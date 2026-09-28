@@ -38,8 +38,15 @@ func snapshot() -> PackedByteArray:
 func restore(data: PackedByteArray) -> bool:
 	var decoded: Variant = bytes_to_var(data) if data.size() > 4 else null
 	if not (decoded is Dictionary) or (decoded as Dictionary).get("v") != SNAPSHOT_VERSION:
+		push_error("World.restore: incompatible snapshot")
 		return false
 	var s: Dictionary = decoded
+	# Validate all required keys are present and correct type before mutating state
+	if not (s.has("tick") and s["tick"] is int and
+			s.has("rng_seed") and s["rng_seed"] is int and
+			s.has("rng_state") and s["rng_state"] is int):
+		push_error("World.restore: incomplete snapshot")
+		return false
 	tick_count = s["tick"]
 	_rng.seed = s["rng_seed"]
 	_rng.state = s["rng_state"]

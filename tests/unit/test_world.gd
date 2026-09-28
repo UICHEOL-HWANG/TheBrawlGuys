@@ -42,4 +42,14 @@ func test_snapshot_restore_round_trip() -> void:
 func test_restore_rejects_garbage() -> void:
 	var w := World.new(GameConfig.new(), 1)
 	assert_false(w.restore(PackedByteArray([1, 2, 3])))
+	assert_push_error("incompatible snapshot")
+	assert_eq(w.tick_count, 0, "state untouched on failed restore")
+
+
+func test_restore_rejects_incomplete_snapshot() -> void:
+	var w := World.new(GameConfig.new(), 1)
+	# Well-formed version but missing required keys
+	var incomplete := var_to_bytes({"v": World.SNAPSHOT_VERSION, "tick": 5})
+	assert_false(w.restore(incomplete))
+	assert_push_error("incomplete snapshot")
 	assert_eq(w.tick_count, 0, "state untouched on failed restore")
