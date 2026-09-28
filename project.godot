@@ -41,3 +41,14 @@ debug_toggle={
 renderer/rendering_method="mobile"
 renderer/rendering_method.web="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+
+[shader_globals]
+
+ds_shadow_tint={
+"type": "color",
+"value": Color(0.42, 0.6, 0.58, 1)
+}
+ds_band_softness={
+"type": "float",
+"value": 0.12
+}
