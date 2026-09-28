@@ -65,4 +65,8 @@
 
 ## 알려진 차이 (구현 중 기록)
 
-- **웹(Compatibility/gl_compatibility) 블룸**: Task 12 웹 스모크(`dev/active/phase-0/evidence/web-arena.png`, 2048×1536, 실제 브라우저 렌더)에서 소프트 툰 셰이딩과 색조 그림자(`ds_shadow_tint`)는 데스크톱과 동일하게 보였으나, 눈에 띄는 블룸 글로우는 확인되지 않았다(원래 씬에 강한 블룸 소스가 없어 차이가 미미할 수 있음 — 대조군 스크린샷과의 나란히 비교는 하지 않음). 차단 사유 아님, Phase 1 비주얼 폴리시 단계에서 재확인 권장.
+- **웹(Compatibility/gl_compatibility) 노출 차이 — 발견 및 수정 (Task 12 review fix round 1)**: 최초 웹 스모크 평가("소프트 툰 셰이딩과 색조 그림자가 데스크톱과 동일하게 보였다")는 픽셀 샘플과 모순되어 부정확했다. 실측 결과 같은 `EnvironmentRig` 에너지값(`SUN_ENERGY`/`AMBIENT_ENERGY`)을 쓸 때 gl_compatibility 렌더러가 Forward+/Mobile보다 채널당 약 1.35~1.4배 더 밝고 채도가 높았다(예: 경기장 상단 sunlit 픽셀 — 데스크톱 (164,215,81) vs 웹 (228,255,116); target DS.GRASS #A5D65A = (165,214,90)). 단순 블룸 누락이 아니라 기본 노출 자체가 렌더러마다 달랐다.
+  - **수정**: `src/render/environment_rig.gd`에 `RenderingServer.get_current_rendering_method() == "gl_compatibility"`일 때만 쓰는 별도 상수(`SUN_ENERGY_COMPAT=0.30`, `AMBIENT_ENERGY_COMPAT=0.27`, `GLOW_INTENSITY_COMPAT=0.20`)를 추가하고 웹 export + 실제 브라우저 캡처로 반복 튜닝했다. Forward+/Mobile(데스크톱) 경로의 상수와 동작은 그대로 유지 — 재캡처한 `desktop-arena.png`의 경기장 상단 샘플은 여전히 (164,215,81)로 회귀 없음을 확인했다.
+  - **수정 후 웹 샘플** (`dev/active/phase-0/evidence/web-arena.png`, 2048×1536, 실제 브라우저 캔버스 캡처): 경기장 상단 (1024,768) → (162,224,80) — target (165,214,90) 대비 R−3/G+10/B−10, 요청된 "약 ±12" 허용범위 내. 배경 잔디 모서리 (2,2) → (119,200,64), 데스크톱 모서리 (123,193,67)와 근접. 나무 그림자 패치(450,300, 넓은 단색 영역, AA 경계 아님) → (33,143,125)로 뚜렷한 초록/청록 색조 유지 확인.
+  - **남는 차이**: 정확히 0으로 맞추지 못한 잔여 편차(G 채널이 계속 조금 높고 B가 조금 낮음)는 `SUN_ENERGY_COMPAT`/`AMBIENT_ENERGY_COMPAT`의 비율을 바꿔도 거의 동일하게 남아, 두 에너지 스칼라만으로는 완전히 없앨 수 없는 렌더러 간 색공간/감마 처리 차이로 보인다(가설, 확정 원인 조사는 안 함). 차단 사유 아님.
+  - **블룸**: 여전히 눈에 띄는 블룸 글로우는 확인되지 않았다(원래 씬에 강한 블룸 소스가 없어 차이가 미미할 수 있음 — 대조군과의 정밀 비교는 하지 않음). Phase 1 비주얼 폴리시 단계에서 재확인 권장.
