@@ -1,0 +1,1272 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 프로젝트 초기화 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 파일 구조 스캔 중...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 전역 클래스 이름을 불러오는 중...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtensions 검증 중...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 오토로드 스크립트를 만드는 중...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 플러그인을 초기화 중...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 파일 스캔 시작 중...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mexport[22m | Started macOS로 내보내는 중 (3 steps)[39m[0m
+[   0% ] [90m[1mexport[22m | 앱 번들 생성 중[39m[0m
+[  25% ] [90m[1mexport[22m | PKG 만드는 중[39m[0m
+[   0% ] [90m[1msavepack[22m | Started 패킹 중 (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gdc[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Bold.ttf-9d8fef4d357af5b52cd60afbe608aa49.fontdata[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Bold.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-BoldItalic.ttf-4274bf704d3d6b9cd32c4f0754d8c83d.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-BoldItalic.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Italic.ttf-9989590b02137b799e13d570de2a42c1.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Italic.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Regular.ttf-856c843fd6f89964d2ca8d8ff1724f13.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Regular.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Bold.ttf-1f003c66d63ebed70964e7756f4fa235.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Bold.ttf.import[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-BoldItalic.ttf-65ebcc61dd5e1dfa8f96313da4ad7019.fontdata[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-BoldItalic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Italic.ttf-baa9156a73770735a0f72fb20b907112.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Italic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Regular.ttf-3babe7e4a7a588dfc9a84c14b4f1fe23.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Regular.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Bold.ttf-7c7f734103b58a32491a4788186f3dcb.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Bold.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-BoldItalic.ttf-227406a33e84448e6aa974176016de19.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-BoldItalic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Italic.ttf-f93abf6c25390c85ad5fb6c4ee75159e.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Italic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Regular.ttf-f3fcfa01cd671c8da433dd875d0fe04b.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Regular.ttf.import[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gdc[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-3eec6d175281e5853cb1df567bd07d3b-about.scn[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/arrow.png-2b5b2d838b5b3467cf300ac2da1630d9.ctex[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/arrow.png.import[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gdc[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-619f4ac706a9392cfefa7a7bd2b925aa-check_for_update.scn[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-977063b975ed2d07c571eeef00528018-EditorRadioButton.res[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-8386f4bb580e16d6c15d474a2f0091ee-GutBottomPanel.scn[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gdc[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-26e9e30cc7f4a2376e8aa94aba7b910a-GutControl.scn[39m[0m
+[  15% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2913c8592f75a3f2de1c5a81e1035893-GutLogo.scn[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gdc[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-a6635ec71365a14084f2ea876d1e36ed-GutRunner.scn[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-1baa7cbab7e02d873ddf15d535bf6df6-GutSceneTheme.res[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gdc[39m[0m
+[  20% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-d44343f2a7581a7edb4b241fb4052588-MinGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6304928bc07bf73a42a2a313e2981be7-NormalGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-23ab0e44de98fa806ae0e6483b7358fb-OutputText.scn[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gdc[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/play.png-5c90e88e8136487a183a099d67a7de24.ctex[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/play.png.import[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gdc[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-482904b7140dd0cc672f657fd7ce2fef-ResizeHandle.scn[39m[0m
+[  25% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gdc[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-fe3acf32e8ed4a9564381bea2f291b91-ResultsTree.scn[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gdc[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2587591ec4b27857073360f2a05c39c6-RunAtCursor.scn[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gdc[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-5504033c615472b31cec39d138ede11f-RunExternally.scn[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gdc[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-c8a40db1d8b2c26578d8c30ddc0045e5-RunResults.scn[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gdc[39m[0m
+[  30% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-45bf223f7ae26b051cd85ab1a317d062-run_from_editor.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-75699124adbc9dbed8ede8495639b2f5-Settings.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gdc[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-b246dc46512778840004d9abfcecb5a7-ShellOutOptions.scn[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-7b81c37238cfeabde6cd329be7d7ac27-ShortcutButton.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-4f5d60061205d4e7909bba3d2d76ce8a-ShortcutDialog.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gdc[39m[0m
+[  34% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6aff9545af7d407ec27d4a8048d87d27-update_required.scn[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/eyey.png-e0a721ab6b749f5d493d61e9f27f0654.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/eyey.png.import[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Folder.svg-caa50e6a0be9d456fd81991dfb537916.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Folder.svg.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/green.png-e3a17091688e10a7013279b38edc7f8a.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/green.png.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_base.png-7038b445a6dfa6ba4cec1a42fa81abae.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_base.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_no_shine.png-340880100fb7bae1a2e0530330841e58.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_no_shine.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/HSplitContainer.svg-81e594d94ee80e4176e099672ef6025b.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/HSplitContainer.svg.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/red.png-47a557c3922e800f76686bc1a4ad0c3c.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/red.png.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Script.svg-34c66aae9c985e3e0470426acbbcda04.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Script.svg.import[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/VSplitContainer.svg-6cec29fefa7e65d6ff7c2fdb9a1bb9ab.ctex[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/VSplitContainer.svg.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/yellow.png-b3cf3d463958a169d909273d3d742052.ctex[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/yellow.png.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gdc[39m[0m
+[  44% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gdc[39m[0m
+[  49% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gdc[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2f0cb05a5e71328ea0af1eb4f93c4e22-GutScene.scn[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gdc[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-34f11fc3cc3883e31a2efc4f77f66ef2-gut_loader_the_scene.scn[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gdc[39m[0m
+[  54% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gdc[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/icon.png-91b084043b8aaf2f1c906e7b9fa92969.ctex[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/icon.png.import[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gdc[39m[0m
+[  59% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gdc[39m[0m
+[  64% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/source_code_pro.fnt-042fb383b3c7b4c19e67c852f7fbefca.fontdata[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/source_code_pro.fnt.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gdc[39m[0m
+[  68% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gdc[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-009fff9a427a23713aab85c867002442-UserFileViewer.scn[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gdc[39m[0m
+[  73% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/versions.json[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gdc[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Jua-Regular.ttf-69b81abe04d21f5b162d8c70bc8d894b.fontdata[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Jua-Regular.ttf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-Medium.otf-38b7e8428b68ea05158620404bacd677.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-Medium.otf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-SemiBold.otf-b18e006bb23af1cf92c966e372cc15da.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-SemiBold.otf.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.apple-touch-icon.png-21031f526f7942c8019a62913b80e091.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.apple-touch-icon.png.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.icon.png-a9d2f4f7433eeddc29dad75f5e7f8710.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.icon.png.import[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.png-7e97af7272d6fa0065ffc53e96463470.ctex[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.png.import[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gdc[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gdc[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-42a0e6a4004da9442f96f492655ade06-default_config.res[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-9537ccc0edc98c68a87b2397f791d877-ds_gallery.scn[39m[0m
+[  83% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-69fd87c629ce721eb5cf84cfb0d5183c-main.scn[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gdc[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gdc[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/shaders/soft_toon.gdshader[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gdc[39m[0m
+[  88% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6ff4cb524a322b29dd7019ebe1e938ee-forest_theme.res[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gdc[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gdc[39m[0m
+[  93% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/EditorRadioButton.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutLogo.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutSceneTheme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/MinGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/NormalGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/Settings.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader_the_scene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/default_config.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/forest_theme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/global_script_class_cache.cfg[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/uid_cache.bin[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+[  50% ] [90m[1mexport[22m | 번들 코드 서명 중[39m[0m
+[  75% ] [90m[1mexport[22m | ZIP 만드는 중[39m[0m
+[92m[ DONE ][39m [1mexport[22m
+[0m
+cannot connect to daemon at tcp:5037: Connection refused
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 프로젝트 초기화 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 파일 구조 스캔 중...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 전역 클래스 이름을 불러오는 중...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtensions 검증 중...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 오토로드 스크립트를 만드는 중...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 플러그인을 초기화 중...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 파일 스캔 시작 중...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mexport[22m | Started Android로 내보내기 (105 steps)[39m[0m
+ERROR: No project icon specified. Please specify one in the Project Settings under Application -> Config -> Icon
+   at: load_icon_refs (platform/android/export/export_plugin.cpp:1941)
+0 param: --xr_mode_regular
+1 param: --xr-mode
+2 param: off
+3 param: --fullscreen
+4 param: --background_color
+5 param: #000000
+[   0% ] [90m[1mexport[22m | APK를 만드는 중...[39m[0m
+ADDING: classes.dex
+ADDING: classes10.dex
+ADDING: classes11.dex
+ADDING: classes12.dex
+ADDING: classes13.dex
+ADDING: classes2.dex
+ADDING: classes3.dex
+ADDING: classes4.dex
+ADDING: classes5.dex
+ADDING: classes6.dex
+ADDING: classes7.dex
+ADDING: classes8.dex
+ADDING: classes9.dex
+ADDING: lib/arm64-v8a/libc++_shared.so
+ADDING: lib/arm64-v8a/libgodot_android.so
+Adding application metadata org.godotengine.rendering.method
+Adding application metadata org.godotengine.editor.version
+Adding feature android.hardware.vulkan.level
+Adding feature android.hardware.vulkan.version
+ADDING: AndroidManifest.xml
+ADDING: res/anim-v21/fragment_fast_out_extra_slow_in.xml
+ADDING: res/animator/fragment_close_enter.xml
+ADDING: res/animator/fragment_close_exit.xml
+ADDING: res/animator/fragment_fade_enter.xml
+ADDING: res/animator/fragment_fade_exit.xml
+ADDING: res/animator/fragment_open_enter.xml
+ADDING: res/animator/fragment_open_exit.xml
+ADDING: res/drawable-hdpi-v4/notification_bg_low_normal.9.png
+ADDING: res/drawable-hdpi-v4/notification_bg_low_pressed.9.png
+ADDING: res/drawable-hdpi-v4/notification_bg_normal.9.png
+ADDING: res/drawable-hdpi-v4/notification_bg_normal_pressed.9.png
+ADDING: res/drawable-hdpi-v4/notify_panel_notification_icon_bg.png
+ADDING: res/drawable-mdpi-v4/notification_bg_low_normal.9.png
+ADDING: res/drawable-mdpi-v4/notification_bg_low_pressed.9.png
+ADDING: res/drawable-mdpi-v4/notification_bg_normal.9.png
+ADDING: res/drawable-mdpi-v4/notification_bg_normal_pressed.9.png
+ADDING: res/drawable-mdpi-v4/notify_panel_notification_icon_bg.png
+ADDING: res/drawable-v21/notification_action_background.xml
+ADDING: res/drawable-v23/compat_splash_screen.xml
+ADDING: res/drawable-v23/compat_splash_screen_no_icon_background.xml
+ADDING: res/drawable-xhdpi-v4/notification_bg_low_normal.9.png
+ADDING: res/drawable-xhdpi-v4/notification_bg_low_pressed.9.png
+ADDING: res/drawable-xhdpi-v4/notification_bg_normal.9.png
+ADDING: res/drawable-xhdpi-v4/notification_bg_normal_pressed.9.png
+ADDING: res/drawable-xhdpi-v4/notify_panel_notification_icon_bg.png
+ADDING: res/drawable/icon_background.xml
+ADDING: res/drawable/notification_bg.xml
+ADDING: res/drawable/notification_bg_low.xml
+ADDING: res/drawable/notification_icon_background.xml
+ADDING: res/drawable/notification_tile_bg.xml
+ADDING: res/drawable/splash_branding_image.webp
+ADDING: res/drawable/splash_icon.webp
+ADDING: res/layout-v21/notification_action.xml
+ADDING: res/layout-v21/notification_action_tombstone.xml
+ADDING: res/layout-v21/notification_template_custom_big.xml
+ADDING: res/layout-v21/notification_template_icon_group.xml
+ADDING: res/layout/custom_dialog.xml
+ADDING: res/layout/godot_app_layout.xml
+ADDING: res/layout/notification_template_part_chronometer.xml
+ADDING: res/layout/notification_template_part_time.xml
+ADDING: res/layout/remote_godot_fragment_layout.xml
+ADDING: res/layout/snackbar.xml
+ADDING: res/layout/splash_screen_view.xml
+ADDING: res/mipmap-anydpi-v26/icon.xml
+ADDING: res/mipmap-hdpi-v4/icon.webp
+ADDING: res/mipmap-hdpi-v4/icon_background.webp
+ADDING: res/mipmap-hdpi-v4/icon_foreground.webp
+ADDING: res/mipmap-hdpi-v4/icon_monochrome.webp
+ADDING: res/mipmap-mdpi-v4/icon.webp
+ADDING: res/mipmap-mdpi-v4/icon_background.webp
+ADDING: res/mipmap-mdpi-v4/icon_foreground.webp
+ADDING: res/mipmap-mdpi-v4/icon_monochrome.webp
+ADDING: res/mipmap-xhdpi-v4/icon.webp
+ADDING: res/mipmap-xhdpi-v4/icon_background.webp
+ADDING: res/mipmap-xhdpi-v4/icon_foreground.webp
+ADDING: res/mipmap-xhdpi-v4/icon_monochrome.webp
+ADDING: res/mipmap-xxhdpi-v4/icon.webp
+ADDING: res/mipmap-xxhdpi-v4/icon_background.webp
+ADDING: res/mipmap-xxhdpi-v4/icon_foreground.webp
+ADDING: res/mipmap-xxhdpi-v4/icon_monochrome.webp
+ADDING: res/mipmap-xxxhdpi-v4/icon.webp
+ADDING: res/mipmap-xxxhdpi-v4/icon_background.webp
+ADDING: res/mipmap-xxxhdpi-v4/icon_foreground.webp
+ADDING: res/mipmap-xxxhdpi-v4/icon_monochrome.webp
+ADDING: res/mipmap/icon.webp
+ADDING: res/mipmap/icon_background.webp
+ADDING: res/mipmap/icon_foreground.webp
+ADDING: res/mipmap/icon_monochrome.webp
+ADDING: res/xml/godot_provider_paths.xml
+ADDING: resources.arsc
+ADDING: DebugProbesKt.bin
+ADDING: kotlin/annotation/annotation.kotlin_builtins
+ADDING: kotlin/collections/collections.kotlin_builtins
+ADDING: kotlin/concurrent/atomics/atomics.kotlin_builtins
+ADDING: kotlin/coroutines/coroutines.kotlin_builtins
+ADDING: kotlin/internal/internal.kotlin_builtins
+ADDING: kotlin/kotlin.kotlin_builtins
+ADDING: kotlin/ranges/ranges.kotlin_builtins
+ADDING: kotlin/reflect/reflect.kotlin_builtins
+[   0% ] [90m[1mexport[22m | 파일을 추가하는 중...[39m[0m
+[  97% ] [90m[1mexport[22m | APK를 정렬 중...[39m[0m
+[  98% ] [90m[1mexport[22m | 디버그 APK에 서명 중...[39m[0m
+Signing binary using: 
+/Users/uicheol_hwang/Library/Android/sdk/build-tools/36.0.0/apksigner sign --verbose --ks <REDACTED> --ks-pass pass:<REDACTED> --ks-key-alias <REDACTED> /Users/uicheol_hwang/Games/build/android/forest-brawl.apk
+Signed
+
+[  99% ] [90m[1mexport[22m | APK 검증 중...[39m[0m
+[92m[ DONE ][39m [1mexport[22m
+[0m
+cannot connect to daemon at tcp:5037: Connection refused
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 프로젝트 초기화 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 파일 구조 스캔 중...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 전역 클래스 이름을 불러오는 중...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtensions 검증 중...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 오토로드 스크립트를 만드는 중...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 플러그인을 초기화 중...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 파일 스캔 시작 중...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1msavepack[22m | Started 패킹 중 (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gdc[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Bold.ttf-9d8fef4d357af5b52cd60afbe608aa49.fontdata[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Bold.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-BoldItalic.ttf-4274bf704d3d6b9cd32c4f0754d8c83d.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-BoldItalic.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Italic.ttf-9989590b02137b799e13d570de2a42c1.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Italic.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Regular.ttf-856c843fd6f89964d2ca8d8ff1724f13.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Regular.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Bold.ttf-1f003c66d63ebed70964e7756f4fa235.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Bold.ttf.import[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-BoldItalic.ttf-65ebcc61dd5e1dfa8f96313da4ad7019.fontdata[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-BoldItalic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Italic.ttf-baa9156a73770735a0f72fb20b907112.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Italic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Regular.ttf-3babe7e4a7a588dfc9a84c14b4f1fe23.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Regular.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Bold.ttf-7c7f734103b58a32491a4788186f3dcb.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Bold.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-BoldItalic.ttf-227406a33e84448e6aa974176016de19.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-BoldItalic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Italic.ttf-f93abf6c25390c85ad5fb6c4ee75159e.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Italic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Regular.ttf-f3fcfa01cd671c8da433dd875d0fe04b.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Regular.ttf.import[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gdc[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-3eec6d175281e5853cb1df567bd07d3b-about.scn[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/arrow.png-2b5b2d838b5b3467cf300ac2da1630d9.ctex[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/arrow.png.import[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gdc[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-619f4ac706a9392cfefa7a7bd2b925aa-check_for_update.scn[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-977063b975ed2d07c571eeef00528018-EditorRadioButton.res[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-8386f4bb580e16d6c15d474a2f0091ee-GutBottomPanel.scn[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gdc[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-26e9e30cc7f4a2376e8aa94aba7b910a-GutControl.scn[39m[0m
+[  15% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2913c8592f75a3f2de1c5a81e1035893-GutLogo.scn[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gdc[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-a6635ec71365a14084f2ea876d1e36ed-GutRunner.scn[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-1baa7cbab7e02d873ddf15d535bf6df6-GutSceneTheme.res[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gdc[39m[0m
+[  20% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-d44343f2a7581a7edb4b241fb4052588-MinGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6304928bc07bf73a42a2a313e2981be7-NormalGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-23ab0e44de98fa806ae0e6483b7358fb-OutputText.scn[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gdc[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/play.png-5c90e88e8136487a183a099d67a7de24.ctex[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/play.png.import[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gdc[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-482904b7140dd0cc672f657fd7ce2fef-ResizeHandle.scn[39m[0m
+[  25% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gdc[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-fe3acf32e8ed4a9564381bea2f291b91-ResultsTree.scn[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gdc[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2587591ec4b27857073360f2a05c39c6-RunAtCursor.scn[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gdc[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-5504033c615472b31cec39d138ede11f-RunExternally.scn[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gdc[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-c8a40db1d8b2c26578d8c30ddc0045e5-RunResults.scn[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gdc[39m[0m
+[  30% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-45bf223f7ae26b051cd85ab1a317d062-run_from_editor.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-75699124adbc9dbed8ede8495639b2f5-Settings.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gdc[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-b246dc46512778840004d9abfcecb5a7-ShellOutOptions.scn[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-7b81c37238cfeabde6cd329be7d7ac27-ShortcutButton.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-4f5d60061205d4e7909bba3d2d76ce8a-ShortcutDialog.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gdc[39m[0m
+[  34% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6aff9545af7d407ec27d4a8048d87d27-update_required.scn[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/eyey.png-e0a721ab6b749f5d493d61e9f27f0654.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/eyey.png.import[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Folder.svg-caa50e6a0be9d456fd81991dfb537916.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Folder.svg.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/green.png-e3a17091688e10a7013279b38edc7f8a.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/green.png.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_base.png-7038b445a6dfa6ba4cec1a42fa81abae.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_base.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_no_shine.png-340880100fb7bae1a2e0530330841e58.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_no_shine.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/HSplitContainer.svg-81e594d94ee80e4176e099672ef6025b.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/HSplitContainer.svg.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/red.png-47a557c3922e800f76686bc1a4ad0c3c.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/red.png.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Script.svg-34c66aae9c985e3e0470426acbbcda04.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Script.svg.import[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/VSplitContainer.svg-6cec29fefa7e65d6ff7c2fdb9a1bb9ab.ctex[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/VSplitContainer.svg.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/yellow.png-b3cf3d463958a169d909273d3d742052.ctex[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/yellow.png.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gdc[39m[0m
+[  44% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gdc[39m[0m
+[  49% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gdc[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2f0cb05a5e71328ea0af1eb4f93c4e22-GutScene.scn[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gdc[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-34f11fc3cc3883e31a2efc4f77f66ef2-gut_loader_the_scene.scn[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gdc[39m[0m
+[  54% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gdc[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/icon.png-91b084043b8aaf2f1c906e7b9fa92969.ctex[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/icon.png.import[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gdc[39m[0m
+[  59% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gdc[39m[0m
+[  64% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/source_code_pro.fnt-042fb383b3c7b4c19e67c852f7fbefca.fontdata[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/source_code_pro.fnt.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gdc[39m[0m
+[  68% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gdc[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-009fff9a427a23713aab85c867002442-UserFileViewer.scn[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gdc[39m[0m
+[  73% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/versions.json[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gdc[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Jua-Regular.ttf-69b81abe04d21f5b162d8c70bc8d894b.fontdata[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Jua-Regular.ttf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-Medium.otf-38b7e8428b68ea05158620404bacd677.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-Medium.otf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-SemiBold.otf-b18e006bb23af1cf92c966e372cc15da.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-SemiBold.otf.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.apple-touch-icon.png-21031f526f7942c8019a62913b80e091.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.apple-touch-icon.png.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.icon.png-a9d2f4f7433eeddc29dad75f5e7f8710.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.icon.png.import[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.png-7e97af7272d6fa0065ffc53e96463470.ctex[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.png.import[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gdc[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gdc[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-42a0e6a4004da9442f96f492655ade06-default_config.res[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-9537ccc0edc98c68a87b2397f791d877-ds_gallery.scn[39m[0m
+[  83% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-69fd87c629ce721eb5cf84cfb0d5183c-main.scn[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gdc[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gdc[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/shaders/soft_toon.gdshader[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gdc[39m[0m
+[  88% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6ff4cb524a322b29dd7019ebe1e938ee-forest_theme.res[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gdc[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gdc[39m[0m
+[  93% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/EditorRadioButton.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutLogo.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutSceneTheme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/MinGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/NormalGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/Settings.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader_the_scene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/default_config.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/forest_theme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/global_script_class_cache.cfg[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/uid_cache.bin[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+cannot connect to daemon at tcp:5037: Connection refused
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 프로젝트 초기화 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 파일 구조 스캔 중...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 전역 클래스 이름을 불러오는 중...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtensions 검증 중...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 오토로드 스크립트를 만드는 중...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 플러그인을 초기화 중...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 파일 스캔 시작 중...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started 액션 스캔 중... (3 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | index.apple-touch-icon.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | index.icon.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | index.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1msavepack[22m | Started 패킹 중 (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gdc[39m[0m
+[   1% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gdc[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Bold.ttf-9d8fef4d357af5b52cd60afbe608aa49.fontdata[39m[0m
+[   2% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Bold.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-BoldItalic.ttf-4274bf704d3d6b9cd32c4f0754d8c83d.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-BoldItalic.ttf.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Italic.ttf-9989590b02137b799e13d570de2a42c1.fontdata[39m[0m
+[   3% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Italic.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/AnonymousPro-Regular.ttf-856c843fd6f89964d2ca8d8ff1724f13.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/AnonymousPro-Regular.ttf.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Bold.ttf-1f003c66d63ebed70964e7756f4fa235.fontdata[39m[0m
+[   4% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Bold.ttf.import[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-BoldItalic.ttf-65ebcc61dd5e1dfa8f96313da4ad7019.fontdata[39m[0m
+[   5% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-BoldItalic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Italic.ttf-baa9156a73770735a0f72fb20b907112.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Italic.ttf.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/CourierPrime-Regular.ttf-3babe7e4a7a588dfc9a84c14b4f1fe23.fontdata[39m[0m
+[   6% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/CourierPrime-Regular.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Bold.ttf-7c7f734103b58a32491a4788186f3dcb.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Bold.ttf.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-BoldItalic.ttf-227406a33e84448e6aa974176016de19.fontdata[39m[0m
+[   7% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-BoldItalic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Italic.ttf-f93abf6c25390c85ad5fb6c4ee75159e.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Italic.ttf.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/LobsterTwo-Regular.ttf-f3fcfa01cd671c8da433dd875d0fe04b.fontdata[39m[0m
+[   8% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/fonts/LobsterTwo-Regular.ttf.import[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gdc[39m[0m
+[   9% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-3eec6d175281e5853cb1df567bd07d3b-about.scn[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/arrow.png-2b5b2d838b5b3467cf300ac2da1630d9.ctex[39m[0m
+[  10% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/arrow.png.import[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gdc[39m[0m
+[  11% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-619f4ac706a9392cfefa7a7bd2b925aa-check_for_update.scn[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-977063b975ed2d07c571eeef00528018-EditorRadioButton.res[39m[0m
+[  12% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gdc[39m[0m
+[  13% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-8386f4bb580e16d6c15d474a2f0091ee-GutBottomPanel.scn[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gdc[39m[0m
+[  14% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-26e9e30cc7f4a2376e8aa94aba7b910a-GutControl.scn[39m[0m
+[  15% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2913c8592f75a3f2de1c5a81e1035893-GutLogo.scn[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gdc[39m[0m
+[  16% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-a6635ec71365a14084f2ea876d1e36ed-GutRunner.scn[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-1baa7cbab7e02d873ddf15d535bf6df6-GutSceneTheme.res[39m[0m
+[  17% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gdc[39m[0m
+[  18% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gdc[39m[0m
+[  19% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gdc[39m[0m
+[  20% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-d44343f2a7581a7edb4b241fb4052588-MinGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6304928bc07bf73a42a2a313e2981be7-NormalGui.scn[39m[0m
+[  21% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-23ab0e44de98fa806ae0e6483b7358fb-OutputText.scn[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gdc[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/play.png-5c90e88e8136487a183a099d67a7de24.ctex[39m[0m
+[  23% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/play.png.import[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gdc[39m[0m
+[  24% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-482904b7140dd0cc672f657fd7ce2fef-ResizeHandle.scn[39m[0m
+[  25% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gdc[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-fe3acf32e8ed4a9564381bea2f291b91-ResultsTree.scn[39m[0m
+[  26% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gdc[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2587591ec4b27857073360f2a05c39c6-RunAtCursor.scn[39m[0m
+[  27% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gdc[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-5504033c615472b31cec39d138ede11f-RunExternally.scn[39m[0m
+[  28% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gdc[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-c8a40db1d8b2c26578d8c30ddc0045e5-RunResults.scn[39m[0m
+[  29% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gdc[39m[0m
+[  30% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-45bf223f7ae26b051cd85ab1a317d062-run_from_editor.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-75699124adbc9dbed8ede8495639b2f5-Settings.scn[39m[0m
+[  31% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gdc[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-b246dc46512778840004d9abfcecb5a7-ShellOutOptions.scn[39m[0m
+[  32% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-7b81c37238cfeabde6cd329be7d7ac27-ShortcutButton.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-4f5d60061205d4e7909bba3d2d76ce8a-ShortcutDialog.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gdc[39m[0m
+[  34% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6aff9545af7d407ec27d4a8048d87d27-update_required.scn[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/eyey.png-e0a721ab6b749f5d493d61e9f27f0654.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/eyey.png.import[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Folder.svg-caa50e6a0be9d456fd81991dfb537916.ctex[39m[0m
+[  35% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Folder.svg.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/green.png-e3a17091688e10a7013279b38edc7f8a.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/green.png.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_base.png-7038b445a6dfa6ba4cec1a42fa81abae.ctex[39m[0m
+[  36% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_base.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/GutIconV2_no_shine.png-340880100fb7bae1a2e0530330841e58.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/GutIconV2_no_shine.png.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/HSplitContainer.svg-81e594d94ee80e4176e099672ef6025b.ctex[39m[0m
+[  37% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/HSplitContainer.svg.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/red.png-47a557c3922e800f76686bc1a4ad0c3c.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/red.png.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Script.svg-34c66aae9c985e3e0470426acbbcda04.ctex[39m[0m
+[  38% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/Script.svg.import[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/VSplitContainer.svg-6cec29fefa7e65d6ff7c2fdb9a1bb9ab.ctex[39m[0m
+[  39% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/VSplitContainer.svg.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/yellow.png-b3cf3d463958a169d909273d3d742052.ctex[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/images/yellow.png.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gdc[39m[0m
+[  41% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gdc[39m[0m
+[  43% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gdc[39m[0m
+[  44% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gdc[39m[0m
+[  45% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gdc[39m[0m
+[  47% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gdc[39m[0m
+[  48% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gdc[39m[0m
+[  49% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gdc[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-2f0cb05a5e71328ea0af1eb4f93c4e22-GutScene.scn[39m[0m
+[  50% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gdc[39m[0m
+[  51% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gdc[39m[0m
+[  52% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gdc[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-34f11fc3cc3883e31a2efc4f77f66ef2-gut_loader_the_scene.scn[39m[0m
+[  53% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gdc[39m[0m
+[  54% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gdc[39m[0m
+[  56% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gdc[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/icon.png-91b084043b8aaf2f1c906e7b9fa92969.ctex[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/icon.png.import[39m[0m
+[  57% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gdc[39m[0m
+[  58% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gdc[39m[0m
+[  59% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gdc[39m[0m
+[  61% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gdc[39m[0m
+[  62% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gdc[39m[0m
+[  63% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gdc[39m[0m
+[  64% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gdc[39m[0m
+[  65% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/source_code_pro.fnt-042fb383b3c7b4c19e67c852f7fbefca.fontdata[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/source_code_pro.fnt.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gdc[39m[0m
+[  67% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gdc[39m[0m
+[  68% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gdc[39m[0m
+[  69% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gdc[39m[0m
+[  71% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gdc[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-009fff9a427a23713aab85c867002442-UserFileViewer.scn[39m[0m
+[  72% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gdc[39m[0m
+[  73% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/versions.json[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gdc[39m[0m
+[  74% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gdc[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Jua-Regular.ttf-69b81abe04d21f5b162d8c70bc8d894b.fontdata[39m[0m
+[  75% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Jua-Regular.ttf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-Medium.otf-38b7e8428b68ea05158620404bacd677.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-Medium.otf.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/Pretendard-SemiBold.otf-b18e006bb23af1cf92c966e372cc15da.fontdata[39m[0m
+[  76% ] [90m[1msavepack[22m | 파일 저장 중: res://assets/fonts/Pretendard-SemiBold.otf.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.apple-touch-icon.png-21031f526f7942c8019a62913b80e091.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.apple-touch-icon.png.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.icon.png-a9d2f4f7433eeddc29dad75f5e7f8710.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.icon.png.import[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/imported/index.png-7e97af7272d6fa0065ffc53e96463470.ctex[39m[0m
+[  78% ] [90m[1msavepack[22m | 파일 저장 중: res://build/web/index.png.import[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gdc[39m[0m
+[  79% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gdc[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-42a0e6a4004da9442f96f492655ade06-default_config.res[39m[0m
+[  80% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gdc[39m[0m
+[  82% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-9537ccc0edc98c68a87b2397f791d877-ds_gallery.scn[39m[0m
+[  83% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-69fd87c629ce721eb5cf84cfb0d5183c-main.scn[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gdc[39m[0m
+[  85% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gdc[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/shaders/soft_toon.gdshader[39m[0m
+[  86% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gdc[39m[0m
+[  88% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gdc[39m[0m
+[  89% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gdc[39m[0m
+[  90% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/exported/133200997/export-6ff4cb524a322b29dd7019ebe1e938ee-forest_theme.res[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gdc[39m[0m
+[  92% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gdc[39m[0m
+[  93% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/change_project_warnings.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/gut_cli.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/cli/optparse.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/about.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/check_for_update.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/EditorRadioButton.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/editor_globals.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutBottomPanel.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutControl.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutLogo.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutRunner.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/GutSceneTheme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_config_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_dock.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_gui.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_logo.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/gut_user_preferences.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/MinGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/NormalGui.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/option_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/OutputText.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/panel_controls.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResizeHandle.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ResultsTree.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunAtCursor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunExternally.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/RunResults.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/run_from_editor.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/Settings.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShellOutOptions.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutButton.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/ShortcutDialog.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gui/update_required.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/autofree.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/awaiter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/collected_test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/comparator.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/compare_result.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_formatter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/diff_tool.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/doubler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/double_tools.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/dynamic_gdscript.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/editor_caret_context_notifier.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/error_tracker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/get_editor_interface.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/godot_singletons.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/GutScene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_cmdln.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_constants.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_fonts.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_loader_the_scene.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_menu.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_plugin.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_to_move.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_tracked_error.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/gut_vscode_debugger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/hook_script.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/inner_class_registry.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/input_sender.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/junit_xml_export.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/lazy_loader.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/logger.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/method_maker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/one_to_many.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/orphan_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_factory.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/parameter_handler.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/printers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/result_exporter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/script_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/signal_watcher.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/singleton_parser.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/spy.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/strutils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubber.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stubs.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/stub_params.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/summary.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/test_collector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/thing_counter.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/update_detector.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/UserFileViewer.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_conversion.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/version_numbers.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://addons/gut/warnings_manager.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/build_theme.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://scripts/capture_evidence.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/default_config.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/config/game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_panel.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/debug/ds_gallery.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/main/main.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/flower_patch.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/props/sphere_cluster.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/arena_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/camera_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/decor_view.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/environment_rig.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/render/toon_materials.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/sim/world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/forest_theme.tres.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://src/ui/theme/tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_camera_framing.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_color_utils.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_config_schema.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_fixed_ticker.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_game_config.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_input_frame.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_smoke.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_theme_builder.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_tokens.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://tests/unit/test_world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/global_script_class_cache.cfg[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://.godot/uid_cache.bin[39m[0m
+[  98% ] [90m[1msavepack[22m | 파일 저장 중: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+cannot connect to daemon at tcp:5037: Connection refused
