@@ -3,8 +3,12 @@ extends Node3D
 ## Warm midday sun, sky ambience and soft bloom (design.md §0 reference A, DS-VIS-01).
 
 const SUN_ROTATION_DEG := Vector3(-55.0, 35.0, 0.0)
-const SUN_ENERGY := 1.2
-const AMBIENT_ENERGY := 0.55
+## Retuned (Task 10 review fix round 1): soft_toon.gdshader's light() writes
+## DIFFUSE_LIGHT without dividing by albedo headroom, so SUN_ENERGY + AMBIENT_ENERGY
+## must sum low enough that a sunlit DS albedo lands near its own token value
+## instead of overexposing. Measured against DS.GRASS #A5D65A -- see task-10-report.md.
+const SUN_ENERGY := 0.75
+const AMBIENT_ENERGY := 0.42
 const GLOW_INTENSITY := 0.35
 
 

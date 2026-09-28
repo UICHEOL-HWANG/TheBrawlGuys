@@ -4,7 +4,9 @@ extends Node3D
 
 const TOP_THICKNESS := 0.2
 const RIM_HEIGHT := 0.8
-const RIM_TAPER := 0.92
+## >1 flares the rim outward below the grass edge so DS-VIS-04's dirt band
+## is not self-occluded by the top disc from the high default camera.
+const RIM_TAPER := 1.08
 const SEGMENTS := 64
 
 var _config: GameConfig
