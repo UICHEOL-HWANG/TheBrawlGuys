@@ -1,7 +1,7 @@
 # Phase 0 — Context
 
-**Last Updated:** 2026-09-28 15:10 KST
-**상태:** 계획 완료, 구현 전 (Task 1 대기)
+**Last Updated:** 2026-09-28 (Task 13)
+**상태:** 구현 완료, 최종 리뷰 대기
 **계획:** [`phase-0-plan.md`](./phase-0-plan.md) · **체크리스트:** [`phase-0-tasks.md`](./phase-0-tasks.md)
 
 ---
@@ -45,6 +45,11 @@
 | `src/render/shaders/soft_toon.gdshader` | 소프트 툰 |
 | `src/debug/config_panel.gd` | 디버그 패널 |
 | `src/debug/ds_gallery.tscn` | DS 갤러리 |
+| `src/render/environment_rig.gd` | 조명·노출, 렌더러별(gl_compatibility) 보정 |
+| `scripts/build_theme.gd` | `forest_theme.tres` 생성기 (토큰 → 테마 동기화) |
+| `scripts/capture_evidence.gd` | 플랫폼별 증거 스크린샷 캡처 |
+| `export_presets.cfg` | macOS/Windows·Android·Web·Linux 헤드리스 export 프리셋 |
+| `ASSETS.md` | 폰트 등 외부 자산 출처·라이선스 기록 |
 
 ## 의존성
 

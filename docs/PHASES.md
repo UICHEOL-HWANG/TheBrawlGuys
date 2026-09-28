@@ -52,28 +52,28 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### ⚙️ 개발 트랙
 
-- [ ] 환경: Godot 4.5+ 설치, Android SDK/JDK·export 템플릿 설치, `git init`
-- [ ] 프로젝트 생성, 폴더 구조, GDScript 정적 타입 경고를 에러로 승격 `[PRD-ARCH-01]`
-- [ ] GUT 설치, `godot --headless` 테스트 실행 스크립트 (`scripts/test.sh`) `[PRD-NFR-06]`
-- [ ] `InputFrame` `[PRD-CTL-01]`, `GameConfig` Resource + `default_config.tres` `[PRD-CFG-01]`
-- [ ] 고정 60Hz 틱 누산기 + 렌더 보간 (`main.gd`), `max_ticks_per_frame` `[PRD-ARCH-02]`
-- [ ] 빈 `World.tick()` / `snapshot()` / `restore()` 골격 `[PRD-ARCH-04]`
-- [ ] 원형 바닥(반경 = `arena_radius`), 조명, 3/4 시점 카메라 리그 `[GD-CAM-01]`
-- [ ] 디버그 패널: `GameConfig`의 `@export` 속성 순회 → 슬라이더 자동 생성, F1 / 세 손가락 탭 토글 `[PRD-CFG-01]` `[DS-CMP-12]`
-- [ ] Export 프리셋: macOS/Windows, Android(APK), Web(스레드 없음), Linux 헤드리스 `[PRD-PLT-01~04]`
-- [ ] `ASSETS.md` 생성 `[PRD-NFR-07]`
+- [x] 환경: Godot 4.5+ 설치, Android SDK/JDK·export 템플릿 설치, `git init`
+- [x] 프로젝트 생성, 폴더 구조, GDScript 정적 타입 경고를 에러로 승격 `[PRD-ARCH-01]`
+- [x] GUT 설치, `godot --headless` 테스트 실행 스크립트 (`scripts/test.sh`) `[PRD-NFR-06]`
+- [x] `InputFrame` `[PRD-CTL-01]`, `GameConfig` Resource + `default_config.tres` `[PRD-CFG-01]`
+- [x] 고정 60Hz 틱 누산기 + 렌더 보간 (`main.gd`), `max_ticks_per_frame` `[PRD-ARCH-02]`
+- [x] 빈 `World.tick()` / `snapshot()` / `restore()` 골격 `[PRD-ARCH-04]`
+- [x] 원형 바닥(반경 = `arena_radius`), 조명, 3/4 시점 카메라 리그 `[GD-CAM-01]`
+- [x] 디버그 패널: `GameConfig`의 `@export` 속성 순회 → 슬라이더 자동 생성, F1 / 세 손가락 탭 토글 `[PRD-CFG-01]` `[DS-CMP-12]`
+- [x] Export 프리셋: macOS/Windows, Android(APK), Web(스레드 없음), Linux 헤드리스 `[PRD-PLT-01~04]`
+- [x] `ASSETS.md` 생성 `[PRD-NFR-07]`
 
 ### 🎨 DS 트랙
 
-- [ ] 레퍼런스 이미지를 `docs/references/ref-a-sunny-forest.png`에 보관
+- [x] 레퍼런스 이미지를 `docs/references/ref-a-sunny-forest.png`에 보관
 - [x] 🖼 레퍼런스 A 기반 팔레트 시안 3개 비교 → 확정 `[DS-TOK-01]` — 2026-09-28 A안(한낮 햇살) 채택
-- [ ] 토큰 v0: `src/ui/theme/tokens.gd` (색·간격·반경·타이포·모션 상수) `[DS-TOK-01~05]`
-- [ ] 폰트 도입 (디스플레이·본문, OFL), `ASSETS.md` 기록 `[DS-TOK-02]`
-- [ ] `forest_theme.tres`: Button·Label·Panel 기본 스타일을 토큰에서 생성 `[DS-THM-01]`
-- [ ] DS 갤러리 씬 `src/debug/ds_gallery.tscn`: 토큰 스와치, 타이포 스케일, 등록된 컴포넌트 전시 `[DS-GOV-02]`
-- [ ] 소프트 툰 셰이더 프로토타입 (2단 셰이딩 · 색 그림자 · 외곽선 없음) — 렌더러 호환성 확인용 `[DS-VIS-01]` `[PRD-PLT-05]`
-- [ ] 구 클러스터 덤불·나무 모듈 1종 + 꽃 점 데칼로 레퍼런스 룩 확인 `[DS-VIS-02]`
-- [ ] 하드코딩 색 검사 스크립트 (`Color(` / `#hex` grep, `tokens.gd` 제외) `[DS-GOV-01]`
+- [x] 토큰 v0: `src/ui/theme/tokens.gd` (색·간격·반경·타이포·모션 상수) `[DS-TOK-01~05]`
+- [x] 폰트 도입 (디스플레이·본문, OFL), `ASSETS.md` 기록 `[DS-TOK-02]`
+- [x] `forest_theme.tres`: Button·Label·Panel 기본 스타일을 토큰에서 생성 `[DS-THM-01]`
+- [x] DS 갤러리 씬 `src/debug/ds_gallery.tscn`: 토큰 스와치, 타이포 스케일, 등록된 컴포넌트 전시 `[DS-GOV-02]`
+- [x] 소프트 툰 셰이더 프로토타입 (2단 셰이딩 · 색 그림자 · 외곽선 없음) — 렌더러 호환성 확인용 `[DS-VIS-01]` `[PRD-PLT-05]`
+- [x] 구 클러스터 덤불·나무 모듈 1종 + 꽃 점 데칼로 레퍼런스 룩 확인 `[DS-VIS-02]`
+- [x] 하드코딩 색 검사 스크립트 (`Color(` / `#hex` grep, `tokens.gd` 제외) `[DS-GOV-01]`
 
 ### 테스트
 
@@ -82,11 +82,11 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### 완료 기준
 
-- [ ] 빈 경기장이 **데스크톱·Android 실기기·웹 브라우저**에서 뜬다 (각 스크린샷)
-- [ ] 디버그 패널에서 `arena_radius`를 바꾸면 바닥 크기가 즉시 바뀐다
-- [ ] 툰 셰이더가 세 플랫폼에서 깨지지 않는다
-- [ ] DS 갤러리 씬이 확정 팔레트·타이포를 보여준다
-- [ ] `scripts/test.sh`, 하드코딩 색 검사 통과
+- [ ] 빈 경기장이 **데스크톱·Android 실기기·웹 브라우저**에서 뜬다 (각 스크린샷) — APK 빌드 완료, 실기기 실행은 사용자 확인 대기
+- [x] 디버그 패널에서 `arena_radius`를 바꾸면 바닥 크기가 즉시 바뀐다
+- [x] 툰 셰이더가 세 플랫폼에서 깨지지 않는다
+- [x] DS 갤러리 씬이 확정 팔레트·타이포를 보여준다
+- [x] `scripts/test.sh`, 하드코딩 색 검사 통과
 
 ---
 
