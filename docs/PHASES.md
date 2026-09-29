@@ -138,7 +138,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 - [ ] 봇과 한 판을 끝까지 할 수 있다 — **키보드와 Android 터치 둘 다** — 사용자 플레이 확인 대기 (키보드) · 실기기 확인 대기 (Android 터치). 자동 증거: `test_main_smoke`, `test_rules` 경기 종료, 링아웃 데모
 - [x] 대미지 100% 이상에서 약공격 한 방에 경기장 밖으로 날아가는 게 눈에 보인다 (녹화 영상) — `test_ringout_feel` + `evidence/ringout-58/70/100/145.png` + 로컬 `ringout.avi`
-- [ ] HUD가 휴대폰 화면에서 한눈에 읽힌다 (실기기 스크린샷) — 실기기 확인 대기 (데스크톱 증거: `dev/active/phase-1/evidence/match-hud.png`)
+- [ ] HUD가 휴대폰 화면에서 한눈에 읽힌다 (실기기 스크린샷) — 실기기 확인 대기 (데스크톱 증거: `dev/done/phase-1/evidence/match-hud.png`)
 - [x] 4인 World(봇 4) 1틱 비용이 측정·기록되어 있다 `[PRD-NFR-02]` — `evidence/measurements.md` (22.2 us/tick 평균)
 - [x] 입력 → 화면 반영 ≤ 3프레임 (고속 촬영 또는 프레임 로그) `[PRD-NFR-03]` — `evidence/measurements.md` (2프레임)
 - [x] 모든 전투·타격감 수치가 디버그 패널에 있다 — `evidence/match-panel.png` + `test_config_schema`

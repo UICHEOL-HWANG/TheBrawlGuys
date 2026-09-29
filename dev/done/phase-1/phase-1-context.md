@@ -1,7 +1,7 @@
 # Phase 1 — Context
 
 **Last Updated:** 2026-09-29
-**상태:** 구현 완료, 최종 리뷰 대기 (Android 실기기·키보드 직접 플레이·HUD 🖼 시안은 대기)
+**상태:** 완료 (최종 리뷰·수정 반영, 2026-09-29) — Android 실기기·키보드 직접 플레이·HUD 🖼 시안은 대기
 **계획:** [`phase-1-plan.md`](./phase-1-plan.md) · **체크리스트:** [`phase-1-tasks.md`](./phase-1-tasks.md)
 **이전 Phase:** [`dev/done/phase-0/phase-0-context.md`](../../done/phase-0/phase-0-context.md)
 
