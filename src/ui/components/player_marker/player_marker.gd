@@ -1,7 +1,7 @@
 class_name PlayerMarker
 extends Control
 ## A player's color + shape badge (design.md DS-VIS-03), shared by HUD components.
-## Dimmed markers (lost stocks) switch to the dim surface color with a small pop.
+## Dimmed markers (lost stocks) are drawn as a soft outline with a small pop.
 
 const POP_SCALE := 1.4
 
@@ -31,5 +31,10 @@ func is_dimmed() -> bool:
 
 
 func _draw() -> void:
-	var c := DS.UI_SURFACE_DIM if _dimmed else PlayerStyle.color(_index)
-	draw_colored_polygon(PlayerStyle.polygon(PlayerStyle.shape(_index), _diameter * 0.5, size * 0.5), c)
+	var pts := PlayerStyle.polygon(PlayerStyle.shape(_index), _diameter * 0.5, size * 0.5)
+	if _dimmed:
+		# Lost stock: outline only, so it stays visible on any background.
+		pts.append(pts[0])
+		draw_polyline(pts, DS.UI_TEXT_SOFT, DS.S1)
+	else:
+		draw_colored_polygon(pts, PlayerStyle.color(_index))
