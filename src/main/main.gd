@@ -24,6 +24,7 @@ func _ready() -> void:
 	if _config == null:
 		push_error("main: GameConfig missing at %s" % CONFIG_PATH)
 		get_tree().quit(1)
+		set_process(false)
 		return
 	_world = World.new(_config, SEED)
 	_ticker = FixedTicker.new(_config.max_ticks_per_frame)
@@ -41,9 +42,10 @@ func _ready() -> void:
 	_camera = CameraRig.new()
 	add_child(_camera)
 	_camera.setup(_config)
-	_panel = ConfigPanel.new()
-	add_child(_panel)
-	_panel.setup(_config)
+	if OS.is_debug_build():
+		_panel = ConfigPanel.new()
+		add_child(_panel)
+		_panel.setup(_config)
 
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
@@ -79,4 +81,6 @@ func _update_info(delta: float, ticks: int) -> void:
 		_tps = _tps_ticks / _tps_time
 		_tps_ticks = 0
 		_tps_time = 0.0
+	if _panel == null:
+		return
 	_panel.set_info("tick %d · %.0f tps · alpha %.2f · %d fps" % [_world.tick_count, _tps, _alpha, Engine.get_frames_per_second()])
