@@ -1,5 +1,8 @@
 class_name GameConfig
 extends Resource
+## Value ownership: GameConfig holds gameplay/feel tunables exposed on the debug panel.
+## Art-direction constants (prop counts, light energies, mesh sizes) stay as named consts
+## in render code; colors and UI sizes live only in DS tokens (src/ui/theme/tokens.gd).
 ## Every tunable number lives here. The debug panel builds a slider for each @export_range.
 ## Initial values: docs/PRD.md §4.5. Camera rules: docs/design.md GD-CAM-01.
 

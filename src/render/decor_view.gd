@@ -1,7 +1,8 @@
 class_name DecorView
 extends Node3D
 ## Outer meadow, lake, rock, bushes, trees and flowers around the arena.
-## Decor stays outside the ring (design.md DS-VIS-04); re-lays out when arena_radius changes.
+## Large props (rock, bushes, trees, lake) stay outside the ring (design.md DS-VIS-04);
+## flower patches are floor decals and may lie inside it. Re-lays out when arena_radius changes.
 
 const GROUND_Y := -1.0
 const GROUND_SIZE := 400.0

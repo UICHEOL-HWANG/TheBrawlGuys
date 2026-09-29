@@ -1,6 +1,8 @@
 class_name ToonMaterials
 extends RefCounted
 ## One shared ShaderMaterial per (color, rim) pair.
+## Cached materials are SHARED between all callers: never mutate them. Callers needing
+## per-instance changes (hit flash, per-fighter rim) must duplicate() first.
 
 const SHADER := preload("res://src/render/shaders/soft_toon.gdshader")
 
