@@ -13,6 +13,8 @@ static func evaluate(view: Dictionary, self_id: int, config: GameConfig) -> Dict
 		return _none()
 	var state := int(me["state"])
 	var pos: Vector3 = me["pos"]
+	if int(me["hitstop_ticks"]) > 0:
+		return _none()  # the sim swallows presses during hitstop
 	if state == Fighter.State.HOLDING:
 		return {"kind": Kind.THROW, "pos": pos}
 	if state != Fighter.State.IDLE and state != Fighter.State.MOVE and state != Fighter.State.AIR:
@@ -24,7 +26,7 @@ static func evaluate(view: Dictionary, self_id: int, config: GameConfig) -> Dict
 	var item := _nearest_item(view, pos, config.item_pickup_radius)
 	if not item.is_empty():
 		return {"kind": Kind.ITEM, "pos": item["pos"]}
-	var foe := _foe_in_reach(view, self_id, pos, config.grab_forward + config.grab_half_width + config.fighter_radius)
+	var foe := _foe_in_box(view, self_id, me, config)
 	if not foe.is_empty():
 		return {"kind": Kind.FIGHTER, "pos": foe["pos"]}
 	return _none()
@@ -58,13 +60,21 @@ static func _nearest_item(view: Dictionary, pos: Vector3, radius: float) -> Dict
 	return best
 
 
-static func _foe_in_reach(view: Dictionary, self_id: int, pos: Vector3, reach: float) -> Dictionary:
+## First fighter the sim grab box would connect with: the box sits grab_forward in front of the
+## grabber (mirrors AttackSet._grab and Combat.hitbox_center).
+static func _foe_in_box(view: Dictionary, self_id: int, me: Dictionary, config: GameConfig) -> Dictionary:
+	var pos: Vector3 = me["pos"]
+	var facing: Vector3 = me["facing"]
+	var half_height := config.fighter_height * 0.5
+	var center := pos + facing * config.grab_forward + Vector3.UP * half_height
+	var half := Vector3(config.grab_half_width, half_height, config.grab_half_width)
+	var yaw := Collision.yaw_of(facing)
 	for f: Dictionary in view["fighters"]:
 		var s := int(f["state"])
 		if int(f["id"]) == self_id or s == Fighter.State.KO or s == Fighter.State.HELD or s == Fighter.State.HOLDING:
 			continue
 		if int(f["invuln_ticks"]) > 0:
 			continue
-		if _flat(f["pos"], pos) <= reach:
+		if Collision.capsule_hits_box(f["pos"], config.fighter_radius, config.fighter_height, center, yaw, half):
 			return f
 	return {}

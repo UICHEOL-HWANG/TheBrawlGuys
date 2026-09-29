@@ -65,3 +65,46 @@ func test_busy_or_airborne_is_none() -> void:
 	w.fighters[0].set_state(Fighter.State.AIR)
 	w.fighters[0].on_ground = false
 	assert_eq(_eval(w), GrabContext.Kind.NONE, "pickups and grabs need the ground")
+
+
+func test_fighter_behind_is_none() -> void:
+	var w := _world()
+	w.fighters[0].facing = Vector3(1, 0, 0)
+	w.fighters[1].pos = w.fighters[0].pos + Vector3(-1.0, 0, 0)
+	assert_eq(_eval(w), GrabContext.Kind.NONE, "the grab box is in front of the fighter")
+	w.fighters[1].pos = w.fighters[0].pos + Vector3(1.0, 0, 0)
+	assert_eq(_eval(w), GrabContext.Kind.FIGHTER)
+
+
+func test_fighter_beside_and_out_of_the_box_is_none() -> void:
+	var w := _world()
+	w.fighters[0].facing = Vector3(1, 0, 0)
+	w.fighters[1].pos = w.fighters[0].pos + Vector3(0.0, 0, w.config.grab_half_width + w.config.fighter_radius + 0.3)
+	assert_eq(_eval(w), GrabContext.Kind.NONE)
+
+
+func test_nearest_of_two_items_wins() -> void:
+	var w := _world()
+	var p := w.fighters[0].pos
+	w.items.add(Item.Kind.BAT, p + Vector3(0.9, 0, 0), Item.State.GROUND, w.config)
+	var near := w.items.add(Item.Kind.ROCK, p + Vector3(0, 0, 0.4), Item.State.GROUND, w.config)
+	assert_eq(GrabContext.evaluate(w.state_view(), 0, w.config)["pos"], near.pos)
+
+
+func test_item_exactly_at_the_pickup_radius_counts_and_just_beyond_does_not() -> void:
+	var w := _world()
+	w.config.item_pickup_radius = 1.5  # exactly representable, so the boundary distance is exact
+	var r := w.config.item_pickup_radius
+	w.fighters[0].pos = Vector3.ZERO
+	w.items.add(Item.Kind.BAT, w.fighters[0].pos + Vector3(r, 0, 0), Item.State.GROUND, w.config)
+	assert_eq(_eval(w), GrabContext.Kind.ITEM, "exactly at the radius")
+	w.items.items[0].pos = w.fighters[0].pos + Vector3(r + 0.05, 0, 0)
+	assert_eq(_eval(w), GrabContext.Kind.NONE, "just beyond")
+
+
+func test_hitstop_is_none() -> void:
+	var w := _world()
+	w.fighters[0].facing = Vector3(1, 0, 0)
+	w.fighters[1].pos = w.fighters[0].pos + Vector3(1.0, 0, 0)
+	w.fighters[0].hitstop_ticks = 3
+	assert_eq(_eval(w), GrabContext.Kind.NONE, "the press is swallowed during hitstop")
