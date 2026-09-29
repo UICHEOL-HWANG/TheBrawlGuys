@@ -23,6 +23,8 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: Att
 			Actions.step_attack(f, input, config, attacks)
 		Fighter.State.CHARGE:
 			Actions.step_charge(f, input, config)
+		Fighter.State.GUARD:
+			Actions.step_guard(f, input, config)
 		_:
 			if not Actions.try_start(f, input, config):
 				_step_control(f, input, config)

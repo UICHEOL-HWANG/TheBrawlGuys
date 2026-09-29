@@ -2,6 +2,7 @@ class_name Combat
 extends RefCounted
 ## Hit resolution (PRD §4.2): active hitboxes vs fighter capsules, damage %, knockback formula,
 ## hitstun and hitstop. Damage is added before knockback is computed (context D7).
+## All hit sources share apply_hit, which also handles guard (context E4).
 
 
 static func knockback(attack: AttackData, target_damage: float, config: GameConfig) -> float:
@@ -40,27 +41,45 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 				continue
 			if Collision.capsule_hits_box(target.pos, config.fighter_radius, config.fighter_height,
 					center, yaw, attack.hitbox_half):
-				events.append(_apply_hit(attacker, target, attack, config, center))
+				attacker.hit_ids.append(target.id)
+				var power := attacker.charge_mul if attacker.attack_kind == AttackSet.Kind.HEAVY else 1.0
+				var e := apply_hit(target, attack, attacker.facing, power, config, center, attacker.id)
+				e["attack_kind"] = attacker.attack_kind
+				attacker.hitstop_ticks = attack.hitstop_ticks
+				events.append(e)
 	return events
 
 
-static func _apply_hit(attacker: Fighter, target: Fighter, attack: AttackData,
-		config: GameConfig, at: Vector3) -> Dictionary:
-	var power := attacker.charge_mul if attacker.attack_kind == AttackSet.Kind.HEAVY else 1.0
-	attacker.hit_ids.append(target.id)
-	target.damage += attack.damage * power
+## One hit from any source (melee, throw, projectile, explosion). dir is the push direction,
+## power scales damage and knockback (heavy charge). A guarding target takes guard_damage_mul
+## of the damage and guard_knockback_mul of the knockback as a flat push, stays in GUARD and
+## reports "guard_hit" (context E4). Sets the target's hitstop; the caller sets the attacker's.
+static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: float,
+		config: GameConfig, at: Vector3, source_id: int) -> Dictionary:
+	var guarded := target.state == Fighter.State.GUARD
+	target.damage += attack.damage * power * (config.guard_damage_mul if guarded else 1.0)
 	var kb := knockback(attack, target.damage, config) * power
-	target.vel = launch_velocity(attacker.facing, attack, kb)
+	target.hitstop_ticks = attack.hitstop_ticks
+	var event := {
+		"type": "hit", "attacker": source_id, "target": target.id, "pos": at,
+		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "power": power,
+	}
+	if guarded:
+		kb *= config.guard_knockback_mul
+		var flat := Vector3(dir.x, 0.0, dir.z)
+		var push := flat.normalized() * kb if flat.length() > 0.0 else Vector3.ZERO
+		target.vel.x = push.x
+		target.vel.z = push.z
+		event["type"] = "guard_hit"
+		event["knockback"] = kb
+		return event
+	target.vel = launch_velocity(dir, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
 	target.attack_ticks = 0
 	target.hit_ids.clear()
+	target.combo_queued = false
+	target.charge_ticks = 0
 	target.set_state(Fighter.State.HITSTUN)
-	target.hitstop_ticks = attack.hitstop_ticks
-	attacker.hitstop_ticks = attack.hitstop_ticks
-	return {
-		"type": "hit", "attacker": attacker.id, "target": target.id, "pos": at,
-		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "attack_kind": attacker.attack_kind,
-		"power": power,
-	}
+	return event

@@ -6,8 +6,13 @@ extends RefCounted
 
 
 ## Returns true when the fighter started an action this tick (movement is then skipped).
-## Priority: heavy > light.
+## Priority: guard > heavy > light.
 static func try_start(f: Fighter, input: InputFrame, _config: GameConfig) -> bool:
+	if input.guard and f.on_ground:
+		f.set_state(Fighter.State.GUARD)
+		f.state_ticks = 0
+		stop_horizontal(f)
+		return true
 	if input.heavy:
 		f.set_state(Fighter.State.CHARGE)
 		f.state_ticks = 0
@@ -61,6 +66,15 @@ static func step_charge(f: Fighter, input: InputFrame, config: GameConfig) -> vo
 	var mul := charge_mul(f.charge_ticks, config)
 	start_attack(f, AttackSet.Kind.HEAVY)
 	f.charge_mul = mul
+
+
+## Guard holds while guard is pressed and the fighter stands on the ground (context E4). A
+## guard push (guard_knockback_mul > 0) slides out with the ground friction.
+static func step_guard(f: Fighter, input: InputFrame, config: GameConfig) -> void:
+	f.vel.x *= config.hitstun_ground_friction
+	f.vel.z *= config.hitstun_ground_friction
+	if not input.guard or not f.on_ground:
+		f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
 
 
 static func charge_mul(charge_ticks: int, config: GameConfig) -> float:
