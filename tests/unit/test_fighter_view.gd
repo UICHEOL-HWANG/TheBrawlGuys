@@ -66,3 +66,17 @@ func test_held_bat_shows_with_use_dots() -> void:
 	var none := _fighter_view_data(Fighter.NONE, 0)
 	v.apply(none, none, 1.0, 2)
 	assert_false(v.held_visible())
+
+
+func test_guard_bubble_follows_the_guard_state() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	v.setup(0, GameConfig.new())
+	var guard := _fighter_view_data(Fighter.NONE, 0)
+	guard["state"] = Fighter.State.GUARD
+	v.apply(guard, guard, 1.0, 0)
+	assert_true(v.bubble_visible())
+	v.wobble()
+	var idle := _fighter_view_data(Fighter.NONE, 0)
+	v.apply(idle, idle, 1.0, 1)
+	assert_false(v.bubble_visible())

@@ -41,6 +41,9 @@ const UI_SURFACE_70 := Color("#FFFDF6B3")
 ## Soft ground shadows under falling boxes (design.md DS-VIS-05): deep teal at 40%.
 const GROUND_SHADOW := Color("#17525A66")
 
+## Guard bubble (design.md DS-VFX-02): sky at 40%, a soap bubble around the guarding fighter.
+const GUARD_BUBBLE := Color("#C4E8F666")
+
 # --- Players (always paired with a shape, DS-VIS-03) ---
 const P1 := Color("#3E7BF0")
 const P2 := Color("#F25C5C")

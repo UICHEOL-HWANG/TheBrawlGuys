@@ -19,6 +19,8 @@ const HAND_FORWARD := 0.4
 const DOT_RADIUS := 0.06
 const DOT_SPACING := 0.16
 const DOT_GAP := 0.25
+const BUBBLE_RADIUS_RATIO := 0.62
+const WOBBLE_SQUASH := Vector3(1.12, 0.88, 1.12)
 
 var _config: GameConfig
 var _body: MeshInstance3D
@@ -27,6 +29,7 @@ var _label: Label3D
 var _held: MeshInstance3D
 var _held_kind: int = Fighter.NONE
 var _dots: Array[MeshInstance3D] = []
+var _bubble: MeshInstance3D
 
 
 func setup(index: int, config: GameConfig) -> void:
@@ -82,6 +85,16 @@ func setup(index: int, config: GameConfig) -> void:
 		add_child(dot)
 		_dots.append(dot)
 
+	var sphere := SphereMesh.new()
+	sphere.radius = config.fighter_height * BUBBLE_RADIUS_RATIO
+	sphere.height = sphere.radius * 2.0
+	_bubble = MeshInstance3D.new()
+	_bubble.mesh = sphere
+	_bubble.material_override = ToonMaterials.translucent(DS.GUARD_BUBBLE)
+	_bubble.position.y = config.fighter_height * 0.5
+	_bubble.visible = false
+	add_child(_bubble)
+
 
 func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	if int(curr["state"]) == Fighter.State.KO:
@@ -93,6 +106,18 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	rotation.y = Collision.yaw_of(facing)
 	_body.visible = blink_visible(int(curr["invuln_ticks"]), tick, _config)
 	_show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
+	_bubble.visible = int(curr["state"]) == Fighter.State.GUARD
+
+
+## Soap-bubble wobble when a guarded hit lands (DS-VFX-02).
+func wobble() -> void:
+	_bubble.scale = WOBBLE_SQUASH
+	var tw := create_tween()
+	tw.tween_property(_bubble, "scale", Vector3.ONE, DS.MOTION_SQUISH).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+
+func bubble_visible() -> bool:
+	return _bubble.visible
 
 
 func _show_item(kind: int, uses: int) -> void:
