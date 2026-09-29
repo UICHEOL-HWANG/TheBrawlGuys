@@ -1,19 +1,21 @@
 class_name World
 extends RefCounted
 ## Pure game state (PRD §5.2). Never reference Node, SceneTree, Input, RenderingServer or PhysicsServer3D here.
-## Tick order: Motion.step per fighter -> separate -> Grab.step -> Grab.resolve -> Combat.resolve -> Rules.apply -> Grab.cleanup -> winner.
-## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1). Snapshot v3 adds the Phase 2 fighter fields.
+## Tick order: Motion.step per fighter -> separate -> Grab.step -> Grab.resolve -> Combat.resolve -> ItemMotion.step -> ItemField.spawn_step -> Rules.apply -> Grab.cleanup -> winner.
+## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1). Snapshot v3 adds the Phase 2 fighter fields. Snapshot v4 adds the item field.
 
-const SNAPSHOT_VERSION := 3
+const SNAPSHOT_VERSION := 4
 const DEFAULT_PLAYER_COUNT := 2
 const SNAPSHOT_TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,
+	"items": TYPE_DICTIONARY,
 }
 
 var config: GameConfig
 var tick_count: int = 0
 var fighters: Array[Fighter] = []
+var items: ItemField = ItemField.new()
 var match_over: bool = false
 var winner_id: int = Rules.ONGOING
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -39,6 +41,8 @@ func tick(inputs: Array[InputFrame]) -> void:
 		_events.append_array(Grab.step(fighters, frame, attacks, config))
 		_events.append_array(Grab.resolve(fighters, attacks, config))
 		_events.append_array(Combat.resolve(fighters, attacks, config))
+		_events.append_array(ItemMotion.step(items, fighters, attacks, config))
+		_events.append_array(items.spawn_step(tick_count, _rng, config))
 		_events.append_array(Rules.apply(fighters, config))
 		Grab.cleanup(fighters)
 		var result := Rules.winner(fighters)
@@ -74,6 +78,7 @@ func state_view() -> Dictionary:
 		"match_over": match_over,
 		"winner": winner_id,
 		"fighters": views,
+		"items": items.views(),
 		"events": _events.duplicate(true),
 	}
 
@@ -91,6 +96,7 @@ func snapshot() -> PackedByteArray:
 		"match_over": match_over,
 		"winner": winner_id,
 		"fighters": data,
+		"items": items.to_data(),
 	})
 
 
@@ -114,12 +120,17 @@ func restore(data: PackedByteArray) -> bool:
 			push_error("World.restore: invalid fighter data")
 			return false
 		restored.append(f)
+	var restored_items := ItemField.from_data(s["items"])
+	if restored_items == null:
+		push_error("World.restore: invalid item data")
+		return false
 	tick_count = s["tick"]
 	_rng.seed = s["rng_seed"]
 	_rng.state = s["rng_state"]
 	match_over = s["match_over"]
 	winner_id = s["winner"]
 	fighters = restored
+	items = restored_items
 	_events = []
 	return true
 
