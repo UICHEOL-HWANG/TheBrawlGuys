@@ -22,6 +22,9 @@ func rand_int(from: int, to: int) -> int:
 	return _rng.randi_range(from, to)
 
 
+## Plain value data only (ints/floats/Vector types/Arrays and Dictionaries of the same):
+## never references to live sim objects, so the render layer can keep prev/curr copies
+## that stay valid after later ticks.
 func state_view() -> Dictionary:
 	return {"tick": tick_count}
 

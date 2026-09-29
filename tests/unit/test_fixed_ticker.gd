@@ -31,7 +31,7 @@ func test_variable_deltas_sum_to_one_second() -> void:
 func test_long_stall_is_capped_and_backlog_dropped() -> void:
 	var t := FixedTicker.new(5)
 	assert_eq(t.advance(1.0), 5, "cap ticks per frame")
-	assert_lt(t.alpha(), 1.0, "backlog beyond cap is dropped")
+	assert_eq(t.alpha(), 0.0, "backlog beyond cap is dropped")
 	assert_eq(t.advance(0.0), 0, "no catch-up spiral on next frame")
 
 
