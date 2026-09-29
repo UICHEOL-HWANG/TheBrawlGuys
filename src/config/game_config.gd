@@ -78,6 +78,10 @@ extends Resource
 
 @export_group("Touch")
 @export_range(0.05, 0.5, 0.01) var touch_hold_threshold: float = 0.15
+@export_range(60.0, 300.0, 5.0) var touch_stick_radius: float = 140.0
+@export_range(0.0, 0.5, 0.01) var touch_stick_deadzone: float = 0.15
+@export_range(96.0, 300.0, 2.0) var touch_attack_diameter: float = 170.0
+@export_range(96.0, 300.0, 2.0) var touch_jump_diameter: float = 130.0
 
 
 ## Hash of every script variable (D1). Snapshots and replays store it so a run can only be

@@ -6,7 +6,12 @@ const SWATCH_SIZE := Vector2(120, 64)
 const SWATCH_COLUMNS := 7
 const PREVIEW_SIZE := Vector2i(560, 360)
 ## Registered components: [display name, scene path]. Phase 1 adds DamageCounter, StockIcons, ...
-const COMPONENTS: Array[Array] = []
+const COMPONENTS: Array[Array] = [
+	["TouchStick · DS-CMP-03", "res://src/ui/components/touch_stick/touch_stick.tscn"],
+	["TouchButton v1 · DS-CMP-04", "res://src/ui/components/touch_button/touch_button.tscn"],
+]
+## Pass `--components-only` after `--` to render just the components section (evidence capture).
+const COMPONENTS_ONLY_ARG := "--components-only"
 
 
 func _ready() -> void:
@@ -27,12 +32,13 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", DS.S6)
 	margin.add_child(col)
 
-	col.add_child(_heading("Palette · DS-TOK-01 (A 한낮 햇살)"))
-	col.add_child(_swatches())
-	col.add_child(_heading("Typography · DS-TOK-02"))
-	col.add_child(_type_scale())
-	col.add_child(_heading("Soft toon · DS-VIS-01 / DS-VIS-02"))
-	col.add_child(_toon_preview())
+	if not OS.get_cmdline_user_args().has(COMPONENTS_ONLY_ARG):
+		col.add_child(_heading("Palette · DS-TOK-01 (A 한낮 햇살)"))
+		col.add_child(_swatches())
+		col.add_child(_heading("Typography · DS-TOK-02"))
+		col.add_child(_type_scale())
+		col.add_child(_heading("Soft toon · DS-VIS-01 / DS-VIS-02"))
+		col.add_child(_toon_preview())
 	col.add_child(_heading("Components · DS-CMP"))
 	col.add_child(_components())
 
@@ -138,5 +144,8 @@ func _components() -> Control:
 		var title := Label.new()
 		title.text = entry[0]
 		box.add_child(title)
-		box.add_child((load(entry[1]) as PackedScene).instantiate())
+		var node := (load(entry[1]) as PackedScene).instantiate()
+		box.add_child(node)
+		if node.has_method("set_preview"):
+			node.call("set_preview")
 	return box

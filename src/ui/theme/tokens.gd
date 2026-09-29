@@ -35,6 +35,9 @@ const UI_TEXT_SOFT := Color("#3F7470")
 const UI_SHADOW := Color("#17525A40")
 const UI_ACCENT := FIRE
 const TRANSPARENT := Color("#FFFFFF00")
+## Translucent cream surfaces for touch controls over the 3D scene (design.md DS-LAY-01).
+const UI_SURFACE_50 := Color("#FFFDF680")
+const UI_SURFACE_70 := Color("#FFFDF6B3")
 
 # --- Players (always paired with a shape, DS-VIS-03) ---
 const P1 := Color("#3E7BF0")
@@ -92,3 +95,5 @@ const MOTION_FAST := 0.08
 const MOTION_BASE := 0.18
 const MOTION_SQUISH := 0.28
 const MOTION_SLOW := 0.40
+## Button press squish (design.md DS-TOK-05).
+const PRESS_SQUISH := Vector2(1.04, 0.92)

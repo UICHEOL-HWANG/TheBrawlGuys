@@ -135,6 +135,8 @@
 |---|---|---|
 | `ui_surface` | `#FFFDF6` | 패널·카드 바탕 (크림 화이트) |
 | `ui_surface_dim` | `#EAF2DC` | 비활성·보조 면 (연두 기운) |
+| `ui_surface_50` | `#FFFDF6` 50% | 가상 스틱 바탕 |
+| `ui_surface_70` | `#FFFDF6` 70% | 터치 버튼 바탕 |
 | `ui_text` | = `canopy_deep` | 본문 글자 |
 | `ui_text_soft` | `#3F7470` | 보조 글자 (크림 바탕 대비 5.2:1, WCAG AA) |
 | `ui_shadow` | `canopy_deep` 25% | 패널 그림자 |
@@ -193,7 +195,7 @@
 | `motion_squish` | 0.28s | out-elastic (약) | 숫자 튀어오름, 배너 등장 — 말랑한 스쿼시 |
 | `motion_slow` | 0.40s | in-out-cubic | 화면 전환 |
 
-- 버튼 눌림: 스케일 (1.04, 0.92) 스쿼시 → `shadow_pressed`로 전환 → 뗄 때 탄성 복귀
+- 버튼 눌림: 스케일 (1.04, 0.92) 스쿼시 → `shadow_pressed`로 전환 → 뗄 때 탄성 복귀 — 토큰 `PRESS_SQUISH`
 
 ### DS-TOK-06 아이콘
 

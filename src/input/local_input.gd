@@ -6,6 +6,8 @@ extends RefCounted
 
 var _jump := ButtonLatch.new()
 var _light := ButtonLatch.new()
+## Set by TouchInput; when the stick is held it overrides the keyboard move vector.
+var touch_stick: TouchStickModel = null
 
 
 func poll() -> void:
@@ -29,4 +31,6 @@ func sample() -> InputFrame:
 
 
 func _move_vector() -> Vector2:
+	if touch_stick != null and touch_stick.active():
+		return touch_stick.vector()
 	return Input.get_vector("p1_left", "p1_right", "p1_up", "p1_down")

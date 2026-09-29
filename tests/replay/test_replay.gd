@@ -7,7 +7,7 @@ extends GutTest
 const SEED := 7
 const TICKS := 600
 const HALF := 300
-const GOLDEN_HASH := 3397349246
+const GOLDEN_HASH := 2040644093
 
 
 static func _script_input(player: int, t: int) -> InputFrame:
