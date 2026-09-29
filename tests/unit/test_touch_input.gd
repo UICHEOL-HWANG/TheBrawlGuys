@@ -62,3 +62,69 @@ func test_stick_and_attack_work_at_the_same_time() -> void:
 func test_fourth_finger_is_ignored() -> void:
 	_touch._unhandled_input(_touch_event(3, _touch.jump_center(), true))
 	assert_false(_local.sample().jump, "index 3 belongs to the debug panel gesture")
+
+
+func test_hold_attack_becomes_heavy_and_release_ends_it() -> void:
+	_touch.time_override = 10.0
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), true))
+	_touch.time_override = 10.5
+	_touch._process(0.0)
+	assert_true(_local.sample().heavy, "held past the threshold -> heavy")
+	assert_true(_local.sample().heavy, "stays held")
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), false))
+	var f := _local.sample()
+	assert_false(f.heavy, "release ends the charge; the sim swings")
+	assert_false(f.light, "a hold is not also a light")
+
+
+func test_short_hold_released_between_frames_still_swings_heavy() -> void:
+	_touch.time_override = 10.0
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), true))
+	_touch.time_override = 10.3
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), false))
+	assert_true(_local.sample().heavy, "past the threshold but no frame ran: one tick of heavy")
+	assert_false(_local.sample().heavy)
+
+
+func test_guard_held_while_touched() -> void:
+	_touch._unhandled_input(_touch_event(1, _touch.button_center("guard"), true))
+	assert_true(_local.sample().guard)
+	_touch._unhandled_input(_touch_event(1, _touch.button_center("guard"), false))
+	assert_false(_local.sample().guard)
+
+
+func test_grab_fires_on_press() -> void:
+	_touch._unhandled_input(_touch_event(2, _touch.button_center("grab"), true))
+	assert_true(_local.sample().grab)
+
+
+func test_canceled_attack_touch_does_not_attack() -> void:
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), true))
+	var cancel := _touch_event(0, _touch.attack_center(), false)
+	cancel.canceled = true
+	_touch._unhandled_input(cancel)
+	assert_false(_local.sample().light)
+
+
+func test_focus_loss_releases_every_finger() -> void:
+	var start := _touch.stick_zone_point()
+	_touch._unhandled_input(_touch_event(0, start, true))
+	_touch._unhandled_input(_drag_event(0, start + Vector2(140, 0)))
+	_touch._unhandled_input(_touch_event(1, _touch.button_center("guard"), true))
+	_touch._unhandled_input(_touch_event(2, _touch.attack_center(), true))
+	_touch._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	var f := _local.sample()
+	assert_eq(f.move_x, 0.0, "stick let go")
+	assert_false(f.guard, "guard let go")
+	assert_false(f.light, "a canceled attack touch is not a tap")
+
+
+func test_layout_follows_the_config() -> void:
+	var c := GameConfig.new()
+	var touch := TouchInput.new()
+	add_child_autofree(touch)
+	touch.setup(LocalInput.new(), c)
+	var arc := touch.button_center("guard")
+	c.touch_layout = TouchLayout.Variant.GRID
+	c.emit_changed()
+	assert_ne(touch.button_center("guard"), arc, "debug panel can switch layouts live for the gate")

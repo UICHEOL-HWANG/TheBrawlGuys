@@ -51,3 +51,9 @@ func _draw() -> void:
 	if _font != null:
 		draw_string(_font, Vector2(0.0, r + DS.SIZE_BODY * LABEL_BASELINE_RATIO), label_text,
 				HORIZONTAL_ALIGNMENT_CENTER, diameter, DS.SIZE_BODY, DS.UI_TEXT)
+
+
+## Resizes the button (layouts change sizes at runtime).
+func set_diameter(d: float) -> void:
+	diameter = d
+	_apply_size()

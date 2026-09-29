@@ -6,7 +6,7 @@ extends SceneTree
 ## Usage (windowed, NOT headless -- it needs a renderer):
 ##   godot --path . -s res://scripts/capture_evidence.gd -- \
 ##       --scene=res://src/main/main.tscn --out=/abs/path/file.png \
-##       [--frames=120] [--arena-radius=20] [--show-panel] [--show-touch]
+##       [--frames=120] [--arena-radius=20] [--show-panel] [--show-touch] [--touch-layout=N]
 
 const DEFAULT_FRAMES := 120
 
@@ -20,7 +20,7 @@ func _init() -> void:
 	var scene_path: String = args.get("scene", "")
 	_out_path = args.get("out", "")
 	if scene_path.is_empty() or _out_path.is_empty():
-		push_error("capture_evidence: usage: -- --scene=res://path.tscn --out=/abs/path.png [--frames=120] [--arena-radius=F] [--show-panel] [--show-touch]")
+		push_error("capture_evidence: usage: -- --scene=res://path.tscn --out=/abs/path.png [--frames=120] [--arena-radius=F] [--show-panel] [--show-touch] [--touch-layout=N]")
 		quit(1)
 		return
 
@@ -43,6 +43,15 @@ func _init() -> void:
 			quit(1)
 			return
 		config.arena_radius = radius
+		config.emit_changed()
+
+	if args.has("touch-layout"):
+		var config := load("res://src/config/default_config.tres") as GameConfig
+		if config == null:
+			push_error("capture_evidence: GameConfig missing at res://src/config/default_config.tres")
+			quit(1)
+			return
+		config.touch_layout = int(args["touch-layout"])
 		config.emit_changed()
 
 	if args.has("show-panel"):
