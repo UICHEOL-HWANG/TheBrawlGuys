@@ -103,3 +103,18 @@
 - 테스트 공백: main 재시작 경로 테스트 없음; 리플레이 스크립트가 링아웃/리스폰/KO를 단언하지 않아 spawn_id/invuln/KO 스냅샷이 골든으로 보호되지 않음
 - 터치: `canceled` 해제 시 약공격 억제, `NOTIFICATION_APPLICATION_FOCUS_OUT`에서 모든 손가락 초기화
 - 전신 프레이밍(F1 이후) 캐릭터 크기: cam_margin / cam_pitch 비교 후 사용자와 결정 (변경 시 골든 재생성)
+
+## SDD 진행 중 컨트롤러 판단 (Rulings)
+
+- Ruling 1: T12 (Stitch HUD mockup gate) is performed by the user + controller, not dispatched. T13 proceeds with design.md DS-LAY-02 default layout; T12 stays "🖼 대기" until mockups arrive — cost if wrong: HUD layout constants may need a small follow-up change.
+- Ruling 2: T18 Step 4 (git mv dev/active/phase-1 → dev/done) is done by the controller after the SDD final review — cost if wrong: none.
+- Ruling 3: pipeline — while a task review runs in the background, the next implementer (disjoint files) proceeds; any fix round for the reviewed task is dispatched after the current implementer finishes — cost if wrong: a fix could touch a file the next task also reads (checked per dispatch).
+- Ruling 4 (T4): commit 6f79762 trailer names "Claude Haiku 4.5"; not rewriting history (b2203e1 already on top) — cosmetic. Remaining implementers use sonnet (haiku repeatedly ignores the fixed trailer) — cost if wrong: one commit with a different trailer.
+- Ruling 5 (T5): "Motion attack/hitstun/hitstop/invuln branches untested" is covered by T6 (hitstop freeze, hitstun ignores input, one hit per swing) and T7 (invuln countdown); T6 additionally adds "attack returns to IDLE after total_ticks" plus the T3 non-symmetric yaw test — cost if wrong: none, tests land one task later.
+- Ruling 6 (T8): accept further tweaks to the replay _script_input (P0 move_z 0, flip period 150, P2 move_x -1, P2 move_z ±0.1) beyond the brief's fallback so the scripted run actually lands hits — the brief's intent is that the golden hash covers combat — cost if wrong: none (test-only inputs). GOLDEN_HASH = 3397349246 (Godot 4.7.2).
+- Ruling 7: commit trailers may name the model that actually authored the commit (each subagent's harness mandates its own attribution line); reviewers no longer flag the model name, only a missing Co-Authored-By trailer. Supersedes the fixed-name requirement (earlier Rulings on T4 trailer are moot) — cost if wrong: mixed model names in trailers, which is truthful.
+- Ruling 8 (T11): accept GOLDEN_HASH update 3397349246 -> 2040644093 — adding GameConfig fields changes the config fingerprint that snapshots hash (D1, by design); implementer verified the old golden passes without the new fields. Any later GameConfig field addition must regenerate the golden with a reason in the commit — cost if wrong: none.
+- Ruling 9 (T13, plan-mandated Important): lost stocks become an outline-only shape in DS.UI_TEXT_SOFT (readable on cream cards and grass) instead of a UI_SURFACE_DIM fill that vanishes on light backgrounds; re-capture gallery-hud.png — cost if wrong: a small visual change the HUD 🖼 gate can revisit.
+- Ruling 10 (T16→T17): the camera must always frame the arena (ring-out edge visible): main._camera_targets() returns alive fighters PLUS the four arena extent points, so the view only widens for launched fighters; recorded in design.md GD-CAM-01. Done inside T17 (tuning task) — cost if wrong: slightly less zoom-in drama in close fights.
+- Ruling 11 (T17): accept pinning global_knockback_mul = 1.0 in the combat formula test (formula test must not depend on tuned default) and ffmpeg-extracted tick-aligned key frames (+ frame 145) — cost if wrong: none.
+- Final review: 카메라 z 프레이밍을 원근 정확식으로 교체(5e72bbf), 재시작 키가 새 경기에서 점프로 래치되던 문제 수정(d4394fb, a186f2e)
