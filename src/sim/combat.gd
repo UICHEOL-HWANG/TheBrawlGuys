@@ -50,7 +50,7 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 	return events
 
 
-## One hit from any source (melee, throw, projectile, explosion). dir is the push direction,
+## One hit from any source (melee, throw, projectile, explosion). dir is the push direction (only its horizontal part is used, normalized),
 ## power scales damage and knockback (heavy charge). A guarding target takes guard_damage_mul
 ## of the damage and guard_knockback_mul of the knockback as a flat push, stays in GUARD and
 ## reports "guard_hit" (context E4). Sets the target's hitstop; the caller sets the attacker's.
@@ -64,16 +64,17 @@ static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: 
 		"type": "hit", "attacker": source_id, "target": target.id, "pos": at,
 		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "power": power,
 	}
+	var flat_dir := Vector3(dir.x, 0.0, dir.z)
+	flat_dir = flat_dir.normalized() if flat_dir.length() > 0.0 else Vector3.ZERO
 	if guarded:
 		kb *= config.guard_knockback_mul
-		var flat := Vector3(dir.x, 0.0, dir.z)
-		var push := flat.normalized() * kb if flat.length() > 0.0 else Vector3.ZERO
+		var push := flat_dir * kb
 		target.vel.x = push.x
 		target.vel.z = push.z
 		event["type"] = "guard_hit"
 		event["knockback"] = kb
 		return event
-	target.vel = launch_velocity(dir, attack, kb)
+	target.vel = launch_velocity(flat_dir, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)

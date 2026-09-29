@@ -62,6 +62,8 @@ func test_blast_pushes_away_from_the_bomb() -> void:
 	assert_lt(w.fighters[0].vel.x, 0.0)
 	assert_gt(w.fighters[1].vel.z, 0.0)
 	assert_gt(w.fighters[0].vel.y, 0.0, "launched upward")
+	var f := w.fighters[0]
+	assert_almost_eq(f.vel.y / Vector2(f.vel.x, f.vel.z).length(), w.config.bomb_launch_angle_y, 0.01)
 
 
 func test_thrower_is_not_safe() -> void:

@@ -114,6 +114,9 @@ func test_grab_throws_a_rock_that_hits_the_first_fighter() -> void:
 	assert_false(hit.is_empty(), "the rock reaches the fighter 3 m ahead")
 	assert_eq(hit["attack_kind"], AttackSet.Kind.ROCK)
 	assert_eq(hit["attacker"], 0)
+	var t := w.fighters[1]
+	assert_gt(t.vel.y, 0.0, "launched upward")
+	assert_almost_eq(t.vel.y / Vector2(t.vel.x, t.vel.z).length(), c.rock_launch_angle_y, 0.01)
 	assert_eq(w.fighters[1].damage, c.rock_damage)
 	assert_eq(w.items.items.size(), 0, "a rock is gone after its hit")
 

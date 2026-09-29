@@ -109,3 +109,9 @@ func test_apply_hit_uses_the_given_direction() -> void:
 	assert_lt(target.vel.z, 0.0)
 	assert_almost_eq(target.vel.x, 0.0, 0.0001)
 	assert_eq(target.state, Fighter.State.HITSTUN)
+
+	var scaled := Fighter.new()
+	Combat.apply_hit(scaled, rock, Vector3(0, 0, -5), 1.0, c, Vector3.ZERO, 3)
+	assert_almost_eq(scaled.vel.x, target.vel.x, 0.0001, "a non-unit dir gives the same launch")
+	assert_almost_eq(scaled.vel.y, target.vel.y, 0.0001)
+	assert_almost_eq(scaled.vel.z, target.vel.z, 0.0001)
