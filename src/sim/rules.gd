@@ -37,13 +37,23 @@ static func respawn(f: Fighter, count: int, config: GameConfig) -> void:
 	f.damage = 0.0
 	f.on_ground = false
 	f.jumps_left = config.max_jumps
+	clear_actions(f)
+	f.invuln_ticks = SimTime.to_ticks(config.respawn_invuln)
+	f.spawn_id += 1
+	f.set_state(Fighter.State.AIR)
+
+
+## Resets attack, charge, combo and grab bookkeeping (respawn and KO).
+static func clear_actions(f: Fighter) -> void:
 	f.hitstun_ticks = 0
 	f.hitstop_ticks = 0
 	f.attack_ticks = 0
 	f.hit_ids.clear()
-	f.invuln_ticks = SimTime.to_ticks(config.respawn_invuln)
-	f.spawn_id += 1
-	f.set_state(Fighter.State.AIR)
+	f.combo_queued = false
+	f.charge_ticks = 0
+	f.charge_mul = 1.0
+	f.grab_ticks = 0
+	f.partner_id = Fighter.NONE
 
 
 static func apply(fighters: Array[Fighter], config: GameConfig) -> Array[Dictionary]:
@@ -59,6 +69,7 @@ static func apply(fighters: Array[Fighter], config: GameConfig) -> Array[Diction
 			respawn(f, fighters.size(), config)
 		else:
 			f.vel = Vector3.ZERO
+			clear_actions(f)
 			f.set_state(Fighter.State.KO)
 		events.append({"type": "ringout", "id": f.id, "pos": at, "stocks_left": f.stocks})
 	return events

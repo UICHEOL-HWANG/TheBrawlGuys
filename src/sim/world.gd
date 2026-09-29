@@ -1,7 +1,7 @@
 class_name World
 extends RefCounted
 ## Pure game state (PRD §5.2). Never reference Node, SceneTree, Input, RenderingServer or PhysicsServer3D here.
-## Tick order: Motion.step per fighter -> Motion.separate -> Combat.resolve -> Rules.apply -> winner.
+## Tick order: Motion.step per fighter -> separate -> Grab.step -> Grab.resolve -> Combat.resolve -> Rules.apply -> Grab.cleanup -> winner.
 ## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1). Snapshot v3 adds the Phase 2 fighter fields.
 
 const SNAPSHOT_VERSION := 3
@@ -32,17 +32,29 @@ func tick(inputs: Array[InputFrame]) -> void:
 	_events = []
 	if not match_over:
 		var attacks := AttackSet.from_config(config)
+		var frame := _resolve_inputs(inputs)
 		for f: Fighter in fighters:
-			var input: InputFrame = inputs[f.id] if f.id < inputs.size() else InputFrame.neutral()
-			Motion.step(f, input, config, attacks)
+			Motion.step(f, frame[f.id], config, attacks)
 		Motion.separate(fighters, config)
+		_events.append_array(Grab.step(fighters, frame, attacks, config))
+		_events.append_array(Grab.resolve(fighters, attacks, config))
 		_events.append_array(Combat.resolve(fighters, attacks, config))
 		_events.append_array(Rules.apply(fighters, config))
+		Grab.cleanup(fighters)
 		var result := Rules.winner(fighters)
 		if result != Rules.ONGOING:
 			match_over = true
 			winner_id = result
 	tick_count += 1
+
+
+## One input per fighter id (copies, so later steps may clear consumed buttons without touching
+## the caller's frames); missing entries are neutral.
+func _resolve_inputs(inputs: Array[InputFrame]) -> Array[InputFrame]:
+	var out: Array[InputFrame] = []
+	for f: Fighter in fighters:
+		out.append(inputs[f.id].copy() if f.id < inputs.size() else InputFrame.neutral())
+	return out
 
 
 func rand_int(from: int, to: int) -> int:

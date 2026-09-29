@@ -25,10 +25,13 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: Att
 			Actions.step_charge(f, input, config)
 		Fighter.State.GUARD:
 			Actions.step_guard(f, input, config)
+		Fighter.State.HOLDING, Fighter.State.HELD:
+			pass  # Grab.step drives holds; the held fighter's position comes from the holder
 		_:
 			if not Actions.try_start(f, input, config):
 				_step_control(f, input, config)
-	_integrate(f, config)
+	if f.state != Fighter.State.HELD:
+		_integrate(f, config)
 	f.state_ticks += 1
 
 

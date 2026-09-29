@@ -100,3 +100,19 @@ func test_after_match_over_the_world_stops_simulating() -> void:
 	w.tick(a)
 	assert_eq(w.fighters[0].pos, frozen)
 	assert_eq(w.tick_count, 2)
+
+
+func test_respawn_clears_action_fields() -> void:
+	var c := GameConfig.new()
+	var f := Rules.spawn_fighter(0, 2, c)
+	f.partner_id = 1
+	f.grab_ticks = 30
+	f.charge_ticks = 40
+	f.charge_mul = 1.5
+	f.combo_queued = true
+	Rules.respawn(f, 2, c)
+	assert_eq(f.partner_id, Fighter.NONE)
+	assert_eq(f.grab_ticks, 0)
+	assert_eq(f.charge_ticks, 0)
+	assert_eq(f.charge_mul, 1.0)
+	assert_false(f.combo_queued)
