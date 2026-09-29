@@ -1,0 +1,79 @@
+class_name Fighter
+extends RefCounted
+## One fighter's sim state. Serialized in World snapshots (to_data/from_data) and exposed to
+## views only as value copies (to_view) — never by reference (PRD §5.2, context D4).
+## View reading: "launched" = HITSTUN and not on_ground; "respawn" = invuln_ticks > 0.
+
+enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO }
+
+const DATA_TYPES := {
+	"id": TYPE_INT, "spawn_id": TYPE_INT, "pos": TYPE_VECTOR3, "vel": TYPE_VECTOR3,
+	"facing": TYPE_VECTOR3, "state": TYPE_INT, "state_ticks": TYPE_INT, "damage": TYPE_FLOAT,
+	"stocks": TYPE_INT, "jumps_left": TYPE_INT, "on_ground": TYPE_BOOL,
+	"hitstun_ticks": TYPE_INT, "hitstop_ticks": TYPE_INT, "invuln_ticks": TYPE_INT,
+	"attack_ticks": TYPE_INT, "hit_ids": TYPE_ARRAY,
+}
+
+var id: int = 0
+## Increments on every respawn so views snap instead of interpolating across the map.
+var spawn_id: int = 0
+var pos: Vector3 = Vector3.ZERO
+var vel: Vector3 = Vector3.ZERO
+var facing: Vector3 = Vector3(0, 0, 1)
+var state: int = State.IDLE
+var state_ticks: int = 0
+var damage: float = 0.0
+var stocks: int = 0
+var jumps_left: int = 0
+var on_ground: bool = true
+var hitstun_ticks: int = 0
+var hitstop_ticks: int = 0
+var invuln_ticks: int = 0
+var attack_ticks: int = 0
+## Targets already hit by the current swing (one hit per target per attack).
+var hit_ids: Array[int] = []
+
+
+func is_alive() -> bool:
+	return state != State.KO
+
+
+func can_act() -> bool:
+	return state == State.IDLE or state == State.MOVE or state == State.AIR
+
+
+func set_state(s: int) -> void:
+	if state != s:
+		state = s
+		state_ticks = 0
+
+
+func to_view() -> Dictionary:
+	return {
+		"id": id, "spawn_id": spawn_id, "pos": pos, "facing": facing, "state": state,
+		"on_ground": on_ground, "damage": damage, "stocks": stocks, "jumps_left": jumps_left,
+		"invuln_ticks": invuln_ticks, "hitstop_ticks": hitstop_ticks, "attack_ticks": attack_ticks,
+	}
+
+
+func to_data() -> Dictionary:
+	var d := {}
+	for key: String in DATA_TYPES:
+		d[key] = get(key)
+	d["hit_ids"] = hit_ids.duplicate()
+	return d
+
+
+static func from_data(d: Dictionary) -> Fighter:
+	for key: String in DATA_TYPES:
+		if not d.has(key) or typeof(d[key]) != DATA_TYPES[key]:
+			return null
+	for v: Variant in d["hit_ids"]:
+		if typeof(v) != TYPE_INT:
+			return null
+	var f := Fighter.new()
+	for key: String in DATA_TYPES:
+		if key != "hit_ids":
+			f.set(key, d[key])
+	f.hit_ids.assign(d["hit_ids"])
+	return f

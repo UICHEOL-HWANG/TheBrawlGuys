@@ -2,8 +2,8 @@ class_name FixedTicker
 extends RefCounted
 ## Fixed 60 Hz accumulator (PRD §5.4). Caps ticks per frame to avoid the spiral of death.
 
-const TICK_RATE := 60
-const TICK_DT := 1.0 / TICK_RATE
+const TICK_RATE := SimTime.TICK_RATE
+const TICK_DT := SimTime.TICK_DT
 ## Absorbs float drift so 60 frames of 1/60 s give exactly 60 ticks.
 const EPSILON := 1e-9
 
