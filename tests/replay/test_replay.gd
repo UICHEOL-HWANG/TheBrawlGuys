@@ -5,17 +5,22 @@ extends GutTest
 ## The golden value is tied to the Godot version (4.7.2) because it hashes engine floats.
 
 const SEED := 7
-const TICKS := 600
-const HALF := 300
-const GOLDEN_HASH := 2898842436
+const TICKS := 1200
+const HALF := 600
+const GOLDEN_HASH := 2973674052
 
 
+## P0 walks back and forth with jumps, light presses, a held heavy every 4 s and grab presses;
+## P1 walks at P0 with light presses, guards in bursts and grabs now and then. Deterministic
+## functions of t only (no bot), so the golden hash guards the sim alone (context E11).
 static func _script_input(player: int, t: int) -> InputFrame:
 	if player == 0:
 		var mx := 1.0 if floori(t / 150.0) % 2 == 0 else -1.0
-		return InputFrame.make(mx, 0.0, t % 45 == 0, t % 20 == 10)
+		var heavy := t % 240 >= 100 and t % 240 < 130
+		return InputFrame.make(mx, 0.0, t % 45 == 0, t % 20 == 10, heavy, false, t % 61 == 50)
 	var mz := -0.1 if floori(t / 70.0) % 2 == 0 else 0.1
-	return InputFrame.make(-1.0, mz, t % 60 == 30, t % 25 == 5)
+	var guard := t % 180 >= 120 and t % 180 < 150
+	return InputFrame.make(-1.0, mz, t % 60 == 30, t % 25 == 5, false, guard, t % 107 == 70)
 
 
 static func _inputs_at(t: int) -> Array[InputFrame]:
@@ -49,15 +54,20 @@ func test_restore_then_continue_matches_uninterrupted_run() -> void:
 	assert_eq(_run(resumed, TICKS - HALF), second_half_straight)
 
 
-func test_the_script_actually_fights() -> void:
+func test_the_script_exercises_phase_2_actions() -> void:
 	var w := World.new(GameConfig.new(), SEED)
-	var hits := 0
+	var seen := {}
 	for i: int in TICKS:
 		w.tick(_inputs_at(w.tick_count))
 		for e: Dictionary in w.state_view()["events"]:
-			if e["type"] == "hit":
-				hits += 1
-	assert_gt(hits, 0, "the scripted inputs must exercise combat, or the golden hash guards nothing")
+			seen[e["type"]] = true
+			if e["type"] == "hit" and e.has("attack_kind"):
+				seen["kind_%d" % int(e["attack_kind"])] = true
+	for needed: String in ["hit", "item_spawn", "item_land"]:
+		assert_true(seen.has(needed), "%s must happen, or the golden hash guards nothing" % needed)
+	assert_true(seen.has("kind_%d" % AttackSet.Kind.LIGHT_1), "light combo exercised")
+	assert_true(seen.has("guard_hit") or seen.has("kind_%d" % AttackSet.Kind.HEAVY) or seen.has("grab"),
+			"at least one of guard, heavy or grab lands")
 
 
 func test_config_changes_the_run() -> void:
