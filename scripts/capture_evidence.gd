@@ -6,7 +6,7 @@ extends SceneTree
 ## Usage (windowed, NOT headless -- it needs a renderer):
 ##   godot --path . -s res://scripts/capture_evidence.gd -- \
 ##       --scene=res://src/main/main.tscn --out=/abs/path/file.png \
-##       [--frames=120] [--arena-radius=20] [--show-panel]
+##       [--frames=120] [--arena-radius=20] [--show-panel] [--show-touch]
 
 const DEFAULT_FRAMES := 120
 
@@ -20,7 +20,7 @@ func _init() -> void:
 	var scene_path: String = args.get("scene", "")
 	_out_path = args.get("out", "")
 	if scene_path.is_empty() or _out_path.is_empty():
-		push_error("capture_evidence: usage: -- --scene=res://path.tscn --out=/abs/path.png [--frames=120] [--arena-radius=F] [--show-panel]")
+		push_error("capture_evidence: usage: -- --scene=res://path.tscn --out=/abs/path.png [--frames=120] [--arena-radius=F] [--show-panel] [--show-touch]")
 		quit(1)
 		return
 
@@ -53,6 +53,14 @@ func _init() -> void:
 			return
 		panel.toggle()
 
+	if args.has("show-touch"):
+		var touch := _find_touch_input(instance)
+		if touch == null:
+			push_error("capture_evidence: no TouchInput found in scene tree")
+			quit(1)
+			return
+		touch.visible = true
+
 	process_frame.connect(_on_process_frame)
 
 
@@ -75,6 +83,16 @@ func _find_config_panel(node: Node) -> ConfigPanel:
 		return node
 	for child: Node in node.get_children():
 		var found := _find_config_panel(child)
+		if found != null:
+			return found
+	return null
+
+
+func _find_touch_input(node: Node) -> TouchInput:
+	if node is TouchInput:
+		return node
+	for child: Node in node.get_children():
+		var found := _find_touch_input(child)
 		if found != null:
 			return found
 	return null
