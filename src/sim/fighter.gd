@@ -3,8 +3,12 @@ extends RefCounted
 ## One fighter's sim state. Serialized in World snapshots (to_data/from_data) and exposed to
 ## views only as value copies (to_view) — never by reference (PRD §5.2, context D4).
 ## View reading: "launched" = HITSTUN and not on_ground; "respawn" = invuln_ticks > 0.
+## New states are appended so Phase 1 values (KO = 5) never move.
 
-enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO }
+enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD }
+
+## "No fighter" / "no item" marker for partner_id and item_kind.
+const NONE := -1
 
 const DATA_TYPES := {
 	"id": TYPE_INT, "spawn_id": TYPE_INT, "pos": TYPE_VECTOR3, "vel": TYPE_VECTOR3,
@@ -12,6 +16,9 @@ const DATA_TYPES := {
 	"stocks": TYPE_INT, "jumps_left": TYPE_INT, "on_ground": TYPE_BOOL,
 	"hitstun_ticks": TYPE_INT, "hitstop_ticks": TYPE_INT, "invuln_ticks": TYPE_INT,
 	"attack_ticks": TYPE_INT, "hit_ids": TYPE_ARRAY,
+	"attack_kind": TYPE_INT, "combo_queued": TYPE_BOOL, "charge_ticks": TYPE_INT,
+	"charge_mul": TYPE_FLOAT, "grab_ticks": TYPE_INT, "partner_id": TYPE_INT,
+	"item_kind": TYPE_INT, "item_uses": TYPE_INT,
 }
 
 var id: int = 0
@@ -32,6 +39,20 @@ var invuln_ticks: int = 0
 var attack_ticks: int = 0
 ## Targets already hit by the current swing (one hit per target per attack).
 var hit_ids: Array[int] = []
+## AttackSet.Kind of the current (or last) attack.
+var attack_kind: int = 0
+## A light press landed inside the combo buffer; the next hit starts when this one ends (E2).
+var combo_queued: bool = false
+var charge_ticks: int = 0
+## Multiplier for the heavy attack that is currently swinging (E3).
+var charge_mul: float = 1.0
+## Ticks left before a hold ends by itself (holder only, E5).
+var grab_ticks: int = 0
+## HOLDING: the fighter being held. HELD: the holder.
+var partner_id: int = NONE
+## Item.Kind carried in hand, or NONE (E6).
+var item_kind: int = NONE
+var item_uses: int = 0
 
 
 func is_alive() -> bool:
@@ -53,6 +74,8 @@ func to_view() -> Dictionary:
 		"id": id, "spawn_id": spawn_id, "pos": pos, "facing": facing, "state": state,
 		"on_ground": on_ground, "damage": damage, "stocks": stocks, "jumps_left": jumps_left,
 		"invuln_ticks": invuln_ticks, "hitstop_ticks": hitstop_ticks, "attack_ticks": attack_ticks,
+		"attack_kind": attack_kind, "charge_ticks": charge_ticks, "partner_id": partner_id,
+		"item_kind": item_kind, "item_uses": item_uses,
 	}
 
 

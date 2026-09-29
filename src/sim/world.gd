@@ -2,9 +2,9 @@ class_name World
 extends RefCounted
 ## Pure game state (PRD §5.2). Never reference Node, SceneTree, Input, RenderingServer or PhysicsServer3D here.
 ## Tick order: Motion.step per fighter -> Motion.separate -> Combat.resolve -> Rules.apply -> winner.
-## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1).
+## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1). Snapshot v3 adds the Phase 2 fighter fields.
 
-const SNAPSHOT_VERSION := 2
+const SNAPSHOT_VERSION := 3
 const DEFAULT_PLAYER_COUNT := 2
 const SNAPSHOT_TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,

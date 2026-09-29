@@ -15,6 +15,14 @@ func _sample() -> Fighter:
 	f.on_ground = false
 	f.hitstun_ticks = 7
 	f.hit_ids.assign([0, 3])
+	f.attack_kind = AttackSet.Kind.HEAVY
+	f.combo_queued = true
+	f.charge_ticks = 12
+	f.charge_mul = 1.3
+	f.grab_ticks = 40
+	f.partner_id = 0
+	f.item_kind = 1
+	f.item_uses = 3
 	return f
 
 
@@ -98,3 +106,37 @@ func test_to_view_is_a_copy() -> void:
 	assert_eq(view["pos"], Vector3(1, 2, 3))
 	assert_eq(view["damage"], 42.5)
 	assert_false(view.has("hit_ids"), "internal bookkeeping stays out of views")
+
+
+func test_phase2_states_keep_phase1_values() -> void:
+	assert_eq(Fighter.State.KO, 5, "HUD/bot/views compare against KO; its value must not move")
+	assert_eq(Fighter.State.CHARGE, 6)
+	assert_eq(Fighter.State.GUARD, 7)
+	assert_eq(Fighter.State.HOLDING, 8)
+	assert_eq(Fighter.State.HELD, 9)
+
+
+func test_new_states_cannot_act() -> void:
+	var f := Fighter.new()
+	for s: int in [Fighter.State.CHARGE, Fighter.State.GUARD, Fighter.State.HOLDING, Fighter.State.HELD]:
+		f.set_state(s)
+		assert_false(f.can_act(), "state %d" % s)
+		assert_true(f.is_alive())
+
+
+func test_phase2_fields_default_to_empty() -> void:
+	var f := Fighter.new()
+	assert_eq(f.partner_id, Fighter.NONE)
+	assert_eq(f.item_kind, Fighter.NONE)
+	assert_eq(f.item_uses, 0)
+	assert_eq(f.charge_mul, 1.0)
+
+
+func test_view_exposes_phase2_fields() -> void:
+	var view := _sample().to_view()
+	assert_eq(view["attack_kind"], AttackSet.Kind.HEAVY)
+	assert_eq(view["charge_ticks"], 12)
+	assert_eq(view["partner_id"], 0)
+	assert_eq(view["item_kind"], 1)
+	assert_eq(view["item_uses"], 3)
+	assert_false(view.has("combo_queued"), "input bookkeeping stays out of views")

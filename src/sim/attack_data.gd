@@ -14,6 +14,8 @@ var hitbox_forward: float = 0.0
 var hitbox_up: float = 0.0
 var hitbox_half: Vector3 = Vector3.ONE
 var hitstop_ticks: int = 0
+## Hitstun floor in ticks; link hits use it so the next combo hit connects (context E1).
+var min_hitstun_ticks: int = 0
 
 
 static func light_from(config: GameConfig) -> AttackData:
