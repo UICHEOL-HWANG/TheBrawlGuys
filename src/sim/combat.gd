@@ -46,9 +46,10 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 
 static func _apply_hit(attacker: Fighter, target: Fighter, attack: AttackData,
 		config: GameConfig, at: Vector3) -> Dictionary:
+	var power := attacker.charge_mul if attacker.attack_kind == AttackSet.Kind.HEAVY else 1.0
 	attacker.hit_ids.append(target.id)
-	target.damage += attack.damage
-	var kb := knockback(attack, target.damage, config)
+	target.damage += attack.damage * power
+	var kb := knockback(attack, target.damage, config) * power
 	target.vel = launch_velocity(attacker.facing, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
@@ -61,4 +62,5 @@ static func _apply_hit(attacker: Fighter, target: Fighter, attack: AttackData,
 	return {
 		"type": "hit", "attacker": attacker.id, "target": target.id, "pos": at,
 		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "attack_kind": attacker.attack_kind,
+		"power": power,
 	}

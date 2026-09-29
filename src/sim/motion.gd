@@ -21,6 +21,8 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: Att
 			_step_hitstun(f, config)
 		Fighter.State.ATTACK:
 			Actions.step_attack(f, input, config, attacks)
+		Fighter.State.CHARGE:
+			Actions.step_charge(f, input, config)
 		_:
 			if not Actions.try_start(f, input, config):
 				_step_control(f, input, config)

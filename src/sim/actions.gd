@@ -6,7 +6,15 @@ extends RefCounted
 
 
 ## Returns true when the fighter started an action this tick (movement is then skipped).
+## Priority: heavy > light.
 static func try_start(f: Fighter, input: InputFrame, _config: GameConfig) -> bool:
+	if input.heavy:
+		f.set_state(Fighter.State.CHARGE)
+		f.state_ticks = 0
+		f.charge_ticks = 0
+		if f.on_ground:
+			stop_horizontal(f)
+		return true
 	if input.light:
 		start_attack(f, AttackSet.Kind.LIGHT_1)
 		return true
@@ -41,6 +49,23 @@ static func step_attack(f: Fighter, input: InputFrame, config: GameConfig, attac
 		start_attack(f, f.attack_kind + 1)
 		return
 	f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
+
+
+## heavy is a held level (context E3): charge while it is true, swing on the tick it goes false.
+static func step_charge(f: Fighter, input: InputFrame, config: GameConfig) -> void:
+	if f.on_ground:
+		stop_horizontal(f)
+	if input.heavy:
+		f.charge_ticks = mini(f.charge_ticks + 1, SimTime.to_ticks(config.heavy_charge_max_time))
+		return
+	var mul := charge_mul(f.charge_ticks, config)
+	start_attack(f, AttackSet.Kind.HEAVY)
+	f.charge_mul = mul
+
+
+static func charge_mul(charge_ticks: int, config: GameConfig) -> float:
+	var full := maxi(SimTime.to_ticks(config.heavy_charge_max_time), 1)
+	return 1.0 + (config.heavy_charge_max_mul - 1.0) * minf(float(charge_ticks) / full, 1.0)
 
 
 static func stop_horizontal(f: Fighter) -> void:
