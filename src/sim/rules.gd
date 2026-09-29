@@ -28,3 +28,49 @@ static func spawn_fighter(index: int, count: int, config: GameConfig) -> Fighter
 	f.jumps_left = config.max_jumps
 	f.on_ground = true
 	return f
+
+
+static func respawn(f: Fighter, count: int, config: GameConfig) -> void:
+	f.pos = spawn_point(f.id, count, config) + Vector3.UP * config.respawn_height
+	f.vel = Vector3.ZERO
+	f.facing = facing_to_center(f.pos)
+	f.damage = 0.0
+	f.on_ground = false
+	f.jumps_left = config.max_jumps
+	f.hitstun_ticks = 0
+	f.hitstop_ticks = 0
+	f.attack_ticks = 0
+	f.hit_ids.clear()
+	f.invuln_ticks = SimTime.to_ticks(config.respawn_invuln)
+	f.spawn_id += 1
+	f.set_state(Fighter.State.AIR)
+
+
+static func apply(fighters: Array[Fighter], config: GameConfig) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	for f: Fighter in fighters:
+		if not f.is_alive():
+			continue
+		if not Collision.is_out_of_bounds(f.pos, config.arena_radius, config.blast_margin, config.kill_y):
+			continue
+		var at := f.pos
+		f.stocks -= 1
+		if f.stocks > 0:
+			respawn(f, fighters.size(), config)
+		else:
+			f.vel = Vector3.ZERO
+			f.set_state(Fighter.State.KO)
+		events.append({"type": "ringout", "id": f.id, "pos": at, "stocks_left": f.stocks})
+	return events
+
+
+static func winner(fighters: Array[Fighter]) -> int:
+	var alive: Array[int] = []
+	for f: Fighter in fighters:
+		if f.is_alive():
+			alive.append(f.id)
+	if alive.size() == 1:
+		return alive[0]
+	if alive.is_empty():
+		return DRAW
+	return ONGOING

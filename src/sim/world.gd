@@ -37,6 +37,11 @@ func tick(inputs: Array[InputFrame]) -> void:
 			Motion.step(f, input, config, attack)
 		Motion.separate(fighters, config)
 		_events.append_array(Combat.resolve(fighters, attack, config))
+		_events.append_array(Rules.apply(fighters, config))
+		var result := Rules.winner(fighters)
+		if result != Rules.ONGOING:
+			match_over = true
+			winner_id = result
 	tick_count += 1
 
 
