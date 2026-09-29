@@ -99,3 +99,7 @@
 - safe-area 여백 적용 (노치·제스처 바)
 - 재시작 시 래치된 입력·화면 흔들림 초기화
 - HUD 🖼 시안 게이트(T12) 및 Android 실기기 확인
+- Config fingerprint이 렌더/UI 필드(cam_*, touch_*, shake/blink/spark, max_ticks_per_frame)까지 해시함 → Phase 6 전에 sim 필드로 제한
+- 테스트 공백: main 재시작 경로 테스트 없음; 리플레이 스크립트가 링아웃/리스폰/KO를 단언하지 않아 spawn_id/invuln/KO 스냅샷이 골든으로 보호되지 않음
+- 터치: `canceled` 해제 시 약공격 억제, `NOTIFICATION_APPLICATION_FOCUS_OUT`에서 모든 손가락 초기화
+- 전신 프레이밍(F1 이후) 캐릭터 크기: cam_margin / cam_pitch 비교 후 사용자와 결정 (변경 시 골든 재생성)
