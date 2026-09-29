@@ -8,7 +8,7 @@ extends RefCounted
 const LAND_TOLERANCE := 0.05
 
 
-static func step(f: Fighter, input: InputFrame, config: GameConfig, attack: AttackData) -> void:
+static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet) -> void:
 	if not f.is_alive():
 		return
 	if f.hitstop_ticks > 0:
@@ -20,9 +20,10 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, attack: Atta
 		Fighter.State.HITSTUN:
 			_step_hitstun(f, config)
 		Fighter.State.ATTACK:
-			_step_attack(f, attack)
+			Actions.step_attack(f, input, config, attacks)
 		_:
-			_step_control(f, input, config)
+			if not Actions.try_start(f, input, config):
+				_step_control(f, input, config)
 	_integrate(f, config)
 	f.state_ticks += 1
 
@@ -40,14 +41,6 @@ static func separate(fighters: Array[Fighter], config: GameConfig) -> void:
 
 
 static func _step_control(f: Fighter, input: InputFrame, config: GameConfig) -> void:
-	if input.light:
-		f.set_state(Fighter.State.ATTACK)
-		f.attack_ticks = 0
-		f.hit_ids.clear()
-		if f.on_ground:
-			f.vel.x = 0.0
-			f.vel.z = 0.0
-		return
 	var dir := Vector3(input.move_x, 0.0, input.move_z)
 	if dir.length() > 1.0:
 		dir = dir.normalized()
@@ -73,15 +66,6 @@ static func _step_control(f: Fighter, input: InputFrame, config: GameConfig) -> 
 		f.set_state(Fighter.State.MOVE)
 	else:
 		f.set_state(Fighter.State.IDLE)
-
-
-static func _step_attack(f: Fighter, attack: AttackData) -> void:
-	f.attack_ticks += 1
-	if f.on_ground:
-		f.vel.x = 0.0
-		f.vel.z = 0.0
-	if f.attack_ticks >= attack.total_ticks():
-		f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
 
 
 static func _step_hitstun(f: Fighter, config: GameConfig) -> void:

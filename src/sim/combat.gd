@@ -23,10 +23,13 @@ static func hitbox_center(attacker: Fighter, attack: AttackData) -> Vector3:
 	return attacker.pos + attacker.facing * attack.hitbox_forward + Vector3.UP * attack.hitbox_up
 
 
-static func resolve(fighters: Array[Fighter], attack: AttackData, config: GameConfig) -> Array[Dictionary]:
+static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	for attacker: Fighter in fighters:
-		if attacker.state != Fighter.State.ATTACK or not attack.is_active(attacker.attack_ticks):
+		if attacker.state != Fighter.State.ATTACK or attacker.attack_kind == AttackSet.Kind.GRAB:
+			continue
+		var attack := attacks.get_attack(attacker.attack_kind)
+		if not attack.is_active(attacker.attack_ticks):
 			continue
 		var center := hitbox_center(attacker, attack)
 		var yaw := Collision.yaw_of(attacker.facing)
@@ -49,7 +52,7 @@ static func _apply_hit(attacker: Fighter, target: Fighter, attack: AttackData,
 	target.vel = launch_velocity(attacker.facing, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
-	target.hitstun_ticks = hitstun_ticks(kb, config)
+	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
 	target.attack_ticks = 0
 	target.hit_ids.clear()
 	target.set_state(Fighter.State.HITSTUN)
@@ -57,5 +60,5 @@ static func _apply_hit(attacker: Fighter, target: Fighter, attack: AttackData,
 	attacker.hitstop_ticks = attack.hitstop_ticks
 	return {
 		"type": "hit", "attacker": attacker.id, "target": target.id, "pos": at,
-		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks,
+		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "attack_kind": attacker.attack_kind,
 	}

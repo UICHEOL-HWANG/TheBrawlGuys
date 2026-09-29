@@ -31,12 +31,12 @@ func _init(p_config: GameConfig, p_seed: int = 0, p_player_count: int = DEFAULT_
 func tick(inputs: Array[InputFrame]) -> void:
 	_events = []
 	if not match_over:
-		var attack := AttackData.light_from(config)
+		var attacks := AttackSet.from_config(config)
 		for f: Fighter in fighters:
 			var input: InputFrame = inputs[f.id] if f.id < inputs.size() else InputFrame.neutral()
-			Motion.step(f, input, config, attack)
+			Motion.step(f, input, config, attacks)
 		Motion.separate(fighters, config)
-		_events.append_array(Combat.resolve(fighters, attack, config))
+		_events.append_array(Combat.resolve(fighters, attacks, config))
 		_events.append_array(Rules.apply(fighters, config))
 		var result := Rules.winner(fighters)
 		if result != Rules.ONGOING:

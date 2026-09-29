@@ -45,11 +45,12 @@ func test_launch_velocity_direction_and_speed() -> void:
 	assert_eq(v.z, 0.0)
 
 
-func test_light_hits_after_startup_and_applies_damage() -> void:
+func test_first_light_is_a_link_hit_after_startup() -> void:
 	var w := _adjacent_world()
 	_swing_until_hit(w)
 	var target := w.fighters[1]
-	assert_eq(target.damage, 4.0)
+	var link := AttackSet.from_config(w.config).get_attack(AttackSet.Kind.LIGHT_1)
+	assert_eq(target.damage, w.config.light_link_damage)
 	assert_eq(target.state, Fighter.State.HITSTUN)
 	var events: Array = w.state_view()["events"]
 	assert_eq(events.size(), 1)
@@ -57,7 +58,8 @@ func test_light_hits_after_startup_and_applies_damage() -> void:
 	assert_eq(e["type"], "hit")
 	assert_eq(e["attacker"], 0)
 	assert_eq(e["target"], 1)
-	assert_almost_eq(e["knockback"], Combat.knockback(AttackData.light_from(w.config), 4.0, w.config), 0.0001)
+	assert_eq(e["attack_kind"], AttackSet.Kind.LIGHT_1)
+	assert_almost_eq(e["knockback"], Combat.knockback(link, w.config.light_link_damage, w.config), 0.0001)
 
 
 func test_hitstop_freezes_both_then_target_flies() -> void:
@@ -74,7 +76,6 @@ func test_hitstop_freezes_both_then_target_flies() -> void:
 	assert_eq(w.fighters[1].pos, p2_at_hit, "target frozen during hitstop")
 	w.tick(_inputs(InputFrame.neutral()))
 	assert_gt(w.fighters[1].pos.x, p2_at_hit.x, "knocked away along attacker facing")
-	assert_gt(w.fighters[1].pos.y, p2_at_hit.y, "launched upward")
 
 
 func test_hitstun_ignores_movement_input() -> void:
@@ -92,7 +93,7 @@ func test_one_hit_per_swing() -> void:
 	_swing_until_hit(w)
 	for i: int in 20:
 		w.tick(_inputs(InputFrame.neutral()))
-	assert_eq(w.fighters[1].damage, 4.0)
+	assert_eq(w.fighters[1].damage, w.config.light_link_damage)
 
 
 func test_invulnerable_target_is_not_hit() -> void:

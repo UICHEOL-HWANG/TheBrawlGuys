@@ -1,0 +1,48 @@
+class_name Actions
+extends RefCounted
+## Control-state transitions (PRD §4.3): what a fighter that can act starts this tick and how a
+## running attack advances. Motion owns physics and calls into here. Later tasks add heavy
+## charge, guard, grab and bat swings to try_start.
+
+
+## Returns true when the fighter started an action this tick (movement is then skipped).
+static func try_start(f: Fighter, input: InputFrame, _config: GameConfig) -> bool:
+	if input.light:
+		start_attack(f, AttackSet.Kind.LIGHT_1)
+		return true
+	return false
+
+
+static func start_attack(f: Fighter, kind: int) -> void:
+	f.set_state(Fighter.State.ATTACK)
+	f.state_ticks = 0
+	f.attack_kind = kind
+	f.attack_ticks = 0
+	f.combo_queued = false
+	f.charge_mul = 1.0
+	f.hit_ids.clear()
+	if f.on_ground:
+		stop_horizontal(f)
+
+
+## One tick of a running attack. A light press while at most combo_buffer_ticks remain queues
+## the next light hit, which starts on the tick this one ends (context E2).
+static func step_attack(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet) -> void:
+	var attack := attacks.get_attack(f.attack_kind)
+	f.attack_ticks += 1
+	if f.on_ground:
+		stop_horizontal(f)
+	var left := attack.total_ticks() - f.attack_ticks
+	if input.light and AttackSet.is_light_chainable(f.attack_kind) and left <= config.combo_buffer_ticks:
+		f.combo_queued = true
+	if left > 0:
+		return
+	if f.combo_queued:
+		start_attack(f, f.attack_kind + 1)
+		return
+	f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
+
+
+static func stop_horizontal(f: Fighter) -> void:
+	f.vel.x = 0.0
+	f.vel.z = 0.0
