@@ -155,3 +155,47 @@ func test_throws_a_held_foe_away_from_the_center() -> void:
 	var f := bot.sample(v)
 	assert_true(f.grab)
 	assert_gt(f.move_x, 0.9, "outward from the center")
+
+
+func _falling_box(pos: Vector3) -> Dictionary:
+	return {"id": 0, "kind": Item.Kind.ROCK, "state": Item.State.FALLING, "pos": pos, "uses": 1, "fuse_ticks": Item.UNLIT}
+
+
+func test_races_toward_a_falling_box_landing_spot() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _view(Vector3(0, 0, 0), Vector3(-6, 0, 0))
+	v["items"] = [_falling_box(Vector3(4, 5.0, 0))]
+	assert_gt(bot.sample(v).move_x, 0.9, "heads for the landing spot while the box is still falling")
+
+
+func test_ignores_a_falling_item_landing_beyond_the_edge_ratio() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(6, 0, 0), Vector3(-6, 0, 0))
+	var beyond := 10.0 * c.bot_edge_ratio + 0.5
+	v["items"] = [_falling_box(Vector3(beyond, 5.0, 0))]
+	assert_lt(bot.sample(v).move_x, 0.0, "goes for the foe, not the void")
+
+
+func test_does_not_press_grab_in_reach_of_a_falling_box() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _view(Vector3(0, 0, 0), Vector3(-6, 0, 0))
+	v["items"] = [_falling_box(Vector3(0.5, 5.0, 0))]
+	var f := bot.sample(v)
+	assert_false(f.grab, "a grab press here would start a grab attack")
+	assert_eq(f.move_x, 0.0, "stands still under the box")
+	assert_eq(f.move_z, 0.0)
+
+
+func test_guard_tracking_survives_edge_and_recovery_ticks() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var edge := _view(Vector3(9.0, 0, 0), Vector3(9.0, 0, 1.0))
+	_foe(edge)["state"] = Fighter.State.ATTACK
+	bot.sample(edge)  # threat #1 starts on the edge tick (early return) and must be counted
+	var calm := _view(Vector3(9.0, 0, 0), Vector3(9.0, 0, 8.0))
+	for i: int in c.bot_guard_ticks + 1:
+		bot.sample(calm)
+	var center := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
+	_foe(center)["state"] = Fighter.State.ATTACK
+	assert_false(bot.sample(center).guard, "threat #2 is the un-guarded one")

@@ -2,7 +2,7 @@ class_name BotController
 extends RefCounted
 ## Bot step 2 (PRD §6.4): step 1 (approach, attack in range, retreat from the edge, recover) plus
 ## guarding every other attack that starts in range (so it can still be hit), racing for nearby
-## items, swinging bats, throwing rocks and bombs at range, mashing the light combo, grabbing a
+## items (also while they are still falling), swinging bats, throwing rocks and bombs at range, mashing the light combo, grabbing a
 ## guarding foe and throwing held fighters away from the center. Reads only state_view() values
 ## and produces InputFrames — never touches the sim. Deterministic (no randomness).
 
@@ -39,6 +39,11 @@ func sample(view: Dictionary) -> InputFrame:
 	var radius: float = view["arena_radius"]
 	var to_center := -flat.normalized() if flat.length() > 0.001 else Vector2.ZERO
 
+	# Tracked every tick (even during recovery/edge/holding) so the every-other-threat toggle
+	# never goes stale.
+	var foe := _nearest_foe(view, my_pos)
+	var guarding := _update_guard(foe, my_pos)
+
 	if not bool(me["on_ground"]) and flat.length() > radius and my_pos.y < 0.0:
 		return InputFrame.make(to_center.x, to_center.y, int(me["jumps_left"]) > 0)
 	if int(me["state"]) == Fighter.State.HOLDING:
@@ -47,8 +52,7 @@ func sample(view: Dictionary) -> InputFrame:
 	if flat.length() > radius * _config.bot_edge_ratio:
 		return InputFrame.make(to_center.x, to_center.y)
 
-	var foe := _nearest_foe(view, my_pos)
-	if _update_guard(foe, my_pos):
+	if guarding:
 		return InputFrame.make(0, 0, false, false, false, true)
 	if _combo_left > 0:
 		_combo_left -= 1
@@ -58,10 +62,12 @@ func sample(view: Dictionary) -> InputFrame:
 	if item_kind == Item.Kind.BOMB or item_kind == Item.Kind.ROCK:
 		return _use_throwable(foe, my_pos)
 	if item_kind == Fighter.NONE:
-		var it := _nearest_item(view, my_pos)
+		var it := _nearest_item(view, my_pos, radius * _config.bot_edge_ratio)
 		if not it.is_empty():
 			var to_item := _flat_delta(my_pos, it["pos"])
 			if to_item.length() <= _config.item_pickup_radius * PICKUP_REACH_RATIO and bool(me["on_ground"]):
+				if int(it["state"]) == Item.State.FALLING:
+					return InputFrame.neutral()  # wait under it; a grab press now would start a grab attack
 				return InputFrame.make(0, 0, false, false, false, false, true)
 			var d := to_item.normalized()
 			return InputFrame.make(d.x, d.y)
@@ -134,11 +140,19 @@ func _nearest_foe(view: Dictionary, my_pos: Vector3) -> Dictionary:
 	return best
 
 
-func _nearest_item(view: Dictionary, my_pos: Vector3) -> Dictionary:
+## Nearest lit-free item on the ground, or still falling (it lands straight below at pos.x, pos.z)
+## as long as that landing spot is inside max_landing_radius.
+func _nearest_item(view: Dictionary, my_pos: Vector3, max_landing_radius: float) -> Dictionary:
 	var best: Dictionary = {}
 	var best_dist := _config.bot_item_seek_range
 	for it: Dictionary in view.get("items", []):
-		if int(it["state"]) != Item.State.GROUND or int(it["fuse_ticks"]) != Item.UNLIT:
+		var state := int(it["state"])
+		if state != Item.State.GROUND and state != Item.State.FALLING:
+			continue
+		if int(it["fuse_ticks"]) != Item.UNLIT:
+			continue
+		var landing: Vector3 = it["pos"]
+		if state == Item.State.FALLING and Vector2(landing.x, landing.z).length() > max_landing_radius:
 			continue
 		var d := _flat_delta(my_pos, it["pos"]).length()
 		if d <= best_dist:

@@ -3,12 +3,11 @@ extends "res://src/main/main.gd"
 ## are step-2 bots standing on opposite sides; a bat box drops between them at DROP_TICK, so the
 ## video shows both racing for it.
 
-const DROP_TICK := 60
+const DROP_TICK := 10
 const START_X := 6.0
 const DROP_OFFSET := Vector3(0, 0, 0.5)
 
 var _p1_bot: BotController
-var _landed := false
 
 
 func _start_match() -> void:
@@ -23,14 +22,5 @@ func _gather_inputs() -> Array[InputFrame]:
 	var w := get_world()
 	if w.tick_count == DROP_TICK:
 		w.items.add(Item.Kind.BAT, DROP_OFFSET + Vector3.UP * _config.item_drop_height, Item.State.FALLING, _config)
-	if not _landed:
-		# Hold both fighters still until the box lands, otherwise they meet mid-arena and brawl
-		# before there is anything to race for.
-		for it: Item in w.items.items:
-			if it.state == Item.State.GROUND:
-				_landed = true
-	if not _landed:
-		var idle: Array[InputFrame] = [InputFrame.neutral(), InputFrame.neutral()]
-		return idle
 	var inputs: Array[InputFrame] = [_p1_bot.sample(_curr_state), _bot.sample(_curr_state)]
 	return inputs
