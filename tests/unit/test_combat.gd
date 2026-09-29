@@ -22,6 +22,7 @@ func _swing_until_hit(w: World) -> void:
 
 func test_knockback_formula_at_0_50_150_percent() -> void:
 	var c := GameConfig.new()
+	c.global_knockback_mul = 1.0  # formula check is independent of the tuned default
 	var a := AttackData.light_from(c)
 	assert_almost_eq(Combat.knockback(a, 0.0, c), 3.0, 0.0001)
 	assert_almost_eq(Combat.knockback(a, 50.0, c), 5.5, 0.0001)

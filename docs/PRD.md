@@ -162,6 +162,7 @@ hitstun   = knockback * config.hitstun_factor   (초)
 | hitstun_factor | 0.04 |
 | 가드 시 대미지 / 넉백 | 20% / 0% |
 | touch_hold_threshold | 0.15초 |
+| global_knockback_mul | 1.7 (Phase 1 튜닝: 중간 거리 100% 약공격 한 방 링아웃) |
 
 **모든 수치는 인게임 디버그 패널에서 실시간 조절 가능해야 한다.**
 

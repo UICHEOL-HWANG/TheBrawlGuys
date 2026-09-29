@@ -29,7 +29,7 @@ func test_default_resource_loads_as_game_config() -> void:
 
 
 func test_global_knockback_default() -> void:
-	assert_eq(GameConfig.new().global_knockback_mul, 1.0)
+	assert_eq(GameConfig.new().global_knockback_mul, 1.7)
 
 
 func test_phase1_defaults_match_prd() -> void:

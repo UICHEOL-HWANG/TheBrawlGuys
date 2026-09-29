@@ -32,7 +32,7 @@ extends Resource
 @export_range(2.0, 40.0, 0.5) var blast_margin: float = 12.0
 
 @export_group("Knockback")
-@export_range(0.0, 10.0, 0.01) var global_knockback_mul: float = 1.0
+@export_range(0.0, 10.0, 0.01) var global_knockback_mul: float = 1.7
 @export_range(0.0, 0.2, 0.001) var hitstun_factor: float = 0.04
 @export_range(0.0, 0.3, 0.005) var hitstop_light: float = 0.06
 @export_range(0.0, 0.3, 0.005) var hitstop_heavy: float = 0.1
