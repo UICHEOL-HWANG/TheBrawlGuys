@@ -16,12 +16,14 @@ static func sliders_for(res: Resource) -> Array[Dictionary]:
 		if not (usage & PROPERTY_USAGE_SCRIPT_VARIABLE) or p["hint"] != PROPERTY_HINT_RANGE:
 			continue
 		var parts := String(p["hint_string"]).split(",")
+		if parts.size() < 2:
+			continue
 		out.append({
 			"name": String(p["name"]),
 			"group": group,
 			"min": float(parts[0]),
 			"max": float(parts[1]),
-			"step": float(parts[2]) if parts.size() > 2 else DEFAULT_STEP,
+			"step": float(parts[2]) if parts.size() > 2 and parts[2].strip_edges().is_valid_float() else DEFAULT_STEP,
 			"is_int": p["type"] == TYPE_INT,
 		})
 	return out

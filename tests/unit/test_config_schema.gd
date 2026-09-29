@@ -28,3 +28,25 @@ func test_every_config_number_is_exposed() -> void:
 	var specs := ConfigSchema.sliders_for(GameConfig.new())
 	for name: String in ["move_speed", "gravity", "kill_y", "hitstun_factor", "cam_pitch", "cam_fov", "touch_hold_threshold"]:
 		assert_false(_find(specs, name).is_empty(), "%s missing" % name)
+
+
+class _BadStep extends Resource:
+	## Reproduces a range hint whose third field is a suffix, not a step ("0,1,or_greater").
+	func _get_property_list() -> Array[Dictionary]:
+		return [{
+			"name": "suffixed", "type": TYPE_FLOAT, "hint": PROPERTY_HINT_RANGE,
+			"hint_string": "0,1,or_greater",
+			"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
+		}]
+
+
+func test_non_numeric_hint_suffix_falls_back_to_default_step() -> void:
+	var s := _find(ConfigSchema.sliders_for(_BadStep.new()), "suffixed")
+	assert_false(s.is_empty())
+	assert_eq(s["step"], ConfigSchema.DEFAULT_STEP, "was 0.0 before the guard")
+
+
+func test_phase1_groups_are_exposed() -> void:
+	var specs := ConfigSchema.sliders_for(GameConfig.new())
+	for name: String in ["stocks", "light_damage", "light_startup_ticks", "bot_attack_range", "shake_max", "blink_hz"]:
+		assert_false(_find(specs, name).is_empty(), "%s missing" % name)

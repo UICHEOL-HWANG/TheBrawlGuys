@@ -26,3 +26,26 @@ func test_camera_defaults_match_gd_cam_01() -> void:
 func test_default_resource_loads_as_game_config() -> void:
 	var res := load(DEFAULT_PATH)
 	assert_true(res is GameConfig, "default_config.tres must be a GameConfig")
+
+
+func test_global_knockback_default() -> void:
+	assert_eq(GameConfig.new().global_knockback_mul, 1.0)
+
+
+func test_phase1_defaults_match_prd() -> void:
+	var c := GameConfig.new()
+	assert_eq(c.stocks, 3)
+	assert_eq(c.respawn_invuln, 2.0)
+	assert_eq(c.max_jumps, 2)
+	assert_eq(c.light_damage, 4.0)
+	assert_eq(c.light_base_knockback, 3.0)
+	assert_eq(c.light_knockback_scaling, 0.05)
+	assert_eq(c.cam_zoom_max, 70.0)
+
+
+func test_fingerprint_changes_with_values() -> void:
+	var a := GameConfig.new()
+	var b := GameConfig.new()
+	assert_eq(a.fingerprint(), b.fingerprint(), "same values -> same fingerprint")
+	b.light_damage = 5.0
+	assert_ne(a.fingerprint(), b.fingerprint(), "changed value -> different fingerprint")
