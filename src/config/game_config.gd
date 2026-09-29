@@ -52,10 +52,90 @@ extends Resource
 @export_range(0.1, 2.0, 0.05) var light_hitbox_half_width: float = 0.45
 @export_range(0.1, 2.0, 0.05) var light_hitbox_half_height: float = 0.45
 
+@export_group("Combo")
+## A light press while the current light hit has at most this many ticks left queues the next hit (E2).
+@export_range(0, 30, 1) var combo_buffer_ticks: int = 10
+## Hits 1-2 of the light combo are link hits: small flat knockback plus a hitstun floor so the
+## next hit connects. Hit 3 is the finisher and uses the LightAttack values above (E1).
+@export_range(0.0, 30.0, 0.5) var light_link_damage: float = 3.0
+@export_range(0.0, 30.0, 0.1) var light_link_base_knockback: float = 1.5
+@export_range(0.0, 2.0, 0.05) var light_link_launch_angle_y: float = 0.0
+@export_range(0, 60, 1) var light_link_hitstun_ticks: int = 18
+
+@export_group("HeavyAttack")
+@export_range(0.0, 40.0, 0.5) var heavy_damage: float = 12.0
+@export_range(0.0, 30.0, 0.1) var heavy_base_knockback: float = 6.0
+@export_range(0.0, 0.5, 0.005) var heavy_knockback_scaling: float = 0.12
+@export_range(0.0, 2.0, 0.05) var heavy_launch_angle_y: float = 0.7
+@export_range(0, 40, 1) var heavy_startup_ticks: int = 8
+@export_range(1, 30, 1) var heavy_active_ticks: int = 4
+@export_range(0, 60, 1) var heavy_recovery_ticks: int = 18
+@export_range(0.0, 3.0, 0.05) var heavy_hitbox_forward: float = 1.0
+@export_range(0.0, 3.0, 0.05) var heavy_hitbox_up: float = 0.9
+@export_range(0.1, 2.0, 0.05) var heavy_hitbox_half_width: float = 0.6
+@export_range(0.1, 2.0, 0.05) var heavy_hitbox_half_height: float = 0.55
+## Holding heavy charges up to this long; the multiplier grows linearly to heavy_charge_max_mul (E3).
+@export_range(0.1, 3.0, 0.05) var heavy_charge_max_time: float = 1.0
+@export_range(1.0, 3.0, 0.05) var heavy_charge_max_mul: float = 1.6
+
+@export_group("Grab")
+@export_range(0, 30, 1) var grab_startup_ticks: int = 4
+@export_range(1, 30, 1) var grab_active_ticks: int = 4
+@export_range(0, 60, 1) var grab_recovery_ticks: int = 16
+@export_range(0.0, 3.0, 0.05) var grab_forward: float = 0.8
+@export_range(0.1, 2.0, 0.05) var grab_half_width: float = 0.45
+## A hold that is not thrown ends by itself after this long (E5).
+@export_range(0.2, 5.0, 0.1) var grab_hold_max_time: float = 1.5
+## Distance from the holder to the held fighter while holding.
+@export_range(0.5, 2.0, 0.05) var grab_hold_distance: float = 0.95
+@export_range(0.0, 30.0, 0.5) var throw_damage: float = 8.0
+@export_range(0.0, 30.0, 0.1) var throw_base_knockback: float = 7.0
+@export_range(0.0, 0.5, 0.005) var throw_knockback_scaling: float = 0.1
+@export_range(0.0, 2.0, 0.05) var throw_launch_angle_y: float = 0.5
+
+@export_group("Items")
+@export_range(1.0, 60.0, 0.5) var item_spawn_min_time: float = 10.0
+@export_range(1.0, 60.0, 0.5) var item_spawn_max_time: float = 15.0
+@export_range(0, 6, 1) var item_max_on_field: int = 2
+## Boxes land within this fraction of the arena radius.
+@export_range(0.1, 1.0, 0.05) var item_spawn_radius_ratio: float = 0.7
+## Drop height; 12 m under the default gravity falls in about 1 s (DS-VIS-05 shadow warning).
+@export_range(2.0, 30.0, 0.5) var item_drop_height: float = 12.0
+@export_range(0.3, 3.0, 0.05) var item_pickup_radius: float = 1.2
+@export_range(0.1, 1.0, 0.05) var item_radius: float = 0.35
+@export_range(2.0, 40.0, 0.5) var item_throw_speed: float = 14.0
+@export_range(0.0, 20.0, 0.5) var item_throw_up: float = 4.0
+@export_range(1, 20, 1) var bat_uses: int = 5
+@export_range(0.0, 40.0, 0.5) var bat_damage: float = 10.0
+@export_range(0.0, 30.0, 0.1) var bat_base_knockback: float = 8.0
+@export_range(0.0, 0.5, 0.005) var bat_knockback_scaling: float = 0.1
+@export_range(0.0, 2.0, 0.05) var bat_launch_angle_y: float = 0.5
+@export_range(0, 40, 1) var bat_startup_ticks: int = 6
+@export_range(1, 30, 1) var bat_active_ticks: int = 4
+@export_range(0, 60, 1) var bat_recovery_ticks: int = 14
+@export_range(0.0, 3.0, 0.05) var bat_hitbox_forward: float = 1.2
+@export_range(0.1, 2.0, 0.05) var bat_hitbox_half_width: float = 0.6
+## Lit on throw; explodes this long after (the throw tick counts as the first tick, E7).
+@export_range(0.5, 6.0, 0.1) var bomb_fuse_time: float = 2.0
+@export_range(0.5, 8.0, 0.1) var bomb_radius: float = 2.5
+@export_range(0.0, 40.0, 0.5) var bomb_damage: float = 15.0
+@export_range(0.0, 30.0, 0.1) var bomb_base_knockback: float = 9.0
+@export_range(0.0, 0.5, 0.005) var bomb_knockback_scaling: float = 0.12
+@export_range(0.0, 2.0, 0.05) var bomb_launch_angle_y: float = 0.8
+## Thrown rocks and thrown bats hit with these numbers.
+@export_range(0.0, 40.0, 0.5) var rock_damage: float = 6.0
+@export_range(0.0, 30.0, 0.1) var rock_base_knockback: float = 5.0
+@export_range(0.0, 0.5, 0.005) var rock_knockback_scaling: float = 0.08
+@export_range(0.0, 2.0, 0.05) var rock_launch_angle_y: float = 0.3
+
 @export_group("Bot")
 @export_range(0.5, 5.0, 0.1) var bot_attack_range: float = 1.4
 @export_range(0, 120, 1) var bot_attack_cooldown_ticks: int = 30
 @export_range(0.3, 1.0, 0.01) var bot_edge_ratio: float = 0.8
+@export_range(0.5, 6.0, 0.1) var bot_guard_range: float = 2.2
+@export_range(1, 90, 1) var bot_guard_ticks: int = 20
+@export_range(0.0, 20.0, 0.5) var bot_item_seek_range: float = 8.0
+@export_range(1.0, 15.0, 0.5) var bot_throw_range: float = 6.0
 
 @export_group("Feel")
 @export_range(0.0, 0.2, 0.001) var shake_per_knockback: float = 0.02
@@ -82,6 +162,9 @@ extends Resource
 @export_range(0.0, 0.5, 0.01) var touch_stick_deadzone: float = 0.15
 @export_range(96.0, 300.0, 2.0) var touch_attack_diameter: float = 170.0
 @export_range(96.0, 300.0, 2.0) var touch_jump_diameter: float = 130.0
+## 0 = arc around attack, 1 = diamond, 2 = 2x2 grid (design.md DS-LAY-01, E9).
+@export_range(0, 2, 1) var touch_layout: int = 0
+@export_range(96.0, 300.0, 2.0) var touch_side_diameter: float = 116.0
 
 
 ## Hash of every script variable (D1). Snapshots and replays store it so a run can only be

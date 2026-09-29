@@ -50,3 +50,16 @@ func test_phase1_groups_are_exposed() -> void:
 	var specs := ConfigSchema.sliders_for(GameConfig.new())
 	for name: String in ["stocks", "light_damage", "light_startup_ticks", "bot_attack_range", "shake_max", "blink_hz"]:
 		assert_false(_find(specs, name).is_empty(), "%s missing" % name)
+
+
+func test_phase2_groups_are_exposed() -> void:
+	var specs := ConfigSchema.sliders_for(GameConfig.new())
+	var expected := {
+		"combo_buffer_ticks": "Combo", "heavy_charge_max_mul": "HeavyAttack", "grab_hold_max_time": "Grab",
+		"bomb_radius": "Items", "bot_guard_range": "Bot", "touch_layout": "Touch",
+	}
+	for name: String in expected:
+		var s := _find(specs, name)
+		assert_false(s.is_empty(), "%s missing" % name)
+		assert_eq(s.get("group"), expected[name], "%s group" % name)
+	assert_true(_find(specs, "touch_layout")["is_int"])

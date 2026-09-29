@@ -49,3 +49,22 @@ func test_fingerprint_changes_with_values() -> void:
 	assert_eq(a.fingerprint(), b.fingerprint(), "same values -> same fingerprint")
 	b.light_damage = 5.0
 	assert_ne(a.fingerprint(), b.fingerprint(), "changed value -> different fingerprint")
+
+
+func test_phase2_defaults_match_prd_4_5() -> void:
+	var c := GameConfig.new()
+	assert_eq(c.heavy_damage, 12.0)
+	assert_eq(c.heavy_base_knockback, 6.0)
+	assert_eq(c.heavy_knockback_scaling, 0.12)
+	assert_eq(c.heavy_charge_max_time, 1.0)
+	assert_eq(c.heavy_charge_max_mul, 1.6)
+	assert_eq(c.bomb_fuse_time, 2.0)
+	assert_eq(c.bat_uses, 5)
+	assert_eq(c.item_spawn_min_time, 10.0)
+	assert_eq(c.item_spawn_max_time, 15.0)
+
+
+func test_item_spawn_window_is_ordered() -> void:
+	var c := GameConfig.new()
+	assert_lt(c.item_spawn_min_time, c.item_spawn_max_time)
+	assert_eq(SimTime.to_ticks(c.bomb_fuse_time), 120, "PHASES test: bomb explodes 120 ticks after the throw")
