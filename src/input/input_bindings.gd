@@ -1,0 +1,28 @@
+class_name InputBindings
+extends RefCounted
+## Default P1 keyboard bindings (PRD §3.2) registered as InputMap actions at startup.
+## Game code reads actions, never raw keys, so rebinding only edits InputMap.
+
+const P1 := {
+	"p1_left": [KEY_A], "p1_right": [KEY_D], "p1_up": [KEY_W], "p1_down": [KEY_S],
+	"p1_jump": [KEY_SPACE], "p1_light": [KEY_J], "p1_heavy": [KEY_K],
+	"p1_guard": [KEY_L], "p1_grab": [KEY_U],
+}
+
+
+static func apply() -> void:
+	for action: String in P1:
+		if not InputMap.has_action(action):
+			InputMap.add_action(action)
+		for key: int in P1[action]:
+			if not _has_key(action, key):
+				var ev := InputEventKey.new()
+				ev.physical_keycode = key
+				InputMap.action_add_event(action, ev)
+
+
+static func _has_key(action: String, key: int) -> bool:
+	for ev: InputEvent in InputMap.action_get_events(action):
+		if ev is InputEventKey and (ev as InputEventKey).physical_keycode == key:
+			return true
+	return false
