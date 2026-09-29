@@ -10,6 +10,10 @@ var heavy: bool = false
 var guard: bool = false
 var grab: bool = false
 
+## Move axes are quantized to 1/MOVE_STEPS so keyboard, touch, bot and network inputs are
+## bit-identical for the same intent (context D5).
+const MOVE_STEPS := 127
+
 
 static func neutral() -> InputFrame:
 	return InputFrame.new()
@@ -24,4 +28,21 @@ func copy() -> InputFrame:
 	f.heavy = heavy
 	f.guard = guard
 	f.grab = grab
+	return f
+
+
+static func quantize_axis(v: float) -> float:
+	return roundf(clampf(v, -1.0, 1.0) * MOVE_STEPS) / MOVE_STEPS
+
+
+static func make(mx: float, mz: float, p_jump: bool = false, p_light: bool = false,
+		p_heavy: bool = false, p_guard: bool = false, p_grab: bool = false) -> InputFrame:
+	var f := InputFrame.new()
+	f.move_x = quantize_axis(mx)
+	f.move_z = quantize_axis(mz)
+	f.jump = p_jump
+	f.light = p_light
+	f.heavy = p_heavy
+	f.guard = p_guard
+	f.grab = p_grab
 	return f
