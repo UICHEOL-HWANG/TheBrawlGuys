@@ -38,6 +38,8 @@ const TRANSPARENT := Color("#FFFFFF00")
 ## Translucent cream surfaces for touch controls over the 3D scene (design.md DS-LAY-01).
 const UI_SURFACE_50 := Color("#FFFDF680")
 const UI_SURFACE_70 := Color("#FFFDF6B3")
+## Soft ground shadows under falling boxes (design.md DS-VIS-05): deep teal at 40%.
+const GROUND_SHADOW := Color("#17525A66")
 
 # --- Players (always paired with a shape, DS-VIS-03) ---
 const P1 := Color("#3E7BF0")

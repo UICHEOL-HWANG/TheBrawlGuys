@@ -42,3 +42,27 @@ func test_blinks_at_blink_hz_then_faster_at_the_end() -> void:
 			toggles += 1
 		last = now
 	assert_gt(toggles, 5, "faster blinking in the final half second")
+
+
+func _fighter_view_data(item_kind: int, uses: int) -> Dictionary:
+	return {
+		"id": 0, "spawn_id": 0, "pos": Vector3.ZERO, "facing": Vector3(0, 0, 1),
+		"state": Fighter.State.IDLE, "invuln_ticks": 0, "item_kind": item_kind, "item_uses": uses,
+	}
+
+
+func test_held_bat_shows_with_use_dots() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	v.setup(0, GameConfig.new())
+	var d := _fighter_view_data(Item.Kind.BAT, 3)
+	v.apply(d, d, 1.0, 0)
+	assert_true(v.held_visible())
+	assert_eq(v.dots_shown(), 3)
+	var rock := _fighter_view_data(Item.Kind.ROCK, 1)
+	v.apply(rock, rock, 1.0, 1)
+	assert_true(v.held_visible())
+	assert_eq(v.dots_shown(), 0, "use dots are for bats only")
+	var none := _fighter_view_data(Fighter.NONE, 0)
+	v.apply(none, none, 1.0, 2)
+	assert_false(v.held_visible())

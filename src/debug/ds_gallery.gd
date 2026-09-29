@@ -16,6 +16,8 @@ const COMPONENTS: Array[Array] = [
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"
+## Pass `--items-only` after `--` to render just the items preview (evidence capture).
+const ITEMS_ONLY_ARG := "--items-only"
 
 
 func _ready() -> void:
@@ -36,13 +38,20 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", DS.S6)
 	margin.add_child(col)
 
-	if not OS.get_cmdline_user_args().has(COMPONENTS_ONLY_ARG):
+	var args := OS.get_cmdline_user_args()
+	if args.has(ITEMS_ONLY_ARG):
+		col.add_child(_heading("Items · DS-VIS-05 (box + shadow / bat / bomb lit / rock)"))
+		col.add_child(_items_preview())
+		return
+	if not args.has(COMPONENTS_ONLY_ARG):
 		col.add_child(_heading("Palette · DS-TOK-01 (A 한낮 햇살)"))
 		col.add_child(_swatches())
 		col.add_child(_heading("Typography · DS-TOK-02"))
 		col.add_child(_type_scale())
 		col.add_child(_heading("Soft toon · DS-VIS-01 / DS-VIS-02"))
 		col.add_child(_toon_preview())
+		col.add_child(_heading("Items · DS-VIS-05 (box + shadow / bat / bomb lit / rock)"))
+		col.add_child(_items_preview())
 	col.add_child(_heading("Components · DS-CMP"))
 	col.add_child(_components())
 
@@ -173,3 +182,37 @@ func _touch_button_states() -> Control:
 		b.set_state(states[i])
 		b.set_charge(0.6)
 	return row
+
+
+func _items_preview() -> Control:
+	var container := SubViewportContainer.new()
+	container.custom_minimum_size = Vector2(PREVIEW_SIZE)
+	var vp := SubViewport.new()
+	vp.size = PREVIEW_SIZE
+	vp.own_world_3d = true
+	container.add_child(vp)
+	var env := EnvironmentRig.new()
+	vp.add_child(env)
+	env.setup()
+	var ground := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(20, 20)
+	ground.mesh = plane
+	ground.material_override = ToonMaterials.toon(DS.GRASS)
+	vp.add_child(ground)
+	var config := GameConfig.new()
+	var samples: Array[Dictionary] = [
+		{"id": 0, "kind": Item.Kind.ROCK, "state": Item.State.FALLING, "pos": Vector3(-3, 3, 0), "uses": 1, "fuse_ticks": Item.UNLIT},
+		{"id": 1, "kind": Item.Kind.BAT, "state": Item.State.GROUND, "pos": Vector3(-1, 0, 0), "uses": 5, "fuse_ticks": Item.UNLIT},
+		{"id": 2, "kind": Item.Kind.BOMB, "state": Item.State.GROUND, "pos": Vector3(1, 0, 0), "uses": 1, "fuse_ticks": 60},
+		{"id": 3, "kind": Item.Kind.ROCK, "state": Item.State.GROUND, "pos": Vector3(3, 0, 0), "uses": 1, "fuse_ticks": Item.UNLIT},
+	]
+	for s: Dictionary in samples:
+		var v := ItemView.new()
+		vp.add_child(v)
+		v.setup(int(s["kind"]), config)
+		v.apply(s, s, 1.0, 0)
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.look_at_from_position(Vector3(0, 6, 7), Vector3(0, 0.5, 0), Vector3.UP)
+	return container
