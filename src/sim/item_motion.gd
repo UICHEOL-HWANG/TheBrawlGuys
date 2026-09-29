@@ -2,6 +2,7 @@ class_name ItemMotion
 extends RefCounted
 ## Loose item physics (PRD §4.4): falling boxes land on the arena floor and items that fall past
 ## kill_y are removed. Thrown rocks and bats hit the first fighter they touch (never their thrower) and break on the ground; thrown bombs stop on bodies and land (context E7).
+## Lit bombs count down every tick and explode at zero, hitting every fighter in bomb_radius, thrower included (context E7).
 
 ## Same landing rule as fighters (Motion.LAND_TOLERANCE): never snap up from under the floor.
 const LAND_TOLERANCE := 0.05
@@ -12,9 +13,31 @@ static func step(field: ItemField, fighters: Array[Fighter], attacks: AttackSet,
 	var events: Array[Dictionary] = []
 	var keep: Array[Item] = []
 	for it: Item in field.items:
+		if it.fuse_ticks > 0:
+			it.fuse_ticks -= 1
+			if it.fuse_ticks == 0:
+				events.append_array(_explode(it, fighters, attacks.get_attack(AttackSet.Kind.BOMB), config))
+				continue
 		if _advance(it, fighters, attacks, config, events):
 			keep.append(it)
 	field.items = keep
+	return events
+
+
+static func _explode(it: Item, fighters: Array[Fighter], attack: AttackData, config: GameConfig) -> Array[Dictionary]:
+	var events: Array[Dictionary] = [{"type": "explosion", "id": it.id, "pos": it.pos, "radius": config.bomb_radius}]
+	for f: Fighter in fighters:
+		if not f.is_alive() or f.invuln_ticks > 0:
+			continue
+		var offset := f.pos + Vector3.UP * (config.fighter_height * 0.5) - it.pos
+		if offset.length() > config.bomb_radius + config.fighter_radius:
+			continue
+		var dir := Vector3(offset.x, 0.0, offset.z)
+		if dir.length() < Collision.EPSILON:
+			dir = Collision.COINCIDENT_AXIS
+		var e := Combat.apply_hit(f, attack, dir, 1.0, config, it.pos, it.owner_id)
+		e["attack_kind"] = AttackSet.Kind.BOMB
+		events.append(e)
 	return events
 
 
