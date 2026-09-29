@@ -9,7 +9,9 @@ enum State { IDLE, PRESSED, HIGHLIGHT, DISABLED, CHARGING }
 
 const PREVIEW_DIAMETER := 150.0
 const ICON_RATIO := 0.32
-const LABEL_OFFSET_RATIO := 0.62
+const ICON_TOP_INSET := DS.S3
+const CAPTION_BOTTOM_INSET := DS.S3
+const CAPTION_GAP := DS.S1
 const RING_WIDTH := DS.STROKE_FOCUS * 2
 const PULSE_HZ := 1.5
 const PULSE_SCALE := 0.04
@@ -79,6 +81,19 @@ func set_preview() -> void:
 	set_state(State.HIGHLIGHT)
 
 
+## Icon and caption layout for a button of this diameter (pixels, button-local): the caption
+## sits in a band at the bottom of the circle and the icon is centered in the space above it.
+static func icon_layout(diameter: float) -> Dictionary:
+	var caption_top := diameter - CAPTION_BOTTOM_INSET - DS.SIZE_CAPTION - CAPTION_GAP
+	var space := maxf(caption_top - ICON_TOP_INSET, 0.0)
+	var half := minf(diameter * 0.5 * ICON_RATIO * 2.0, space * 0.5)
+	return {
+		"icon_center": Vector2(diameter * 0.5, ICON_TOP_INSET + space * 0.5),
+		"icon_half": half,
+		"caption_top": caption_top,
+	}
+
+
 func _apply_size() -> void:
 	custom_minimum_size = Vector2(diameter, diameter)
 	size = custom_minimum_size
@@ -98,9 +113,10 @@ func _draw() -> void:
 			draw_arc(c, r - RING_WIDTH * 0.5, -PI * 0.5, -PI * 0.5 + TAU * maxf(_charge, 0.01),
 					ARC_SEGMENTS, color, RING_WIDTH, true)
 	var ink := DS.UI_TEXT_SOFT if _state == State.DISABLED else DS.UI_TEXT
-	TouchIcons.draw(self, icon, c - Vector2(0, r * 0.12), r * ICON_RATIO * 2.0, ink)
+	var layout := icon_layout(diameter)
+	TouchIcons.draw(self, icon, layout["icon_center"], layout["icon_half"], ink)
 	if _font != null:
-		draw_string(_font, Vector2(0.0, r + r * LABEL_OFFSET_RATIO), label_text,
+		draw_string(_font, Vector2(0.0, diameter - CAPTION_BOTTOM_INSET), label_text,
 				HORIZONTAL_ALIGNMENT_CENTER, diameter, DS.SIZE_CAPTION, ink)
 
 

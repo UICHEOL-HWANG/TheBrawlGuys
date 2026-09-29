@@ -51,3 +51,14 @@ func test_repeated_same_state_keeps_the_pulse_running() -> void:
 	assert_eq(b.scale, scale_before, "same state must not reset the pulse")
 	assert_ne(b.scale, Vector2.ONE)
 
+
+
+func test_icon_stays_above_the_caption_band() -> void:
+	for d: float in [96.0, 116.0, 130.0, 170.0]:
+		var layout := TouchButton.icon_layout(d)
+		var center: Vector2 = layout["icon_center"]
+		var half: float = layout["icon_half"]
+		var caption_top: float = layout["caption_top"]
+		assert_gt(half, 0.0, "d=%s icon has size" % d)
+		assert_lte(center.y + half, caption_top, "d=%s icon clears the caption" % d)
+		assert_gte(center.y - half, 0.0, "d=%s icon stays inside the button" % d)
