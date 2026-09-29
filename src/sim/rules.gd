@@ -43,7 +43,7 @@ static func respawn(f: Fighter, count: int, config: GameConfig) -> void:
 	f.set_state(Fighter.State.AIR)
 
 
-## Resets attack, charge, combo and grab bookkeeping (respawn and KO).
+## Resets attack, charge, combo and grab bookkeeping and the carried item (respawn and KO).
 static func clear_actions(f: Fighter) -> void:
 	f.hitstun_ticks = 0
 	f.hitstop_ticks = 0
@@ -54,6 +54,8 @@ static func clear_actions(f: Fighter) -> void:
 	f.charge_mul = 1.0
 	f.grab_ticks = 0
 	f.partner_id = Fighter.NONE
+	f.item_kind = Fighter.NONE
+	f.item_uses = 0
 
 
 static func apply(fighters: Array[Fighter], config: GameConfig) -> Array[Dictionary]:

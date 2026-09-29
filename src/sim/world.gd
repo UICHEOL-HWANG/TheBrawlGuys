@@ -1,7 +1,7 @@
 class_name World
 extends RefCounted
 ## Pure game state (PRD §5.2). Never reference Node, SceneTree, Input, RenderingServer or PhysicsServer3D here.
-## Tick order: Motion.step per fighter -> separate -> Grab.step -> Grab.resolve -> Combat.resolve -> ItemMotion.step -> ItemField.spawn_step -> Rules.apply -> Grab.cleanup -> winner.
+## Tick order: ItemActions.pre_step -> Motion.step per fighter -> separate -> Grab.step -> Grab.resolve -> Combat.resolve -> ItemMotion.step -> ItemField.spawn_step -> Rules.apply -> Grab.cleanup -> ItemActions.drop_from_disabled -> winner.
 ## The config is a tracked sim input: its fingerprint is part of every snapshot (context D1). Snapshot v3 adds the Phase 2 fighter fields. Snapshot v4 adds the item field.
 
 const SNAPSHOT_VERSION := 4
@@ -35,6 +35,7 @@ func tick(inputs: Array[InputFrame]) -> void:
 	if not match_over:
 		var attacks := AttackSet.from_config(config)
 		var frame := _resolve_inputs(inputs)
+		_events.append_array(ItemActions.pre_step(fighters, frame, items, config))
 		for f: Fighter in fighters:
 			Motion.step(f, frame[f.id], config, attacks)
 		Motion.separate(fighters, config)
@@ -45,6 +46,7 @@ func tick(inputs: Array[InputFrame]) -> void:
 		_events.append_array(items.spawn_step(tick_count, _rng, config))
 		_events.append_array(Rules.apply(fighters, config))
 		Grab.cleanup(fighters)
+		_events.append_array(ItemActions.drop_from_disabled(fighters, items, config))
 		var result := Rules.winner(fighters)
 		if result != Rules.ONGOING:
 			match_over = true

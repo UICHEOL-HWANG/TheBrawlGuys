@@ -24,7 +24,14 @@ static func try_start(f: Fighter, input: InputFrame, _config: GameConfig) -> boo
 			stop_horizontal(f)
 		return true
 	if input.light:
-		start_attack(f, AttackSet.Kind.LIGHT_1)
+		if f.item_kind == Item.Kind.BAT:
+			start_attack(f, AttackSet.Kind.BAT)
+			f.item_uses -= 1
+			if f.item_uses <= 0:
+				f.item_kind = Fighter.NONE
+				f.item_uses = 0
+		else:
+			start_attack(f, AttackSet.Kind.LIGHT_1)
 		return true
 	return false
 
