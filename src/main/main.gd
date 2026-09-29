@@ -132,13 +132,11 @@ func _draw_fighters() -> void:
 
 
 func _camera_targets() -> PackedVector3Array:
-	var pts := PackedVector3Array()
+	var r := _config.arena_radius
+	var pts := PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
 	for f: Dictionary in _curr_state["fighters"]:
 		if int(f["state"]) != Fighter.State.KO:
 			pts.append(f["pos"])
-	if pts.is_empty():
-		var r := _config.arena_radius
-		pts = PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
 	return pts
 
 
