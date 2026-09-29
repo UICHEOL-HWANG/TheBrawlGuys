@@ -5,4 +5,4 @@ GODOT="${GODOT:-godot}"
 cd "$(dirname "$0")/.."
 "$GODOT" --headless --path . --import >/dev/null
 "$GODOT" --headless --path . -s addons/gut/gut_cmdln.gd \
-  -gdir=res://tests/unit -ginclude_subdirs -gexit "$@"
+  -gdir=res://tests/unit,res://tests/replay -ginclude_subdirs -gexit "$@"
