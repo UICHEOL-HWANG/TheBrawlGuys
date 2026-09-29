@@ -72,3 +72,58 @@ func test_poll_resumes_on_the_next_frame_after_reset() -> void:
 	Input.action_press("p1_jump")
 	local.poll()
 	assert_true(local.sample().jump)
+
+
+func test_keyboard_heavy_and_guard_are_held_levels() -> void:
+	var local := LocalInput.new()
+	await get_tree().process_frame
+	Input.action_press("p1_heavy")
+	Input.action_press("p1_guard")
+	local.poll()
+	var a := local.sample()
+	var b := local.sample()
+	assert_true(a.heavy and b.heavy, "heavy stays true while K is held")
+	assert_true(a.guard and b.guard, "guard stays true while L is held")
+	Input.action_release("p1_heavy")
+	Input.action_release("p1_guard")
+	await get_tree().process_frame
+	local.poll()
+	var c := local.sample()
+	assert_false(c.heavy or c.guard)
+
+
+func test_keyboard_grab_is_latched_once() -> void:
+	var local := LocalInput.new()
+	await get_tree().process_frame
+	Input.action_press("p1_grab")
+	local.poll()
+	assert_true(local.sample().grab)
+	assert_false(local.sample().grab, "a press reaches exactly one tick")
+
+
+func test_touch_heavy_and_guard_feed_the_same_frame() -> void:
+	var local := LocalInput.new()
+	local.set_touch_heavy(true)
+	local.set_touch_guard(true)
+	var a := local.sample()
+	assert_true(a.heavy and a.guard)
+	local.set_touch_heavy(false)
+	local.set_touch_guard(false)
+	var b := local.sample()
+	assert_false(b.heavy or b.guard)
+
+
+func test_touch_grab_press() -> void:
+	var local := LocalInput.new()
+	local.press_grab()
+	assert_true(local.sample().grab)
+
+
+func test_reset_clears_every_latch() -> void:
+	var local := LocalInput.new()
+	local.press_grab()
+	local.set_touch_heavy(true)
+	local.set_touch_heavy(false)
+	local.reset()
+	var f := local.sample()
+	assert_false(f.grab or f.heavy, "nothing latched before a restart fires in the new match")
