@@ -4,11 +4,22 @@ extends GutTest
 func _view(me_pos: Vector3, foe_pos: Vector3, me_on_ground: bool = true, jumps: int = 2) -> Dictionary:
 	return {
 		"arena_radius": 10.0,
+		"items": [],
 		"fighters": [
-			{"id": 0, "pos": foe_pos, "facing": Vector3(1, 0, 0), "state": Fighter.State.IDLE, "on_ground": true, "jumps_left": 2},
-			{"id": 1, "pos": me_pos, "facing": Vector3(-1, 0, 0), "state": Fighter.State.IDLE, "on_ground": me_on_ground, "jumps_left": jumps},
+			{"id": 0, "pos": foe_pos, "facing": Vector3(1, 0, 0), "state": Fighter.State.IDLE, "on_ground": true,
+				"jumps_left": 2, "item_kind": Fighter.NONE, "invuln_ticks": 0},
+			{"id": 1, "pos": me_pos, "facing": Vector3(-1, 0, 0), "state": Fighter.State.IDLE, "on_ground": me_on_ground,
+				"jumps_left": jumps, "item_kind": Fighter.NONE, "invuln_ticks": 0},
 		],
 	}
+
+
+func _me(v: Dictionary) -> Dictionary:
+	return v["fighters"][1]
+
+
+func _foe(v: Dictionary) -> Dictionary:
+	return v["fighters"][0]
 
 
 func test_approaches_the_opponent() -> void:
@@ -18,15 +29,17 @@ func test_approaches_the_opponent() -> void:
 	assert_false(f.light)
 
 
-func test_attacks_in_range_then_waits_for_cooldown() -> void:
+func test_attacks_in_range_mashes_the_combo_then_waits() -> void:
 	var c := GameConfig.new()
 	var bot := BotController.new(1, c)
 	var v := _view(Vector3(1.0, 0, 0), Vector3(0, 0, 0))
 	assert_true(bot.sample(v).light, "in range and ready")
-	var waited := 0
-	for i: int in 1000:
-		if bot.sample(v).light:
-			break
+	var mash := 0
+	while bot.sample(v).light:
+		mash += 1
+	assert_eq(mash, BotController.combo_mash_ticks(c), "keeps pressing through the combo buffer windows")
+	var waited := mash + 1
+	while not bot.sample(v).light:
 		waited += 1
 	# cooldown N set on the attack sample, decremented at the start of each later sample
 	assert_eq(waited, c.bot_attack_cooldown_ticks - 1)
@@ -69,3 +82,76 @@ func test_bot_drives_a_real_world_into_combat() -> void:
 			hit = true
 			break
 	assert_true(hit, "bot walks over and lands a light attack on an idle player")
+
+
+func test_guards_every_other_attack_that_starts_in_range() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
+	bot.sample(v)  # the bot swings first and starts its cooldown; ignore
+	var calm := _view(Vector3(3.0, 0, 0), Vector3(0, 0, 0))
+	for i: int in BotController.combo_mash_ticks(c) + 1:
+		bot.sample(calm)
+	var attacking := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
+	_foe(attacking)["state"] = Fighter.State.ATTACK
+	assert_true(bot.sample(attacking).guard, "first threat: guard")
+	for i: int in c.bot_guard_ticks:
+		bot.sample(calm)
+	assert_false(bot.sample(attacking).guard, "second threat: no guard (every other)")
+
+
+func test_walks_to_a_nearby_item_and_picks_it_up() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(0, 0, 0), Vector3(-6, 0, 0))
+	v["items"] = [{"id": 0, "kind": Item.Kind.BAT, "state": Item.State.GROUND, "pos": Vector3(4, 0, 0), "uses": 5, "fuse_ticks": Item.UNLIT}]
+	var f := bot.sample(v)
+	assert_gt(f.move_x, 0.9, "heads for the item, not the foe")
+	_me(v)["pos"] = Vector3(3.5, 0, 0)
+	assert_true(bot.sample(v).grab, "grabs to pick it up when in reach")
+
+
+func test_ignores_lit_bombs_and_far_items() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(0, 0, 0), Vector3(-6, 0, 0))
+	v["items"] = [
+		{"id": 0, "kind": Item.Kind.BOMB, "state": Item.State.GROUND, "pos": Vector3(2, 0, 0), "uses": 1, "fuse_ticks": 40},
+		{"id": 1, "kind": Item.Kind.ROCK, "state": Item.State.GROUND, "pos": Vector3(0, 0, c.bot_item_seek_range + 1.0), "uses": 1, "fuse_ticks": Item.UNLIT},
+	]
+	assert_lt(bot.sample(v).move_x, 0.0, "goes for the foe instead")
+
+
+func test_throws_a_rock_when_the_foe_is_in_range() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(0, 0, 0), Vector3(-4, 0, 0))
+	_me(v)["item_kind"] = Item.Kind.ROCK
+	var f := bot.sample(v)
+	assert_true(f.grab)
+	assert_lt(f.move_x, 0.0, "aims at the foe")
+
+
+func test_swings_a_bat_without_mashing() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(1.0, 0, 0), Vector3(0, 0, 0))
+	_me(v)["item_kind"] = Item.Kind.BAT
+	assert_true(bot.sample(v).light)
+	assert_false(bot.sample(v).light, "one swing per cooldown with a bat")
+
+
+func test_grabs_a_guarding_foe() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _view(Vector3(1.0, 0, 0), Vector3(0, 0, 0))
+	_foe(v)["state"] = Fighter.State.GUARD
+	assert_true(bot.sample(v).grab)
+
+
+func test_throws_a_held_foe_away_from_the_center() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _view(Vector3(3, 0, 0), Vector3(4, 0, 0))
+	_me(v)["state"] = Fighter.State.HOLDING
+	var f := bot.sample(v)
+	assert_true(f.grab)
+	assert_gt(f.move_x, 0.9, "outward from the center")

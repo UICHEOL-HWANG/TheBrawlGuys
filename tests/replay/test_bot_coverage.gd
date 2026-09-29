@@ -30,12 +30,12 @@ func test_bot_match_is_deterministic() -> void:
 	assert_eq(_run(SEED, 1800)["hash"], _run(SEED, 1800)["hash"])
 
 
-## Event types a bot match must go through. Task 18 (bot step 2) extends this list with
-## ringout, item_pickup, guard_hit and grab, and adds the KO assertion.
-const REQUIRED_EVENTS: Array[String] = ["hit", "item_spawn", "item_land"]
+## Event types a bot match must go through (bot step 2, Task 18).
+const REQUIRED_EVENTS: Array[String] = ["hit", "ringout", "item_spawn", "item_land", "item_pickup", "guard_hit", "grab"]
 
 
 func test_bot_match_covers_required_events() -> void:
 	var seen: Dictionary = _run(SEED, MAX_TICKS)["seen"]
 	for needed: String in REQUIRED_EVENTS:
 		assert_true(seen.has(needed), "%s never happened in a bot match" % needed)
+	assert_true(seen.has("match_over"), "a bot match ends with a KO within 4 minutes")
