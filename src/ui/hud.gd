@@ -10,6 +10,7 @@ const STOCK_ICONS_SCENE := preload("res://src/ui/components/stock_icons/stock_ic
 const RESULT_BANNER_SCENE := preload("res://src/ui/components/result_banner/result_banner.tscn")
 const LAYER := 5
 
+var _margin: MarginContainer
 var _row: HBoxContainer
 var _banner: ResultBanner
 var _counters: Array[DamageCounter] = []
@@ -75,15 +76,14 @@ func result_visible() -> bool:
 
 
 func _build_frame() -> void:
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for side: String in ["left", "right", "top"]:
-		margin.add_theme_constant_override("margin_" + side, DS.S5)
-	add_child(margin)
+	_margin = MarginContainer.new()
+	_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_apply_safe_area()
+	add_child(_margin)
 	_row = HBoxContainer.new()
 	_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_child(_row)
+	_margin.add_child(_row)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -91,3 +91,17 @@ func _build_frame() -> void:
 	_banner = RESULT_BANNER_SCENE.instantiate() as ResultBanner
 	center.add_child(_banner)
 	_banner.restart_requested.connect(func() -> void: restart_requested.emit())
+	get_viewport().size_changed.connect(_apply_safe_area)
+
+
+## Keeps the s5 margin inside the device safe area (DS-LAY-02, Phase 1 carry-over).
+func _apply_safe_area() -> void:
+	var vp := get_viewport().get_visible_rect()
+	var safe := SafeArea.rect(get_viewport())
+	_margin.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
+	_margin.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
+	_margin.add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5)
+
+
+func frame_margin(side: String) -> int:
+	return _margin.get_theme_constant("margin_" + side)

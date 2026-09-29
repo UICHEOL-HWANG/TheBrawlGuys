@@ -42,3 +42,9 @@ func test_result_banner_texts() -> void:
 	assert_eq(banner.title(), "승리!")
 	_hud.hide_result()
 	assert_false(_hud.result_visible())
+
+
+func test_frame_keeps_the_s5_margin_inside_the_safe_area() -> void:
+	# desktop: the safe area is the whole viewport, so the margin is exactly s5
+	assert_eq(_hud.frame_margin("left"), DS.S5)
+	assert_eq(_hud.frame_margin("top"), DS.S5)

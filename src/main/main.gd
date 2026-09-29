@@ -1,6 +1,7 @@
 extends Node
 ## Entry point: fixed 60 Hz sim loop + interpolated rendering (docs/PRD.md §5.4).
-## Phase 1: local player (keyboard + touch) vs bot, HUD, game feel, result and restart.
+## Phase 2: local player (keyboard + four-button touch) vs bot step 2, items, HUD, charge gauges,
+## grab hints, game feel, result and restart.
 
 const CONFIG_PATH := "res://src/config/default_config.tres"
 const SEED := 1
@@ -16,8 +17,12 @@ var _ticker: FixedTicker
 var _camera: CameraRig
 var _panel: ConfigPanel
 var _local_input: LocalInput
+var _touch: TouchInput
 var _bot: BotController
 var _views: Array[FighterView] = []
+var _item_layer: ItemLayer
+var _grab_hint: GrabHint
+var _gauges: ChargeGaugeLayer
 var _hud: Hud
 var _feel: FeelDirector
 var _result_shown: bool = false
@@ -62,11 +67,19 @@ func _ready() -> void:
 		add_child(view)
 		view.setup(i, _config)
 		_views.append(view)
+	_item_layer = ItemLayer.new()
+	add_child(_item_layer)
+	_item_layer.setup(_config)
+	_grab_hint = GrabHint.new()
+	add_child(_grab_hint)
+	_grab_hint.setup(_config)
 
 	_local_input = LocalInput.new()
-	var touch := TouchInput.new()
-	add_child(touch)
-	touch.setup(_local_input, _config)
+	_touch = TouchInput.new()
+	add_child(_touch)
+	_touch.setup(_local_input, _config)
+	_gauges = ChargeGaugeLayer.new()
+	add_child(_gauges)
 	_hud = Hud.new()
 	add_child(_hud)
 	_hud.restart_requested.connect(_start_match)
@@ -81,8 +94,17 @@ func get_world() -> World:
 	return _world
 
 
+func get_hud() -> Hud:
+	return _hud
+
+
+func get_item_layer() -> ItemLayer:
+	return _item_layer
+
+
 func _start_match() -> void:
 	_local_input.reset()
+	_feel.reset()
 	_world = World.new(_config, SEED, PLAYER_COUNT)
 	_bot = BotController.new(BOT_PLAYER, _config)
 	_hud.setup(PLAYER_COUNT, _config.stocks)
@@ -109,9 +131,13 @@ func _process(delta: float) -> void:
 		events.append_array(_curr_state["events"])
 	_alpha = _ticker.alpha()
 	_draw_fighters()
+	_item_layer.sync(_prev_state["items"], _curr_state["items"], _alpha, int(_curr_state["tick"]))
 	_hud.update_from(_curr_state)
 	_feel.on_events(events)
+	_wobble_guards(events)
+	_update_local_hints()
 	_camera.follow(_camera_targets(), delta)
+	_gauges.update_from(_curr_state, _config, _camera.unproject)
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
 		_hud.show_result(int(_curr_state["winner"]), LOCAL_PLAYER)
@@ -130,6 +156,28 @@ func _draw_fighters() -> void:
 	for i: int in _views.size():
 		var before: Dictionary = prev[i] if i < prev.size() else {}
 		_views[i].apply(before, curr[i], _alpha, tick)
+
+
+func _wobble_guards(events: Array) -> void:
+	for e: Dictionary in events:
+		if String(e["type"]) == "guard_hit":
+			var id := int(e["target"])
+			if id < _views.size():
+				_views[id].wobble()
+
+
+## Grab button highlight, grab target ring and disabled touch buttons for the local player.
+func _update_local_hints() -> void:
+	var me: Dictionary = _curr_state["fighters"][LOCAL_PLAYER]
+	var active := int(me["state"]) != Fighter.State.KO and not bool(_curr_state["match_over"])
+	_touch.set_enabled(active)
+	var ctx := GrabContext.evaluate(_curr_state, LOCAL_PLAYER, _config)
+	var kind := int(ctx["kind"])
+	_touch.set_grab_highlight(active and kind != GrabContext.Kind.NONE)
+	if active and (kind == GrabContext.Kind.ITEM or kind == GrabContext.Kind.FIGHTER):
+		_grab_hint.show_at(ctx["pos"])
+	else:
+		_grab_hint.hide_hint()
 
 
 func _camera_targets() -> PackedVector3Array:
