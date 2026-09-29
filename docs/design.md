@@ -427,7 +427,7 @@
 | DS-TOK-03 | 간격 | PRD-UI-01 | 0 | ✅ |
 | DS-TOK-04 | 반경·선·그림자 | PRD-UI-01 | 0 | ✅ |
 | DS-TOK-05 | 모션 | PRD-UI-01, PRD-UI-02 | 0 (정의), 3 (적용) | ✅ |
-| DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | ⬜ |
+| DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | 🟨 (Phase 2: 터치 버튼 4종 아이콘, Phase 5에서 계속) |
 | DS-THM-01 | 기본 테마 | PRD-UI-01 | 0 | ✅ |
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ⬜ |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |

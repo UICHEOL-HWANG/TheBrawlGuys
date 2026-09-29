@@ -149,6 +149,8 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 **목표**: 아이템을 먼저 줍기 위한 눈치 싸움을 만든다. 터치 조작을 완성형(스틱 + 4버튼)으로 올린다.
 
+**결정**: E1~E11(`dev/active/phase-2/phase-2-context.md`) 사용자 승인 2026-09-29.
+
 ### ⚙️ 개발 트랙
 
 **sim**
@@ -184,7 +186,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### 완료 기준
 
-- [x] 상자가 떨어지면 플레이어와 봇이 서로 먼저 가려고 한다 (녹화 영상) — `evidence/item-race-70/105/135/158/255.png` + 로컬 `item-race.avi` (`src/debug/item_race_demo.tscn`)
+- [x] 상자가 떨어지면 서로 먼저 가려고 한다 (녹화 영상) — 증거는 봇 대 봇 데모 씬(`src/debug/item_race_demo.tscn`, 두 봇 모두 2단계, 떨어지는 상자에 반응)이며 사람 플레이어는 없다: `evidence/item-race-030-falling.png`·`item-race-058-nearly-landed.png`·`item-race-066-contest.png`·`item-race-096-picked-up.png` + 로컬 `item-race.avi`
 - [ ] 터치만으로 6액션 전부를 쓸 수 있다 (Android 실기기) — 실기기 확인 대기 (데스크톱 증거: `test_touch_input` + `evidence/match-hud-touch.png`)
 - [x] 인게임 UI가 전부 DS 컴포넌트로 구성되어 있다 (갤러리 등록 확인) — `evidence/gallery-touch-button-v2.png`·`gallery-charge-gauge.png`·`gallery-items.png`
 - [x] 리플레이 회귀 테스트 갱신·통과 — `tests/replay/*` (1200틱, 골든 2973674052)

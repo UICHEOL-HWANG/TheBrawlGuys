@@ -1,10 +1,10 @@
 # Phase 2 — Tasks
 
-**Last Updated:** 2026-09-29 (T20 완료, 최종 리뷰 대기)
+**Last Updated:** 2026-09-29 (T20 완료, 최종 리뷰 수정 반영)
 상세 단계와 코드: [`phase-2-plan.md`](./phase-2-plan.md) · 결정·이슈: [`phase-2-context.md`](./phase-2-context.md)
 
 ## 사전 조건
-- [x] context의 사용자 확인 대기 결정 E1~E11 승인
+- [x] context의 사용자 확인 대기 결정 E1~E11 승인 (사용자 승인 2026-09-29)
 - [ ] 🖼 4버튼 레이아웃 Stitch 시안 (T13, 사용자 수행) — 대기, 기본값 0 호 배치로 진행
 - [ ] Android 실기기 — 없음, 터치 완료 기준은 대기 표시
 
@@ -33,10 +33,10 @@
 | T19 | main 연결 + 연출 + 재시작 + HUD safe area | PRD-UI-01, DS-LAY-02, DS-VFX-02 | `test_main_smoke`, `test_feel_director`, `test_hud` + 스크린샷 | ✅ |
 | T20 | 상자 쟁탈 데모 + 측정 + 마감 | README R3·R4·R6 | 영상·측정 + `check-all.sh` | ✅ |
 
-상태: ⬜ 예정 · 🟨 진행 · ✅ 완료
+상태: ⬜ 예정 · 🟨 진행 · ✅ 완료 · 🖼 대기 (사용자 시안 비교 대기)
 
 ## Phase 2 완료 기준 (PHASES.md)
-- [x] 상자가 떨어지면 플레이어와 봇이 서로 먼저 가려고 한다 (녹화 영상) — `evidence/item-race-*.png`
+- [x] 상자가 떨어지면 서로 먼저 가려고 한다 (녹화 영상) — 봇 대 봇 데모 씬(두 봇 모두 2단계, 떨어지는 상자에 반응), 사람 플레이어 없음 — `evidence/item-race-*.png`
 - [ ] 터치만으로 6액션 전부를 쓸 수 있다 (Android 실기기) — 실기기 확인 대기
 - [x] 인게임 UI가 전부 DS 컴포넌트로 구성되어 있다 (갤러리 등록 확인)
 - [x] 리플레이 회귀 테스트 갱신·통과

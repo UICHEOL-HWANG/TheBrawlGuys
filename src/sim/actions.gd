@@ -1,8 +1,8 @@
 class_name Actions
 extends RefCounted
 ## Control-state transitions (PRD §4.3): what a fighter that can act starts this tick and how a
-## running attack advances. Motion owns physics and calls into here. Later tasks add heavy
-## charge, guard, grab and bat swings to try_start.
+## running attack advances (light combo, heavy charge, guard, grab attempts and bat swings).
+## Motion owns physics and calls into here.
 
 
 ## Returns true when the fighter started an action this tick (movement is then skipped).

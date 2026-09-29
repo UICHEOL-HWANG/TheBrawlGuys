@@ -2,8 +2,9 @@ class_name AttackButtonModel
 extends RefCounted
 ## Touch attack button gesture (PRD §3.3): a tap shorter than touch_hold_threshold is a light
 ## attack on release; holding past it is a held heavy (charge) that swings on release. A canceled
-## tap does nothing; a canceled charge still releases (the sim cannot un-charge). Time is passed
-## in (seconds) so the model stays pure.
+## tap does nothing; a canceled charge still releases (the sim cannot un-charge), except on focus
+## loss, where TouchInput cancels every finger and then resets the input latches so nothing fires
+## afterwards. Time is passed in (seconds) so the model stays pure.
 
 enum Result { NONE, LIGHT, HEAVY_RELEASE }
 
