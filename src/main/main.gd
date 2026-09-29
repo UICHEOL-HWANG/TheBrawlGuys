@@ -82,6 +82,7 @@ func get_world() -> World:
 
 
 func _start_match() -> void:
+	_local_input.reset()
 	_world = World.new(_config, SEED, PLAYER_COUNT)
 	_bot = BotController.new(BOT_PLAYER, _config)
 	_hud.setup(PLAYER_COUNT, _config.stocks)

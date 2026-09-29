@@ -25,6 +25,12 @@ func press_light() -> void:
 	_light.press()
 
 
+## Drops any latched press (e.g. the Space that confirmed a restart also counts as p1_jump).
+func reset() -> void:
+	_jump.consume()
+	_light.consume()
+
+
 func sample() -> InputFrame:
 	var move := _move_vector()
 	return InputFrame.make(move.x, move.y, _jump.consume(), _light.consume())

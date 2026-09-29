@@ -45,3 +45,12 @@ func test_latched_press_reaches_exactly_one_tick() -> void:
 	var second := local.sample()
 	assert_true(first.jump and first.light)
 	assert_false(second.jump or second.light)
+
+
+func test_reset_clears_latched_presses() -> void:
+	var local := LocalInput.new()
+	local.press_jump()
+	local.press_light()
+	local.reset()
+	var f := local.sample()
+	assert_false(f.jump or f.light, "a press latched before a restart must not fire in the new match")
