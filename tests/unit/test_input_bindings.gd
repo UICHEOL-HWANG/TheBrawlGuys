@@ -54,3 +54,21 @@ func test_reset_clears_latched_presses() -> void:
 	local.reset()
 	var f := local.sample()
 	assert_false(f.jump or f.light, "a press latched before a restart must not fire in the new match")
+
+
+func test_poll_in_the_same_frame_as_reset_is_ignored() -> void:
+	# The Space that confirms a restart is still "just pressed" when _process polls later that frame.
+	var local := LocalInput.new()
+	Input.action_press("p1_jump")
+	local.reset()
+	local.poll()
+	assert_false(local.sample().jump, "the restart key must not latch a jump in the new match")
+
+
+func test_poll_resumes_on_the_next_frame_after_reset() -> void:
+	var local := LocalInput.new()
+	local.reset()
+	await get_tree().process_frame
+	Input.action_press("p1_jump")
+	local.poll()
+	assert_true(local.sample().jump)

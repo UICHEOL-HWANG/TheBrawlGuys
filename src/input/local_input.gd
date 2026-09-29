@@ -8,9 +8,13 @@ var _jump := ButtonLatch.new()
 var _light := ButtonLatch.new()
 ## Set by TouchInput; when the stick is held it overrides the keyboard move vector.
 var touch_stick: TouchStickModel = null
+## Process frame of the last reset(); poll() ignores keys still "just pressed" in that frame.
+var _reset_frame: int = -1
 
 
 func poll() -> void:
+	if Engine.get_process_frames() == _reset_frame:
+		return
 	if Input.is_action_just_pressed("p1_jump"):
 		_jump.press()
 	if Input.is_action_just_pressed("p1_light"):
@@ -26,7 +30,9 @@ func press_light() -> void:
 
 
 ## Drops any latched press (e.g. the Space that confirmed a restart also counts as p1_jump).
+## Called from input handling, so the same frame's poll() must not re-latch the key.
 func reset() -> void:
+	_reset_frame = Engine.get_process_frames()
 	_jump.consume()
 	_light.consume()
 
