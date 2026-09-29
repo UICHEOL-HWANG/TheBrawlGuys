@@ -1,6 +1,6 @@
 # 숲속 난투 — 디자인 시스템
 
-> 버전 0.3 · 2026-09-28 (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
+> 버전 0.4 · 2026-09-29 (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떻게 보이고, 들리고, 느껴지는지**를 소유한다.
@@ -430,20 +430,24 @@
 | DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | ⬜ |
 | DS-THM-01 | 기본 테마 | PRD-UI-01 | 0 | ✅ |
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ⬜ |
-| DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | ⬜ |
-| DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | ⬜ |
+| DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (Phase 2 🖼에서 계속) |
+| DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
 | DS-LAY-03 | 화면 흐름 | PRD-UI-02 | 4, 5, 6 | ⬜ |
 | DS-CMP-12 | 컴포넌트 — `DebugPanel` | §6 표 참조 | 0 | ✅ |
-| DS-CMP-01~11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-01~03, 09 | 컴포넌트 — `DamageCounter`·`StockIcons`·`TouchStick`·`ResultBanner` | §6 표 참조 | 1 | ✅ |
+| DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | 🟨 (v1만) |
+| DS-CMP-05~08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (Phase 3에서 계속) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (Phase 3·5에서 계속) |
-| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ⬜ |
-| DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ⬜ |
+| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |
+| DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | 🟨 (Phase 4에서 계속) |
 | DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2 | ⬜ |
-| DS-VFX-01~06 | 이펙트 | PRD-FX-02, PRD-RULE-05 | 1, 2, 3 | ⬜ |
+| DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
+| DS-VFX-02~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 2, 3 | ⬜ |
 | DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | ⬜ |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | ⬜ |
-| GD-FEEL-01~04 | 타격감 | PRD-RULE-05, PRD-CORE-01 | 1, 3 | ⬜ |
+| GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
+| GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ⬜ |
 | GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04 | 0, 4 | 🟨 (Phase 4에서 계속) |
 | GD-ANIM-01 | 애니메이션 매핑 | PRD-FX-01, PRD-ARCH-01 | 3 | ⬜ |
 | DS-A11Y-01 | 색각 대응 | PRD-UI-01 | 5, 6 | ⬜ |

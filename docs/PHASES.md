@@ -97,34 +97,34 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 ### ⚙️ 개발 트랙
 
 **sim**
-- [ ] `collision.gd`: 캡슐–박스, 캡슐–캡슐, 원형 경기장 지면·경계 판정 `[PRD-ARCH-01]`
-- [ ] `fighter.gd`: 상태 머신 (idle / move / jump / attack / hitstun / launched / respawn)
-- [ ] 이동, 점프, 2단 점프 1회, 중력 `[PRD-CTL-02]`
-- [ ] 약공격 1종: 전방 박스 히트박스, 활성 프레임, 대미지 % `[PRD-RULE-01]`
-- [ ] `combat.gd`: 넉백 공식, hitstun, hitstop(N틱 정지) `[PRD-RULE-04]` `[PRD-RULE-05]`
-- [ ] `rules.gd`: 링아웃(`kill_y`·경계), 스톡 3, 리스폰(공중 등장 + 2초 무적), 승패 `[PRD-RULE-02]` `[PRD-RULE-03]`
-- [ ] 틱 비용 계측 훅 (디버그 패널에 ms 표시) `[PRD-NFR-02]`
+- [x] `collision.gd`: 캡슐–박스, 캡슐–캡슐, 원형 경기장 지면·경계 판정 `[PRD-ARCH-01]`
+- [x] `fighter.gd`: 상태 머신 (idle / move / jump / attack / hitstun / launched / respawn)
+- [x] 이동, 점프, 2단 점프 1회, 중력 `[PRD-CTL-02]`
+- [x] 약공격 1종: 전방 박스 히트박스, 활성 프레임, 대미지 % `[PRD-RULE-01]`
+- [x] `combat.gd`: 넉백 공식, hitstun, hitstop(N틱 정지) `[PRD-RULE-04]` `[PRD-RULE-05]`
+- [x] `rules.gd`: 링아웃(`kill_y`·경계), 스톡 3, 리스폰(공중 등장 + 2초 무적), 승패 `[PRD-RULE-02]` `[PRD-RULE-03]`
+- [x] 틱 비용 계측 훅 (디버그 패널에 ms 표시) `[PRD-NFR-02]`
 
 **input**
-- [ ] `local_input.gd`: InputMap 기반 키보드 → InputFrame `[PRD-CTL-02]`
-- [ ] 터치 기본: 플로팅 가상 스틱 + 점프 + 공격(탭만) `[PRD-CTL-03]` `[PRD-CTL-04]`
-- [ ] `bot.gd` 1단계: 접근 → 사거리 내 공격, 가장자리에서 중앙 복귀 `[PRD-BOT-01]`
+- [x] `local_input.gd`: InputMap 기반 키보드 → InputFrame `[PRD-CTL-02]`
+- [x] 터치 기본: 플로팅 가상 스틱 + 점프 + 공격(탭만) `[PRD-CTL-03]` `[PRD-CTL-04]`
+- [x] `bot.gd` 1단계: 접근 → 사거리 내 공격, 가장자리에서 중앙 복귀 `[PRD-BOT-01]`
 
 **render / ui**
-- [ ] 캡슐 뷰 + 상태 보간, 승패 화면 + 재시작 `[PRD-UI-01]`
+- [x] 캡슐 뷰 + 상태 보간, 승패 화면 + 재시작 `[PRD-UI-01]`
 
 ### 🎨 DS 트랙
 
-- [ ] HUD 레이아웃: 정보 상단 · 조작 하단, safe area 여백 `[DS-LAY-02]`
-- [ ] `DamageCounter`: 큰 숫자 %, 대미지 색 램프, 피격 시 흔들림 `[DS-CMP-01]` `[DS-TOK-01]`
-- [ ] `StockIcons` `[DS-CMP-02]`
-- [ ] `TouchStick` v1 (플로팅, 데드존 시각화) `[DS-CMP-03]`
-- [ ] `TouchButton` v1 (idle / pressed 상태) `[DS-CMP-04]`
-- [ ] `ResultBanner` (승·패, 재시작 버튼) `[DS-CMP-09]`
-- [ ] 플레이어 식별: 발밑 색 링 + P1/P2 라벨 (P1 파랑, P2 빨강) `[DS-VIS-03]`
-- [ ] 타격감 v1: 히트 퍼프(소·대), 넉백 비례 화면 흔들림, 무적 깜빡임 `[GD-FEEL-01~03]` `[DS-VFX-01]`
-- [ ] 경기장 가장자리 가독성: 바닥 테두리 대비선 `[DS-VIS-04]`
-- [ ] 모든 신규 컴포넌트를 DS 갤러리에 등록 `[DS-GOV-02]`
+- [ ] HUD 레이아웃: 정보 상단 · 조작 하단, safe area 여백 `[DS-LAY-02]` — Stitch 시안 대기 (T12), 기본 배치로 구현
+- [x] `DamageCounter`: 큰 숫자 %, 대미지 색 램프, 피격 시 흔들림 `[DS-CMP-01]` `[DS-TOK-01]`
+- [x] `StockIcons` `[DS-CMP-02]`
+- [x] `TouchStick` v1 (플로팅, 데드존 시각화) `[DS-CMP-03]`
+- [x] `TouchButton` v1 (idle / pressed 상태) `[DS-CMP-04]`
+- [x] `ResultBanner` (승·패, 재시작 버튼) `[DS-CMP-09]`
+- [x] 플레이어 식별: 발밑 색 링 + P1/P2 라벨 (P1 파랑, P2 빨강) `[DS-VIS-03]`
+- [x] 타격감 v1: 히트 퍼프(소·대), 넉백 비례 화면 흔들림, 무적 깜빡임 `[GD-FEEL-01~03]` `[DS-VFX-01]`
+- [x] 경기장 가장자리 가독성: 바닥 테두리 대비선 `[DS-VIS-04]`
+- [x] 모든 신규 컴포넌트를 DS 갤러리에 등록 `[DS-GOV-02]`
 
 ### 테스트
 
@@ -136,12 +136,12 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### 완료 기준
 
-- [ ] 봇과 한 판을 끝까지 할 수 있다 — **키보드와 Android 터치 둘 다**
-- [ ] 대미지 100% 이상에서 약공격 한 방에 경기장 밖으로 날아가는 게 눈에 보인다 (녹화 영상)
-- [ ] HUD가 휴대폰 화면에서 한눈에 읽힌다 (실기기 스크린샷)
-- [ ] 4인 World(봇 4) 1틱 비용이 측정·기록되어 있다 `[PRD-NFR-02]`
-- [ ] 입력 → 화면 반영 ≤ 3프레임 (고속 촬영 또는 프레임 로그) `[PRD-NFR-03]`
-- [ ] 모든 전투·타격감 수치가 디버그 패널에 있다
+- [ ] 봇과 한 판을 끝까지 할 수 있다 — **키보드와 Android 터치 둘 다** — 사용자 플레이 확인 대기 (키보드) · 실기기 확인 대기 (Android 터치). 자동 증거: `test_main_smoke`, `test_rules` 경기 종료, 링아웃 데모
+- [x] 대미지 100% 이상에서 약공격 한 방에 경기장 밖으로 날아가는 게 눈에 보인다 (녹화 영상) — `test_ringout_feel` + `evidence/ringout-58/70/100/145.png` + 로컬 `ringout.avi`
+- [ ] HUD가 휴대폰 화면에서 한눈에 읽힌다 (실기기 스크린샷) — 실기기 확인 대기 (데스크톱 증거: `dev/active/phase-1/evidence/match-hud.png`)
+- [x] 4인 World(봇 4) 1틱 비용이 측정·기록되어 있다 `[PRD-NFR-02]` — `evidence/measurements.md` (22.2 us/tick 평균)
+- [x] 입력 → 화면 반영 ≤ 3프레임 (고속 촬영 또는 프레임 로그) `[PRD-NFR-03]` — `evidence/measurements.md` (2프레임)
+- [x] 모든 전투·타격감 수치가 디버그 패널에 있다 — `evidence/match-panel.png` + `test_config_schema`
 
 ---
 
