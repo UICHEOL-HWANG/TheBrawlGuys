@@ -1,7 +1,7 @@
 # Phase 2 — Context
 
 **Last Updated:** 2026-09-29
-**상태:** 구현 완료, 최종 리뷰 수정 반영 (재검토 대기) (T13 🖼 게이트·Android 실기기 대기)
+**상태:** 완료 (최종 리뷰·수정 반영, 2026-09-29) — Android 실기기·🖼 4버튼 Stitch 시안(T13)은 대기
 **계획:** [`phase-2-plan.md`](./phase-2-plan.md) · **체크리스트:** [`phase-2-tasks.md`](./phase-2-tasks.md)
 **이전 Phase:** [`dev/done/phase-1/phase-1-context.md`](../../done/phase-1/phase-1-context.md)
 
@@ -122,3 +122,17 @@ E1~E11 모두 계획대로 구현됨 (결정 변경 없음, 사용자 승인 202
 - config 지문의 범위 (sim 필드로 제한할지, Phase 6 전)
 - 🖼 4버튼 레이아웃 Stitch 게이트(T13) 결과 반영, HUD 🖼 시안, Android 실기기 확인 (Android/Stitch 대기)
 - 캐릭터 크기(카메라 여백) — 🖼 게이트 때 결정
+
+## SDD 진행 중 컨트롤러 판단 (Rulings)
+
+- - Ruling: execute on main (user approved "main에서 바로 진행" for this project since Phase 0; Phase 1 ran on main) — cost if wrong: none beyond Phase 1 precedent.
+- - Ruling: T13 (🖼 Stitch 4-button gate) is user+controller, not dispatched; T14+ proceed with touch_layout default 0 (arc); T13 stays "🖼 대기" and the three layout captures from T12 are shown to the user at the end — cost if wrong: default value change later (1 line).
+- - Ruling: T20 git mv is controller-only after final review (plan says so) — cost: none.
+- - Ruling: model tiers — sonnet implementers for all code tasks (plans contain full code but multi-file Godot work; haiku ignored trailers in Phase 1), sonnet reviewers, opus final review — cost: token spend.
+- Task 3: Ruling: reviewer Important "no RED run for test_actions" — accepted as a process gap, not a code defect: on pre-T3 code (477faab) Motion._step_control started ATTACK without ever setting attack_kind (always 0) and had no chaining, so test_press_inside_buffer_chains_second_hit / test_third_hit / test_full_combo (expects 3 hits) cannot pass there; the golden failure also proves behavior changed. Controller re-verification via temp worktree was blocked by a local hook — cost if wrong: a test that passes vacuously (low; asserts specific LIGHT_2/LIGHT_3 kinds).
+- Ruling: T8 plan said "13 tests" but supplied 12 — plan miscount; 12 verbatim is correct — cost: none.
+- Ruling: fix at the root in Combat.apply_hit — normalize the flat push direction once (zero → straight up) so every hit source obeys the PRD §4.2 formula; T9's _explode is covered by the same fix — cost if wrong: none (melee/throw already pass unit facings, golden unchanged expected)
+- Ruling: accept both T12 deviations — EPSILON is a float-precision fix of the brief's own test; focus-loss reset is the safer semantics (app backgrounded should not attack) and supersedes the brief's "canceled charge still releases" comment for the focus-loss path only — cost if wrong: a charge lost on focus loss (acceptable).
+- Task 13: skipped by preflight Ruling (🖼 gate, user) — captures ready: dev/active/phase-2/evidence/touch-layout-{0,1,2}.png (controller viewed layout-0: arc, no overlap, clear of HUD)
+- Ruling: accept the demo deviation for now but fix the root cause in the final wave — bots ignore FALLING boxes, so they cannot race during the drop warning; make the bot head for a falling box's landing spot so the demo needs no override — cost if wrong: demo re-record.
+- Ruling: fold T20's findings into the final fix wave instead of a separate round — the fix wave changes the evidence itself (bot races falling boxes → demo override removed and re-recorded; tune script becomes a sweep), so the doc text must be rewritten after it anyway — cost if wrong: none (same fixes, one dispatch).
