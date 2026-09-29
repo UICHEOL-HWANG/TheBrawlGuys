@@ -37,3 +37,8 @@ func follow(targets: PackedVector3Array, delta: float) -> void:
 
 func set_shake_offset(offset: Vector3) -> void:
 	_shake_offset = offset
+
+
+## Screen position of a world point (HUD elements that follow fighters, context E10).
+func unproject(world: Vector3) -> Vector2:
+	return _camera.unproject_position(world)
