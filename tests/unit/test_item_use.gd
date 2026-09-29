@@ -188,3 +188,58 @@ func test_ring_out_loses_the_item() -> void:
 	assert_eq(w.fighters[0].item_kind, Fighter.NONE)
 	assert_eq(w.fighters[0].item_uses, 0)
 	assert_eq(w.items.items.size(), 0)
+
+
+func test_being_grabbed_drops_the_held_item() -> void:
+	var w := _world()
+	w.fighters[0].item_kind = Item.Kind.BAT
+	w.fighters[0].item_uses = 3
+	w.fighters[1].pos = w.fighters[0].pos + Vector3(1.0, 0, 0)
+	w.fighters[1].facing = Vector3(-1, 0, 0)
+	var dropped: Array[Dictionary] = []
+	var held := false
+	for i: int in 30:
+		var p2 := _grab() if i == 0 else InputFrame.neutral()
+		w.tick(_inputs(InputFrame.neutral(), p2))
+		dropped.append_array(_events_of(w, "item_drop"))
+		if w.fighters[0].state == Fighter.State.HELD:
+			held = true
+			break
+	assert_true(held, "fighter 1 grabs fighter 0")
+	assert_eq(w.fighters[0].item_kind, Fighter.NONE)
+	assert_eq(dropped.size(), 1, "one item_drop event")
+	assert_eq(dropped[0]["fighter"], 0)
+	assert_eq(dropped[0]["kind"], Item.Kind.BAT)
+	assert_eq(w.items.items.size(), 1)
+	assert_eq(w.items.items[0].state, Item.State.FALLING)
+	assert_eq(w.items.items[0].uses, 3, "uses carry over to the dropped item")
+
+
+func test_thrown_rock_never_hits_its_own_thrower() -> void:
+	var w := _world()
+	w.fighters[0].item_kind = Item.Kind.ROCK
+	w.fighters[0].item_uses = 1
+	w.tick(_inputs(_grab()))
+	assert_eq(w.items.items.size(), 1)
+	var rock := w.items.items[0]
+	assert_eq(rock.state, Item.State.THROWN)
+	# The thrower steps into the rock's flight path: the rock overlaps its capsule each tick.
+	for i: int in 6:
+		w.fighters[0].pos = Vector3(rock.pos.x, 0.0, rock.pos.z)
+		w.tick(_inputs(InputFrame.neutral()))
+		assert_true(_events_of(w, "hit").is_empty(), "tick %d: no hit on the thrower" % i)
+		assert_eq(w.fighters[0].damage, 0.0)
+		assert_eq(w.items.items.size(), 1, "the rock keeps flying")
+
+
+func test_thrown_rock_overlapping_another_fighter_does_hit() -> void:
+	# Control for the test above: the same overlap on the foe is a hit.
+	var w := _world()
+	w.fighters[0].item_kind = Item.Kind.ROCK
+	w.fighters[0].item_uses = 1
+	w.tick(_inputs(_grab()))
+	var rock := w.items.items[0]
+	w.fighters[1].pos = Vector3(rock.pos.x, 0.0, rock.pos.z)
+	w.tick(_inputs(InputFrame.neutral()))
+	assert_eq(_events_of(w, "hit").size(), 1)
+	assert_eq(_events_of(w, "hit")[0]["attacker"], 0)
