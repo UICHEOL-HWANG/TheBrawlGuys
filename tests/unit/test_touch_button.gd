@@ -40,3 +40,14 @@ func test_every_icon_draws() -> void:
 		b.set_state(TouchButton.State.HIGHLIGHT)
 		await get_tree().process_frame
 		assert_eq(b.state(), TouchButton.State.HIGHLIGHT)
+
+
+func test_repeated_same_state_keeps_the_pulse_running() -> void:
+	var b := _button()
+	b.set_state(TouchButton.State.HIGHLIGHT)
+	b._process(0.1)
+	var scale_before := b.scale
+	b.set_state(TouchButton.State.HIGHLIGHT)
+	assert_eq(b.scale, scale_before, "same state must not reset the pulse")
+	assert_ne(b.scale, Vector2.ONE)
+

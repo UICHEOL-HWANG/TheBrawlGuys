@@ -158,3 +158,12 @@ func test_attack_shows_charging_while_held() -> void:
 	var attack := _touch.buttons()["attack"] as TouchButton
 	assert_eq(attack.state(), TouchButton.State.CHARGING)
 	assert_almost_eq(attack.charge(), 0.5, 0.01, "(0.65 - 0.15) s of a 1 s max charge")
+
+
+func test_grab_highlight_pulses_when_set_every_frame() -> void:
+	var grab: TouchButton = _touch.buttons()["grab"]
+	_touch.set_grab_highlight(true)
+	_touch.set_grab_highlight(true)
+	grab._process(0.15)
+	_touch.set_grab_highlight(true)
+	assert_ne(grab.scale, Vector2.ONE, "repeated highlight calls must not reset the pulse")

@@ -87,6 +87,8 @@ func attack_charge_time() -> float:
 
 
 func set_grab_highlight(on: bool) -> void:
+	if on == _grab_highlight:
+		return
 	_grab_highlight = on
 	_refresh_idle("grab")
 

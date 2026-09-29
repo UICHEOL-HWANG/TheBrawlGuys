@@ -41,6 +41,8 @@ func _process(delta: float) -> void:
 
 
 func set_state(s: int) -> void:
+	if s == _state:
+		return  # keep the pulse running and skip the redraw
 	_state = s
 	_pulse_time = 0.0
 	scale = DS.PRESS_SQUISH if s == State.PRESSED or s == State.CHARGING else Vector2.ONE
