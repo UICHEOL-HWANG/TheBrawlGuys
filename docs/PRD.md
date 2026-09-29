@@ -162,7 +162,11 @@ hitstun   = knockback * config.hitstun_factor   (초)
 | hitstun_factor | 0.04 |
 | 가드 시 대미지 / 넉백 | 20% / 0% |
 | touch_hold_threshold | 0.15초 |
-| global_knockback_mul | 1.7 (Phase 1 튜닝: 중간 거리 100% 약공격 한 방 링아웃) |
+| global_knockback_mul | 1.7 (Phase 1 튜닝, Phase 2에서 3타 콤보 마무리 기준으로 재확인: 중간 거리 100%에서 링아웃하는 범위 1.37~2.75) |
+| combo_buffer_ticks / 연결타 대미지·넉백 | 10틱 / 3% · 1.5 (scaling 0) |
+| 잡기 유지 / 던지기 대미지·base·scaling | 1.5초 / 8% · 7 · 0.1 |
+| 상자 주기 / 필드 최대 | 10~15초 / 2개 |
+| 방망이 / 폭탄 / 돌멩이 대미지 | 10% (5회) / 15% (2초, 반경 2.5 m) / 6% |
 
 **모든 수치는 인게임 디버그 패널에서 실시간 조절 가능해야 한다.**
 
