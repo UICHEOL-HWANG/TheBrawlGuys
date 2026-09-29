@@ -16,6 +16,10 @@ const MAX_FINGERS := 3
 const MOUSE_FINGER := 0
 const NO_FINGER := -1
 const LABELS := {"attack": "공격", "jump": "점프", "guard": "가드", "grab": "잡기"}
+const ICONS := {
+	"attack": TouchIcons.Icon.ATTACK, "jump": TouchIcons.Icon.JUMP,
+	"guard": TouchIcons.Icon.GUARD, "grab": TouchIcons.Icon.GRAB,
+}
 
 ## Test clock: when >= 0 it replaces the real time in seconds.
 var time_override: float = -1.0
@@ -28,6 +32,8 @@ var _buttons: Dictionary = {}
 var _owner: Dictionary = {}
 var _stick_finger: int = NO_FINGER
 var _heavy_sent: bool = false
+var _enabled: bool = true
+var _grab_highlight: bool = false
 
 
 func setup(local: LocalInput, config: GameConfig) -> void:
@@ -42,6 +48,8 @@ func setup(local: LocalInput, config: GameConfig) -> void:
 	for name: String in TouchLayout.BUTTONS:
 		var b := TOUCH_BUTTON_SCENE.instantiate() as TouchButton
 		b.label_text = LABELS[name]
+		b.icon = ICONS[name]
+		b.dim_when_idle = name == "grab"
 		add_child(b)
 		_buttons[name] = b
 		_owner[name] = NO_FINGER
@@ -78,10 +86,45 @@ func attack_charge_time() -> float:
 	return _attack_model.charge_time(_now())
 
 
+func set_grab_highlight(on: bool) -> void:
+	_grab_highlight = on
+	_refresh_idle("grab")
+
+
+func set_enabled(on: bool) -> void:
+	if on == _enabled:
+		return
+	_enabled = on
+	if not on:
+		_release_all()
+	for name: String in TouchLayout.BUTTONS:
+		_refresh_idle(name)
+
+
+## Resting look of a button nobody is touching: disabled, highlighted (grab) or idle.
+func _refresh_idle(name: String) -> void:
+	if _owner[name] != NO_FINGER:
+		return
+	var b: TouchButton = _buttons[name]
+	if not _enabled:
+		b.set_state(TouchButton.State.DISABLED)
+	elif name == "grab" and _grab_highlight:
+		b.set_state(TouchButton.State.HIGHLIGHT)
+	else:
+		b.set_state(TouchButton.State.IDLE)
+
+
 func _process(_delta: float) -> void:
-	if _attack_model != null and not _heavy_sent and _attack_model.holding_heavy(_now()):
-		_heavy_sent = true
-		_local.set_touch_heavy(true)
+	if _attack_model == null or _owner["attack"] == NO_FINGER:
+		return
+	var now := _now()
+	if _attack_model.holding_heavy(now):
+		if not _heavy_sent:
+			_heavy_sent = true
+			_local.set_touch_heavy(true)
+		var attack: TouchButton = _buttons["attack"]
+		attack.set_state(TouchButton.State.CHARGING)
+		attack.set_charge(_attack_model.charge_time(now) / maxf(_config.heavy_charge_max_time, 0.01))
 
 
 func _notification(what: int) -> void:
@@ -129,6 +172,8 @@ func _layout() -> void:
 
 func _down(index: int, pos: Vector2) -> void:
 	visible = true
+	if not _enabled:
+		return
 	for name: String in TouchLayout.BUTTONS:
 		var b: TouchButton = _buttons[name]
 		if _owner[name] == NO_FINGER and b.contains(pos):
@@ -146,7 +191,7 @@ func _up(index: int, canceled: bool) -> void:
 	for name: String in TouchLayout.BUTTONS:
 		if _owner[name] == index:
 			_owner[name] = NO_FINGER
-			(_buttons[name] as TouchButton).set_state(TouchButton.State.IDLE)
+			_refresh_idle(name)
 			_button_up(name, canceled)
 	if index == _stick_finger:
 		_stick_finger = NO_FINGER

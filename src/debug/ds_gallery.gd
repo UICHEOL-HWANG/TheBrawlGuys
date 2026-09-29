@@ -11,7 +11,7 @@ const COMPONENTS: Array[Array] = [
 	["StockIcons · DS-CMP-02", "res://src/ui/components/stock_icons/stock_icons.tscn"],
 	["ResultBanner · DS-CMP-09", "res://src/ui/components/result_banner/result_banner.tscn"],
 	["TouchStick · DS-CMP-03", "res://src/ui/components/touch_stick/touch_stick.tscn"],
-	["TouchButton v1 · DS-CMP-04", "res://src/ui/components/touch_button/touch_button.tscn"],
+	["TouchButton v2 · DS-CMP-04", "res://src/ui/components/touch_button/touch_button.tscn"],
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"
@@ -151,4 +151,24 @@ func _components() -> Control:
 		box.add_child(node)
 		if node.has_method("set_preview"):
 			node.call("set_preview")
+	var states_title := Label.new()
+	states_title.text = "TouchButton v2 states · idle / pressed / highlight / disabled / charging"
+	box.add_child(states_title)
+	box.add_child(_touch_button_states())
 	return box
+
+
+func _touch_button_states() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", DS.S5)
+	var scene := load("res://src/ui/components/touch_button/touch_button.tscn") as PackedScene
+	var icons := [TouchIcons.Icon.ATTACK, TouchIcons.Icon.JUMP, TouchIcons.Icon.GRAB, TouchIcons.Icon.GUARD, TouchIcons.Icon.ATTACK]
+	var states := [TouchButton.State.IDLE, TouchButton.State.PRESSED, TouchButton.State.HIGHLIGHT,
+			TouchButton.State.DISABLED, TouchButton.State.CHARGING]
+	for i: int in states.size():
+		var b := scene.instantiate() as TouchButton
+		b.icon = icons[i]
+		row.add_child(b)
+		b.set_state(states[i])
+		b.set_charge(0.6)
+	return row

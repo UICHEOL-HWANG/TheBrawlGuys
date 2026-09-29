@@ -128,3 +128,33 @@ func test_layout_follows_the_config() -> void:
 	c.touch_layout = TouchLayout.Variant.GRID
 	c.emit_changed()
 	assert_ne(touch.button_center("guard"), arc, "debug panel can switch layouts live for the gate")
+
+
+func test_buttons_carry_their_icons() -> void:
+	var b: Dictionary = _touch.buttons()
+	assert_eq((b["attack"] as TouchButton).icon, TouchIcons.Icon.ATTACK)
+	assert_eq((b["grab"] as TouchButton).icon, TouchIcons.Icon.GRAB)
+	assert_true((b["grab"] as TouchButton).dim_when_idle, "grab rests at 60% until it has a target")
+
+
+func test_grab_highlight_and_disable() -> void:
+	var grab := _touch.buttons()["grab"] as TouchButton
+	_touch.set_grab_highlight(true)
+	assert_eq(grab.state(), TouchButton.State.HIGHLIGHT)
+	_touch.set_grab_highlight(false)
+	assert_eq(grab.state(), TouchButton.State.IDLE)
+	_touch.set_enabled(false)
+	for b: TouchButton in _touch.buttons().values():
+		assert_eq(b.state(), TouchButton.State.DISABLED)
+	_touch._unhandled_input(_touch_event(1, _touch.jump_center(), true))
+	assert_false(_local.sample().jump, "disabled buttons ignore touches")
+
+
+func test_attack_shows_charging_while_held() -> void:
+	_touch.time_override = 20.0
+	_touch._unhandled_input(_touch_event(0, _touch.attack_center(), true))
+	_touch.time_override = 20.65
+	_touch._process(0.0)
+	var attack := _touch.buttons()["attack"] as TouchButton
+	assert_eq(attack.state(), TouchButton.State.CHARGING)
+	assert_almost_eq(attack.charge(), 0.5, 0.01, "(0.65 - 0.15) s of a 1 s max charge")

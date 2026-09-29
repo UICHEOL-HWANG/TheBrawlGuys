@@ -2,7 +2,7 @@
 
 [ext_resource type="FontFile" path="res://assets/fonts/Pretendard-SemiBold.otf" id="1_e58nf"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_suxve"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e58nf"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -13,7 +13,7 @@ corner_radius_top_right = 999
 corner_radius_bottom_right = 999
 corner_radius_bottom_left = 999
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0lef4"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_suxve"]
 draw_center = false
 border_width_left = 4
 border_width_top = 4
@@ -25,7 +25,7 @@ corner_radius_top_right = 999
 corner_radius_bottom_right = 999
 corner_radius_bottom_left = 999
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j2nyi"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0lef4"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -39,7 +39,7 @@ shadow_color = Color(0.09019608, 0.32156864, 0.3529412, 0.2509804)
 shadow_size = 16
 shadow_offset = Vector2(0, 8)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cpkg6"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j2nyi"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -53,7 +53,7 @@ shadow_color = Color(0.09019608, 0.32156864, 0.3529412, 0.2509804)
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nfvqy"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cpkg6"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -72,13 +72,14 @@ default_font = ExtResource("1_e58nf")
 default_font_size = 28
 Button/colors/font_color = Color(0.09019608, 0.32156864, 0.3529412, 1)
 Button/colors/font_disabled_color = Color(0.24705882, 0.45490196, 0.4392157, 1)
+Button/colors/font_focus_color = Color(0.09019608, 0.32156864, 0.3529412, 1)
 Button/colors/font_hover_color = Color(0.09019608, 0.32156864, 0.3529412, 1)
 Button/colors/font_pressed_color = Color(0.09019608, 0.32156864, 0.3529412, 1)
-Button/styles/disabled = SubResource("StyleBoxFlat_suxve")
-Button/styles/focus = SubResource("StyleBoxFlat_0lef4")
-Button/styles/hover = SubResource("StyleBoxFlat_j2nyi")
-Button/styles/normal = SubResource("StyleBoxFlat_j2nyi")
-Button/styles/pressed = SubResource("StyleBoxFlat_cpkg6")
+Button/styles/disabled = SubResource("StyleBoxFlat_e58nf")
+Button/styles/focus = SubResource("StyleBoxFlat_suxve")
+Button/styles/hover = SubResource("StyleBoxFlat_0lef4")
+Button/styles/normal = SubResource("StyleBoxFlat_0lef4")
+Button/styles/pressed = SubResource("StyleBoxFlat_j2nyi")
 Label/colors/font_color = Color(0.09019608, 0.32156864, 0.3529412, 1)
-Panel/styles/panel = SubResource("StyleBoxFlat_nfvqy")
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_nfvqy")
+Panel/styles/panel = SubResource("StyleBoxFlat_cpkg6")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_cpkg6")

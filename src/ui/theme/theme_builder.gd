@@ -23,6 +23,7 @@ static func build() -> Theme:
 		theme.set_color("font_color", type_name, DS.UI_TEXT)
 	theme.set_color("font_hover_color", "Button", DS.UI_TEXT)
 	theme.set_color("font_pressed_color", "Button", DS.UI_TEXT)
+	theme.set_color("font_focus_color", "Button", DS.UI_TEXT)
 	theme.set_color("font_disabled_color", "Button", DS.UI_TEXT_SOFT)
 	return theme
 

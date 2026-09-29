@@ -21,6 +21,7 @@ func test_button_states() -> void:
 	assert_eq(focus.border_color, DS.PETAL_YELLOW)
 	assert_eq(focus.border_width_top, DS.STROKE_FOCUS)
 	assert_false(focus.draw_center)
+	assert_eq(t.get_color("font_focus_color", "Button"), DS.UI_TEXT, "focused buttons keep readable text")
 
 
 func test_text_colors_and_font() -> void:

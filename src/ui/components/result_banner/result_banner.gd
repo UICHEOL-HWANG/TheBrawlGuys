@@ -23,7 +23,6 @@ func _ready() -> void:
 	col.add_child(_title)
 	_button = Button.new()
 	_button.text = "다시 하기"
-	_button.add_theme_color_override("font_focus_color", DS.UI_TEXT)  # theme has no focus font color
 	_button.pressed.connect(func() -> void: restart_requested.emit())
 	col.add_child(_button)
 	visible = false
