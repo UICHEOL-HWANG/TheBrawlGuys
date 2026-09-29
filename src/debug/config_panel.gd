@@ -1,11 +1,14 @@
 class_name ConfigPanel
 extends CanvasLayer
-## Dev-only live tuning panel (design.md DS-CMP-12). Toggle: F1 or a third finger on touch.
+## Dev-only live tuning panel (design.md DS-CMP-12). Toggle: F1 or a four-finger tap on touch
+## (Phase 1 gameplay uses up to three fingers: stick + jump + attack).
 ## DS exception: default Godot styling and fixed dev sizes are allowed here.
 
-const PANEL_WIDTH := 460.0
-const NAME_WIDTH := 190.0
-const VALUE_WIDTH := 70.0
+const PANEL_WIDTH := 660.0
+const NAME_WIDTH := 260.0
+const VALUE_WIDTH := 80.0
+const SLIDER_MIN_WIDTH := 240.0
+const SCROLLBAR_ALLOWANCE := 24.0
 
 var _config: GameConfig
 var _root: PanelContainer
@@ -22,12 +25,15 @@ func setup(config: GameConfig) -> void:
 	add_child(_root)
 
 	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_root.add_child(scroll)
 	var box := VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(box)
 
 	_info = Label.new()
+	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_info.custom_minimum_size.x = PANEL_WIDTH - SCROLLBAR_ALLOWANCE
 	box.add_child(_info)
 
 	var current_group := ""
@@ -54,7 +60,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle()
 	elif event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
-		if touch.pressed and touch.index == 2:
+		if touch.pressed and touch.index == 3:
 			toggle()
 
 
@@ -71,19 +77,31 @@ func _make_row(spec: Dictionary) -> Control:
 	slider.step = spec["step"]
 	slider.value = float(_config.get(spec["name"]))
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.custom_minimum_size.x = SLIDER_MIN_WIDTH
 	row.add_child(slider)
 
 	var value_label := Label.new()
 	value_label.custom_minimum_size.x = VALUE_WIDTH
-	value_label.text = _format(slider.value, spec["is_int"])
+	var decimals := _decimals_for_step(float(spec["step"]))
+	value_label.text = _format(slider.value, spec["is_int"], decimals)
 	row.add_child(value_label)
 
 	slider.value_changed.connect(func(v: float) -> void:
 		_config.set(spec["name"], int(v) if spec["is_int"] else v)
 		_config.emit_changed()
-		value_label.text = _format(v, spec["is_int"]))
+		value_label.text = _format(v, spec["is_int"], decimals))
 	return row
 
 
-func _format(v: float, is_int: bool) -> String:
-	return str(int(v)) if is_int else "%.3f" % v
+func _format(v: float, is_int: bool, decimals: int) -> String:
+	return str(int(v)) if is_int else "%.*f" % [decimals, v]
+
+
+## Number of decimals implied by a slider step (0.001 -> 3, 0.1 -> 1, 1.0 -> 0).
+static func _decimals_for_step(step: float) -> int:
+	var decimals := 0
+	var scaled := step
+	while decimals < 6 and absf(scaled - roundf(scaled)) > 0.0001:
+		scaled *= 10.0
+		decimals += 1
+	return decimals
