@@ -36,6 +36,7 @@ func tick(inputs: Array[InputFrame]) -> void:
 			var input: InputFrame = inputs[f.id] if f.id < inputs.size() else InputFrame.neutral()
 			Motion.step(f, input, config, attack)
 		Motion.separate(fighters, config)
+		_events.append_array(Combat.resolve(fighters, attack, config))
 	tick_count += 1
 
 

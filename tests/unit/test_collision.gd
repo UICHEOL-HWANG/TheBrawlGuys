@@ -73,3 +73,11 @@ func test_box_rotation_matters() -> void:
 func test_box_above_capsule_misses() -> void:
 	var half := Vector3(0.45, 0.45, 0.45)
 	assert_false(Collision.capsule_hits_box(Vector3(0.8, 0, 0), R, H, Vector3(0.8, 3.0, 0), 0.0, half))
+
+
+func test_non_symmetric_yaw_pins_rotation_sign() -> void:
+	# long thin box pointing along facing (1, 0, 1) normalized = yaw PI/4
+	var half := Vector3(0.1, 0.45, 1.0)
+	var yaw := PI / 4.0
+	assert_true(Collision.capsule_hits_box(Vector3(0.7, 0, 0.7), 0.3, 1.6, Vector3.ZERO, yaw, half), "along the facing diagonal")
+	assert_false(Collision.capsule_hits_box(Vector3(0.7, 0, -0.7), 0.3, 1.6, Vector3.ZERO, yaw, half), "mirrored diagonal is outside")
