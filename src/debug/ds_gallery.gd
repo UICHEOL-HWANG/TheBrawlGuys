@@ -7,6 +7,9 @@ const SWATCH_COLUMNS := 7
 const PREVIEW_SIZE := Vector2i(560, 360)
 ## Registered components: [display name, scene path]. Phase 1 adds DamageCounter, StockIcons, ...
 const COMPONENTS: Array[Array] = [
+	["DamageCounter · DS-CMP-01", "res://src/ui/components/damage_counter/damage_counter.tscn"],
+	["StockIcons · DS-CMP-02", "res://src/ui/components/stock_icons/stock_icons.tscn"],
+	["ResultBanner · DS-CMP-09", "res://src/ui/components/result_banner/result_banner.tscn"],
 	["TouchStick · DS-CMP-03", "res://src/ui/components/touch_stick/touch_stick.tscn"],
 	["TouchButton v1 · DS-CMP-04", "res://src/ui/components/touch_button/touch_button.tscn"],
 ]
