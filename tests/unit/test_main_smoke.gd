@@ -23,7 +23,7 @@ func test_restart_after_a_ko_starts_a_clean_match() -> void:
 	var hud: Hud = main.call("get_hud")
 	assert_true(hud.result_visible(), "the KO ends the match and shows the result")
 	hud.restart_requested.emit()
-	await wait_frames(1)
+	await wait_process_frames(1)
 	var fresh: World = main.call("get_world")
 	assert_ne(fresh, w, "a new world")
 	assert_false(hud.result_visible())
@@ -40,3 +40,17 @@ func test_items_in_the_world_get_views() -> void:
 	await wait_seconds(0.1)
 	var layer: ItemLayer = main.call("get_item_layer")
 	assert_eq(layer.view_count(), 1)
+
+
+func test_restart_clears_item_views_immediately() -> void:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	add_child_autofree(main)
+	await wait_seconds(0.2)
+	var w: World = main.call("get_world")
+	w.items.add(Item.Kind.BOMB, Vector3(0, 0, 0), Item.State.GROUND, w.config)
+	await wait_seconds(0.1)
+	var layer: ItemLayer = main.call("get_item_layer")
+	assert_eq(layer.view_count(), 1)
+	var hud: Hud = main.call("get_hud")
+	hud.restart_requested.emit()
+	assert_eq(layer.view_count(), 0, "no stale item view survives a restart")

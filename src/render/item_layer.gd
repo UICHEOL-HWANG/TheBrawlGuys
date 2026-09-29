@@ -31,6 +31,13 @@ func sync(prev_items: Array, curr_items: Array, alpha: float, tick: int) -> void
 			_views.erase(id)
 
 
+## Frees every view (a new match starts with a new item id sequence).
+func clear() -> void:
+	for id: int in _views.keys():
+		(_views[id] as ItemView).queue_free()
+	_views.clear()
+
+
 func view_count() -> int:
 	return _views.size()
 
