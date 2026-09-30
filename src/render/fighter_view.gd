@@ -13,7 +13,6 @@ const RING_LIFT := 0.02
 const LABEL_GAP := 0.6
 const LABEL_PIXEL_SIZE := 0.01
 const BLINK_END_SECONDS := 0.5
-const HELD_SCALE := 0.75
 const HAND_SIDE := 0.9
 const HAND_FORWARD := 0.4
 const DOT_RADIUS := 0.06
@@ -28,9 +27,8 @@ var _model: CharacterModel = null
 var _animator: CharacterAnimator = null
 var _ring: MeshInstance3D
 var _label: Label3D
-var _held: MeshInstance3D
+var _held: HeldItem
 var _charge_glow: ChargeGlow
-var _held_kind: int = Fighter.NONE
 var _dots: Array[MeshInstance3D] = []
 var _bubble: MeshInstance3D
 var _blob: BlobShadow
@@ -83,14 +81,11 @@ func setup(index: int, config: GameConfig) -> void:
 	_label.position.y = config.fighter_height + LABEL_GAP
 	add_child(_label)
 
-	_held = MeshInstance3D.new()
-	_held.scale = Vector3.ONE * HELD_SCALE
-	_held.position = Vector3(config.fighter_radius * HAND_SIDE,
+	var hand_spot := Vector3(config.fighter_radius * HAND_SIDE,
 			config.fighter_height * ItemActions.HAND_HEIGHT_RATIO, config.fighter_radius * HAND_FORWARD)
-	_held.visible = false
-	add_child(_held)
+	_attach_held(config, hand_spot)
 	_charge_glow = ChargeGlow.new()
-	_charge_glow.position = _held.position
+	_charge_glow.position = hand_spot
 	add_child(_charge_glow)
 	var dot_mesh := SphereMesh.new()
 	dot_mesh.radius = DOT_RADIUS
@@ -189,12 +184,25 @@ func bubble_visible() -> bool:
 	return _bubble.visible
 
 
+## The carried item rides on the character's hand slot (or a fixed spot on the capsule).
+func _attach_held(config: GameConfig, hand_spot: Vector3) -> void:
+	_held = HeldItem.new()
+	_held.position = hand_spot
+	add_child(_held)
+	var hand := _model.hand_slot() if _model != null else null
+	if hand == null:
+		_held.setup(config)
+		return
+	var hand_scale := hand.global_transform.basis.get_scale().x if hand.is_inside_tree() else _model.model_scale()
+	_held.setup(config, hand, hand_scale)
+
+
+func held_item() -> HeldItem:
+	return _held
+
+
 func _show_item(kind: int, uses: int) -> void:
-	_held.visible = kind != Fighter.NONE
-	if kind != Fighter.NONE and kind != _held_kind:
-		_held.mesh = ItemView.shape_mesh(kind)
-		_held.material_override = ToonMaterials.toon(ItemView.kind_color(kind), ItemView.RIM)
-	_held_kind = kind
+	_held.show_item(kind, uses)
 	for i: int in _dots.size():
 		_dots[i].visible = kind == Item.Kind.BAT and i < uses
 

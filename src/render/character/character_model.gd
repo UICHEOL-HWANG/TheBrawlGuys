@@ -6,6 +6,8 @@ extends Node3D
 
 ## Extra yaw if the model's front is not +Z (checked against a screenshot in Task 5).
 const FACING_OFFSET := 0.0
+## KayKit's right-hand weapon bone; carried items ride on it (HeldItem).
+const HAND_BONE := "handslot.r"
 
 var _root: Node3D
 var _player: AnimationPlayer
@@ -35,6 +37,21 @@ func setup(entry: Dictionary, config: GameConfig) -> bool:
 
 func animation_player() -> AnimationPlayer:
 	return _player
+
+
+## The right-hand weapon slot of the KayKit rig (BoneAttachment3D on handslot.r), or null.
+func hand_slot() -> Node3D:
+	if _root == null:
+		return null
+	for node: Node in _root.find_children("*", "BoneAttachment3D", true, false):
+		if (node as BoneAttachment3D).bone_name == HAND_BONE:
+			return node as Node3D
+	return null
+
+
+## Uniform scale applied to fit the glb to the fighter height.
+func model_scale() -> float:
+	return _root.scale.x if _root != null else 1.0
 
 
 func visible_height() -> float:

@@ -12,18 +12,36 @@ func test_shadow_grows_as_the_box_falls() -> void:
 	assert_gt(ItemView.shadow_scale(3.0, 12.0), ItemView.shadow_scale(9.0, 12.0))
 
 
-func test_fuse_blinks_only_when_lit() -> void:
-	assert_false(ItemView.fuse_visible(Item.UNLIT, 0))
+func test_a_lit_bomb_blinks_its_spark() -> void:
+	var v := ItemView.new()
+	add_child_autofree(v)
+	var c := GameConfig.new()
+	v.setup(Item.Kind.BOMB, c)
+	var bomb := v.model() as BombModel
+	assert_eq(bomb.fuse_total, SimTime.to_ticks(c.bomb_fuse_time), "fuse length from the config")
+	var unlit := _item(0, Item.Kind.BOMB, Item.State.GROUND, Vector3.ZERO)
+	v.apply(unlit, unlit, 1.0, 0)
+	assert_false(bomb.spark_visible())
 	var seen := {}
 	for t: int in 60:
-		seen[ItemView.fuse_visible(60, t)] = true
-	assert_eq(seen.size(), 2, "a lit fuse blinks on and off")
+		var lit := _item(0, Item.Kind.BOMB, Item.State.THROWN, Vector3.ZERO, 60)
+		v.apply(lit, lit, 1.0, t)
+		seen[bomb.spark_visible()] = true
+	assert_eq(seen.size(), 2, "a lit spark blinks on and off")
 
 
-func test_kind_colors_are_point_colors() -> void:
-	assert_eq(ItemView.kind_color(Item.Kind.BOMB), DS.BERRY)
+func test_each_kind_gets_its_own_model() -> void:
+	var c := GameConfig.new()
+	var views: Array[ItemView] = []
 	for kind: int in [Item.Kind.BAT, Item.Kind.BOMB, Item.Kind.ROCK]:
-		assert_ne(ItemView.kind_color(kind), DS.GRASS, "items must stand out from the grass")
+		var v := ItemView.new()
+		add_child_autofree(v)
+		v.setup(kind, c)
+		views.append(v)
+	assert_true(views[0].model() is BatModel)
+	assert_true(views[1].model() is BombModel)
+	assert_true(views[2].model() is RockModel)
+	assert_eq((views[0].model() as BatModel).max_uses, c.bat_uses, "cracks count down from the config uses")
 
 
 func test_falling_box_shows_box_and_shadow_then_the_item() -> void:
