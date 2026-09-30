@@ -1,9 +1,10 @@
 class_name AuthService
 extends Node
-## Google sign-in through Supabase Auth with PKCE (platform A4, PRD-AUTH-01).
-## Web: redirect to the provider, then restore() reads ?code= on the reload. Desktop: loopback
-## server on 127.0.0.1 + system browser. Mobile: not supported yet (deep links, context P2).
-## Sessions persist in SessionStore and are refreshed on start. Emits login_* analytics.
+## Sign-in through Supabase Auth (platform A4/B6, PRD-AUTH-01). Google with PKCE — web: redirect
+## to the provider, then restore() reads ?code= on the reload; desktop: loopback server on
+## 127.0.0.1 + system browser; mobile: not supported yet (deep links, context P2). Email with a
+## 6-digit code (EmailOtp) works on every platform. Sessions persist in SessionStore and are
+## refreshed on start. Emits login_* analytics.
 
 signal signed_in(session: SupabaseSession)
 signal sign_in_failed(reason: String)
@@ -18,6 +19,8 @@ var open_url: Callable = OS.shell_open
 var clock_ms: Callable = Time.get_ticks_msec
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 var identify: Callable = func(user_id: String) -> void: Analytics.identify(user_id)
+## Email code sign-in on the same client; created by setup().
+var email: EmailOtp = null
 
 var _client: SupabaseClient
 var _store: SessionStore
@@ -33,6 +36,7 @@ func setup(client: SupabaseClient, store: SessionStore, loopback_port: int, redi
 	_port = loopback_port
 	_redirect_web = redirect_web
 	_client.session_changed.connect(_on_session_changed)
+	email = EmailOtp.new(client, func(event_name: String, props: Dictionary) -> void: track.call(event_name, props))
 
 
 func is_signed_in() -> bool:
@@ -100,6 +104,21 @@ func sign_in() -> void:
 		_fail("browser_open_failed")
 
 
+## Mails a 6-digit code. done(result: String), one of EmailOtp.RESULT_*.
+func send_email_code(address: String, done: Callable) -> void:
+	email.platform_kind = platform_kind
+	email.send(address, done)
+
+
+## Signs in with the mailed code; on RESULT_OK signed_in fires first, as for Google.
+func verify_email_code(address: String, code: String, done: Callable) -> void:
+	email.platform_kind = platform_kind
+	email.verify(address, code, func(result: String) -> void:
+		if result == EmailOtp.RESULT_OK:
+			_completed(EmailOtp.PROVIDER)
+		done.call(result))
+
+
 func sign_out() -> void:
 	_stop_listening()
 	if _client != null:
@@ -137,9 +156,13 @@ func _exchange(code: String, verifier: String) -> void:
 		if not ok:
 			_fail("exchange_%d" % status)
 			return
-		track.call("login_completed", {"provider": PROVIDER, "platform": platform_kind})
-		identify.call(_client.session.user_id)
-		signed_in.emit(_client.session))
+		_completed(PROVIDER))
+
+
+func _completed(provider: String) -> void:
+	track.call("login_completed", {"provider": provider, "platform": platform_kind})
+	identify.call(_client.session.user_id)
+	signed_in.emit(_client.session)
 
 
 func _restored() -> void:

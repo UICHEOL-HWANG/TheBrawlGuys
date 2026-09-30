@@ -4,7 +4,7 @@ extends GutTest
 const PLAN_EVENTS: Array[String] = [
 	"app_opened", "app_backgrounded", "app_closed", "perf_sampled",
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
-	"logout",
+	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
 	"screen_viewed", "mode_selected", "character_selected", "arena_selected", "select_cancelled",
 	"match_started", "match_ended", "match_abandoned", "rematch_clicked",
 	"stock_lost", "special_used", "special_hit", "gauge_full",
