@@ -106,7 +106,7 @@
 ### 측정값
 
 - 테스트: 388개 (387 통과, 1 보류: `test_apply_sets_global_uniforms`, 헤드리스 렌더러는 글로벌 셰이더 파라미터를 읽지 못함). `check-all.sh` ALL CHECKS PASSED
-- 성능 (데스크톱 Mac14,7, 4인 봇전, vsync 끔, `evidence/performance.md`): LOW 30.0fps (max_fps 30 제한, p95 34.9ms), MEDIUM 60.0fps (p95 18.3ms), HIGH 60.0fps (p95 17.8ms). MEDIUM·HIGH는 fps 제한에 걸린 값이라 여유폭은 드러나지 않음
+- 성능 (데스크톱 Mac14,7, 4인 봇전, vsync 끔, `evidence/performance.md`): 상한 해제(Engine.max_fps 0) 측정: LOW 평균 6.9ms/144.9fps (p95 7.3ms, 출시 상한 30), MEDIUM 6.9ms/144.9fps (p95 7.2ms, 상한 60), HIGH 6.9ms/144.9fps (p95 7.2ms, 상한 60). 세 단계가 같은 값으로 수렴하므로 렌더 비용이 창/디스플레이 한계보다 작다는 뜻이며, 60fps 상한(16.7ms) 대비 2배 이상 여유
 - 빌드 크기 (`check_build_size.sh`): Android APK 36MB (예산 150). 웹 pck+wasm 원본 47MB, gzip -9 18MB (예산 40). 웹 예산은 압축 전송 크기로 측정한다 (컨트롤러 판정)
 - 웹 비교: `evidence/web-toon.png` vs `evidence/desktop-toon.png`. 웹이 데스크톱보다 어둡고 올리브 톤이라 "웹 툰 룩 유지"는 미체크. 최종 수정 단계에서 재캡처 후 갱신
 
@@ -114,7 +114,7 @@
 
 - iOS: 서명 없는 Xcode 프로젝트만 export. 팀 ID는 자리표시 `0000000000`, 앱 아이콘은 자리표시 `assets/app_icon.svg`
 - BGM은 임시곡
-- 데스크톱 60fps 측정은 fps 제한 때문에 여유폭 미확인
+- 데스크톱 측정은 상한을 해제했지만 세 단계가 6.9ms 근처로 수렴해 단계 간 비용 차이는 분리되지 않음 (창/디스플레이 한계)
 - 🖼 캐릭터 룩 T7 미수행: 근접 캡처 `evidence/look-closeup-{0,1,2}.png`
 
 ### Phase 4로 넘기는 항목

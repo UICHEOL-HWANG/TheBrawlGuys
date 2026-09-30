@@ -27,12 +27,15 @@ func _set_level(level: int) -> void:
 	_level = level
 	_config.quality_level = level
 	_config.emit_changed()
+	# emit_changed applies the level's shipping cap (30/60); lift it so frame time is uncapped.
+	Engine.max_fps = 0
 	_frame = 0
 	_times.clear()
 	_last_us = Time.get_ticks_usec()
 
 
 func _tick() -> void:
+	Engine.max_fps = 0  # the match's _ready applies the LOW cap on the first frame; keep it lifted
 	var now := Time.get_ticks_usec()
 	_frame += 1
 	if _frame > WARMUP:
@@ -46,11 +49,11 @@ func _tick() -> void:
 		total += t
 	var avg := float(total) / _times.size()
 	var p95 := _times[int(_times.size() * 0.95)]
-	_rows.append("| %s | %.0f | %d | %d | %.1f |" % [["LOW", "MEDIUM", "HIGH"][_level], avg, p95, _times[-1], 1000000.0 / avg])
+	_rows.append("| %s | %.0f | %d | %d | %.1f | %d |" % [["LOW", "MEDIUM", "HIGH"][_level], avg, p95, _times[-1], 1000000.0 / avg, int(Quality.settings(_level)["max_fps"])])
 	if _level < 2:
 		_set_level(_level + 1)
 		return
-	var text := "# Phase 3 성능 (데스크톱, 4인 봇전, vsync 끔)\n\n| 품질 | 평균 µs | p95 µs | 최대 µs | 평균 FPS |\n|---|---|---|---|---|\n" + "\n".join(_rows) + "\n\n- 기기: %s\n- LOW는 max_fps 30 제한이 걸린다 (프레임 시간은 제한 포함)\n- 모바일 실기기 측정: 대기\n" % OS.get_model_name()
+	var text := "# Phase 3 성능 (데스크톱, 4인 봇전, vsync 끔, 상한 해제)\n\n| 품질 | 평균 µs | p95 µs | 최대 µs | 평균 FPS | 출시 상한 FPS |\n|---|---|---|---|---|---|\n" + "\n".join(_rows) + "\n\n- 기기: %s\n- 측정 중에는 Engine.max_fps = 0 (상한 해제): 표는 렌더 비용 자체이며 출시 상한 열은 참고용\n- 프레임 시간이 세 단계 모두 같은 값으로 수렴하면 렌더 비용이 창/디스플레이 한계보다 작다는 뜻이다 (상한 해제 후에도 그 아래는 보이지 않음). 최대값의 1초 스파이크는 창 시작 시 1회성 정지\n- 모바일 실기기 측정: 대기\n" % OS.get_model_name()
 	var f := FileAccess.open(OUT, FileAccess.WRITE)
 	f.store_string(text)
 	f.close()

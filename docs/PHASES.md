@@ -223,7 +223,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 ### 완료 기준
 
 - [x] 캡슐 버전과 같은 리플레이 해시 → 조작감 동일 — `BEHAVIOR_HASH` 1822125224 (커밋 61bd3ba에서 고정) Phase 3 내내 불변. `GOLDEN_HASH`는 cf80ce7(지문을 sim 그룹으로 한정)에서 한 번만 변경 (2953754395)
-- [ ] 중급 모바일 기기 4인 봇전 60fps 유지 (프로파일러 캡처) `[PRD-NFR-01]` — 실기기 확인 대기 (데스크톱 품질별 4인 봇전: `dev/active/phase-3/evidence/performance.md`, LOW 30 / MEDIUM 60 / HIGH 60fps는 fps 제한에 걸린 값)
+- [ ] 중급 모바일 기기 4인 봇전 60fps 유지 (프로파일러 캡처) `[PRD-NFR-01]` — 실기기 확인 대기 (데스크톱 품질별 4인 봇전: `dev/active/phase-3/evidence/performance.md`, 상한 해제 후 LOW·MEDIUM·HIGH 모두 평균 6.9ms/145fps, p95 7.3ms 이하)
 - [x] 모바일 빌드 ≤ 150MB, 웹 초기 로딩 ≤ 40MB `[PRD-NFR-05]` — `check_build_size.sh`: android apk 36 MB (≤150), web pck+wasm gzip -9 18 MB (≤40, 원본 47 MB). 웹 예산은 압축 전송 크기로 측정 (컨트롤러 판정)
 - [ ] 웹(Compatibility)에서도 툰 룩이 유지된다 (스크린샷 비교) — 최종 수정 단계에서 조정 중 (현재 웹 캡처가 데스크톱보다 어둡고 올리브 톤: `evidence/web-toon.png` vs `evidence/desktop-toon.png`)
 
