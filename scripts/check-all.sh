@@ -6,4 +6,5 @@ cd "$(dirname "$0")"
 ./check-sim-purity.sh
 ./check-colors.sh
 ./check-docs.sh
+./check-secrets.sh
 echo "ALL CHECKS PASSED"

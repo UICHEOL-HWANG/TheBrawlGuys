@@ -7,3 +7,5 @@ build/*
 # OS
 .DS_Store
 *.avi
+# Local client keys (never commit)
+config/secrets.local.cfg
