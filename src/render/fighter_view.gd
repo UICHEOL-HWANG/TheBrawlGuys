@@ -25,6 +25,7 @@ const WOBBLE_SQUASH := Vector3(1.12, 0.88, 1.12)
 var _config: GameConfig
 var _body: MeshInstance3D
 var _model: CharacterModel = null
+var _animator: CharacterAnimator = null
 var _ring: MeshInstance3D
 var _label: Label3D
 var _held: MeshInstance3D
@@ -49,6 +50,10 @@ func setup(index: int, config: GameConfig) -> void:
 	add_child(_model)
 	if _model.setup(CharacterCatalog.for_player(index), config):
 		_body.visible = false
+		if _model.animation_player() != null:
+			_animator = CharacterAnimator.new()
+			add_child(_animator)
+			_animator.setup(_model.animation_player(), config)
 	else:
 		_model.queue_free()
 		_model = null
@@ -119,6 +124,16 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 		_body.visible = shown
 	_show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
 	_bubble.visible = int(curr["state"]) == Fighter.State.GUARD
+
+
+## Advances the character animation from the latest sim view (main calls this every frame).
+func animate(curr: Dictionary, delta: float) -> void:
+	if _animator != null and int(curr["state"]) != Fighter.State.KO:
+		_animator.apply(curr, delta)
+
+
+func animator() -> CharacterAnimator:
+	return _animator
 
 
 func model() -> CharacterModel:

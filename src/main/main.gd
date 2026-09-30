@@ -131,7 +131,7 @@ func _process(delta: float) -> void:
 		_curr_state = _world.state_view()
 		events.append_array(_curr_state["events"])
 	_alpha = _ticker.alpha()
-	_draw_fighters()
+	_draw_fighters(delta)
 	_item_layer.sync(_prev_state["items"], _curr_state["items"], _alpha, int(_curr_state["tick"]))
 	_hud.update_from(_curr_state)
 	_feel.on_events(events)
@@ -150,13 +150,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_start_match()
 
 
-func _draw_fighters() -> void:
+func _draw_fighters(delta: float) -> void:
 	var prev: Array = _prev_state["fighters"]
 	var curr: Array = _curr_state["fighters"]
 	var tick := int(_curr_state["tick"])
 	for i: int in _views.size():
 		var before: Dictionary = prev[i] if i < prev.size() else {}
 		_views[i].apply(before, curr[i], _alpha, tick)
+		_views[i].animate(curr[i], delta)
 
 
 func _wobble_guards(events: Array) -> void:
