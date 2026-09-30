@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-10-01 04:00 KST (main 병합: p5-charselect · p5-gear)
+**Last Updated:** 2026-10-01 06:00 KST (feat/p5-tutorial: T11 온보딩 튜토리얼)
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -71,3 +71,16 @@
 - 스타일·캐릭터가 바뀌면 벗기고 다시 입힘(메시 변환·재질·대기 클립 복원). 디버그 B/C·`StyleMockup`은 삭제
 - 증거: `evidence/silhouette-final{,-bw,-sil,-held}.png` (`scripts/capture_silhouette.gd`, 슬롯별 캐릭터 강제) · 경기 화면 `silhouette-final-match{,-zoom}.png` (`scripts/capture_gear_match.gd`, 밀집 4인 · Barbarian이 방망이를 들어 장갑 숨김)
 - 한계: 경기 카메라(위에서 내려봄)에선 Mage 구슬이 모자 챙에 일부 가려진다. 필살기·공격 모션 중에도 검·지팡이 기울기가 그대로라 스윙 궤적과 칼날 각도가 조금 어긋날 수 있음 — 실제 플레이 확인 후 조정
+
+## T11 온보딩 튜토리얼 결정 (2026-10-01, `feat/p5-tutorial`)
+- 흐름: `App._on_signed_in`(세션 복원 포함)에서 타이틀을 띄운 뒤 `TutorialProgress.is_pending()`이면 튜토리얼 화면(`App.TUTORIAL`, 커튼 + 배경 분리)을 그 위에 push. 완료·건너뛰기 → `menu_requested` → `_back_to_title`. 디버그 "건너뛰기(로그인)"는 로그인 성공이 아니라 튜토리얼 없이 타이틀로. 타이틀 "튜토리얼 다시 보기"(secondary) = source `replay`
+- 저장: `SettingsStore` `[onboarding] tutorial = completed | skipped`(없으면 pending). 다시 보기에서 건너뛰어도 이전 `completed`는 유지. 테스트는 `App.tutorial`에 자기 파일을 넣는다(`test_app_flow`는 완료 상태로)
+- 장면: `src/tutorial/tutorial_match.gd`가 `main.gd`를 상속(perf_match 패턴). main에 훅 두 개만 추가: `_new_tracking()`(튜토리얼은 무음 MatchTracking — 경기 이벤트·Supabase 업로드·user_match_seq 없음), `_after_tick(inputs)`. 고전 경기장, P1 = `barbarian`(필살기 있음), 슬롯 1 = 클래식 연습 상대
+- sim 순수 유지: sim 코드는 한 줄도 안 바뀜. `TutorialStaging`이 튜토리얼 자기 World의 공개 필드만 틱 사이에 고친다(테스트처럼): 스톡 99(50 아래면 다시 99), 아이템 상자 스포너 끔(`next_spawn_tick` = 1<<30), 미션마다 연습 상대 대미지 0, 아이템 미션 동안 필드·손에 아이템이 없으면 가운데 방망이 드롭, 필살기 미션 동안 게이지 가득. 튜토리얼 경기는 기록·업로드되지 않으므로 리플레이 해시와 무관
+- 판정(`TutorialDetector`, 렌더 쪽, 뷰·이벤트만): 이동 = 지상 평면 누적 4 m(리스폰 순간이동 제외) · 점프 = `jumps_left` 감소 · 약공격 = 내 `hit` + 내 상태 ATTACK·LIGHT_1~3 · 강공격 = 내 `hit`, attack_kind HEAVY, `power` ≥ `Actions.charge_mul(0.25초)`(톡 친 강공격은 불인정) · 가드 = 나를 향한 `guard_hit` 또는 내 `perfect_guard` · 잡기 = 내 `grab` → 던지기 = 내 `hit` attack_kind THROW · 아이템 = 내 `item_pickup` → 내 `item_throw` 또는 방망이 스윙 시작 · 필살기 = 내 `special_start`. 연습 상대의 행동은 절대 인정 안 됨
+- 연습 상대(`TutorialDummy`): 가드 미션에서만 다가와(봇 공격 사거리) 80틱마다 한 틱 돌아선 뒤 약공격, 그 외엔 중립
+- UI: `TutorialCard`(DS-CMP-19, UiPanel) 위쪽 가운데 + `TutorialSkipDialog`(확인창, 터치 위 레이어, 열려 있는 동안 `_process`를 건너뛰어 sim 정지). 건너뛰기 버튼은 포커스를 받지 않는다(Space = 점프가 버튼을 누르지 않게). Esc·패드 Start = 확인창 열기/닫기, 완료 뒤엔 타이틀로. 성공 피드백 "좋아요!" + bump + `ui_confirm`, 1.2초 뒤 다음 미션(그동안 판정 멈춤, 키 링 없음)
+- 키 바 재사용: `KeyHintBar.set_highlight(ids)` / `highlighted()`, `KeyCap.set_target()` = 플레이어 색 링(`stroke_focus`, 알파 0.35↔1 `motion_slow`). 처음엔 `petal_yellow`였지만 크림 바 위에서 안 보여 캡처 후 바꿈. 바가 200줄을 넘지 않게 갤러리 미리보기를 `KeyHintPreview`로 뺌. 튜토리얼은 숨긴 바도 저장 없이 보이게 한다
+- 장치별 문구(`TutorialText`): 터치 컨트롤이 보이면 터치(키 바는 숨음) · 마지막 입력이 패드이거나 P1이 패드를 잡고 있으면 패드(Xbox A/X/Y/B/RB, PS × □ △ ○ R1 — Pretendard에 ✕가 없어 ×) · 아니면 P1 InputMap 키. 조사(로/으로, 를/을)는 장치별 명사에 붙여 둠
+- 트래킹(스키마 5 → 6, 마이그레이션 없음): `tutorial_started{source, step_count?, input_device?}`, `tutorial_step_completed{step, index(1부터), ms_in_step, attempts(≥1)}`, `tutorial_skipped{step, index, ms_in_step?, total_ms?}`, `tutorial_completed{total_ms, step_count?}`. `screen_viewed.screen`에 `tutorial`. tracking-plan §3.3.1 · Q18
+- 증거: `evidence/tutorial-{mission,success,grab,special,skip,complete}.png`(1920×1080) · `-phone.png`(1624×750, 배율 1.6, 터치). 캡처 `scripts/capture_tutorial.gd`(미션은 목표를 직접 완료시켜 넘김)

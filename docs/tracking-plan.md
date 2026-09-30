@@ -1,6 +1,6 @@
 # TheBrawlGuys — 트래킹 플랜
 
-> 버전 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
+> 버전 0.4 · 2026-10-01 (Phase 5 T11 온보딩 튜토리얼 퍼널 — `tutorial_*` 4종, `screen_viewed.screen`에 `tutorial` — `event_schema_version` 6) · 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
 > 상위: [`PRD.md`](./PRD.md) §5.8 (`PRD-DATA-03`, `PRD-DATA-04`) · 일정: [`PHASES.md`](./PHASES.md) Phase 4.0 · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떤 이벤트를, 어떤 속성으로, 어디에 보내는지**의 단일 원천(SSOT)이다.
@@ -94,11 +94,24 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|character\|arena\|lobby\|match\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
+| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|character\|arena\|lobby\|match\|tutorial\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
 | `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
 | `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest)` | `browse_count: int` | A | 4 |
 | `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
+
+#### 3.3.1 온보딩 튜토리얼 퍼널 (`PRD-UI-02`, Phase 5 T11)
+
+기기에서 처음 로그인하면(세션 복원 포함, `user://settings.cfg` `[onboarding] tutorial`이 비어 있을 때) 타이틀 위에 연습 경기장 튜토리얼이 열린다. 타이틀의 "튜토리얼 다시 보기"로 언제든 다시 할 수 있다. 미션 순서(`step` 값, 바꾸지 않고 추가만 한다): `move` → `jump` → `light_attack` → `heavy_attack` → `guard` → `grab_throw` → `item` → `special`. `index`는 1부터(카드의 "n/8"). 튜토리얼은 경기가 아니다 — `match_*`·`stock_lost` 등 경기 이벤트와 Supabase 행을 보내지 않는다. 성공 판정은 렌더 쪽에서 sim 뷰·이벤트만 읽는다(원칙 T3).
+
+| 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
+|---|---|---|---|---|---|
+| `tutorial_started` | 튜토리얼 화면이 첫 미션을 연 순간 | `source: enum(first_login\|replay)` | `step_count: int` (미션 수, 지금 8), `input_device: enum(keyboard\|gamepad\|touch)` (시작 때 안내한 장치) | A | 5 (스키마 6) |
+| `tutorial_step_completed` | 한 미션의 마지막 목표를 성공한 순간 (잡기·던지기, 줍기·쓰기처럼 목표가 둘이면 둘 다) | `step: str` (위 순서의 id), `index: int` (1..8), `ms_in_step: int` (미션을 연 뒤 성공까지 ms, 건너뛰기 확인창이 떠 있던 시간 포함), `attempts: int` (그 미션의 버튼을 새로 누른 횟수 ≥ 1 — 이동은 중립에서 벗어난 횟수, 필살기는 강+가드가 함께 눌린 횟수) | — | A | 5 (스키마 6) |
+| `tutorial_skipped` | 건너뛰기 확인창에서 "건너뛰기"를 누른 순간 (버튼·Esc·패드 Start로 연 확인창) | `step: str` (그때 진행 중이던 미션), `index: int` | `ms_in_step: int`, `total_ms: int` | A | 5 (스키마 6) |
+| `tutorial_completed` | 마지막 미션(`special`)을 성공한 순간 | `total_ms: int` (시작부터) | `step_count: int` | A | 5 (스키마 6) |
+
+퍼널: `tutorial_started` → `tutorial_step_completed` (`index` 1..8) → `tutorial_completed`, 이탈 지점 = `tutorial_skipped.step` 또는 마지막 `tutorial_step_completed` 뒤 `session_ended`. 완료·건너뛰기는 기기에 저장되어 첫 로그인 튜토리얼은 한 번만 열린다(다시 보기에서 건너뛰어도 이전 완료는 유지).
 
 ### 3.4 경기
 
@@ -269,6 +282,7 @@
 | Q15 | **플레이 스타일 군집·실력** (M3·M4) | `match_players` 행동 피처 (`press_*`, `mash_ratio`, `edge_time_ratio`, `avg_nearest_opponent_dist`, `hit_accuracy`, `max_combo`, `comeback_win` …), `controller`·`bot_params_hash` | 세그먼트별 튜닝, 봇 난이도 추천 |
 | Q16 | **재현 가능한 경기만 분석하고 있나?** (L0 무결성) | `matches` 재현 헤더 (`config_fingerprint`, `sim_version`, `final_state_hash`), `match_inputs`, `scripts/replay_verify.gd` | 불일치 경기 제외, sim 변경 시 버전 관리 |
 | Q17 | **체감 성능이 이탈에 주는 영향** | `perf_sampled` (`fps_p5`, `fps_p50`, `spike_count`, `match_id`로 경기와 조인), `load_timed`, `input_device_primary` | 품질 기본값·최적화 우선순위 |
+| Q18 | **온보딩 튜토리얼** — 어느 미션에서 오래 걸리거나 건너뛰나? 튜토리얼을 끝낸 사람이 첫 경기를 더 완주하나? | `tutorial_started.source`·`input_device`, `tutorial_step_completed` (`index`, `ms_in_step`, `attempts`), `tutorial_skipped.step`, `tutorial_completed.total_ms`, 이어서 `match_started` → `match_ended` / `match_abandoned` (Q4) | 미션 순서·문구·판정 기준(`TutorialDetector`) 조정, 어려운 미션 빼기 |
 
 ---
 
