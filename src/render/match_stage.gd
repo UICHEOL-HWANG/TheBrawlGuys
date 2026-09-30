@@ -18,6 +18,7 @@ var _requested_id: String = ""
 var _views: Array[FighterView] = []
 var _hazards: Array[FighterHazards] = []
 var _defense: Array[DefenseFx] = []
+var _reactions: Array[HitReaction] = []
 var _items: ItemLayer
 
 
@@ -38,6 +39,10 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 		view.add_child(fx)
 		fx.setup(i, config, view)
 		_defense.append(fx)
+		var reaction := HitReaction.new()
+		view.add_child(reaction)
+		reaction.setup(view.model())
+		_reactions.append(reaction)
 		var hazards := FighterHazards.new()
 		add_child(hazards)
 		hazards.setup(i, config)
@@ -86,16 +91,41 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 	_items.sync(prev["items"], curr["items"], alpha, tick)
 
 
-## This frame's sim events: guard wobbles, perfect-guard rings and arena reactions (mushroom squash).
+## This frame's sim events: guard wobbles, hit reactions (DS-VFX-08), perfect-guard rings and
+## arena reactions (mushroom squash).
 func on_events(events: Array) -> void:
 	for e: Dictionary in events:
-		if String(e["type"]) == "guard_hit":
-			var id := int(e["target"])
-			if id < _views.size():
-				_views[id].wobble()
-		elif String(e["type"]) == "perfect_guard" and int(e["fighter"]) < _defense.size():
-			_defense[int(e["fighter"])].perfect_flash()
+		match String(e["type"]):
+			"guard_hit":
+				var id := int(e["target"])
+				if id < _views.size():
+					_views[id].wobble()
+			"hit":
+				_react(e)
+			"perfect_guard":
+				if int(e["fighter"]) < _defense.size():
+					_defense[int(e["fighter"])].perfect_flash()
 	_arena_view.on_events(events)
+
+
+func reactions() -> Array[HitReaction]:
+	return _reactions
+
+
+## Victim flash and jolt; a melee attacker also lunges (render only).
+func _react(e: Dictionary) -> void:
+	var target := int(e["target"])
+	var attacker := int(e["attacker"])
+	if target < 0 or target >= _views.size():
+		return
+	var melee := e.has("attack_kind") and attacker >= 0 and attacker < _views.size()
+	var at: Vector3 = e["pos"]
+	var from := _views[attacker].position if melee else at
+	var dir := ImpactTier.hit_direction(_views[target].position, at, from, melee)
+	var hold := float(e["hitstop_ticks"]) / SimTime.TICK_RATE
+	_reactions[target].struck(dir, ImpactTier.of(float(e["knockback"]), _config), hold)
+	if melee and attacker != target:
+		_reactions[attacker].strike(dir, hold)
 
 
 func set_identity_visible(on: bool) -> void:

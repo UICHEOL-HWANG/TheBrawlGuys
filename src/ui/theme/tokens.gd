@@ -85,6 +85,12 @@ const GUARD_BUBBLE := Color("#C4E8F666")
 const GUARD_BUBBLE_LOW := Color("#F0584A66")
 ## Respawn light pillar (design.md DS-VFX-06): glow at 40%.
 const RESPAWN_BEAM := Color("#FFF3C466")
+## Comic hit impact (DS-VFX-01 v2): hot star core, victim flash, heavy-hit screen flash (glow
+## 24%) and the flat guard clang spark (DS-VFX-07).
+const IMPACT_CORE := Color("#FFFBEA")
+const HIT_FLASH := Color("#FFFFFF")
+const SCREEN_FLASH := Color("#FFF3C43D")
+const CLANG := Color("#8FD0FF")
 
 # --- Players (always paired with a shape, DS-VIS-03) ---
 const P1 := Color("#3E7BF0")

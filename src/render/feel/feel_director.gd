@@ -1,18 +1,27 @@
 class_name FeelDirector
 extends Node3D
-## Turns sim events into game feel (design.md §9): hit puffs sized by knockback, screen shake that
-## starts when hitstop ends, a full-strength shake on ring-out, a small puff on guarded hits and a
-## large puff plus shake on bomb explosions. Landing dust and knockback trails come from
-## ViewEvents. Render-side only.
+## Turns sim events into game feel (design.md §9): comic impact bursts sized by the knockback tier
+## in the attacker's color, damage numbers over the victim, a screen flash and camera punch on
+## heavy hits (DS-VFX-01 v2, DS-VFX-09), a blue clang on guarded hits (DS-VFX-07), screen shake
+## that starts when hitstop ends, a full-strength shake on ring-out and a large puff plus shake on
+## bomb explosions. Landing dust and knockback trails come from ViewEvents. Render-side only.
+## Bursts and numbers are pooled (ImpactTier.pool_cap, fewer on low quality).
 
 ## Explosion shake as a fraction of shake_max.
 const EXPLOSION_SHAKE_RATIO := 0.8
+## Star roll step between consecutive bursts (radians), so repeated hits do not look stamped.
+const ROLL_STEP := 0.9
 
 var _config: GameConfig
 var _camera: CameraRig
 var _shake: ShakeModel
 var _trail: KnockbackTrail
 var _decor_lake: bool = ArenaDressings.has_decor_lake(ArenaCatalog.DEFAULT_ID)
+var _bursts: Array[ImpactBurst] = []
+var _burst_pool: FxPool
+var _popups: DamagePopup
+var _flash: ScreenFlash
+var _hits: int = 0
 
 
 func setup(config: GameConfig, camera: CameraRig) -> void:
@@ -21,6 +30,16 @@ func setup(config: GameConfig, camera: CameraRig) -> void:
 	_shake = ShakeModel.new(config)
 	_trail = KnockbackTrail.new()
 	add_child(_trail)
+	_burst_pool = FxPool.new(ImpactTier.pool_cap(Quality.particle_scale(config)))
+	for i: int in _burst_pool.size():
+		var burst := ImpactBurst.new()
+		add_child(burst)
+		_bursts.append(burst)
+	_popups = DamagePopup.new()
+	add_child(_popups)
+	_popups.setup(config)
+	_flash = ScreenFlash.new()
+	add_child(_flash)
 
 
 ## The arena being played (ring-outs splash only where there is water).
@@ -28,15 +47,16 @@ func set_arena(arena_id: String) -> void:
 	_decor_lake = ArenaDressings.has_decor_lake(arena_id)
 
 
-func on_events(events: Array) -> void:
+## fighters: this tick's fighter views (positions and damage for direction and numbers).
+func on_events(events: Array, fighters: Array = []) -> void:
 	for e: Dictionary in events:
 		match String(e["type"]):
 			"hit":
-				var kb: float = e["knockback"]
-				_spark(e["pos"], kb >= _config.spark_large_threshold)
-				_shake.add(kb, float(e["hitstop_ticks"]) / SimTime.TICK_RATE)
+				_impact(e, fighters)
+				_shake.add(float(e["knockback"]), _hold(e))
 			"guard_hit":
-				_spark(e["pos"], false)
+				_hits += 1
+				_next_burst().play_clang(e["pos"], _direction(e, fighters), _hold(e), _hits * ROLL_STEP)
 			"explosion":
 				_spark(e["pos"], true)
 				_shake.add(_full_shake_knockback() * EXPLOSION_SHAKE_RATIO, 0.0)
@@ -69,9 +89,13 @@ func on_view_events(events: Array) -> void:
 				_trail.add_sample(e["pos"], float(e["intensity"]), PlayerStyle.color(int(e["id"])), scale)
 
 
-## A restart starts with a still camera (Phase 1 carry-over).
+## A restart starts with a still camera (Phase 1 carry-over) and no leftover hit effects.
 func reset() -> void:
 	_shake = ShakeModel.new(_config)
+	for b: ImpactBurst in _bursts:
+		b.stop()
+	_popups.clear()
+	_flash.stop()
 	if _camera != null:
 		_camera.set_shake_offset(Vector3.ZERO)
 
@@ -86,6 +110,57 @@ func _process(delta: float) -> void:
 	var offset := _shake.update(delta)
 	if _camera != null:
 		_camera.set_shake_offset(offset)
+
+
+func active_bursts() -> Array[ImpactBurst]:
+	return _bursts.filter(func(b: ImpactBurst) -> bool: return b.active())
+
+
+func popups() -> DamagePopup:
+	return _popups
+
+
+func screen_flash() -> ScreenFlash:
+	return _flash
+
+
+## A landed hit: comic burst in the attacker's color, the victim's number, heavy extras.
+func _impact(e: Dictionary, fighters: Array) -> void:
+	var tier := ImpactTier.of(float(e["knockback"]), _config)
+	var attacker := _fighter(fighters, int(e["attacker"]))
+	var color := PlayerStyle.color(int(e["attacker"])) if not attacker.is_empty() else DS.FIRE
+	var lines := ImpactTier.speed_lines(tier, Quality.particle_scale(_config))
+	_hits += 1
+	_next_burst().play_hit(e["pos"], _direction(e, fighters), tier, color, _hold(e), lines, _hits * ROLL_STEP)
+	var target := _fighter(fighters, int(e["target"]))
+	if not target.is_empty():
+		_popups.show_hit(target["pos"], float(e["damage"]), float(target["damage"]), tier)
+	if tier == ImpactTier.Tier.HEAVY:
+		_flash.flash()
+		if _camera != null:
+			_camera.punch(_config.impact_heavy_punch)
+
+
+func _direction(e: Dictionary, fighters: Array) -> Vector3:
+	var at: Vector3 = e["pos"]
+	var target := _fighter(fighters, int(e["target"]))
+	var attacker := _fighter(fighters, int(e["attacker"]))
+	return ImpactTier.hit_direction(target.get("pos", at), at, attacker.get("pos", at), e.has("attack_kind"))
+
+
+func _next_burst() -> ImpactBurst:
+	return _bursts[_burst_pool.acquire()]
+
+
+static func _hold(e: Dictionary) -> float:
+	return float(e["hitstop_ticks"]) / SimTime.TICK_RATE
+
+
+static func _fighter(fighters: Array, id: int) -> Dictionary:
+	for f: Dictionary in fighters:
+		if int(f["id"]) == id:
+			return f
+	return {}
 
 
 func _spark(at: Vector3, large: bool) -> void:
