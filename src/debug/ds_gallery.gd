@@ -13,6 +13,8 @@ const COMPONENTS: Array[Array] = [
 	["TouchStick · DS-CMP-03", "res://src/ui/components/touch_stick/touch_stick.tscn"],
 	["TouchButton v2 · DS-CMP-04", "res://src/ui/components/touch_button/touch_button.tscn"],
 	["ChargeGauge · DS-CMP-05", "res://src/ui/components/charge_gauge/charge_gauge.tscn"],
+	["MenuButton · DS-CMP-06", "res://src/ui/components/menu_button/menu_button.tscn"],
+	["Panel · DS-CMP-07", "res://src/ui/components/panel/panel.tscn"],
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"

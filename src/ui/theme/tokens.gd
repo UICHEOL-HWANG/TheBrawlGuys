@@ -104,5 +104,15 @@ const MOTION_FAST := 0.08
 const MOTION_BASE := 0.18
 const MOTION_SQUISH := 0.28
 const MOTION_SLOW := 0.40
+## Big entrances (login panel spring / logo drop, design.md DS-TOK-05).
+const MOTION_ENTRANCE := 0.60
 ## Button press squish (design.md DS-TOK-05).
 const PRESS_SQUISH := Vector2(1.04, 0.92)
+
+# --- Menu layout sizes (DS-TOK-03 menu sizes), at 1920x1080 ---
+const BUTTON_MIN_WIDTH := 400
+const BUTTON_HEIGHT := 80
+const PANEL_WIDTH := 640
+const SIDE_PANEL_WIDTH := 680
+## Title logo outline (world-overlay text rule of DS-TOK-02, scaled for display_xl).
+const LOGO_OUTLINE := 14
