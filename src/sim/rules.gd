@@ -56,6 +56,7 @@ static func clear_actions(f: Fighter) -> void:
 	f.item_uses = 0
 	f.burn_ticks = 0
 	f.burn_clock = 0
+	f.held_presses = 0
 
 
 ## Ring-outs this tick. Each "ringout" event says which bound was crossed ("zone": "kill_y",
