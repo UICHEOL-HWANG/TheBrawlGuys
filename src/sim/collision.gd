@@ -1,19 +1,11 @@
 class_name Collision
 extends RefCounted
-## Simple-shape collision for the pure sim (PRD §5.2): round arena floor, ring-out bounds,
-## vertical capsules (fighters) and Y-rotated boxes (hitboxes). No engine physics.
+## Simple-shape collision for the pure sim (PRD §5.2): vertical capsules (fighters) and
+## Y-rotated boxes (hitboxes). No engine physics. Floors and ring-out bounds are ArenaFloor's.
 
 ## Push direction used when two capsules sit exactly on top of each other.
 const COINCIDENT_AXIS := Vector3(1, 0, 0)
 const EPSILON := 0.000001
-
-
-static func on_arena_floor(pos: Vector3, arena_radius: float) -> bool:
-	return Vector2(pos.x, pos.z).length() <= arena_radius
-
-
-static func is_out_of_bounds(pos: Vector3, arena_radius: float, blast_margin: float, kill_y: float) -> bool:
-	return pos.y < kill_y or Vector2(pos.x, pos.z).length() > arena_radius + blast_margin
 
 
 static func separate_capsules(a: Vector3, b: Vector3, radius: float, height: float) -> Vector3:

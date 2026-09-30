@@ -17,3 +17,12 @@
 
 ## 핵심 파일
 `src/sim/collision.gd`, `rules.gd`, `world.gd`, 신규 `src/sim/arena/`, `src/render/arena_view.gd`, `decor_view.gd`, `environment_rig.gd`, `tests/replay/test_replay.gd`
+
+## T1–T5 병합 (2026-09-30, merge 6b823a0)
+- 테스트 547/547, check-all 통과. 4봇 틱 비용 경기장별 평균 66~80µs (예산 2000µs)
+- 경기장 id: classic(기본) · lakeside_camp · log_bridge · mushroom_forest · foggy_forest. `World(config, seed, count, ArenaCatalog.build(id, config))`
+- 새 sim 이벤트: gimmick_damage{kind,target,amount,pos} · platform_break/restore{id,pos} · bounce{fighter,pad,pos} · fog_start{id,ticks} · fog_end{id} · ringout.zone(kill_y|blast|lake|water)
+- state_view 추가: arena, arena_theme, arena_floors, gimmicks[], fighter.burning
+- 해시: GOLDEN 2216053793, BEHAVIOR 11665018 (사유는 각 커밋), ARENA_HASHES는 test_arena_replay.gd
+- 봇 미러 교착 방지: `bot_attack_range_spread` (동시 타격 공정화의 부작용)
+- 남은 것: T6 렌더(경기장 뷰·테마·위험 표시·안개), T7 선택 화면 — 앱 셸 병합 후

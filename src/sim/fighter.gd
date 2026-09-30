@@ -18,7 +18,8 @@ const DATA_TYPES := {
 	"attack_ticks": TYPE_INT, "hit_ids": TYPE_ARRAY,
 	"attack_kind": TYPE_INT, "combo_queued": TYPE_BOOL, "charge_ticks": TYPE_INT,
 	"charge_mul": TYPE_FLOAT, "grab_ticks": TYPE_INT, "partner_id": TYPE_INT,
-	"item_kind": TYPE_INT, "item_uses": TYPE_INT,
+	"item_kind": TYPE_INT, "item_uses": TYPE_INT, "burn_ticks": TYPE_INT, "burn_clock": TYPE_INT,
+	"held_presses": TYPE_INT,
 }
 
 var id: int = 0
@@ -53,6 +54,11 @@ var partner_id: int = NONE
 ## Item.Kind carried in hand, or NONE (E6).
 var item_kind: int = NONE
 var item_uses: int = 0
+## Ticks of burning left (campfire, Burning) and ticks since the last burn damage.
+var burn_ticks: int = 0
+var burn_clock: int = 0
+## PressBuffer mask of presses made during hitstop, replayed when the freeze ends.
+var held_presses: int = 0
 
 
 func is_alive() -> bool:
@@ -75,7 +81,7 @@ func to_view() -> Dictionary:
 		"on_ground": on_ground, "damage": damage, "stocks": stocks, "jumps_left": jumps_left,
 		"invuln_ticks": invuln_ticks, "hitstop_ticks": hitstop_ticks, "attack_ticks": attack_ticks,
 		"attack_kind": attack_kind, "charge_ticks": charge_ticks, "partner_id": partner_id,
-		"item_kind": item_kind, "item_uses": item_uses,
+		"item_kind": item_kind, "item_uses": item_uses, "burning": burn_ticks > 0,
 	}
 
 

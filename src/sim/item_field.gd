@@ -11,7 +11,8 @@ var next_spawn_tick: int = NOT_SCHEDULED
 var next_id: int = 0
 
 
-func spawn_step(tick: int, rng: RandomNumberGenerator, config: GameConfig) -> Array[Dictionary]:
+## Boxes drop into `area` (the arena's item_area) at item_spawn_radius_ratio of its size.
+func spawn_step(tick: int, rng: RandomNumberGenerator, config: GameConfig, area: ArenaShape) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	if next_spawn_tick == NOT_SCHEDULED:
 		next_spawn_tick = tick + _interval(rng, config)
@@ -21,10 +22,11 @@ func spawn_step(tick: int, rng: RandomNumberGenerator, config: GameConfig) -> Ar
 	next_spawn_tick = tick + _interval(rng, config)
 	if items.size() >= config.item_max_on_field:
 		return events
-	var angle := rng.randf() * TAU
-	var r := sqrt(rng.randf()) * config.arena_radius * config.item_spawn_radius_ratio
+	var u1 := rng.randf()
+	var u2 := rng.randf()
 	var kind := rng.randi_range(0, Item.KIND_COUNT - 1)
-	var it := add(kind, Vector3(cos(angle) * r, config.item_drop_height, sin(angle) * r), Item.State.FALLING, config)
+	var at := area.sample_point(u1, u2, config.item_spawn_radius_ratio, config.item_drop_height)
+	var it := add(kind, at, Item.State.FALLING, config)
 	events.append({"type": "item_spawn", "id": it.id, "kind": kind, "pos": it.pos})
 	return events
 

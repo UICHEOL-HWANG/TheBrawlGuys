@@ -1,14 +1,11 @@
 class_name Motion
 extends RefCounted
 ## Per-tick fighter movement (PRD §4): input -> state, gravity, landing, walking off the edge,
-## and capsule separation. Hitstop freezes a fighter completely (PRD §4.2).
-
-## A fighter may land only if it was at most this far below the floor on the previous tick,
-## so a fighter falling under the arena never snaps back up.
-const LAND_TOLERANCE := 0.05
+## and capsule separation. Hitstop freezes a fighter completely (PRD §4.2). Floors come from the
+## arena (ArenaFloor.ground_top), which also owns the landing tolerance.
 
 
-static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet) -> void:
+static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet, arena: ArenaData) -> void:
 	if not f.is_alive():
 		return
 	if f.hitstop_ticks > 0:
@@ -31,7 +28,7 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: Att
 			if not Actions.try_start(f, input, config):
 				_step_control(f, input, config)
 	if f.state != Fighter.State.HELD:
-		_integrate(f, config)
+		_integrate(f, config, arena)
 	f.state_ticks += 1
 
 
@@ -85,13 +82,13 @@ static func _step_hitstun(f: Fighter, config: GameConfig) -> void:
 		f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
 
 
-static func _integrate(f: Fighter, config: GameConfig) -> void:
+static func _integrate(f: Fighter, config: GameConfig, arena: ArenaData) -> void:
 	var prev_y := f.pos.y
 	f.vel.y += config.gravity * SimTime.TICK_DT
 	f.pos += f.vel * SimTime.TICK_DT
-	var over_floor := Collision.on_arena_floor(f.pos, config.arena_radius)
-	if over_floor and f.pos.y <= 0.0 and prev_y >= -LAND_TOLERANCE and f.vel.y <= 0.0:
-		f.pos.y = 0.0
+	var top := ArenaFloor.ground_top(arena, f.pos, prev_y)
+	if top != ArenaFloor.NO_GROUND and f.pos.y <= top and f.vel.y <= 0.0:
+		f.pos.y = top
 		f.vel.y = 0.0
 		if not f.on_ground:
 			f.on_ground = true

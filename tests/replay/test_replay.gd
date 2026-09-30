@@ -7,11 +7,11 @@ extends GutTest
 const SEED := 7
 const TICKS := 1200
 const HALF := 600
-const GOLDEN_HASH := 2953754395
-## Sim behavior without the config fingerprint (context F1). Fixed in Phase 3 Task 1 from the
-## Phase 2 code before the fingerprint scope changed; it must never change during Phase 3
-## (presentation work must not touch the sim).
-const BEHAVIOR_HASH := 1822125224
+const GOLDEN_HASH := 2216053793
+## Sim behavior without the config fingerprint (context F1). Changes only with deliberate sim
+## changes, each explained in its commit message (Phase 4: snapshot v5 arena/burn fields, then
+## the carried-over combat fixes). Presentation work must never move it.
+const BEHAVIOR_HASH := 11665018
 
 
 ## P0 walks back and forth with jumps, light presses, a held heavy every 4 s and grab presses;
@@ -100,4 +100,4 @@ static func _behavior_run(w: World, ticks: int) -> int:
 func test_behavior_hash() -> void:
 	var h := _behavior_run(World.new(GameConfig.new(), SEED), TICKS)
 	assert_ne(BEHAVIOR_HASH, 0, "BEHAVIOR_HASH not set yet; set it to %d" % h)
-	assert_eq(h, BEHAVIOR_HASH, "sim behavior changed; Phase 3 must not change it (got %d)" % h)
+	assert_eq(h, BEHAVIOR_HASH, "sim behavior changed; if deliberate, update BEHAVIOR_HASH to %d" % h)
