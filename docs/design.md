@@ -233,6 +233,17 @@
 | 버섯 숲 | 늦은 오후 황금빛, 버섯 자체 발광(`petal_pink`·`berry`) | 채도 낮춘 `grass_mid` | 황금 블룸 |
 | 안개 낀 숲 | 이른 아침 차가운 빛 | 회녹색 | `sky` 안개, 주기적으로 짙어짐 |
 
+구현 (Phase 4 T6, 2026-09-30): `ArenaTheme`(src/render/arena/arena_theme.gd, 경기장당 테마 파일 1개)이 `EnvironmentRig.apply_theme()`로 하늘·환경광·태양 색·각도·세기 배율·블룸 배율·기본 안개를 바꾼다. 색은 아래 테마 전용 토큰만 쓴다 (UI에는 쓰지 않는다). 안개 기믹 중에는 `EnvironmentRig.set_fog_boost()`가 거리 안개를 더 짙게 하고, 메뉴 배경은 `hold_fog()`로 헤이즈 안개를 테마 위에 고정한다. Compatibility(웹)은 반투명·안개가 더 진하게 섞여 측정한 배율로 낮춘다.
+
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `sky_pale` | `#DDF1F8` | 통나무 다리 옅은 하늘 |
+| `grass_dusk` / `grass_gold` / `canopy_gold` | `#98B25C` / `#BFD35A` / `#3E8A6A` | 버섯 숲 바닥·덤불·나무 (DS-TOK-01 B안 값) |
+| `sun_gold` / `sky_gold` | `#FFD89A` / `#F4E3B5` | 버섯 숲 늦은 오후 햇빛·하늘 |
+| `grass_mist` / `grass_mist_deep` / `canopy_mist` | `#9CB79A` / `#7E9C80` / `#4E7F78` | 안개 낀 숲 회녹색 바닥·바깥·침엽수 |
+| `sun_cool` / `fog_mist` | `#E6F2F7` / `#DCEBEF` | 안개 낀 숲 아침 햇빛·안개 색 |
+| `fog_veil` | `fog_mist` 55% | 안개가 낄 때 경기장 위 안개 층 |
+
 ---
 
 ## 5. 레이아웃 (DS-LAY)
@@ -314,6 +325,8 @@
 | DS-CMP-14 | `LoginPanel` | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `motion_calm` 등장 | 4.0 | PRD-AUTH-01 |
 | DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
 
+`SelectCard` 구현 (Phase 4 T7, 2026-09-30): `ui_surface` 카드(`radius_l`, `shadow_soft`, 너비 `card_width` 320) 안에 코드로 그린 위에서 본 디오라마 썸네일(`ArenaThumb`, 높이 `card_thumb_height` 200: 바깥 초원·링아웃 물·흙 띠 위 바닥·나무 고리·기믹 표시, 경기장 테마 색) · `title` 이름 · `caption` 한 줄 설명(`ui_text_soft`) · 기믹 아이콘(`GimmickIcon` `card_icon` 48: 물·불·균열·튕김·안개). focus = `petal_yellow` 링 + ×1.04, selected = `ring_color` 링(경기장은 `ui_accent`, Phase 5 캐릭터는 플레이어 색) + ×1.07, locked = `ui_surface_dim` + "준비 중". 경기장 선택 화면: 제목 위, 카드 4장 아래 한 줄, "뒤로" + 조작 안내(←/→ · Z/Enter · X/Esc), 호버 = 포커스, 클릭·탭 = 확정
+
 `LoginPanel` 확정 (2026-09-30, 레퍼런스 [`references/ref-login-calmforest.webp`](./references/ref-login-calmforest.webp) — 사용자의 이전 프로젝트 calm forest):
 - 헤이즈 낀 궤도 디오라마(`DS-LAY-03`) 위, 화면 **정중앙에 반투명 유리 카드** 하나. 카드는 뒤 장면을 흐리게 비추고(스크린 텍스처 밉맵 블러) 세이지 틴트를 덮는다. Compatibility 렌더러(웹)에서는 블러 대신 틴트를 진하게 한다
 - 카드 내용(위→아래, 가운데 정렬): 크레스트 로고(`CrestLogo` DS-CMP-15, 불꽃 깜빡임) · 흰 제목 "The Brawl Guys" · 자간 넓은 태그라인 · 흰 알약 버튼 "G + Google로 시작하기" · 상태 한 줄(loading/error) · 안내 "로그인하면 어느 기기에서든 기록이 이어집니다." · 🌐 언어 링크(한국어↔English 전환 스텁, `settings_changed` 트래킹) · debug 빌드만 "건너뛰기 (디버그)" 링크. 게스트 버튼은 없다 (Google 전용)
@@ -366,6 +379,7 @@
 ### DS-VIS-03 플레이어 식별
 
 - 발밑 링: 플레이어 색 + 모양 마커(●▲■◆), 부드러운 발광으로 바닥 위에 항상 그려짐 (안개·그림자 무시)
+- 안개 낀 숲 (Phase 4 T6): 안개가 끼면 각 전투원의 몸 실루엣(플레이어 색 50%)과 발밑 링(90%)이 깊이 검사·안개 없이 안개 층 위에 그려지고 안개 양에 맞춰 나타난다 (`FogSilhouette`). 메뉴 배경에서는 숨긴다
 - 머리 위 `P1`~`P4` 라벨: 로컬 다인 / 온라인에서만 표시
 - 흑백으로도 구분 가능해야 한다 (Phase 5 완료 기준)
 
@@ -375,11 +389,18 @@
 - 위험 요소 규칙: 지속 대미지 = `fire` 발광 + 불티 / 부서질 발판 = 균열이 단계적으로 커짐 / 튕김 버섯 = 말랑하게 숨 쉬는 모션
 - 장식(큰 나무, 바위)은 경기장 바깥에만. 카메라와 전투원 사이를 가리면 자동 디더 페이드
 
+구현 (Phase 4 T6, 2026-09-30):
+- 화상 영역(캠프파이어): 돌 테두리·장작·3겹 불꽃(`fire`·`petal_yellow`·`glow`) 깜빡임 + 불티 + 따뜻한 점광원, 화상 반경을 바닥에 `fire_ring`(`fire` 40%) 고리·원판으로 표시. 불붙은 전투원은 몸 주위 불꽃 혀 + 불티 (`BurnFlames`)
+- 부서질 발판: 맞은 적이 있으면 균열 1단계, 경고 시간 동안 1→3단계로 커지며 떨림도 커짐, 부서지면 물로 떨어져 사라지고 복구되면 아래에서 튀어 올라옴 (`PlankView`, 균열 `canopy_deep`)
+- 튕김 버섯: 스스로 빛나는 갓(`petal_pink`/`berry` + `glow` 점)이 숨 쉬듯 부풀고, 튕길 때 납작하게 눌렸다 출렁이며 복귀. 반발 표시 = 바닥의 `bounce_ring`(`petal_yellow` 50%) 고리 + 갓 위로 올라가는 작은 화살표 (`MushroomPadView`)
+- 장식은 경기장 파일마다 1개(`ArenaDressing`)가 바깥에만 두고, **디더 페이드 대신 배치 단계에서 가림을 없앤다**: `DecorOcclusion`이 대전 카메라 자세(기본 프레이밍 + `cam_zoom_max`)에서 경기장 중심부(바닥~전투원 키)로 가는 시선을 자르는 장식을 빼고, 테스트가 경기장 5종 모두 가리는 장식이 없음을 확인한다
+
 ### DS-VIS-05 아이템·소품
 
 - 아이템은 포인트 색(`berry`, `petal_*`) 단순 실루엣 + 은은한 `glow` 림 → 연두 바닥에서 바로 보임 (레퍼런스의 보라 열매처럼)
 - 상자 낙하 1초 전 바닥에 부드러운 원형 그림자 예고 (쟁탈 시작 신호)
 - 아이템을 든 캐릭터는 손 위치에 아이템 표시, 남은 사용 횟수는 작은 점
+- 정식 모델 (Phase 4 T8, 🖼 캡처 제출 — 사용자 확인 대기): 코드로 만드는 저폴리 소프트 툰 모델, 아이템당 1파일(`src/render/props/items/`), 모든 파트에 `glow` 림. 상자 = `bark` 속 + `dirt` 판자 + `stone_shade` 금속 띠 / 방망이 = `dirt` 몸통 + `petal_pink` 그립 테이프·`berry` 감개, 남은 횟수에 따라 균열 3단계 / 폭탄 = `berry` 몸통 + `petal_pink` 하이라이트 + `stone_shade` 뚜껑 + `dirt` 심지, 불붙으면 `fire`·`glow` 불꽃이 심지를 타고 내려가며 폭발 직전 점점 빠르게 깜빡임 / 돌멩이 = `stone_cream` 깎은 정이십면체 + `stone_shade` 조각, 던지면 회전. 든 아이템은 KayKit `handslot.r` 뼈에 붙고 종류별 손 오프셋(`HOLD`)을 쓴다
 
 ---
 
@@ -463,7 +484,7 @@
 | DS-TOK-05 | 모션 | PRD-UI-01, PRD-UI-02 | 0 (정의), 3 (적용) | ✅ |
 | DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | 🟨 (Phase 2: 터치 버튼 4종 아이콘, Phase 5에서 계속) |
 | DS-THM-01 | 기본 테마 | PRD-UI-01 | 0 | ✅ |
-| DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ⬜ |
+| DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ✅ (Phase 4 T6) |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
 | DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
 | DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | 🔨 (4.0 로그인·타이틀·배경 완료, 캐릭터·경기장 선택은 4·5) |
@@ -472,14 +493,15 @@
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |
 | DS-CMP-05 | 컴포넌트 — `ChargeGauge` | PRD-CMB-02 | 2 | ✅ |
 | DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ✅ |
-| DS-CMP-08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-08 | SelectCard | PRD-UI-02 | 4, 5 | 🟨 (경기장 선택 Phase 4 T7 완료, 캐릭터 선택은 Phase 5) |
+| DS-CMP-10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
 | DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스) |
 | DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
-| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |
-| DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | 🟨 (Phase 4에서 계속) |
-| DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2 | ✅ |
+| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (안개 실루엣 Phase 4 완료, P3·P4 모양은 Phase 5) |
+| DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ✅ (Phase 4 T6 위험 표시·장식 가림) |
+| DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2, 4 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |
 | DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
