@@ -152,6 +152,8 @@ extends Resource
 
 @export_group("Bot")
 @export_range(0.5, 5.0, 0.1) var bot_attack_range: float = 1.4
+## Bot n swings at bot_attack_range - n % 4 * spread, so mirrored bots do not trade forever.
+@export_range(0.0, 0.5, 0.01) var bot_attack_range_spread: float = 0.1
 @export_range(0, 120, 1) var bot_attack_cooldown_ticks: int = 30
 @export_range(0.3, 1.0, 0.01) var bot_edge_ratio: float = 0.8
 @export_range(0.5, 6.0, 0.1) var bot_guard_range: float = 2.2

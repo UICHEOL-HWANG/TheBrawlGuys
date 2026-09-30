@@ -32,6 +32,11 @@ static func combo_mash_ticks(config: GameConfig) -> int:
 	return 2 * (config.light_startup_ticks + config.light_active_ticks + config.light_recovery_ticks)
 
 
+## Swing range of bot `id`: staggered by id so mirrored bots never start the same trade forever.
+static func attack_range(id: int, config: GameConfig) -> float:
+	return config.bot_attack_range - config.bot_attack_range_spread * float(id % 4)
+
+
 func sample(view: Dictionary) -> InputFrame:
 	if _cooldown > 0:
 		_cooldown -= 1
@@ -134,7 +139,7 @@ func _fight(foe: Dictionary, my_pos: Vector3, item_kind: int, arena: ArenaData) 
 	var reach := _config.grab_forward + _config.grab_half_width + _config.fighter_radius
 	if int(foe["state"]) == Fighter.State.GUARD and delta.length() <= reach:
 		return InputFrame.make(dir.x, dir.y, false, false, false, false, true)
-	if delta.length() <= _config.bot_attack_range and _cooldown == 0:
+	if delta.length() <= attack_range(_self_id, _config) and _cooldown == 0:
 		_cooldown = _config.bot_attack_cooldown_ticks
 		if item_kind != Item.Kind.BAT:
 			_combo_left = combo_mash_ticks(_config)
