@@ -6,10 +6,12 @@ extends RefCounted
 
 
 ## Returns true when the fighter started an action this tick (movement is then skipped).
-## Priority: grab > guard > heavy > light.
-static func try_start(f: Fighter, input: InputFrame, _config: GameConfig) -> bool:
+## Priority: grab > dodge (guard press + move input, or in the air) > guard > heavy > light.
+static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool:
 	if input.grab and f.on_ground:
 		start_attack(f, AttackSet.Kind.GRAB)
+		return true
+	if Dodge.try_start(f, input, config):
 		return true
 	if input.guard and f.on_ground:
 		f.set_state(Fighter.State.GUARD)

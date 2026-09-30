@@ -72,7 +72,7 @@ static func find(fighters: Array[Fighter], id: int) -> Fighter:
 
 
 static func _grabbable(holder: Fighter, target: Fighter) -> bool:
-	return target != holder and target.is_alive() and target.invuln_ticks <= 0 \
+	return target != holder and target.is_alive() and not target.untouchable() \
 			and target.state != Fighter.State.HOLDING and target.state != Fighter.State.HELD
 
 
@@ -90,6 +90,7 @@ static func _start_hold(holder: Fighter, target: Fighter, config: GameConfig) ->
 	target.charge_ticks = 0
 	target.combo_queued = false
 	target.hit_ids.clear()
+	Dodge.clear(target)
 	_place(holder, target, config)
 
 

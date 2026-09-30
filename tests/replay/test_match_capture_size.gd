@@ -10,7 +10,7 @@ const SEED := 13
 const MAX_INPUT_BYTES := 28 * 1024
 const MAX_TOTAL_BYTES := 512 * 1024
 ## Enough stocks that four bots are still fighting at three minutes.
-const STOCKS := 9
+const STOCKS := 12
 
 var _run: Dictionary = {}
 var _config := GameConfig.new()

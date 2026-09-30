@@ -79,6 +79,7 @@ func test_guard_and_invulnerability_apply() -> void:
 	var c := w.config
 	w.fighters[0].pos = Vector3(1.0, 0, 0)
 	w.fighters[0].set_state(Fighter.State.GUARD)
+	w.fighters[0].guard_prev = true  # held for a while: an ordinary guard, not a perfect one
 	w.fighters[1].pos = Vector3(-1.0, 0, 0)
 	w.fighters[1].invuln_ticks = 60
 	var guard: Array[InputFrame] = [InputFrame.make(0, 0, false, false, false, true), InputFrame.neutral()]

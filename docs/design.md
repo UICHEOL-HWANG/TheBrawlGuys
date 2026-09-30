@@ -447,6 +447,10 @@
 | DS-VFX-04 | 넉백 궤적 | 속도 > `trail_speed_threshold` | 플레이어 색 리본 + 떨어지는 잎사귀, 속도에 비례한 길이 | 3 |
 | DS-VFX-05 | 링아웃 | 스톡 소모 | 물이면 큰 물보라, 낭떠러지면 플레이어 색 별 폭발 + 카메라 펀치 | 3 |
 | DS-VFX-06 | 리스폰·차지 광 | 리스폰 / 강공격 차지 | 햇살 기둥에서 내려옴 / 차지량 비례 `glow` 블룸 | 3 |
+| DS-VFX-10 | 회피 잔상 | 구르기·공중 회피 무적 구간 (`is_dodging`) | 캐릭터 반투명 + 플레이어 색 캡슐 잔상이 `MOTION_BASE` 동안 사라짐 (`DefenseFx`) | combat-depth A |
+| DS-VFX-11 | 가드 내구도 버블 | 가드 중 | 버블 반지름 = 내구도 비율(최소 45%), 30% 미만이면 `GUARD_BUBBLE_LOW`와 번갈아 깜빡임 | combat-depth A |
+| DS-VFX-12 | 가드 브레이크 | `guard_break` (내구도 0) | 머리 위로 `petal_yellow` 별 3개가 도는 기절 표시, 기절 동안 유지 | combat-depth A |
+| DS-VFX-13 | 저스트 가드 | `perfect_guard` | `glow` 링이 몸통에서 퍼지며 `MOTION_SLOW` 동안 사라짐 | combat-depth A |
 
 | ID | 사운드 세트 | 내용 |
 |---|---|---|
@@ -539,6 +543,7 @@
 | DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
+| DS-VFX-10~13 | 방어 연출 (회피 잔상·내구도 버블·브레이크 별·저스트 가드 링) | PRD-CMB-03 | combat-depth A | ✅ (2026-09-30, 증거 스크린샷 미촬영) |
 | DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |

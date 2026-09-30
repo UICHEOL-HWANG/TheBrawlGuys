@@ -27,7 +27,7 @@ static func step(field: ItemField, fighters: Array[Fighter], book: StyleBook,
 static func _explode(it: Item, fighters: Array[Fighter], attack: AttackData, config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = [{"type": "explosion", "id": it.id, "pos": it.pos, "radius": config.bomb_radius}]
 	for f: Fighter in fighters:
-		if not f.is_alive() or f.invuln_ticks > 0:
+		if not f.is_alive() or f.untouchable():
 			continue
 		var offset := f.pos + Vector3.UP * (config.fighter_height * 0.5) - it.pos
 		if offset.length() > config.bomb_radius + config.fighter_radius:
@@ -76,7 +76,7 @@ static func _advance(it: Item, fighters: Array[Fighter], book: StyleBook, config
 static func _first_hit(it: Item, fighters: Array[Fighter], config: GameConfig) -> Fighter:
 	var half := Vector3.ONE * config.item_radius
 	for f: Fighter in fighters:
-		if f.id == it.owner_id or not f.is_alive() or f.invuln_ticks > 0:
+		if f.id == it.owner_id or not f.is_alive() or f.untouchable():
 			continue
 		if Collision.capsule_hits_box(f.pos, config.fighter_radius, config.fighter_height, it.pos, 0.0, half):
 			return f

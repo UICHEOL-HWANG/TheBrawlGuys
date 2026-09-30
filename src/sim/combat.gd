@@ -61,7 +61,7 @@ static func _contacts(fighters: Array[Fighter], book: StyleBook, config: GameCon
 		var yaw := Collision.yaw_of(attacker.facing)
 		var power := attacker.charge_mul if attacker.attack_kind == AttackSet.Kind.HEAVY else 1.0
 		for target: Fighter in fighters:
-			if target == attacker or not target.is_alive() or target.invuln_ticks > 0:
+			if target == attacker or not target.is_alive() or target.untouchable():
 				continue
 			if attacker.hit_ids.has(target.id):
 				continue
@@ -75,11 +75,13 @@ static func _contacts(fighters: Array[Fighter], book: StyleBook, config: GameCon
 ## One hit from any source (melee, throw, projectile, explosion). dir is the push direction (only its horizontal part is used, normalized),
 ## power scales damage and knockback (heavy charge). A guarding target takes guard_damage_mul
 ## of the damage and guard_knockback_mul of the knockback as a flat push, stays in GUARD and
-## reports "guard_hit" (context E4). Sets the target's hitstop; the caller sets the attacker's.
+## reports "guard_hit" (context E4); the block costs guard points, or nothing at all on a perfect
+## guard (GuardMeter). Sets the target's hitstop; the caller sets the attacker's.
 static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: float,
 		config: GameConfig, at: Vector3, source_id: int) -> Dictionary:
 	var guarded := target.state == Fighter.State.GUARD
-	var dealt := attack.damage * power * (config.guard_damage_mul if guarded else 1.0)
+	var perfect := guarded and GuardMeter.is_perfect(target, config)
+	var dealt := attack.damage * power * (0.0 if perfect else config.guard_damage_mul if guarded else 1.0)
 	target.damage += dealt
 	var kb := knockback(attack, target.damage, config) * power * StyleCatalog.knockback_taken(
 			CharacterData.style_of(target.character), config)
@@ -91,20 +93,34 @@ static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: 
 	var flat_dir := Vector3(dir.x, 0.0, dir.z)
 	flat_dir = flat_dir.normalized() if flat_dir.length() > 0.0 else Vector3.ZERO
 	if guarded:
-		kb *= config.guard_knockback_mul
-		var push := flat_dir * kb
-		target.vel.x = push.x
-		target.vel.z = push.z
-		event["type"] = "guard_hit"
-		event["knockback"] = kb
+		if perfect:
+			target.perfect_by = source_id
+		else:
+			GuardMeter.block(target, attack.damage * power, config)
+		_guard_push(target, flat_dir, kb * config.guard_knockback_mul, event)
 		return event
 	target.vel = launch_velocity(flat_dir, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
+	_interrupt(target)
+	return event
+
+
+static func _guard_push(target: Fighter, flat_dir: Vector3, kb: float, event: Dictionary) -> void:
+	var push := flat_dir * kb
+	target.vel.x = push.x
+	target.vel.z = push.z
+	event["type"] = "guard_hit"
+	event["knockback"] = kb
+
+
+## A clean hit ends whatever the target was doing (attack, charge, dodge, guard-break stun).
+static func _interrupt(target: Fighter) -> void:
 	target.attack_ticks = 0
 	target.hit_ids.clear()
 	target.combo_queued = false
 	target.charge_ticks = 0
+	target.guard_break_left = 0
+	Dodge.clear(target)
 	target.set_state(Fighter.State.HITSTUN)
-	return event

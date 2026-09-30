@@ -1,5 +1,5 @@
 class_name SpecialConfig
-extends Resource
+extends DefenseConfig
 ## Phase 5 special-move tunables (PRD §6.2.1), split out of GameConfig to keep files short.
 ## GameConfig extends StyleConfig extends this, so every value here is a GameConfig value: the
 ## debug panel shows each @export_range and the sim groups enter GameConfig.fingerprint().

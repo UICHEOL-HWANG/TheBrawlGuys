@@ -11,12 +11,14 @@ func _guard(mx: float = 0.0) -> InputFrame:
 	return InputFrame.make(mx, 0, false, false, false, true)
 
 
-## P2 guards 1.0 m in front of P1.
+## P2 guards 1.0 m in front of P1, held past the perfect-guard window (combat-depth A) so hits
+## are ordinary guarded hits.
 func _guarding_world(config: GameConfig = null) -> World:
 	var w := World.new(config if config != null else GameConfig.new(), 1)
 	w.fighters[1].pos = w.fighters[0].pos + Vector3(1.0, 0, 0)
 	w.fighters[0].facing = Vector3(1, 0, 0)
-	w.tick(_inputs(InputFrame.neutral(), _guard()))
+	for i: int in w.config.perfect_guard_ticks + 1:
+		w.tick(_inputs(InputFrame.neutral(), _guard()))
 	return w
 
 
@@ -52,7 +54,10 @@ func test_no_guard_in_the_air() -> void:
 	var w := World.new(GameConfig.new(), 1)
 	w.tick(_inputs(InputFrame.make(0, 0, true)))
 	w.tick(_inputs(_guard()))
-	assert_eq(w.fighters[0].state, Fighter.State.AIR)
+	assert_eq(w.fighters[0].state, Fighter.State.DODGE, "a guard press in the air is an air dodge")
+	while w.fighters[0].state == Fighter.State.DODGE:
+		w.tick(_inputs(_guard()))
+	assert_ne(w.fighters[0].state, Fighter.State.GUARD, "held guard never guards in the air")
 
 
 func test_guard_beats_heavy_and_light_priority() -> void:
