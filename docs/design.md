@@ -292,6 +292,21 @@
 | 성능 | 현재 품질 설정을 그대로 따르고, 품질 LOW에서도 60fps |
 | 전환 | 메뉴 화면이 바뀌어도 배경은 끊기지 않는다. 대전 진입 시 배경을 멈추고 대전 씬으로 교체 |
 
+### DS-LAY-04 모바일 반응형 스케일 · 세로 안내 (2026-09-30)
+
+기준 해상도 1920×1080 + `canvas_items`/`expand`만으로는 폰 가로(812×375 CSS px)에서 2D UI 전체가 약 0.35배로 줄어 캡션이 7 CSS px가 된다. 그래서 **2D 캔버스만** 창 크기에 맞춰 키운다 (`Window.content_scale_factor`, 3D 뷰는 그대로 창을 채운다). 글자를 다시 줄여 맞추지 않는다.
+
+| 요소 | 규칙 |
+|---|---|
+| 뷰포트 분류 | CSS px(웹 = 창 픽셀 ÷ devicePixelRatio, 네이티브 = 포인트) 기준 짧은 변 < `PHONE_MAX_SHORT_CSS` 500 → phone, 터치 + 짧은 변 < `TABLET_MAX_SHORT_CSS` 1100 → tablet, 나머지 desktop |
+| 배율 | desktop은 항상 **1.0** (기존 모습 그대로). phone은 가장 작은 캡션(`caption` 22)이 `CAPTION_MIN_PHONE_CSS` 12 CSS px, tablet은 `CAPTION_MIN_TABLET_CSS` 13이 되도록, 터치 기기는 가장 작은 버튼(`TOUCH_TARGET_BASE_MIN` 96)이 `TOUCH_TARGET_MIN_CSS` 44 이상이 되도록 한다. 0.05 단위 올림, 상한 `UI_SCALE_MAX` 3.0 |
+| 확정 값 | 812×375 · 667×375 → **1.6** · 740×360 → **1.65** · 1024×768 터치 → **1.15** · 1280×720 · 1920×1080 · 1024×768(터치 없음) → **1.0** · 375×812 세로 → 2.8 (안내만 보임) |
+| 다시 계산 | 시작할 때와 창 크기·방향이 바뀔 때마다 (`UiScaler` 오토로드) |
+| 넘칠 때 | 화면 가운데 블록(로그인 카드 등)은 `FitCenter`로 감싼다: 들어가면 가운데, 안 들어가면 세로 스크롤 |
+| 세로 안내 | 터치 기기가 세로면 전체 화면 `haze` 위 `Panel`에 코드로 그린 회전 아이콘(`ui_text` 폰 윤곽 + `fire` 곡선 화살표, `motion_slow`로 기울기) · "가로로 돌려주세요"(`display_l`) · 안내(`body`, `ui_text_soft`). 떠 있는 동안 아래 입력을 모두 막고, 첫 탭에 전체 화면 + `screen.orientation.lock("landscape")`를 시도한다(실패는 무시, iOS Safari 미지원). 네이티브는 가로 고정이라 뜨지 않는다 |
+| 터치 감지 | `DisplayServer.is_touchscreen_available()`, 웹은 `ontouchstart`·`maxTouchPoints` JS 폴백. 터치면 터치 컨트롤이 보이고 `KeyHintBar`는 숨는다 |
+| 트래킹 | 전역 속성 `viewport_class`·`orientation`·`ui_scale` (tracking-plan.md §2) |
+
 ---
 
 ## 6. 컴포넌트 (DS-CMP)
@@ -475,6 +490,7 @@
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
 | DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
 | DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | 🔨 (4.0 로그인·타이틀·배경 완료, 캐릭터·경기장 선택은 4·5) |
+| DS-LAY-04 | 모바일 반응형 스케일 · 세로 안내 | PRD-UI-01, PRD-PLT-01, PRD-PLT-03 | 4 | ✅ (2026-09-30, `platform/evidence/mobile-*.png`) |
 | DS-CMP-12 | 컴포넌트 — `DebugPanel` | §6 표 참조 | 0 | ✅ |
 | DS-CMP-01~03, 09 | 컴포넌트 — `DamageCounter`·`StockIcons`·`TouchStick`·`ResultBanner` | §6 표 참조 | 1 | ✅ |
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |

@@ -40,6 +40,9 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
+| `viewport_class` | enum(phone\|tablet\|desktop) | 창 짧은 변(CSS px)·터치로 분류 (design.md DS-LAY-04). `app_opened`부터 붙고 창이 바뀌면 갱신 | `event_properties` |
+| `orientation` | enum(portrait\|landscape) | 창 가로·세로 | `event_properties` |
+| `ui_scale` | float | 적용한 2D UI 배율 (`content_scale_factor`, desktop 1.0) | `event_properties` |
 
 ---
 
