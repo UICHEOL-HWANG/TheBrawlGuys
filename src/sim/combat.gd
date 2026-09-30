@@ -26,9 +26,11 @@ static func hitbox_center(attacker: Fighter, attack: AttackData) -> Vector3:
 
 ## Two passes so same-tick trades are fair (Phase 3 carry-over): every contact is found from the
 ## state at the start of the step, then all of them are applied. A fighter hit this tick still
-## lands its own active hit, whatever the fighter ids.
+## lands its own active hit, whatever the fighter ids, and everyone in a contact ends up frozen
+## for the longest hitstop among its contacts this tick (order-free).
 static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
+	var freeze := {}  # Fighter -> longest hitstop from this pass
 	for h: Dictionary in _contacts(fighters, attacks, config):
 		var attacker: Fighter = h["attacker"]
 		var target: Fighter = h["target"]
@@ -36,8 +38,11 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 		attacker.hit_ids.append(target.id)
 		var e := apply_hit(target, attack, h["facing"], h["power"], config, h["center"], attacker.id)
 		e["attack_kind"] = h["kind"]
-		attacker.hitstop_ticks = maxi(attacker.hitstop_ticks, attack.hitstop_ticks)
 		events.append(e)
+		for f: Fighter in [attacker, target]:
+			freeze[f] = maxi(int(freeze.get(f, 0)), attack.hitstop_ticks)
+	for f: Fighter in freeze:
+		f.hitstop_ticks = freeze[f]
 	return events
 
 

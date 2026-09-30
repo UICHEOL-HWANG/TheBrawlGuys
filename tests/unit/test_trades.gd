@@ -52,6 +52,24 @@ func test_trade_does_not_depend_on_fighter_ids() -> void:
 	assert_eq(a.fighters[1].damage, b.fighters[0].damage)
 
 
+func test_trade_freezes_do_not_depend_on_fighter_ids() -> void:
+	# light (short hitstop) vs heavy (long hitstop) landing on the same tick, both id orders
+	var freezes: Array[Vector2i] = []
+	for heavy_id: int in [0, 1]:
+		var w := _face_off(1.2)
+		var attacks := AttackSet.from_config(w.config)
+		for f: Fighter in w.fighters:
+			var kind := AttackSet.Kind.HEAVY if f.id == heavy_id else AttackSet.Kind.LIGHT_1
+			Actions.start_attack(f, kind)
+			f.attack_ticks = attacks.get_attack(kind).startup_ticks + 1
+		Combat.resolve(w.fighters, attacks, w.config)
+		var light_id := 1 - heavy_id
+		freezes.append(Vector2i(w.fighters[heavy_id].hitstop_ticks, w.fighters[light_id].hitstop_ticks))
+	assert_eq(freezes[0], freezes[1], "same freezes whichever fighter swings the heavy")
+	var heavy_stop := SimTime.to_ticks(GameConfig.new().hitstop_heavy)
+	assert_eq(freezes[0], Vector2i(heavy_stop, heavy_stop), "both frozen by the longer hit")
+
+
 func test_bots_stagger_their_swing_range_by_id() -> void:
 	var c := GameConfig.new()
 	assert_gt(BotController.attack_range(0, c), BotController.attack_range(1, c),
