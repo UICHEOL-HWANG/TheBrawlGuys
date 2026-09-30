@@ -18,6 +18,26 @@ const COMPONENTS: Array[Array] = [
 const COMPONENTS_ONLY_ARG := "--components-only"
 ## Pass `--items-only` after `--` to render just the items preview (evidence capture).
 const ITEMS_ONLY_ARG := "--items-only"
+## Capture-only section switches, same idea as --items-only.
+const VFX_ONLY_ARG := "--vfx-only"
+const AUDIO_ONLY_ARG := "--audio-only"
+const CHARACTERS_ONLY_ARG := "--characters-only"
+const CHARACTER_PREVIEW_SIZE := Vector2i(1100, 400)
+const CHARACTER_X: Array[float] = [-2.4, -0.8, 0.8, 2.4]
+const TRAIL_SAMPLES := 6
+const IDLE_VIEW := {"state": Fighter.State.IDLE, "on_ground": true, "attack_kind": -1, "item_kind": -1,
+		"charge_ticks": 0, "hitstop_ticks": 0}
+## Fake single-stock view that flips the BGM to its intense layer.
+const INTENSE_VIEW := {"match_over": false, "fighters": [{"state": Fighter.State.IDLE, "stocks": 1}]}
+const CALM_VIEW := {"match_over": false, "fighters": [{"state": Fighter.State.IDLE, "stocks": 3}]}
+
+var _sfx: SfxDirector
+var _music: MusicDirector
+var _animators: Array[CharacterAnimator] = []
+var _intense_on: bool = false
+var _vfx_stage: Node3D
+var _charge_glow: ChargeGlow
+var _trail: KnockbackTrail
 
 
 func _ready() -> void:
@@ -38,7 +58,27 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", DS.S6)
 	margin.add_child(col)
 
+	var config := GameConfig.new()
+	_sfx = SfxDirector.new()
+	add_child(_sfx)
+	_sfx.setup(config)
+	_music = MusicDirector.new()
+	add_child(_music)
+	_music.setup(config)
+
 	var args := OS.get_cmdline_user_args()
+	if args.has(CHARACTERS_ONLY_ARG):
+		col.add_child(_heading("Characters · DS-VIS-02"))
+		col.add_child(_characters_preview())
+		return
+	if args.has(VFX_ONLY_ARG):
+		col.add_child(_heading("VFX · DS-VFX-01~06"))
+		col.add_child(_vfx_preview())
+		return
+	if args.has(AUDIO_ONLY_ARG):
+		col.add_child(_heading("SFX · DS-SFX-01 / BGM · DS-SFX-02"))
+		col.add_child(_audio_preview())
+		return
 	if args.has(ITEMS_ONLY_ARG):
 		col.add_child(_heading("Items · DS-VIS-05 (box + shadow / bat / bomb lit / rock)"))
 		col.add_child(_items_preview())
@@ -52,8 +92,19 @@ func _ready() -> void:
 		col.add_child(_toon_preview())
 		col.add_child(_heading("Items · DS-VIS-05 (box + shadow / bat / bomb lit / rock)"))
 		col.add_child(_items_preview())
+		col.add_child(_heading("Characters · DS-VIS-02"))
+		col.add_child(_characters_preview())
+		col.add_child(_heading("VFX · DS-VFX-01~06"))
+		col.add_child(_vfx_preview())
+		col.add_child(_heading("SFX · DS-SFX-01 / BGM · DS-SFX-02"))
+		col.add_child(_audio_preview())
 	col.add_child(_heading("Components · DS-CMP"))
 	col.add_child(_components())
+
+
+func _process(delta: float) -> void:
+	for a: CharacterAnimator in _animators:
+		a.apply(IDLE_VIEW, delta)
 
 
 func _heading(text: String) -> Label:
@@ -216,3 +267,135 @@ func _items_preview() -> Control:
 	vp.add_child(cam)
 	cam.look_at_from_position(Vector3(0, 6, 7), Vector3(0, 0.5, 0), Vector3.UP)
 	return container
+
+
+func _preview_viewport(size: Vector2i) -> Array:
+	var container := SubViewportContainer.new()
+	container.custom_minimum_size = Vector2(size)
+	var vp := SubViewport.new()
+	vp.size = size
+	vp.own_world_3d = true
+	container.add_child(vp)
+	var env := EnvironmentRig.new()
+	vp.add_child(env)
+	env.setup()
+	var ground := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(20, 20)
+	ground.mesh = plane
+	ground.material_override = ToonMaterials.toon(DS.GRASS)
+	vp.add_child(ground)
+	return [container, vp]
+
+
+func _button(label: String, node_name: String, on_press: Callable) -> Button:
+	var b := Button.new()
+	b.text = label
+	b.name = node_name
+	b.pressed.connect(on_press)
+	return b
+
+
+func _characters_preview() -> Control:
+	var box := VBoxContainer.new()
+	var made := _preview_viewport(CHARACTER_PREVIEW_SIZE)
+	var vp := made[1] as SubViewport
+	box.add_child(made[0] as Control)
+	# CharacterModel.setup needs the live tree, which this subtree joins only after we return.
+	vp.ready.connect(_fill_characters.bind(vp))
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.fov = 30.0
+	cam.look_at_from_position(Vector3(0, 1.0, 4.4), Vector3(0, 0.9, 0), Vector3.UP)
+	var row := HBoxContainer.new()
+	for n: int in 3:
+		var look := n
+		row.add_child(_button("Look %s" % "ABC"[n], "look_" + "abc"[n], func() -> void: LookPreset.apply(look)))
+	box.add_child(row)
+	return box
+
+
+func _fill_characters(vp: SubViewport) -> void:
+	var config := GameConfig.new()
+	for i: int in CharacterCatalog.CHARACTERS.size():
+		var model := CharacterModel.new()
+		vp.add_child(model)
+		if not model.setup(CharacterCatalog.CHARACTERS[i], config):
+			continue
+		model.position = Vector3(CHARACTER_X[i], 0, 0)
+		var animator := CharacterAnimator.new()
+		model.add_child(animator)
+		animator.setup(model.animation_player(), config)
+		_animators.append(animator)
+
+
+func _vfx_preview() -> Control:
+	var box := VBoxContainer.new()
+	var made := _preview_viewport(PREVIEW_SIZE)
+	var vp := made[1] as SubViewport
+	box.add_child(made[0] as Control)
+	_vfx_stage = Node3D.new()
+	_vfx_stage.name = "vfx_stage"
+	vp.add_child(_vfx_stage)
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.look_at_from_position(Vector3(0, 3.5, 7), Vector3(0, 1.2, 0), Vector3.UP)
+	var scale := Quality.particle_scale(GameConfig.new())
+	var row := HBoxContainer.new()
+	var kinds: Array[Array] = [
+		["hit small", "hit_small", func() -> void: _spawn(HitSpark.new()).play(Vector3(0, 1, 0), false)],
+		["hit large", "hit_large", func() -> void: _spawn(HitSpark.new()).play(Vector3(0, 1, 0), true)],
+		["dust", "dust", func() -> void: _spawn(DustPuff.new()).play(Vector3.ZERO, 1.0, scale)],
+		["trail", "trail", func() -> void: _play_trail(scale)],
+		["splash", "splash", func() -> void: _spawn(RingoutBurst.new()).play(Vector3.ZERO, true, DS.P1, scale)],
+		["star", "star", func() -> void: _spawn(RingoutBurst.new()).play(Vector3(0, 1, 0), false, DS.P2, scale)],
+		["respawn", "respawn", func() -> void: _spawn(RespawnBeam.new()).play(Vector3(0, 4, 0))],
+		["charge", "charge", func() -> void: _play_charge()],
+	]
+	for k: Array in kinds:
+		row.add_child(_button(k[0], "vfx_" + String(k[1]), k[2]))
+	box.add_child(row)
+	return box
+
+
+## Adds an effect node to the preview stage and returns it typed as its own class via duck typing.
+func _spawn(effect: Node3D) -> Variant:
+	_vfx_stage.add_child(effect)
+	return effect
+
+
+func _play_trail(scale: float) -> void:
+	if _trail == null or not is_instance_valid(_trail):
+		_trail = KnockbackTrail.new()
+		_vfx_stage.add_child(_trail)
+	for i: int in TRAIL_SAMPLES:
+		_trail.add_sample(Vector3(-2.5 + i, 1.0, 0), 1.0, DS.P1, scale)
+
+
+func _play_charge() -> void:
+	if _charge_glow == null or not is_instance_valid(_charge_glow):
+		_charge_glow = ChargeGlow.new()
+		_vfx_stage.add_child(_charge_glow)
+		_charge_glow.position = Vector3(0, 1, 0)
+	_charge_glow.set_charge(1.0)
+
+
+func _audio_preview() -> Control:
+	var box := VBoxContainer.new()
+	var grid := HFlowContainer.new()
+	for name: String in SfxRecipes.RECIPES:
+		var recipe := name
+		grid.add_child(_button(recipe, "sfx_" + recipe, func() -> void: _sfx.play(recipe)))
+	box.add_child(grid)
+	var bgm := HBoxContainer.new()
+	bgm.add_child(_button("battle", "bgm_battle", _music.play_battle))
+	bgm.add_child(_button("intense toggle", "bgm_intense", _toggle_intense))
+	bgm.add_child(_button("menu", "bgm_menu", _music.play_menu))
+	bgm.add_child(_button("stop", "bgm_stop", _music.stop))
+	box.add_child(bgm)
+	return box
+
+
+func _toggle_intense() -> void:
+	_intense_on = not _intense_on
+	_music.update_from(INTENSE_VIEW if _intense_on else CALM_VIEW)
