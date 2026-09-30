@@ -37,6 +37,32 @@ func test_authorize_url() -> void:
 			+ "&code_challenge=CH&code_challenge_method=s256")
 
 
+func test_loopback_redirect_carries_the_state_nonce() -> void:
+	assert_eq(AuthUrls.loopback_redirect(54321, "n0nce"), "http://127.0.0.1:54321/callback?state=n0nce")
+	assert_eq(AuthUrls.loopback_redirect(54321), "http://127.0.0.1:54321/callback")
+	var url := AuthUrls.authorize("https://p.supabase.co", "google", AuthUrls.loopback_redirect(54321, "n0nce"), "CH")
+	assert_string_contains(url, "redirect_to=http%3A%2F%2F127.0.0.1%3A54321%2Fcallback%3Fstate%3Dn0nce&")
+
+
+func test_new_state_is_random_and_url_safe() -> void:
+	var a := AuthUrls.new_state()
+	assert_eq(a.length(), AuthUrls.STATE_LENGTH)
+	assert_ne(a, AuthUrls.new_state())
+	assert_eq(a.uri_encode(), a, "no escaping needed")
+
+
+func test_loopback_accepts_only_the_expected_state() -> void:
+	var ok := LoopbackServer.parse_request_line("GET /callback?state=n0nce&code=abc HTTP/1.1", "n0nce")
+	assert_eq(ok, {"code": "abc"})
+	assert_eq(LoopbackServer.parse_request_line("GET /callback?code=abc HTTP/1.1", "n0nce"), {},
+			"a request without our nonce is ignored, the sign-in keeps waiting")
+	assert_eq(LoopbackServer.parse_request_line("GET /callback?state=other&code=abc HTTP/1.1", "n0nce"), {})
+	assert_eq(LoopbackServer.parse_request_line("GET /callback?state=other&error=access_denied HTTP/1.1", "n0nce"),
+			{}, "a forged error cannot end the sign-in early")
+	assert_eq(LoopbackServer.parse_request_line("GET /callback?state=n0nce&error=access_denied HTTP/1.1", "n0nce"),
+			{"error": "access_denied"})
+
+
 func test_loopback_request_line_with_code() -> void:
 	var r := LoopbackServer.parse_request_line("GET /callback?code=abc-123&state=x HTTP/1.1")
 	assert_eq(r, {"code": "abc-123"})
