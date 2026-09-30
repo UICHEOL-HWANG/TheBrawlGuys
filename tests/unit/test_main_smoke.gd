@@ -31,6 +31,38 @@ func test_restart_after_a_ko_starts_a_clean_match() -> void:
 	assert_lt(fresh.tick_count, 30, "the new match just started")
 
 
+func test_telemetry_follows_the_match() -> void:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	add_child_autofree(main)
+	await wait_seconds(0.2)
+	var t: MatchTelemetry = main.call("get_telemetry")
+	assert_true(t.is_active(), "tracking starts with the match")
+	var w: World = main.call("get_world")
+	w.fighters[1].stocks = 1
+	w.fighters[1].pos = Vector3(0, w.config.kill_y - 1, 0)
+	await wait_seconds(0.2)
+	assert_false(t.is_active(), "match over ends tracking")
+	assert_eq(t.match_row()["result"], "win")
+	assert_gt(t.event_rows().size(), 0, "raw rows collected")
+	var hud: Hud = main.call("get_hud")
+	hud.restart_requested.emit()
+	var fresh: MatchTelemetry = main.call("get_telemetry")
+	assert_ne(fresh, t)
+	assert_ne(fresh.match_id(), t.match_id())
+	assert_true(fresh.is_active())
+
+
+func test_restart_mid_match_abandons_the_old_tracking() -> void:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	add_child_autofree(main)
+	await wait_seconds(0.2)
+	var t: MatchTelemetry = main.call("get_telemetry")
+	var hud: Hud = main.call("get_hud")
+	hud.restart_requested.emit()
+	assert_false(t.is_active())
+	assert_eq(t.match_row()["result"], "abandoned")
+
+
 func test_items_in_the_world_get_views() -> void:
 	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
