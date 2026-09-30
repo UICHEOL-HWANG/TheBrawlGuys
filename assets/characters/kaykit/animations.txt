@@ -1,0 +1,360 @@
+# Knight
+anim	1H_Melee_Attack_Chop	1.067
+anim	1H_Melee_Attack_Slice_Diagonal	1.000
+anim	1H_Melee_Attack_Slice_Horizontal	1.067
+anim	1H_Melee_Attack_Stab	1.600
+anim	1H_Ranged_Aiming	1.067
+anim	1H_Ranged_Reload	1.167
+anim	1H_Ranged_Shoot	1.067
+anim	1H_Ranged_Shooting	1.600
+anim	2H_Melee_Attack_Chop	1.633
+anim	2H_Melee_Attack_Slice	1.100
+anim	2H_Melee_Attack_Spin	2.400
+anim	2H_Melee_Attack_Spinning	0.667
+anim	2H_Melee_Attack_Stab	1.600
+anim	2H_Melee_Idle	1.067
+anim	2H_Ranged_Aiming	1.600
+anim	2H_Ranged_Reload	1.600
+anim	2H_Ranged_Shoot	1.067
+anim	2H_Ranged_Shooting	1.067
+anim	Block	1.067
+anim	Block_Attack	1.067
+anim	Block_Hit	1.067
+anim	Blocking	1.067
+anim	Cheer	1.667
+anim	Death_A	0.800
+anim	Death_A_Pose	0.001
+anim	Death_B	2.633
+anim	Death_B_Pose	0.001
+anim	Dodge_Backward	0.400
+anim	Dodge_Forward	0.400
+anim	Dodge_Left	0.400
+anim	Dodge_Right	0.400
+anim	Dualwield_Melee_Attack_Chop	1.267
+anim	Dualwield_Melee_Attack_Slice	1.167
+anim	Dualwield_Melee_Attack_Stab	1.600
+anim	Hit_A	0.667
+anim	Hit_B	0.867
+anim	Idle	1.067
+anim	Interact	1.300
+anim	Jump_Full_Long	2.333
+anim	Jump_Full_Short	1.167
+anim	Jump_Idle	1.067
+anim	Jump_Land	0.667
+anim	Jump_Start	0.600
+anim	Lie_Down	3.000
+anim	Lie_Idle	2.667
+anim	Lie_Pose	0.001
+anim	Lie_StandUp	2.333
+anim	PickUp	1.300
+anim	Running_A	0.800
+anim	Running_B	1.067
+anim	Running_Strafe_Left	0.800
+anim	Running_Strafe_Right	0.800
+anim	Sit_Chair_Down	0.800
+anim	Sit_Chair_Idle	3.600
+anim	Sit_Chair_Pose	0.001
+anim	Sit_Chair_StandUp	0.800
+anim	Sit_Floor_Down	1.000
+anim	Sit_Floor_Idle	4.000
+anim	Sit_Floor_Pose	0.001
+anim	Sit_Floor_StandUp	1.133
+anim	Spellcast_Long	2.533
+anim	Spellcast_Raise	2.100
+anim	Spellcast_Shoot	0.933
+anim	Spellcasting	0.667
+anim	T-Pose	0.001
+anim	Throw	1.367
+anim	Unarmed_Idle	1.067
+anim	Unarmed_Melee_Attack_Kick	0.933
+anim	Unarmed_Melee_Attack_Punch_A	1.467
+anim	Unarmed_Melee_Attack_Punch_B	1.667
+anim	Unarmed_Pose	0.001
+anim	Use_Item	1.600
+anim	Walking_A	1.067
+anim	Walking_B	1.067
+anim	Walking_Backwards	1.067
+anim	Walking_C	1.600
+mesh	Rig/Skeleton3D/handslot_l/1H_Sword_Offhand
+mesh	Rig/Skeleton3D/handslot_l/Badge_Shield
+mesh	Rig/Skeleton3D/handslot_l/Rectangle_Shield
+mesh	Rig/Skeleton3D/handslot_l/Round_Shield
+mesh	Rig/Skeleton3D/handslot_l/Spike_Shield
+mesh	Rig/Skeleton3D/handslot_r/1H_Sword
+mesh	Rig/Skeleton3D/handslot_r/2H_Sword
+mesh	Rig/Skeleton3D/head/Knight_Helmet
+mesh	Rig/Skeleton3D/chest/Knight_Cape
+mesh	Rig/Skeleton3D/Knight_ArmLeft
+mesh	Rig/Skeleton3D/Knight_ArmRight
+mesh	Rig/Skeleton3D/Knight_Body
+mesh	Rig/Skeleton3D/Knight_Head
+mesh	Rig/Skeleton3D/Knight_LegLeft
+mesh	Rig/Skeleton3D/Knight_LegRight
+# Barbarian
+anim	1H_Melee_Attack_Chop	1.067
+anim	1H_Melee_Attack_Slice_Diagonal	1.000
+anim	1H_Melee_Attack_Slice_Horizontal	1.067
+anim	1H_Melee_Attack_Stab	1.600
+anim	1H_Ranged_Aiming	1.067
+anim	1H_Ranged_Reload	1.167
+anim	1H_Ranged_Shoot	1.067
+anim	1H_Ranged_Shooting	1.600
+anim	2H_Melee_Attack_Chop	1.633
+anim	2H_Melee_Attack_Slice	1.100
+anim	2H_Melee_Attack_Spin	2.400
+anim	2H_Melee_Attack_Spinning	0.667
+anim	2H_Melee_Attack_Stab	1.600
+anim	2H_Melee_Idle	1.067
+anim	2H_Ranged_Aiming	1.600
+anim	2H_Ranged_Reload	1.600
+anim	2H_Ranged_Shoot	1.067
+anim	2H_Ranged_Shooting	1.067
+anim	Block	1.067
+anim	Block_Attack	1.067
+anim	Block_Hit	1.067
+anim	Blocking	1.067
+anim	Cheer	1.667
+anim	Death_A	0.800
+anim	Death_A_Pose	0.001
+anim	Death_B	2.633
+anim	Death_B_Pose	0.001
+anim	Dodge_Backward	0.400
+anim	Dodge_Forward	0.400
+anim	Dodge_Left	0.400
+anim	Dodge_Right	0.400
+anim	Dualwield_Melee_Attack_Chop	1.267
+anim	Dualwield_Melee_Attack_Slice	1.167
+anim	Dualwield_Melee_Attack_Stab	1.600
+anim	Hit_A	0.667
+anim	Hit_B	0.867
+anim	Idle	1.067
+anim	Interact	1.300
+anim	Jump_Full_Long	2.333
+anim	Jump_Full_Short	1.167
+anim	Jump_Idle	1.067
+anim	Jump_Land	0.667
+anim	Jump_Start	0.600
+anim	Lie_Down	3.000
+anim	Lie_Idle	2.667
+anim	Lie_Pose	0.001
+anim	Lie_StandUp	2.333
+anim	PickUp	1.300
+anim	Running_A	0.800
+anim	Running_B	1.067
+anim	Running_Strafe_Left	0.800
+anim	Running_Strafe_Right	0.800
+anim	Sit_Chair_Down	0.800
+anim	Sit_Chair_Idle	3.600
+anim	Sit_Chair_Pose	0.001
+anim	Sit_Chair_StandUp	0.800
+anim	Sit_Floor_Down	1.000
+anim	Sit_Floor_Idle	4.000
+anim	Sit_Floor_Pose	0.001
+anim	Sit_Floor_StandUp	1.133
+anim	Spellcast_Long	2.533
+anim	Spellcast_Raise	2.100
+anim	Spellcast_Shoot	0.933
+anim	Spellcasting	0.667
+anim	T-Pose	0.001
+anim	Throw	1.367
+anim	Unarmed_Idle	1.067
+anim	Unarmed_Melee_Attack_Kick	0.933
+anim	Unarmed_Melee_Attack_Punch_A	1.467
+anim	Unarmed_Melee_Attack_Punch_B	1.667
+anim	Unarmed_Pose	0.001
+anim	Use_Item	1.600
+anim	Walking_A	1.067
+anim	Walking_B	1.067
+anim	Walking_Backwards	1.067
+anim	Walking_C	1.600
+mesh	Rig/Skeleton3D/handslot_l/1H_Axe_Offhand
+mesh	Rig/Skeleton3D/handslot_l/Barbarian_Round_Shield
+mesh	Rig/Skeleton3D/handslot_r/1H_Axe
+mesh	Rig/Skeleton3D/handslot_r/2H_Axe
+mesh	Rig/Skeleton3D/handslot_r/Mug
+mesh	Rig/Skeleton3D/head/Barbarian_Hat
+mesh	Rig/Skeleton3D/chest/Barbarian_Cape
+mesh	Rig/Skeleton3D/Barbarian_ArmLeft
+mesh	Rig/Skeleton3D/Barbarian_ArmRight
+mesh	Rig/Skeleton3D/Barbarian_Body
+mesh	Rig/Skeleton3D/Barbarian_Head
+mesh	Rig/Skeleton3D/Barbarian_LegLeft
+mesh	Rig/Skeleton3D/Barbarian_LegRight
+# Mage
+anim	1H_Melee_Attack_Chop	1.067
+anim	1H_Melee_Attack_Slice_Diagonal	1.000
+anim	1H_Melee_Attack_Slice_Horizontal	1.067
+anim	1H_Melee_Attack_Stab	1.600
+anim	1H_Ranged_Aiming	1.067
+anim	1H_Ranged_Reload	1.167
+anim	1H_Ranged_Shoot	1.067
+anim	1H_Ranged_Shooting	1.600
+anim	2H_Melee_Attack_Chop	1.633
+anim	2H_Melee_Attack_Slice	1.100
+anim	2H_Melee_Attack_Spin	2.400
+anim	2H_Melee_Attack_Spinning	0.667
+anim	2H_Melee_Attack_Stab	1.600
+anim	2H_Melee_Idle	1.067
+anim	2H_Ranged_Aiming	1.600
+anim	2H_Ranged_Reload	1.600
+anim	2H_Ranged_Shoot	1.067
+anim	2H_Ranged_Shooting	1.067
+anim	Block	1.067
+anim	Block_Attack	1.067
+anim	Block_Hit	1.067
+anim	Blocking	1.067
+anim	Cheer	1.667
+anim	Death_A	0.800
+anim	Death_A_Pose	0.001
+anim	Death_B	2.633
+anim	Death_B_Pose	0.001
+anim	Dodge_Backward	0.400
+anim	Dodge_Forward	0.400
+anim	Dodge_Left	0.400
+anim	Dodge_Right	0.400
+anim	Dualwield_Melee_Attack_Chop	1.267
+anim	Dualwield_Melee_Attack_Slice	1.167
+anim	Dualwield_Melee_Attack_Stab	1.600
+anim	Hit_A	0.667
+anim	Hit_B	0.867
+anim	Idle	1.067
+anim	Interact	1.300
+anim	Jump_Full_Long	2.333
+anim	Jump_Full_Short	1.167
+anim	Jump_Idle	1.067
+anim	Jump_Land	0.667
+anim	Jump_Start	0.600
+anim	Lie_Down	3.000
+anim	Lie_Idle	2.667
+anim	Lie_Pose	0.001
+anim	Lie_StandUp	2.333
+anim	PickUp	1.300
+anim	Running_A	0.800
+anim	Running_B	1.067
+anim	Running_Strafe_Left	0.800
+anim	Running_Strafe_Right	0.800
+anim	Sit_Chair_Down	0.800
+anim	Sit_Chair_Idle	3.600
+anim	Sit_Chair_Pose	0.001
+anim	Sit_Chair_StandUp	0.800
+anim	Sit_Floor_Down	1.000
+anim	Sit_Floor_Idle	4.000
+anim	Sit_Floor_Pose	0.001
+anim	Sit_Floor_StandUp	1.133
+anim	Spellcast_Long	2.533
+anim	Spellcast_Raise	2.100
+anim	Spellcast_Shoot	0.933
+anim	Spellcasting	0.667
+anim	T-Pose	0.001
+anim	Throw	1.367
+anim	Unarmed_Idle	1.067
+anim	Unarmed_Melee_Attack_Kick	0.933
+anim	Unarmed_Melee_Attack_Punch_A	1.467
+anim	Unarmed_Melee_Attack_Punch_B	1.667
+anim	Unarmed_Pose	0.001
+anim	Use_Item	1.600
+anim	Walking_A	1.067
+anim	Walking_B	1.067
+anim	Walking_Backwards	1.067
+anim	Walking_C	1.600
+mesh	Rig/Skeleton3D/handslot_l/Spellbook
+mesh	Rig/Skeleton3D/handslot_l/Spellbook_open
+mesh	Rig/Skeleton3D/handslot_r/1H_Wand
+mesh	Rig/Skeleton3D/handslot_r/2H_Staff
+mesh	Rig/Skeleton3D/head/Mage_Hat
+mesh	Rig/Skeleton3D/chest/Mage_Cape
+mesh	Rig/Skeleton3D/Mage_ArmLeft
+mesh	Rig/Skeleton3D/Mage_ArmRight
+mesh	Rig/Skeleton3D/Mage_Body
+mesh	Rig/Skeleton3D/Mage_Head
+mesh	Rig/Skeleton3D/Mage_LegLeft
+mesh	Rig/Skeleton3D/Mage_LegRight
+# Rogue
+anim	1H_Melee_Attack_Chop	1.067
+anim	1H_Melee_Attack_Slice_Diagonal	1.000
+anim	1H_Melee_Attack_Slice_Horizontal	1.067
+anim	1H_Melee_Attack_Stab	1.600
+anim	1H_Ranged_Aiming	1.067
+anim	1H_Ranged_Reload	1.167
+anim	1H_Ranged_Shoot	1.067
+anim	1H_Ranged_Shooting	1.600
+anim	2H_Melee_Attack_Chop	1.633
+anim	2H_Melee_Attack_Slice	1.100
+anim	2H_Melee_Attack_Spin	2.400
+anim	2H_Melee_Attack_Spinning	0.667
+anim	2H_Melee_Attack_Stab	1.600
+anim	2H_Melee_Idle	1.067
+anim	2H_Ranged_Aiming	1.600
+anim	2H_Ranged_Reload	1.600
+anim	2H_Ranged_Shoot	1.067
+anim	2H_Ranged_Shooting	1.067
+anim	Block	1.067
+anim	Block_Attack	1.067
+anim	Block_Hit	1.067
+anim	Blocking	1.067
+anim	Cheer	1.667
+anim	Death_A	0.800
+anim	Death_A_Pose	0.001
+anim	Death_B	2.633
+anim	Death_B_Pose	0.001
+anim	Dodge_Backward	0.400
+anim	Dodge_Forward	0.400
+anim	Dodge_Left	0.400
+anim	Dodge_Right	0.400
+anim	Dualwield_Melee_Attack_Chop	1.267
+anim	Dualwield_Melee_Attack_Slice	1.167
+anim	Dualwield_Melee_Attack_Stab	1.600
+anim	Hit_A	0.667
+anim	Hit_B	0.867
+anim	Idle	1.067
+anim	Interact	1.300
+anim	Jump_Full_Long	2.333
+anim	Jump_Full_Short	1.167
+anim	Jump_Idle	1.067
+anim	Jump_Land	0.667
+anim	Jump_Start	0.600
+anim	Lie_Down	3.000
+anim	Lie_Idle	2.667
+anim	Lie_Pose	0.001
+anim	Lie_StandUp	2.333
+anim	PickUp	1.300
+anim	Running_A	0.800
+anim	Running_B	1.067
+anim	Running_Strafe_Left	0.800
+anim	Running_Strafe_Right	0.800
+anim	Sit_Chair_Down	0.800
+anim	Sit_Chair_Idle	3.600
+anim	Sit_Chair_Pose	0.001
+anim	Sit_Chair_StandUp	0.800
+anim	Sit_Floor_Down	1.000
+anim	Sit_Floor_Idle	4.000
+anim	Sit_Floor_Pose	0.001
+anim	Sit_Floor_StandUp	1.133
+anim	Spellcast_Long	2.533
+anim	Spellcast_Raise	2.100
+anim	Spellcast_Shoot	0.933
+anim	Spellcasting	0.667
+anim	T-Pose	0.001
+anim	Throw	1.367
+anim	Unarmed_Idle	1.067
+anim	Unarmed_Melee_Attack_Kick	0.933
+anim	Unarmed_Melee_Attack_Punch_A	1.467
+anim	Unarmed_Melee_Attack_Punch_B	1.667
+anim	Unarmed_Pose	0.001
+anim	Use_Item	1.600
+anim	Walking_A	1.067
+anim	Walking_B	1.067
+anim	Walking_Backwards	1.067
+anim	Walking_C	1.600
+mesh	Rig/Skeleton3D/handslot_l/Knife_Offhand
+mesh	Rig/Skeleton3D/handslot_r/1H_Crossbow
+mesh	Rig/Skeleton3D/handslot_r/2H_Crossbow
+mesh	Rig/Skeleton3D/handslot_r/Knife
+mesh	Rig/Skeleton3D/handslot_r/Throwable
+mesh	Rig/Skeleton3D/chest/Rogue_Cape
+mesh	Rig/Skeleton3D/Rogue_ArmLeft
+mesh	Rig/Skeleton3D/Rogue_ArmRight
+mesh	Rig/Skeleton3D/Rogue_Body
+mesh	Rig/Skeleton3D/Rogue_Head
+mesh	Rig/Skeleton3D/Rogue_LegLeft
+mesh	Rig/Skeleton3D/Rogue_LegRight
