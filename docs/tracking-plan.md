@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 3). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 4 — Phase 5 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -127,7 +127,7 @@
 | `ringouts_scored` / `self_destructs` | int | 마지막 가격자로서의 링아웃 / 가격자 없는 낙사 | 4.0 |
 | `items_used` | int | 줍기 후 휘두름·투척 | 4.0 |
 | `falls_by_gimmick` | int | 기믹이 원인인 스톡 소모 | 4 |
-| `specials` / `special_hits` | int | 필살기 발동 / 적중 | 5 |
+| `specials` / `special_hits` | int | 필살기 발동 수 (`special_start`) / 필살기 적중 수 (`special_hit` 원시 이벤트 수 = 대상 × 타수, 돌진 연타의 다단 히트는 한 타마다 센다) | 5 |
 | `controller` / `bot_difficulty` / `bot_params_hash` | str / str? / int? | `local`\|`bot`\|`remote` · 봇 난이도(기본 `normal`) · Bot 설정 그룹 해시 (Supabase 행만, A7) | 4.0 |
 
 **행동 피처 (A8, `MatchFeatures.COLUMNS`, analytics-strategy §3.2)** — `match_ended.players[]`와 `match_players` 열에 같은 이름으로 들어간다. 비율은 0~1, "생존 틱"은 KO가 아닌 틱.
@@ -135,7 +135,7 @@
 | 필드 | 타입 | 정의 |
 |---|---|---|
 | `press_light` / `press_heavy` / `press_guard` / `press_grab` / `press_jump` | int | 버튼을 새로 누른 횟수 (눌린 상태 유지는 1회) |
-| `press_special` | int | 필살기 버튼 — Phase 5 전에는 항상 0 |
+| `press_special` | int | 필살기 입력(강+가드 동시 = X+C)이 새로 성립한 횟수. 두 버튼은 `press_heavy`·`press_guard`에도 각각 센다 (Phase 5, 그 전 빌드는 0) |
 | `inputs_per_min` | float | 위 누름 합계 / 경기 분 |
 | `direction_changes` | int | 8방향 스틱 방향이 바뀐 횟수 (중립은 방향이 아님) |
 | `mash_ratio` | float | 같은 버튼을 10틱(기본 콤보 버퍼) 안에 다시 누른 비율 |
@@ -159,12 +159,12 @@
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
 | `stock_lost` | sim `ringout` | `match_id: str`, `victim_slot: int`, `stocks_left: int`, `damage_at_death: float`, `cause: enum(knockback\|gimmick\|self)`, `attacker_slot: int` (-1 = 없음), `angle_deg: float` (경기장 중심 기준, 0° = +x 동, 90° = −z 북), `zone: str` (8방위 섹터 `n`·`ne`… 또는 경기장 안쪽으로 떨어지면 `below`) | `last_hit_attack: str`, `last_hit_ms_ago: int`, `item: str` | A (+ S 원시 `ringout`) | 4.0 (구역은 4) |
-| `gauge_full` | 필살기 게이지 100% 도달 | `match_id: str`, `slot: int`, `character: str`, `match_time_s: float` | — | A | 5 |
-| `special_used` | sim `special_start` | `match_id: str`, `slot: int`, `character: str`, `ms_since_full: int`, `target_damage: float` (가장 가까운 상대 %) | — | A (+ S) | 5 |
-| `special_hit` | sim `special_hit` (발동 1회당 첫 적중만) | `match_id: str`, `slot: int`, `character: str`, `targets_hit: int`, `caused_ringout: bool` | — | A (+ S 원시 전부) | 5 |
+| `gauge_full` | sim `gauge_full` (필살기 게이지 100% 도달) | `match_id: str`, `slot: int`, `character: str` (캐릭터 id, 클래식 `""`), `match_time_s: float` | — | A (+ S 원시) | 5 |
+| `special_used` | sim `special_start` | `match_id: str`, `slot: int`, `character: str`, `special: str` (필살기 id), `ms_since_full: int` (게이지가 찬 뒤 살아 있던 시간 — KO 상태로 보낸 시간은 뺀다, 모르면 -1), `target_damage: float` (가장 가까운 살아 있는 상대 %) | — | A (+ S) | 5 |
+| `special_hit` | sim `special_hit` (발동 1회당 1번 — 첫 적중으로 열고 판정 뒤 발행) | `match_id: str`, `slot: int`, `character: str`, `special: str`, `targets_hit: int` (이 발동이 맞힌 서로 다른 대상 수), `target_slot: int` (첫 대상), `caused_ringout: bool` | — | A (+ S 원시 전부) | 5 |
 
 `attacker_slot`은 피해자에게 마지막으로 `hit`을 넣은 슬롯이다 (링아웃 전 `ringout_credit_s` 안, config). 없으면 `cause = self`.
-`caused_ringout`은 적중 후 같은 창 안에 대상이 링아웃되면 true — 판정 후 지연 발행한다.
+`caused_ringout`은 적중 후 같은 창(`StockLoss.WINDOW_TICKS`, 180틱) 안에 맞은 대상이 링아웃되고 그 링아웃이 시전자에게 크레딧될 때(`stock_lost.attacker_slot`과 같은 마지막 가격자 규칙 — 기믹이나 다른 플레이어의 나중 타격이면 false) true — 판정 후 지연 발행한다: 대상이 링아웃되면 즉시(true), 아니면 창이 지나거나 같은 슬롯의 다음 필살기가 시작되거나 경기가 끝날 때(false). sim은 한 틱의 타격을 모두 낸 뒤 링아웃을 낸다(`Rules.apply`가 마지막)라 같은 틱 링아웃도 맞게 잡힌다(`test_special_ringout`). 구현 `SpecialTelemetry`.
 
 ### 3.6 아이템
 
@@ -200,7 +200,7 @@
 
 ## 4. Supabase 원시 테이블 (`PRD-DATA-04`)
 
-마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` (순서대로). 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
+마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` → `0003_special_hits.sql` (순서대로). 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
 
 ### 4.1 테이블
 
@@ -208,7 +208,7 @@
 |---|---|---|
 | `profiles` | `id uuid pk = auth.uid`, `display_name text`, `created_at timestamptz` | 첫 로그인 시 생성 |
 | `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
-| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
+| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
 | `match_events` | `id bigserial pk`, `match_id uuid fk`, `tick int`, `type text`, `actor_slot int`, `target_slot int`, `payload jsonb` · 인덱스(`match_id`, `type`) | 원시 행동 로그. 경기 종료 시 500행 청크로 insert |
 | `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다 |
 
@@ -227,7 +227,7 @@
 | sim | `item_spawn` · `item_pickup` · `item_drop` · `item_throw` · `item_land` · `item_break` | 파이터 / — | `item`, `pos` | 4.0 |
 | sim | `explosion` | 던진 파이터 / — | `pos`, 반경 | 4.0 |
 | sim (Phase 4) | `gimmick_damage` · `platform_break` · `bounce` · `fog_start` · `fog_end` | 피해자 / — | `kind`, `pos`, `damage` | 4 |
-| sim (Phase 5) | `special_start` · `special_hit` · `projectile_spawn` | 시전자 / 대상 | `character`, `pos`, `knockback` | 5 |
+| sim (Phase 5) | `special_start` · `special_hit` · `gauge_full` · `projectile_spawn` | 시전자 / 대상 | `character`, `special`, `pos`, `knockback` | 5 |
 | view | `jumped` · `landed` · `respawned` | id / — | `pos` (`landed`는 `intensity`) | 4.0 |
 | 샘플 | `pos` | — / — | 전원의 `pos`·`damage`·`state`를 **30틱(0.5초)마다** 1행 | 4.0 |
 
@@ -256,7 +256,7 @@
 | Q2 | **경기장별 링아웃 위치·원인**이 다른가? | `stock_lost` (`zone`, `angle_deg`, `cause`), `gimmick_triggered`, `gimmick_ringout`, `match_events` `ringout`·`pos`·기믹 원시 | 기믹 강도·경기장 모양 조정 (Phase 4 완료 기준) |
 | Q3 | **로그인 퍼널**의 어디서 이탈하나? | `app_opened` → `login_viewed` → `login_started` → `login_completed` / `login_failed.reason` / `login_skipped` / `session_restored` → `screen_viewed` → `mode_selected` → `match_started` | 로그인 UI·흐름 수정, 건너뛰기 정책 |
 | Q4 | **첫 경기 완주율** ≥ 80%인가? (PRD §1.3) | `match_started` → `match_ended` vs `match_abandoned` (사용자 첫 경기) | 난이도·온보딩 조정 |
-| Q5 | **필살기 사용률·영향**은? | `gauge_full` → `special_used` (`ms_since_full`), `special_hit.caused_ringout`, `match_ended.players[].specials`, `match_events` `special_*`·`projectile_spawn` | 게이지 증가량·필살기 위력 조정 |
+| Q5 | **필살기 사용률·영향**은? | `gauge_full` → `special_used` (`ms_since_full`), `special_hit` (`targets_hit`, `caused_ringout`), `match_ended.players[].specials`·`special_hits`, `match_events` `special_*`·`projectile_spawn` | 게이지 증가량·필살기 위력 조정 |
 | Q6 | **아이템이 승패에 미치는 영향**은? 눈치 싸움이 생기나? (PRD §1.3) | `item_picked_up` (`ms_since_spawn`, `contested`), `item_used`, `item_hit`, `stock_lost.item`, `match_events` `item_*`·`explosion` | 아이템 수치·스폰 주기 조정 |
 | Q7 | **세션 길이·재방문**은? | `app_opened` / `app_backgrounded` / `app_closed` (`session_seconds`, `matches_played`), `session_restored.session_age_days`, `rematch_clicked`, `logout` | 세션 설계, 리매치 흐름 |
 | Q8 | **"날아가는 맛"** — 사망 대미지 분포가 적당한가? | `stock_lost.damage_at_death`, `match_events` `hit.knockback`·`guard_hit`·`grab`·`grab_release`, `jumped`·`landed`·`respawned` | `global_knockback_mul`·scaling 조정 |

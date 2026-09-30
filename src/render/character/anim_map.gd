@@ -2,10 +2,18 @@ class_name AnimMap
 extends RefCounted
 ## Sim fighter view -> animation state (design.md GD-ANIM-01): a pure, read-only mapping. The
 ## animation never changes sim timing; attack clips are stretched to the sim length (Task 6).
+## A special (Phase 5) plays its character's own motion, picked by the view's "special" id.
 
-enum Anim { IDLE, RUN, JUMP, FALL, LIGHT, HEAVY, CHARGE, BAT, GRAB, HOLD, HELD, THROW, HIT, LAUNCHED, GUARD, KO }
+enum Anim {
+	IDLE, RUN, JUMP, FALL, LIGHT, HEAVY, CHARGE, BAT, GRAB, HOLD, HELD, THROW, HIT, LAUNCHED, GUARD, KO,
+	SLAM, RUSH, SPIN, CAST,
+}
 
 const TIMED: Array[int] = [Anim.LIGHT, Anim.HEAVY, Anim.BAT, Anim.GRAB]
+const SPECIAL_ANIMS := {
+	SpecialCatalog.GROUND_SLAM: Anim.SLAM, SpecialCatalog.DASH_RUSH: Anim.RUSH,
+	SpecialCatalog.SPIN_SLASH: Anim.SPIN, SpecialCatalog.BIG_FIREBALL: Anim.CAST,
+}
 
 
 static func anim_for(view: Dictionary) -> int:
@@ -29,6 +37,8 @@ static func anim_for(view: Dictionary) -> int:
 			return Anim.HELD
 		Fighter.State.KO:
 			return Anim.KO
+		Fighter.State.SPECIAL:
+			return int(SPECIAL_ANIMS.get(String(view.get("special", "")), Anim.HEAVY))
 	return Anim.IDLE
 
 

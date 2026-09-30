@@ -22,7 +22,19 @@ func test_presses_are_rising_edges_per_action() -> void:
 	var s := feats.summary(0)
 	assert_eq(s["press_light"], 2, "held light counts once, then again after release")
 	assert_eq([s["press_jump"], s["press_heavy"], s["press_guard"], s["press_grab"]], [1, 1, 1, 1])
-	assert_eq(s["press_special"], 0, "no special button before Phase 5")
+	assert_eq(s["press_special"], 1, "heavy + guard together is the special chord (X+C)")
+
+
+func test_special_chord_counts_once_per_forming() -> void:
+	var feats := InputFeatures.new(1)
+	var frames := [InputFrame.make(0, 0, false, false, true), InputFrame.make(0, 0, false, false, true, true),
+		InputFrame.make(0, 0, false, false, true, true), InputFrame.make(0, 0, false, false, false, true),
+		InputFrame.make(0, 0, false, false, true, true)]
+	for f: InputFrame in frames:
+		feats.observe([f])
+	var s := feats.summary(0)
+	assert_eq(s["press_special"], 2, "chord formed on tick 1 (heavy held first) and again on tick 4")
+	assert_eq(s["press_heavy"], 2)
 
 
 func test_mash_ratio_counts_quick_repeats() -> void:

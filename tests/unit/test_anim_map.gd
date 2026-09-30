@@ -42,3 +42,16 @@ func test_names_and_timing() -> void:
 	for a: int in [AnimMap.Anim.LIGHT, AnimMap.Anim.HEAVY, AnimMap.Anim.BAT, AnimMap.Anim.GRAB]:
 		assert_true(AnimMap.is_timed(a))
 	assert_false(AnimMap.is_timed(AnimMap.Anim.RUN))
+
+
+func test_special_state_plays_the_character_special_motion() -> void:
+	var v := _v(Fighter.State.SPECIAL, true, AttackSet.Kind.SPECIAL)
+	var expected := {
+		SpecialCatalog.GROUND_SLAM: AnimMap.Anim.SLAM, SpecialCatalog.DASH_RUSH: AnimMap.Anim.RUSH,
+		SpecialCatalog.SPIN_SLASH: AnimMap.Anim.SPIN, SpecialCatalog.BIG_FIREBALL: AnimMap.Anim.CAST,
+	}
+	for id: String in expected:
+		v["special"] = id
+		assert_eq(AnimMap.anim_for(v), expected[id], id)
+	v["special"] = ""
+	assert_eq(AnimMap.anim_for(v), AnimMap.Anim.HEAVY, "unknown special falls back to a heavy swing")

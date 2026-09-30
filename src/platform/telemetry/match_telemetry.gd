@@ -58,7 +58,7 @@ func on_frame(events: Array, view_events: Array, view: Dictionary, inputs: Array
 	var tick := int(view["tick"])
 	var fighters: Array = view["fighters"]
 	var radius := float(view["arena_radius"])
-	_combat.begin_tick(fighters)
+	_combat.begin_tick(fighters, tick)
 	var enriched: Array = []
 	for e: Dictionary in events:
 		enriched.append(e.merged(_combat.on_event(e, tick, fighters, radius)))

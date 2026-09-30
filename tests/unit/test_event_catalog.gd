@@ -52,8 +52,22 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_a8() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 3)
+func test_schema_version_is_bumped_for_phase5_specials() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 4)
+
+
+func test_special_events_require_their_context() -> void:
+	var full := {"match_id": "m", "slot": 0, "character": "mage", "match_time_s": 1.5}
+	assert_eq(EventCatalog.validate("gauge_full", full).size(), 0)
+	assert_eq(EventCatalog.validate("gauge_full", {"match_id": "m", "slot": 0}).size(), 2, "character, match_time_s")
+	var used := {"match_id": "m", "slot": 0, "character": "mage", "special": "big_fireball", "ms_since_full": 500,
+		"target_damage": 40.0}
+	assert_eq(EventCatalog.validate("special_used", used).size(), 0)
+	var hit := {"match_id": "m", "slot": 0, "character": "mage", "special": "big_fireball", "targets_hit": 2,
+		"target_slot": 1, "caused_ringout": false}
+	assert_eq(EventCatalog.validate("special_hit", hit).size(), 0)
+	hit.erase("caused_ringout")
+	assert_eq(EventCatalog.validate("special_hit", hit).size(), 1)
 
 
 func test_a8_events_require_their_context() -> void:

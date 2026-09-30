@@ -4,11 +4,14 @@ extends RefCounted
 ## presses per action (rising edges), mash presses (same button again within MASH_WINDOW_TICKS,
 ## the default combo buffer), 8-way direction changes, guard hold time and idle gaps
 ## (IDLE_GAP_TICKS of neutral input in a row, counted once per gap: away vs. giving up).
+## press_special counts each forming of the special chord (heavy + guard held together, X+C —
+## what SpecialRunner reads); its buttons already count as heavy / guard presses.
 
 const ACTIONS := {
 	"jump": InputCodec.JUMP, "light": InputCodec.LIGHT, "heavy": InputCodec.HEAVY,
 	"guard": InputCodec.GUARD, "grab": InputCodec.GRAB,
 }
+const SPECIAL_CHORD := InputCodec.HEAVY | InputCodec.GUARD
 const MASH_WINDOW_TICKS := 10
 const IDLE_GAP_TICKS := 5 * SimTime.TICK_RATE
 const SECTORS := 8
@@ -26,7 +29,7 @@ func _init(slot_count: int) -> void:
 		for action: String in ACTIONS:
 			presses[action] = 0
 		_slots.append({"code": InputCodec.NEUTRAL, "dir": NO_DIRECTION, "presses": presses, "last_press": {},
-			"mashes": 0, "dir_changes": 0, "guard_ticks": 0, "idle_run": 0, "idle_gaps": 0, "ticks": 0})
+			"mashes": 0, "chords": 0, "dir_changes": 0, "guard_ticks": 0, "idle_run": 0, "idle_gaps": 0, "ticks": 0})
 
 
 ## One tick's inputs in slot order (missing slots are neutral, as in World).
@@ -43,7 +46,7 @@ func summary(slot: int) -> Dictionary:
 	for action: String in ACTIONS:
 		out["press_" + action] = int(s["presses"][action])
 		total += int(s["presses"][action])
-	out["press_special"] = 0  # Phase 5 adds the special button
+	out["press_special"] = int(s["chords"])
 	var ticks := maxi(int(s["ticks"]), 1)
 	out["inputs_per_min"] = snappedf(total * TICKS_PER_MINUTE / ticks, RATE_STEP)
 	out["direction_changes"] = int(s["dir_changes"])
@@ -59,6 +62,9 @@ func _observe_slot(s: Dictionary, code: int) -> void:
 	for action: String in ACTIONS:
 		if pressed & int(ACTIONS[action]):
 			_press(s, action, tick)
+	if InputCodec.buttons(code) & SPECIAL_CHORD == SPECIAL_CHORD \
+			and InputCodec.buttons(int(s["code"])) & SPECIAL_CHORD != SPECIAL_CHORD:
+		s["chords"] = int(s["chords"]) + 1
 	_track_direction(s, code)
 	if InputCodec.buttons(code) & InputCodec.GUARD:
 		s["guard_ticks"] = int(s["guard_ticks"]) + 1

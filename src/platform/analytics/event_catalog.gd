@@ -6,8 +6,9 @@ extends RefCounted
 
 ## Bumped with every change to event names, properties or Supabase row shapes (tracking-plan §7).
 ## Stamped on matches rows and sent as an Amplitude super property. 1 = platform A6,
-## 2 = A7 replay header, 3 = A8 features and session / load / result / perf events.
-const SCHEMA_VERSION := 3
+## 2 = A7 replay header, 3 = A8 features and session / load / result / perf events,
+## 4 = Phase 5 special events and the match_players.special_hits column.
+const SCHEMA_VERSION := 4
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -46,9 +47,9 @@ const EVENTS: Dictionary = {
 	# Combat highlights
 	"stock_lost": ["match_id", "victim_slot", "attacker_slot", "cause", "damage_at_death", "angle_deg", "zone",
 		"stocks_left"],
-	"special_used": ["match_id", "slot", "character"],
-	"special_hit": ["match_id", "slot", "target_slot"],
-	"gauge_full": ["match_id", "slot"],
+	"special_used": ["match_id", "slot", "character", "special", "ms_since_full", "target_damage"],
+	"special_hit": ["match_id", "slot", "character", "special", "targets_hit", "target_slot", "caused_ringout"],
+	"gauge_full": ["match_id", "slot", "character", "match_time_s"],
 	# Items
 	"item_picked_up": ["match_id", "slot", "item"],
 	"item_used": ["match_id", "slot", "item", "action"],

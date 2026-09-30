@@ -1,7 +1,7 @@
 class_name CombatTelemetry
 extends RefCounted
 ## Combat bookkeeping for MatchTelemetry (platform A6): turns sim events and fighter views into
-## SlotStats counters, the stock_lost / gimmick / item Amplitude events and the extra raw-row
+## SlotStats counters, the stock_lost / gimmick / item / special Amplitude events and the extra raw-row
 ## fields (attack_kind on hits, cause and credited attacker on ringouts). Split out of
 ## MatchTelemetry so the match lifecycle and the combat reading stay one responsibility each.
 
@@ -13,6 +13,7 @@ var _emit: Callable  # (event_name, props)
 var _loss := StockLoss.new()
 var _attacks := AttackTracker.new()
 var _items := ItemTelemetry.new()
+var _specials: SpecialTelemetry
 var _prev: Array = []
 var _dealer: Dictionary = {}  # target -> attacker of this tick's last hit
 
@@ -20,6 +21,7 @@ var _dealer: Dictionary = {}  # target -> attacker of this tick's last hit
 func _init(stat: Callable, emit: Callable) -> void:
 	_stat = stat
 	_emit = emit
+	_specials = SpecialTelemetry.new(emit, _count)
 
 
 ## Fighter views of the previous tick (damage at death, swing starts).
@@ -27,8 +29,9 @@ func previous() -> Array:
 	return _prev
 
 
-## Start of a tick: swings opened or closed since the last view.
-func begin_tick(fighters: Array) -> void:
+## Start of a tick: swings opened or closed since the last view, special hits whose window passed.
+func begin_tick(fighters: Array, tick: int) -> void:
+	_specials.begin_tick(fighters, tick)
 	var seen := _attacks.observe(_prev, fighters)
 	for slot: int in seen["whiffs"]:
 		_count(slot, "whiffs")
@@ -61,6 +64,7 @@ func on_event(e: Dictionary, tick: int, fighters: Array, arena_radius: float) ->
 			_loss.note_gimmick(victim, String(e.get("kind", type)), tick)
 		_emit.call("gimmick_triggered", {"kind": String(e.get("kind", type)), "victim_slot": victim})
 	_items.on_event(e, _emit, _count)
+	_specials.on_event(e.merged(extra), tick, fighters)
 	return extra
 
 
@@ -70,8 +74,10 @@ func end_tick(fighters: Array) -> void:
 	_prev = fighters
 
 
-## Match end: every swing still open is closed (and counted as a whiff when it never landed).
+## Match end: every swing still open is closed (and counted as a whiff when it never landed) and
+## every open special hit is sent.
 func finish() -> void:
+	_specials.finish()
 	for slot: int in _attacks.close_all():
 		_count(slot, "whiffs")
 

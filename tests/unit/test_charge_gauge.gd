@@ -47,3 +47,16 @@ func test_layer_shows_a_gauge_only_while_charging() -> void:
 	w.fighters[0].set_state(Fighter.State.IDLE)
 	layer.update_from(w.state_view(), c, project)
 	assert_false(g0.visible)
+
+
+func test_layer_hides_gauges_the_camera_cannot_see() -> void:
+	var c := GameConfig.new()
+	var w := World.new(c, 1)
+	w.fighters[0].set_state(Fighter.State.CHARGE)
+	var layer := ChargeGaugeLayer.new()
+	add_child_autofree(layer)
+	var project := func(p: Vector3) -> Vector2: return Vector2(p.x, p.z)
+	layer.update_from(w.state_view(), c, project, func(_p: Vector3) -> bool: return false)
+	assert_false(layer.gauge(0).visible, "behind the camera or off screen (special cut-in close shot)")
+	layer.update_from(w.state_view(), c, project, func(_p: Vector3) -> bool: return true)
+	assert_true(layer.gauge(0).visible)
