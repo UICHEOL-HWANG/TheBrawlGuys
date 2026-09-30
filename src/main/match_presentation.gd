@@ -55,7 +55,7 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 		touch: TouchInput) -> void:
 	_music.update_from(view)
 	_follow_arena(String(view.get("arena", ArenaCatalog.DEFAULT_ID)))
-	_feel.on_events(events)
+	_feel.on_events(events, view.get("fighters", []))
 	_feel.on_view_events(view_events)
 	_sfx.on_events(events)
 	_sfx.on_events(view_events)

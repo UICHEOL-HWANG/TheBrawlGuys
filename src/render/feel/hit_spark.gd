@@ -1,7 +1,7 @@
 class_name HitSpark
 extends Node3D
-## Hit puff v1 (design.md DS-VFX-01): a soft glow puff that swells and shrinks away; large hits
-## add a burst of petals. Round shapes only (no sharp spark lines). Frees itself when done.
+## Soft glow puff that swells and shrinks away; large ones add a burst of petals. Since the comic
+## impact (DS-VFX-01 v2, ImpactBurst) took over hits, only bomb explosions use it. Frees itself.
 
 const SMALL_SCALE := 0.6
 const LARGE_SCALE := 1.2

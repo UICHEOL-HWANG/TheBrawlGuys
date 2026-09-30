@@ -128,6 +128,10 @@
 | `fire` | `#FF9A2E` | 캠프파이어, 주 강조(CTA) |
 | `glow` | `#FFF3C4` | 블룸·발광 중심 |
 | `danger` | `#F0584A` | 위험·경고 |
+| `impact_core` | `#FFFBEA` | 코믹 임팩트 별 심지·충격 링 (DS-VFX-01 v2) |
+| `hit_flash` | `#FFFFFF` | 피격자 흰색 플래시 덮개 (DS-VFX-08) |
+| `screen_flash` | `glow` 24% | 강타 화면 플래시 (DS-VFX-01 v2) |
+| `clang` | `#8FD0FF` | 가드 클랭 링 (DS-VFX-07) |
 
 **UI 팔레트**
 
@@ -437,16 +441,19 @@
 ## 8. 이펙트와 사운드 (DS-VFX / DS-SFX)
 
 **모든 이펙트 강도는 넉백 크기 `k`의 함수다** (원칙 2). 강도 계수는 `GameConfig`에 있다.
-이펙트 형태도 형태 언어를 따른다: **동그란 퍼프, 꽃잎, 빛 점**. 날카로운 스파크 선 금지.
+이펙트 형태도 형태 언어를 따른다: **동그란 퍼프, 꽃잎, 빛 점**. 예외 — **타격 순간(DS-VFX-01·07)만은 뾰족한 코믹 별·스피드 라인·금속성 스파크를 쓴다** (2026-09-30 사용자 요청 "겟앰프드처럼 때리는 게 더 구체적으로 보이게": 누가 누구를 얼마나 세게 때렸는지 한눈에). 나머지 이펙트는 계속 둥근 형태.
 
 | ID | 이펙트 | 트리거 | 강도 규칙 | Phase |
 |---|---|---|---|---|
-| DS-VFX-01 | 히트 퍼프 | 타격 성공 | 소형 = `glow` 원 퍼프 / 대형(k ≥ 중간값) = 퍼프 + 흩날리는 꽃잎·잎사귀 | 1 (v1), 3 |
+| DS-VFX-01 | 코믹 임팩트 버스트 (v2, 2026-09-30 개정 — v1 둥근 퍼프는 폭탄 폭발에만 남음) | 타격 성공 | 카메라를 향한 평면 뾰족 별(`canopy_deep` 외곽 + **공격자 플레이어 색** + `impact_core` 심지, 가시 수·크기는 k 단계별) + 타격 방향을 향한 충격 링. 단계: 약(k < `impact_medium_threshold`) / 중 / 강(k ≥ `spark_large_threshold`). 강타는 방사형 스피드 라인 + 화면 플래시(`screen_flash`, 0.12초) + 카메라 펀치(`impact_heavy_punch`). hitstop 동안 크게 유지 후 0.14초에 줄며 사라짐. 풀링(품질 LOW는 절반) | 1 (v1), 3, 5 (v2) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | 가드 중 / 잡기 가능 | 가드 피격 시 비눗방울처럼 출렁임 | 2 |
 | DS-VFX-03 | 착지 먼지 | 착지, 급정지 | 연두빛 흙먼지 구름, 낙하 속도 비례 | 3 |
 | DS-VFX-04 | 넉백 궤적 | 속도 > `trail_speed_threshold` | 플레이어 색 리본 + 떨어지는 잎사귀, 속도에 비례한 길이 | 3 |
 | DS-VFX-05 | 링아웃 | 스톡 소모 | 물이면 큰 물보라, 낭떠러지면 플레이어 색 별 폭발 + 카메라 펀치 | 3 |
 | DS-VFX-06 | 리스폰·차지 광 | 리스폰 / 강공격 차지 | 햇살 기둥에서 내려옴 / 차지량 비례 `glow` 블룸 | 3 |
+| DS-VFX-07 | 가드 클랭 | 가드 피격 | 별 없이 작은 평면 `petal_blue` 바늘 8개 + `clang` 링 (가드 버블 출렁임과 함께) | 5 |
+| DS-VFX-08 | 피격 플래시·반동 | 타격 성공 | 피격자 모델 `hit_flash` 흰색 덮개(hitstop 동안 유지 후 0.1초 페이드) + 타격 방향으로 밀렸다 떨리며 복귀 + 단계별 스쿼시. 근접 공격자는 hitstop 동안 앞으로 살짝 내딛은 자세. 렌더 전용(sim 위치 불변) | 5 |
+| DS-VFX-09 | 대미지 숫자 | 타격 성공 (가드 제외) | 피격자 머리 위 "+12%" (`display_l` × 단계 배율, `canopy_deep` 외곽선), 색 = 피격 후 누적 % 의 DamageCounter 램프 색. 튀어나와 떠오르며 0.75초에 사라짐. `damage_popups` = 0 이면 끔 | 5 |
 
 | ID | 사운드 세트 | 내용 |
 |---|---|---|
@@ -463,7 +470,7 @@
 
 | ID | 항목 | 규칙 | GameConfig 키 (예) |
 |---|---|---|---|
-| GD-FEEL-01 | hitstop | 공격자·피격자 동시 정지. 강공격일수록 길게. 정지 중 피격자는 살짝 스쿼시 | `hitstop_light`, `hitstop_heavy` |
+| GD-FEEL-01 | hitstop | 공격자·피격자 동시 정지. 강공격일수록 길게. 정지 중 피격자는 흰색 플래시 + 스쿼시·반동, 공격자는 내딛은 자세(DS-VFX-08) | `hitstop_light`, `hitstop_heavy` |
 | GD-FEEL-02 | 화면 흔들림 | 진폭 = min(k × `shake_per_knockback`, `shake_max`), 지수 감쇠. hitstop이 끝날 때 시작 | `shake_per_knockback`, `shake_max`, `shake_decay` |
 | GD-FEEL-03 | 무적 깜빡임 | 리스폰 무적 동안 반투명 펄스 10Hz, 마지막 0.5초는 20Hz | `blink_hz`, `blink_hz_end` |
 | GD-FEEL-04 | 넉백 궤적 강도 | DS-VFX-04 강도 = 속도 / `trail_speed_full` | `trail_speed_threshold`, `trail_speed_full` |
@@ -536,9 +543,10 @@
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (안개 실루엣 Phase 4 완료, P3·P4 모양은 Phase 5) |
 | DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ✅ (Phase 4 T6 위험 표시·장식 가림) |
 | DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2, 4 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |
-| DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
+| DS-VFX-01 | 코믹 임팩트 버스트 (v2) | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3, 5 (v2) | ✅ (v2 2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
+| DS-VFX-07~09 | 가드 클랭·피격 플래시·대미지 숫자 | PRD-FX-02, PRD-RULE-05 | 5 | ✅ (2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
 | DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |

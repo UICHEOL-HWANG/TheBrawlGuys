@@ -224,6 +224,12 @@ extends StyleConfig
 ## Landing dust (DS-VFX-03) by fall speed (m/s).
 @export_range(0.0, 20.0, 0.5) var dust_min_fall_speed: float = 4.0
 @export_range(1.0, 40.0, 0.5) var dust_full_fall_speed: float = 14.0
+## Comic hit impact (DS-VFX-01 v2): knockback at or above this is a medium hit (heavy starts at
+## spark_large_threshold). Heavy hits punch the camera in by this fraction of the ring-out punch.
+@export_range(0.0, 40.0, 0.5) var impact_medium_threshold: float = 4.0
+@export_range(0.0, 1.0, 0.05) var impact_heavy_punch: float = 0.35
+## Floating damage numbers above the victim (DS-VFX-09): 1 = on, 0 = off.
+@export_range(0, 1, 1) var damage_popups: int = 1
 
 
 ## Groups whose values change the simulation. Only these enter the fingerprint (context F1):
