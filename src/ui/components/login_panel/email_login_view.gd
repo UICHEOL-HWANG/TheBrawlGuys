@@ -53,6 +53,8 @@ func show_step(s: int) -> void:
 	resend_button().visible = s == Step.CODE
 	if s == Step.CODE and code_input().is_node_ready():
 		code_input().clear()
+	if email_field().state() == UiTextField.State.ERROR:
+		email_field().set_state(UiTextField.State.IDLE)  # a new step starts clean
 	set_message("", false)
 	_apply_texts()
 	focus_current()
@@ -100,10 +102,13 @@ func submit() -> void:
 	if _step == Step.EMAIL:
 		code_requested.emit(email())
 	else:
-		code_submitted.emit(email(), code())
+		code_submitted.emit(email(), code_input().code())
 
 
+## Steps back; not while a request is out (its answer belongs to this step).
 func go_back() -> void:
+	if _busy:
+		return
 	if _step == Step.CODE:
 		show_step(Step.EMAIL)
 	else:
@@ -121,10 +126,6 @@ func focus_current() -> void:
 
 func email() -> String:
 	return email_field().text.strip_edges()
-
-
-func code() -> String:
-	return code_input().code()
 
 
 func email_field() -> UiTextField:

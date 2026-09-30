@@ -81,8 +81,18 @@ func test_email_validation() -> void:
 
 func test_code_validation() -> void:
 	assert_true(EmailOtp.is_valid_code("012345"))
-	for bad: String in ["", "12345", "1234567", "12345a", "12 345"]:
+	for bad: String in ["", "12345", "1234567", "12345a", "12 345", "123456\n"]:
 		assert_false(EmailOtp.is_valid_code(bad), bad)
+
+
+func test_a_code_is_pending_for_the_last_address() -> void:
+	assert_false(_auth.email.has_pending_code(EMAIL))
+	_send_ok()
+	assert_true(_auth.email.has_pending_code(" Player@Example.com"), "normalized")
+	assert_false(_auth.email.has_pending_code("other@example.com"))
+	_auth.send_email_code("other@example.com", _done())
+	_http.respond(429, "{}")
+	assert_false(_auth.email.has_pending_code("other@example.com"), "rate limited: nothing was mailed")
 
 
 func test_invalid_email_is_refused_without_a_request() -> void:
@@ -134,7 +144,9 @@ func test_send_results_are_mapped() -> void:
 	var cases := [[429, "{}", "rate_limited"], [422, "{\"error_code\":\"validation_failed\"}", "invalid_email"],
 		[400, "{\"error_code\":\"email_address_invalid\"}", "invalid_email"],
 		[400, "{\"error_code\":\"email_provider_disabled\"}", "error"],
-		[400, "{\"error_code\":\"email_address_not_authorized\"}", "error"], [500, "", "error"], [0, "", "error"]]
+		[400, "{\"error_code\":\"email_address_not_authorized\"}", "error"], [500, "", "error"], [0, "", "error"],
+		[400, "{}", "invalid_email"], [401, "{}", "error"], [403, "{\"error_code\":\"captcha_failed\"}", "error"],
+		[404, "", "error"]]
 	for i: int in cases.size():
 		var c: Array = cases[i]
 		_auth.send_email_code("p%d@example.com" % i, _done())
@@ -176,7 +188,8 @@ func test_verify_refuses_a_malformed_code_without_a_request() -> void:
 
 func test_verify_errors_are_mapped() -> void:
 	_send_ok()
-	for c: Array in [[400, "wrong_code"], [429, "rate_limited"], [500, "error"], [0, "error"]]:
+	for c: Array in [[400, "wrong_code"], [403, "wrong_code"], [422, "wrong_code"], [429, "rate_limited"],
+			[401, "error"], [404, "error"], [500, "error"], [0, "error"]]:
 		_auth.verify_email_code(EMAIL, CODE, _done())
 		_http.respond(int(c[0]), "{}")
 		assert_eq(_results.back(), String(c[1]), "status %d" % c[0])

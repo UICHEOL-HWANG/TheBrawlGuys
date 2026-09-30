@@ -86,6 +86,11 @@ func email_cooldown_s() -> int:
 	return auth.email.cooldown_left_s() if auth != null else 0
 
 
+## The last code went to this address (it may still be in the mailbox).
+func email_code_pending(address: String) -> bool:
+	return auth != null and auth.email.has_pending_code(address)
+
+
 ## done(result: String): EmailOtp.RESULT_* or REASON_NOT_CONFIGURED. Never emits failed.
 func send_email_code(address: String, done: Callable) -> void:
 	if auth == null:

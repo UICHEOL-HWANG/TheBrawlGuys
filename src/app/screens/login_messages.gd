@@ -9,6 +9,7 @@ const WAITING := "브라우저에서 Google 로그인을 마쳐 주세요"
 ## Only Google waits for mobile deep links; email codes work on mobile.
 const MOBILE := "모바일은 Google 로그인을 준비 중이에요 · 이메일로 계속해 주세요"
 const CODE_SENT := "인증코드를 보냈어요 · 메일함을 확인해 주세요"
+const CODE_ALREADY_SENT := "이미 보낸 코드를 입력해 주세요"
 const INVALID_EMAIL := "잘못된 이메일이에요 · 주소를 다시 확인해 주세요"
 const INVALID_CODE := "6자리 숫자 코드를 입력해 주세요"
 const WRONG_CODE := "코드가 틀렸거나 만료됐어요"
