@@ -109,8 +109,8 @@ func _token_grant(grant: String, payload: Dictionary, done: Callable) -> void:
 func _on_token(code: int, body: String, done: Callable) -> void:
 	if code < 200 or code >= 300:
 		_net_error("auth/token", code)
-		if code == HTTP_BAD_REQUEST or code == HTTP_UNAUTHORIZED:
-			sign_out()
+		if session != null and (code == HTTP_BAD_REQUEST or code == HTTP_UNAUTHORIZED):
+			sign_out()  # the refresh token is no longer valid
 		done.call(false, code, body)
 		return
 	var fresh := SupabaseSession.from_token_response(JsonSafe.parse(body), int(now_s.call()))
