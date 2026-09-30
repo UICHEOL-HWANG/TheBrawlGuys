@@ -20,8 +20,7 @@ func setup(index: int, diameter: float) -> void:
 
 func set_dimmed(d: bool) -> void:
 	if d and not _dimmed and is_inside_tree():
-		scale = Vector2.ONE * POP_SCALE
-		create_tween().tween_property(self, "scale", Vector2.ONE, DS.MOTION_BASE)
+		UiMotion.bump(self, POP_SCALE)
 	_dimmed = d
 	queue_redraw()
 

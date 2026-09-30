@@ -50,3 +50,16 @@ func test_losing_a_stock_bumps_its_marker() -> void:
 	await wait_process_frames(1)
 	s.set_stocks(2)
 	assert_ne((s.get_child(2) as Control).scale, Vector2.ONE, "the lost stock pops")
+
+
+func test_ui_components_do_not_hand_roll_tweens() -> void:
+	var offenders: Array[String] = []
+	var dirs: Array[String] = ["res://src/ui/components"]
+	while not dirs.is_empty():
+		var dir: String = dirs.pop_back()
+		for sub: String in DirAccess.get_directories_at(dir):
+			dirs.append("%s/%s" % [dir, sub])
+		for f: String in DirAccess.get_files_at(dir):
+			if f.ends_with(".gd") and FileAccess.get_file_as_string("%s/%s" % [dir, f]).contains("create_tween"):
+				offenders.append("%s/%s" % [dir, f])
+	assert_eq(offenders, [], "every UI transition goes through UiMotion (DS-TOK-05)")
