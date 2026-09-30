@@ -28,8 +28,8 @@
 - P4: Supabase/Vercel CLI 미설치 → 마이그레이션은 SQL Editor, 배포는 `npx vercel`
 
 ## 사용자 대기
-- [ ] secrets.local.cfg 입력
-- [ ] Supabase Google provider 활성화 + Redirect URL 등록
+- [x] secrets.local.cfg 입력 (Amplitude·Supabase 키 유효 확인)
+- [x] Supabase Google provider 활성화 + Redirect URL 등록 (2026-09-30 확인: authorize → accounts.google.com 302)
 - [ ] 마이그레이션 SQL 실행
 - [x] `npx vercel login` — uicheol-hwang / team cheorish (Hobby), 2026-09-30
 - [ ] Amplitude MCP 커넥터 인증 (검증용, 선택)
