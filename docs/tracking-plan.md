@@ -1,6 +1,6 @@
 # TheBrawlGuys — 트래킹 플랜
 
-> 버전 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — `event_schema_version` 3)
+> 버전 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
 > 상위: [`PRD.md`](./PRD.md) §5.8 (`PRD-DATA-03`, `PRD-DATA-04`) · 일정: [`PHASES.md`](./PHASES.md) Phase 4.0 · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떤 이벤트를, 어떤 속성으로, 어디에 보내는지**의 단일 원천(SSOT)이다.
@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 4 — Phase 5 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 5 — Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -96,7 +96,7 @@
 |---|---|---|---|---|---|
 | `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|character\|arena\|lobby\|match\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
-| `character_selected` | 슬롯별 캐릭터 확정 | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool` | `browse_count: int` (확정 전 넘겨본 카드 수) | A | 5 |
+| `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
 | `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest)` | `browse_count: int` | A | 4 |
 | `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
 
@@ -116,7 +116,7 @@
 |---|---|---|---|
 | `slot` | int | 0부터 | 4.0 |
 | `is_bot` | bool | | 4.0 |
-| `character` / `style` | str | Phase 5 전에는 슬롯 고정 모델·기본 스타일 | 4.0 |
+| `character` / `style` | str | 캐릭터 id(`barbarian`\|`rogue`\|`knight`\|`mage`, 캐릭터를 안 고른 경기 = `""` 클래식) / 스타일(`boxer`\|`weapon`\|`ranged`, 클래식 = `classic`). 스키마 5부터 `match_ended.players[]`에도 들어가 스타일별 요약(Q1·Q13)을 Amplitude에서 바로 볼 수 있다. 스키마 4 이하 `match_players.character`는 슬롯 고정 모델 이름(`Knight` 등)이고 sim은 클래식이었다 | 4.0 / 5 |
 | `input_device` | str | 로컬 슬롯은 경기 시작 때 그 플레이어의 장치: 패드를 받았으면 `gamepad`, 아니면 P1은 플랫폼 기본(`keyboard`\|`touch`), 로컬 2인 P2는 `keyboard`. 봇은 `bot` (스키마 변경 없음, 2026-09-30 로컬 2인) | 4.0 |
 | `result` | enum(win\|loss\|draw) | | 4.0 |
 | `stocks_left` | int | | 4.0 |
@@ -210,7 +210,7 @@
 | `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
 | `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
 | `match_events` | `id bigserial pk`, `match_id uuid fk`, `tick int`, `type text`, `actor_slot int`, `target_slot int`, `payload jsonb` · 인덱스(`match_id`, `type`) | 원시 행동 로그. 경기 종료 시 500행 청크로 insert |
-| `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다 |
+| `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다. 슬롯 캐릭터는 `match_players.character`에서 읽는다(`event_schema_version` ≥ 5, 그 전 경기는 클래식으로 재생) |
 
 `payload`에는 이벤트의 나머지 필드(`pos`, `knockback`, `power`, `stocks_left` …)를 그대로 넣는다. `Vector3`는 `[x, y, z]` 배열(소수 2자리).
 

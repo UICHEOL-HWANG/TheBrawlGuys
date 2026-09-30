@@ -213,6 +213,7 @@
 - 64×64 그리드, 둥근 끝 선(굵기 6) 또는 평면 채색 덩어리. 날카로운 모서리 금지
 - 색은 `ui_text` 단색 기본, 상태에 따라 포인트 색
 - 세트: 터치 버튼(점프·공격·가드·잡기), 아이템 3종, 스타일 3종, 입력 장치 프롬프트(키보드·Xbox·PS), 경기장 기믹
+- 입력 장치 프롬프트 (Phase 5 T9, `SelectPrompts` → `PromptRow`): 선택 화면의 플레이어마다 "고르기 · 확정 · 취소" 줄. 키보드 = 작은 `KeyCap`(InputMap에서 읽음: P1 ← → · Z · X, P2 A D · F · G), 패드 = `PadGlyph`(코드로 그린 둥근 배지: 십자키 + Xbox A/B 글자, `Input.get_joy_name`이 PS 계열이면 ✕/○ 모양), 터치 = 없음(화면 안내 "카드를 눌러 고르세요"). 플레이어가 마지막으로 쓴 장치를 따르고, 없으면 잡고 있는 패드 → 터치 → 키보드
 
 ---
 
@@ -331,9 +332,9 @@
 | DS-CMP-05 | `ChargeGauge` | 강공격 차지량 (월드 공간) | 차지 중 · 최대(반짝) | `petal_yellow` → `fire`, `glow` | 2 | PRD-CMB-02 |
 | DS-CMP-06 | `MenuButton` (`UiMenuButton`) | 메뉴 조작 | idle · focus(호버 포함) · pressed · disabled | `ui_accent`(primary) / `ui_surface`(secondary) / 투명 + `ui_surface` 70% 테두리 + 흰 글자(ghost, 유리 카드 위 보조 동작), `radius_pill`, `stroke_focus`, `PRESS_SQUISH` | 4.0 | PRD-UI-02 |
 | DS-CMP-07 | `Panel` (`UiPanel`) | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
-| DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일, 플레이어 색 링 | 4, 5 | PRD-UI-02 |
+| DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일(경기장) / 캐릭터 초상(`CharacterPortrait`: 자기 모델이 작은 잔디 무대에서 idle, 포커스·선택된 카드만 매 프레임 그림), 플레이어 색 링(선택), 커서 배지(`CardMarks`: 그 카드에 커서가 있는 플레이어의 마커+번호, 썸네일 오른쪽 위에 겹쳐 높이 0) | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
-| DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음 · 선택 중 · 준비 · 연결 끊김 | 플레이어 색+모양 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
+| DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음(`ui_surface_dim`) · 선택 중 · 준비(`stroke_focus` 플레이어 색 링) · 연결 끊김(dim + 마커 흐림, Phase 6 자리) | 한 줄 머리: `PlayerMarker`(색+모양) · `P1`(`title`) · 봇 태그 · 캐릭터(`body`) · 상태(`caption`), 아래 `PromptRow`(DS-TOK-06). `radius_l`, `shadow_soft`, 최소 폭 400 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
 | DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 | 입력 · 오류 · 확인 중 | `display_l`, 글자별 둥근 칸 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
@@ -411,7 +412,7 @@
 - 발밑 링: 플레이어 색 + 모양 마커(●▲■◆), 부드러운 발광으로 바닥 위에 항상 그려짐 (안개·그림자 무시)
 - 안개 낀 숲 (Phase 4 T6): 안개가 끼면 각 전투원의 몸 실루엣(플레이어 색 50%)과 발밑 링(90%)이 깊이 검사·안개 없이 안개 층 위에 그려지고 안개 양에 맞춰 나타난다 (`FogSilhouette`). 메뉴 배경에서는 숨긴다
 - 머리 위 `P1`~`P4` 라벨: 로컬 다인 / 온라인에서만 표시
-- 흑백으로도 구분 가능해야 한다 (Phase 5 완료 기준)
+- 흑백으로도 구분 가능해야 한다 (Phase 5 완료 기준) — Phase 5 T9: 발밑 링이 플레이어 모양 그대로의 납작한 띠(`PlayerRingMesh`: P1 원 · P2 삼각 · P3 사각 · P4 마름모, 다각형은 변이 몸 밖으로 나오게 키움)로 바뀌었고 안개 실루엣 링도 같은 모양. 증거 `phase-5/evidence/player-ids{,-gray}.png`
 
 ### DS-VIS-04 경기장 가독성
 
@@ -512,7 +513,7 @@
 | DS-TOK-03 | 간격 | PRD-UI-01 | 0 | ✅ |
 | DS-TOK-04 | 반경·선·그림자 | PRD-UI-01 | 0 | ✅ |
 | DS-TOK-05 | 모션 | PRD-UI-01, PRD-UI-02 | 0 (정의), 3 (적용) | ✅ |
-| DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | 🟨 (Phase 2: 터치 버튼 4종 아이콘, Phase 5에서 계속) |
+| DS-TOK-06 | 아이콘 | PRD-CTL-03, PRD-STYLE-01~03 | 2, 5 | 🟨 (Phase 2: 터치 버튼 4종 아이콘, Phase 5 T9: 입력 장치 프롬프트 키보드·Xbox·PS. 스타일 아이콘은 T8 시안 후) |
 | DS-THM-01 | 기본 테마 | PRD-UI-01 | 0 | ✅ |
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ✅ (Phase 4 T6) |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
@@ -524,8 +525,9 @@
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |
 | DS-CMP-05 | 컴포넌트 — `ChargeGauge` | PRD-CMB-02 | 2 | ✅ |
 | DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ✅ |
-| DS-CMP-08 | SelectCard | PRD-UI-02 | 4, 5 | 🟨 (경기장 선택 Phase 4 T7 완료, 캐릭터 선택은 Phase 5) |
-| DS-CMP-10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-08 | SelectCard | PRD-UI-02 | 4, 5 | ✅ (경기장 Phase 4 T7, 캐릭터 Phase 5 T9 `phase-5/evidence/char-select-*.png`) |
+| DS-CMP-10 | PlayerSlot | PRD-LOCAL-01, PRD-NET-03 | 5, 6 | 🟨 (Phase 5 T9 로컬 상태 3종 + 연결 끊김 자리, 갤러리 등록. 온라인 연결은 Phase 6) |
+| DS-CMP-11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
 | DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스 · 이메일 모드 추가 `evidence/login-email-*.png`) |
 | DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
 | DS-CMP-16 | 컴포넌트 — `KeyHintBar` (키보드 조작 안내 바) | PRD-CTL-02, PRD-UI-01 | 4 | ✅ (2026-09-30, `evidence/key-hint-*.png`) |
@@ -533,7 +535,7 @@
 | DS-CMP-18 | 컴포넌트 — `CodeInput` (6자리 인증코드) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-code.png`·`-error.png`) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
-| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (안개 실루엣 Phase 4 완료, P3·P4 모양은 Phase 5) |
+| DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ✅ (안개 실루엣 Phase 4, 모양 링 P1~P4 Phase 5 T9 — 흑백 캡처 `phase-5/evidence/player-ids-gray.png`) |
 | DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ✅ (Phase 4 T6 위험 표시·장식 가림) |
 | DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2, 4 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |
 | DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
