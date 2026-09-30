@@ -4,17 +4,28 @@ const R := 0.45
 const H := 1.6
 
 
+## Classic arena with the Phase 1 numbers: radius 10, blast margin 12, kill_y -8.
+func _classic() -> ArenaData:
+	var c := GameConfig.new()
+	c.arena_radius = 10.0
+	c.blast_margin = 12.0
+	c.kill_y = -8.0
+	return ArenaCatalog.default(c)
+
+
 func test_floor_is_inside_radius() -> void:
-	assert_true(Collision.on_arena_floor(Vector3(9.9, 0, 0), 10.0))
-	assert_true(Collision.on_arena_floor(Vector3(0, 5, -10.0), 10.0))
-	assert_false(Collision.on_arena_floor(Vector3(7.2, 0, 7.2), 10.0))
+	var a := _classic()
+	assert_true(ArenaFloor.over_floor(a, Vector3(9.9, 0, 0)))
+	assert_true(ArenaFloor.over_floor(a, Vector3(0, 5, -10.0)))
+	assert_false(ArenaFloor.over_floor(a, Vector3(7.2, 0, 7.2)))
 
 
 func test_out_of_bounds_by_height_or_distance() -> void:
-	assert_false(Collision.is_out_of_bounds(Vector3(0, 0, 0), 10.0, 12.0, -8.0))
-	assert_true(Collision.is_out_of_bounds(Vector3(0, -8.1, 0), 10.0, 12.0, -8.0))
-	assert_true(Collision.is_out_of_bounds(Vector3(22.1, 3, 0), 10.0, 12.0, -8.0))
-	assert_false(Collision.is_out_of_bounds(Vector3(21.9, 3, 0), 10.0, 12.0, -8.0))
+	var a := _classic()
+	assert_eq(ArenaFloor.out_zone(a, Vector3(0, 0, 0)), "")
+	assert_eq(ArenaFloor.out_zone(a, Vector3(0, -8.1, 0)), "kill_y")
+	assert_eq(ArenaFloor.out_zone(a, Vector3(22.1, 3, 0)), "blast")
+	assert_eq(ArenaFloor.out_zone(a, Vector3(21.9, 3, 0)), "")
 
 
 func test_separate_pushes_apart_by_half_penetration() -> void:

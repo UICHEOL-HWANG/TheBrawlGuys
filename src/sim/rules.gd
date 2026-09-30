@@ -1,17 +1,15 @@
 class_name Rules
 extends RefCounted
-## Match rules (PRD §4.1): spawning here; ring-out, stocks, respawn and winner added in Task 7.
+## Match rules (PRD §4.1): spawning, ring-out (ArenaFloor.out_zone), stocks, respawn and winner.
+## Spawn points and ring-out bounds come from the World's ArenaData (Phase 4 T1); the optional
+## arena argument defaults to the classic circle for callers outside a World.
 
 const ONGOING := -2
 const DRAW := -1
-## Fighters spawn on a circle at this fraction of the arena radius.
-const SPAWN_RADIUS_RATIO := 0.5
 
 
-static func spawn_point(index: int, count: int, config: GameConfig) -> Vector3:
-	var angle := PI + TAU * float(index) / float(maxi(count, 1))
-	var r := config.arena_radius * SPAWN_RADIUS_RATIO
-	return Vector3(cos(angle) * r, 0.0, sin(angle) * r)
+static func spawn_point(index: int, count: int, config: GameConfig, arena: ArenaData = null) -> Vector3:
+	return _arena_or_default(arena, config).spawn_point(index, count)
 
 
 static func facing_to_center(pos: Vector3) -> Vector3:
@@ -19,10 +17,10 @@ static func facing_to_center(pos: Vector3) -> Vector3:
 	return flat.normalized() if flat.length() > 0.0001 else Vector3(0, 0, 1)
 
 
-static func spawn_fighter(index: int, count: int, config: GameConfig) -> Fighter:
+static func spawn_fighter(index: int, count: int, config: GameConfig, arena: ArenaData = null) -> Fighter:
 	var f := Fighter.new()
 	f.id = index
-	f.pos = spawn_point(index, count, config)
+	f.pos = spawn_point(index, count, config, arena)
 	f.facing = facing_to_center(f.pos)
 	f.stocks = config.stocks
 	f.jumps_left = config.max_jumps
@@ -30,8 +28,8 @@ static func spawn_fighter(index: int, count: int, config: GameConfig) -> Fighter
 	return f
 
 
-static func respawn(f: Fighter, count: int, config: GameConfig) -> void:
-	f.pos = spawn_point(f.id, count, config) + Vector3.UP * config.respawn_height
+static func respawn(f: Fighter, count: int, config: GameConfig, arena: ArenaData = null) -> void:
+	f.pos = spawn_point(f.id, count, config, arena) + Vector3.UP * config.respawn_height
 	f.vel = Vector3.ZERO
 	f.facing = facing_to_center(f.pos)
 	f.damage = 0.0
@@ -43,7 +41,7 @@ static func respawn(f: Fighter, count: int, config: GameConfig) -> void:
 	f.set_state(Fighter.State.AIR)
 
 
-## Resets attack, charge, combo and grab bookkeeping and the carried item (respawn and KO).
+## Resets attack, charge, combo and grab bookkeeping, the carried item and burning (respawn and KO).
 static func clear_actions(f: Fighter) -> void:
 	f.hitstun_ticks = 0
 	f.hitstop_ticks = 0
@@ -56,24 +54,30 @@ static func clear_actions(f: Fighter) -> void:
 	f.partner_id = Fighter.NONE
 	f.item_kind = Fighter.NONE
 	f.item_uses = 0
+	f.burn_ticks = 0
+	f.burn_clock = 0
+	f.held_presses = 0
 
 
-static func apply(fighters: Array[Fighter], config: GameConfig) -> Array[Dictionary]:
+## Ring-outs this tick. Each "ringout" event says which bound was crossed ("zone": "kill_y",
+## "blast" or a ring-out zone tag such as "lake" / "water").
+static func apply(fighters: Array[Fighter], config: GameConfig, arena: ArenaData) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	for f: Fighter in fighters:
 		if not f.is_alive():
 			continue
-		if not Collision.is_out_of_bounds(f.pos, config.arena_radius, config.blast_margin, config.kill_y):
+		var zone := ArenaFloor.out_zone(arena, f.pos)
+		if zone.is_empty():
 			continue
 		var at := f.pos
 		f.stocks -= 1
 		if f.stocks > 0:
-			respawn(f, fighters.size(), config)
+			respawn(f, fighters.size(), config, arena)
 		else:
 			f.vel = Vector3.ZERO
 			clear_actions(f)
 			f.set_state(Fighter.State.KO)
-		events.append({"type": "ringout", "id": f.id, "pos": at, "stocks_left": f.stocks})
+		events.append({"type": "ringout", "id": f.id, "pos": at, "stocks_left": f.stocks, "zone": zone})
 	return events
 
 
@@ -87,3 +91,7 @@ static func winner(fighters: Array[Fighter]) -> int:
 	if alive.is_empty():
 		return DRAW
 	return ONGOING
+
+
+static func _arena_or_default(arena: ArenaData, config: GameConfig) -> ArenaData:
+	return arena if arena != null else ArenaCatalog.default(config)

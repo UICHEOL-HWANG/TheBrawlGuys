@@ -110,9 +110,11 @@ extends Resource
 @export_range(0.0, 30.0, 0.1) var bat_base_knockback: float = 8.0
 @export_range(0.0, 0.5, 0.005) var bat_knockback_scaling: float = 0.1
 @export_range(0.0, 2.0, 0.05) var bat_launch_angle_y: float = 0.5
-@export_range(0, 40, 1) var bat_startup_ticks: int = 6
+## Startup equals the light attack so a bat swung into a light attack trades instead of being
+## interrupted (Phase 3 carry-over); the longer recovery keeps a whiffed swing punishable.
+@export_range(0, 40, 1) var bat_startup_ticks: int = 3
 @export_range(1, 30, 1) var bat_active_ticks: int = 4
-@export_range(0, 60, 1) var bat_recovery_ticks: int = 14
+@export_range(0, 60, 1) var bat_recovery_ticks: int = 18
 @export_range(0.0, 3.0, 0.05) var bat_hitbox_forward: float = 1.2
 @export_range(0.1, 2.0, 0.05) var bat_hitbox_half_width: float = 0.6
 ## Lit on throw; explodes this long after (the throw tick counts as the first tick, E7).
@@ -128,14 +130,42 @@ extends Resource
 @export_range(0.0, 0.5, 0.005) var rock_knockback_scaling: float = 0.08
 @export_range(0.0, 2.0, 0.05) var rock_launch_angle_y: float = 0.3
 
+@export_group("Arena Gimmicks")
+## Campfire (PRD-ARENA-01): touching it burns for burn_duration, burn_damage % at once and then
+## every burn_interval while the burn lasts.
+@export_range(0.0, 20.0, 0.5) var burn_damage: float = 2.0
+@export_range(0.1, 3.0, 0.05) var burn_interval: float = 0.5
+@export_range(0.1, 10.0, 0.1) var burn_duration: float = 2.0
+## Feet higher than this above the fire (m) jump over it unharmed.
+@export_range(0.1, 3.0, 0.05) var burn_reach_height: float = 1.0
+## Log bridge planks (PRD-ARENA-02): first crack at start + order * interval, cracked for
+## warn_time, gone for respawn_time, back for rebreak_time before cracking again.
+@export_range(1.0, 120.0, 0.5) var platform_break_start_time: float = 20.0
+@export_range(0.5, 60.0, 0.5) var platform_break_interval: float = 6.0
+@export_range(0.1, 5.0, 0.05) var platform_warn_time: float = 1.5
+@export_range(1.0, 60.0, 0.5) var platform_respawn_time: float = 12.0
+@export_range(1.0, 120.0, 0.5) var platform_rebreak_time: float = 30.0
+## Hits taken by fighters standing on a plank (and explosions over it) that crack it early.
+@export_range(1, 40, 1) var platform_hits_to_break: int = 6
+## Mushroom (PRD-ARENA-03) launch speed straight up (m/s); ~3x the jump height at 16.
+@export_range(5.0, 40.0, 0.5) var bounce_speed: float = 16.0
+## Fog (PRD-ARENA-04): first fog at first_time, lasting duration, repeating every period.
+@export_range(0.0, 120.0, 0.5) var fog_first_time: float = 15.0
+@export_range(1.0, 120.0, 0.5) var fog_period: float = 30.0
+@export_range(0.5, 60.0, 0.5) var fog_duration: float = 10.0
+
 @export_group("Bot")
 @export_range(0.5, 5.0, 0.1) var bot_attack_range: float = 1.4
+## Bot n swings at bot_attack_range - n % 4 * spread, so mirrored bots do not trade forever.
+@export_range(0.0, 0.5, 0.01) var bot_attack_range_spread: float = 0.1
 @export_range(0, 120, 1) var bot_attack_cooldown_ticks: int = 30
 @export_range(0.3, 1.0, 0.01) var bot_edge_ratio: float = 0.8
 @export_range(0.5, 6.0, 0.1) var bot_guard_range: float = 2.2
 @export_range(1, 90, 1) var bot_guard_ticks: int = 20
 @export_range(0.0, 20.0, 0.5) var bot_item_seek_range: float = 8.0
 @export_range(1.0, 15.0, 0.5) var bot_throw_range: float = 6.0
+## Bots never walk where this far ahead of them has no floor (bridge gaps, edges).
+@export_range(0.1, 3.0, 0.05) var bot_ground_lookahead: float = 0.6
 
 @export_group("Feel")
 @export_range(0.0, 0.2, 0.001) var shake_per_knockback: float = 0.02
@@ -190,6 +220,7 @@ extends Resource
 ## can be tuned or added without invalidating snapshots and replay hashes.
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
+	"Arena Gimmicks",
 ]
 
 @export_group("Audio")
