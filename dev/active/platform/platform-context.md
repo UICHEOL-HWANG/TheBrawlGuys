@@ -44,3 +44,7 @@
 - 원시 행 보강(984c0a3): `hit`/`guard_hit` payload에 `attack_kind`(이름), `ringout` payload에 `cause`·`attacker_slot`
 - 남은 리뷰 항목: 데스크톱 콜백 `state` 검사 없음(PKCE라 코드 주입은 불가, 조기 종료만 가능) → B1에서 redirect_to에 nonce 추가 / 세션 파일 평문 / 업로드 재시도 없음(matches.id가 클라이언트 uuid라 중복은 PK로 막힘) / 계정당 insert 한도 없음
 - `AuthService`는 아직 씬에 연결 안 됨 → B1
+
+## 도메인 (2026-09-30)
+- `thebrawlguys.cloud` 구매 완료 (호스팅케이알). 네임서버는 호스팅케이알 기본 유지, 배포(D1) 시 A/CNAME 레코드로 Vercel 연결, HTTPS는 Vercel 자동
+- 배포 시: Vercel 프로젝트 도메인 추가 → 호스팅케이알 DNS 레코드 → Supabase Redirect URLs에 `https://thebrawlguys.cloud` → `secrets.local.cfg`의 `auth.redirect_web`
