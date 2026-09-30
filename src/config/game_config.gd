@@ -167,11 +167,37 @@ extends Resource
 @export_range(96.0, 300.0, 2.0) var touch_side_diameter: float = 116.0
 
 
-## Hash of every script variable (D1). Snapshots and replays store it so a run can only be
-## restored or verified against the exact same tuning.
+## Groups whose values change the simulation. Only these enter the fingerprint (context F1):
+## camera, touch, feel, bot, loop and later presentation groups never alter a replay, so they
+## can be tuned or added without invalidating snapshots and replay hashes.
+const SIM_GROUPS: Array[String] = [
+	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
+]
+const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch"]
+
+
+## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays
+## store it so a run can only be restored or verified against the same sim tuning.
 func fingerprint() -> int:
 	var values: Array = []
+	var group := ""
 	for p: Dictionary in get_property_list():
-		if int(p["usage"]) & PROPERTY_USAGE_SCRIPT_VARIABLE:
+		var usage := int(p["usage"])
+		if usage & PROPERTY_USAGE_GROUP:
+			group = String(p["name"])
+			continue
+		if usage & PROPERTY_USAGE_SCRIPT_VARIABLE and SIM_GROUPS.has(group):
 			values.append([p["name"], get(p["name"])])
 	return hash(values)
+
+
+static func group_names() -> Array[String]:
+	var names: Array[String] = []
+	var in_script := false
+	for p: Dictionary in GameConfig.new().get_property_list():
+		var usage := int(p["usage"])
+		if usage & PROPERTY_USAGE_CATEGORY:
+			in_script = String(p["name"]) == "game_config.gd"
+		elif in_script and usage & PROPERTY_USAGE_GROUP:
+			names.append(String(p["name"]))
+	return names

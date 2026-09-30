@@ -68,3 +68,32 @@ func test_item_spawn_window_is_ordered() -> void:
 	var c := GameConfig.new()
 	assert_lt(c.item_spawn_min_time, c.item_spawn_max_time)
 	assert_eq(SimTime.to_ticks(c.bomb_fuse_time), 120, "PHASES test: bomb explodes 120 ticks after the throw")
+
+
+func test_fingerprint_ignores_presentation_groups() -> void:
+	var a := GameConfig.new()
+	var b := GameConfig.new()
+	b.cam_pitch = 45.0
+	b.touch_layout = 2
+	b.shake_max = 0.1
+	b.bot_attack_range = 3.0
+	b.max_ticks_per_frame = 2
+	assert_eq(a.fingerprint(), b.fingerprint(), "camera/touch/feel/bot/loop never change a replay")
+
+
+func test_fingerprint_follows_sim_groups() -> void:
+	for name: String in ["move_speed", "fighter_radius", "arena_radius", "stocks", "global_knockback_mul",
+			"light_damage", "combo_buffer_ticks", "heavy_damage", "grab_hold_max_time", "bomb_radius"]:
+		var a := GameConfig.new()
+		var b := GameConfig.new()
+		var v: Variant = b.get(name)
+		b.set(name, v + 1 if typeof(v) == TYPE_INT else float(v) + 0.5)
+		assert_ne(a.fingerprint(), b.fingerprint(), "%s is a sim value" % name)
+
+
+func test_every_group_is_classified() -> void:
+	for group: String in GameConfig.group_names():
+		assert_true(GameConfig.SIM_GROUPS.has(group) or GameConfig.NON_SIM_GROUPS.has(group),
+				"GameConfig group %s must be listed in SIM_GROUPS or NON_SIM_GROUPS" % group)
+	for group: String in GameConfig.SIM_GROUPS:
+		assert_false(GameConfig.NON_SIM_GROUPS.has(group), "%s listed twice" % group)

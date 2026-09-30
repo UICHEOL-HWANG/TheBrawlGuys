@@ -7,7 +7,7 @@ extends GutTest
 const SEED := 7
 const TICKS := 1200
 const HALF := 600
-const GOLDEN_HASH := 2973674052
+const GOLDEN_HASH := 2953754395
 ## Sim behavior without the config fingerprint (context F1). Fixed in Phase 3 Task 1 from the
 ## Phase 2 code before the fingerprint scope changed; it must never change during Phase 3
 ## (presentation work must not touch the sim).
