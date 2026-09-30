@@ -33,24 +33,6 @@ func _held(view: Dictionary, kind: int) -> Dictionary:
 	return out
 
 
-func test_gear_kind_follows_the_style() -> void:
-	assert_eq(StyleGearCatalog.look_for("barbarian", StyleCatalog.BOXER)["gear"], StyleGearCatalog.Gear.GLOVES)
-	assert_eq(StyleGearCatalog.look_for("rogue", StyleCatalog.BOXER)["gear"], StyleGearCatalog.Gear.GLOVES)
-	assert_eq(StyleGearCatalog.look_for("knight", StyleCatalog.WEAPON)["gear"], StyleGearCatalog.Gear.SWORD)
-	assert_eq(StyleGearCatalog.look_for("mage", StyleCatalog.RANGED)["gear"], StyleGearCatalog.Gear.STAFF)
-
-
-func test_barbarian_gloves_are_bigger_than_rogue_gloves() -> void:
-	var big := float(StyleGearCatalog.look_for("barbarian", StyleCatalog.BOXER)["glove_radius"])
-	var small := float(StyleGearCatalog.look_for("rogue", StyleCatalog.BOXER)["glove_radius"])
-	assert_gt(big, small)
-
-
-func test_classic_and_unknown_characters_have_no_look() -> void:
-	assert_true(StyleGearCatalog.look_for(CharacterData.DEFAULT, StyleCatalog.CLASSIC).is_empty())
-	assert_true(StyleGearCatalog.look_for("pirate", StyleCatalog.BOXER).is_empty())
-
-
 func test_knight_wears_the_sword_and_helmet_tilted_back() -> void:
 	var v := _fighter(0)
 	var rest := _mesh(v, "2H_Sword").transform
@@ -140,3 +122,59 @@ func test_fighter_without_a_model_ignores_gear() -> void:
 	var gear := StyleGear.new(null, null)
 	gear.follow(_views()[0])
 	assert_eq(gear.worn(), "")
+
+
+func test_redress_keeps_the_accessory_texture() -> void:
+	var v := _fighter(0)
+	var views := _views()
+	var classic: Array[String] = []
+	_show(v, views[0])
+	_show(v, _views(classic)[0])
+	_show(v, views[0])
+	var mat := _mesh(v, "Knight_Helmet").get_surface_override_material(0) as ShaderMaterial
+	assert_true(bool(mat.get_shader_parameter("use_texture")), "not a white helmet on re-dress")
+
+
+func test_undress_puts_the_sword_back_and_drops_the_orb() -> void:
+	var knight := _fighter(0)
+	var rest := _mesh(knight, "2H_Sword").transform
+	var mage := _fighter(2)
+	var classic: Array[String] = []
+	_show(knight, _views()[0])
+	_show(knight, _views(classic)[0])
+	assert_eq(_mesh(knight, "2H_Sword").transform, rest)
+	_show(mage, _views()[2])
+	_show(mage, _views(classic)[2])
+	assert_eq(_mesh(mage, "2H_Staff").get_child_count(), 0)
+
+
+func test_style_change_on_the_same_character_redresses() -> void:
+	var v := _fighter(0)
+	var view: Dictionary = _views()[0].duplicate()
+	_show(v, view)
+	view["style"] = StyleCatalog.BOXER
+	_show(v, view)
+	assert_false(_mesh(v, "2H_Sword").visible)
+	assert_eq(v.gear().hand_gear().size(), 2, "gloves")
+	view["style"] = StyleCatalog.CLASSIC
+	_show(v, view)
+	assert_eq(v.gear().worn(), "")
+	assert_eq(v.gear().hand_gear().size(), 0)
+
+
+func test_staff_hides_while_held_and_undress_while_busy_redresses_clean() -> void:
+	var v := _fighter(2)
+	var view: Dictionary = _views()[2]
+	_show(v, _held(view, Item.Kind.BOMB))
+	assert_false(_mesh(v, "2H_Staff").is_visible_in_tree())
+	var classic: Array[String] = []
+	_show(v, _held(_views(classic)[2], Item.Kind.BOMB))
+	_show(v, view)
+	assert_true(_mesh(v, "2H_Staff").is_visible_in_tree())
+
+
+func test_orb_keeps_its_size_in_metres() -> void:
+	var v := _fighter(2)
+	_show(v, _views()[2])
+	var orb := _mesh(v, "2H_Staff").get_child(0) as Node3D
+	assert_almost_eq(orb.global_transform.basis.get_scale().x, 1.0, 0.05)

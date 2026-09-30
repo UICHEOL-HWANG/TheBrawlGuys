@@ -10,12 +10,13 @@ enum Gear { GLOVES, SWORD, STAFF }
 const STYLE_GEAR := {
 	StyleCatalog.BOXER: Gear.GLOVES, StyleCatalog.WEAPON: Gear.SWORD, StyleCatalog.RANGED: Gear.STAFF,
 }
-## Per character: headgear mesh turned back on, glove radius (m, boxers; Barbarian's bigger).
+## Per character: headgear mesh turned back on, glove radius in m when boxing (Barbarian's
+## bigger; the others only matter if a character ever changes style).
 const CHARACTER := {
 	CharacterData.BARBARIAN: {"headgear": "Barbarian_Hat", "glove_radius": 0.2},
 	CharacterData.ROGUE: {"headgear": "Rogue_Cape", "glove_radius": 0.155},
-	CharacterData.KNIGHT: {"headgear": "Knight_Helmet", "glove_radius": 0.0},
-	CharacterData.MAGE: {"headgear": "Mage_Hat", "glove_radius": 0.0},
+	CharacterData.KNIGHT: {"headgear": "Knight_Helmet", "glove_radius": 0.16},
+	CharacterData.MAGE: {"headgear": "Mage_Hat", "glove_radius": 0.16},
 }
 ## KayKit hand meshes revealed per gear kind (hidden by CharacterCatalog in the default look).
 const HAND_MESH := {Gear.SWORD: "2H_Sword", Gear.STAFF: "2H_Staff"}

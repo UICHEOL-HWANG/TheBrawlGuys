@@ -16,6 +16,9 @@ const HANDS: Array[String] = ["handslot.l", "handslot.r"]
 var _model: CharacterModel
 var _animator: CharacterAnimator
 var _worn: String = ""
+## The character / style last looked at: follow() only re-dresses when one of them changes.
+var _seen_character: String = ""
+var _seen_style: String = ""
 var _revealed: Array[MeshInstance3D] = []
 var _rest: Dictionary = {}  # revealed hand mesh -> its KayKit transform
 var _built: Array[Node3D] = []
@@ -32,11 +35,14 @@ func _init(model: CharacterModel, animator: CharacterAnimator) -> void:
 func follow(view: Dictionary) -> void:
 	if _model == null:
 		return
-	var wanted := _wanted(view)
-	if wanted != _worn:
+	var character := String(view.get("character", ""))
+	var style := String(view.get("style", ""))
+	if character != _seen_character or style != _seen_style:
+		_seen_character = character
+		_seen_style = style
 		_undress()
-		if not wanted.is_empty():
-			_dress(wanted, String(view.get("style", "")))
+		if character == _model.character_id():
+			_dress(character, style)
 	_set_hands_busy(int(view.get("item_kind", Fighter.NONE)) != Fighter.NONE)
 
 
@@ -48,13 +54,6 @@ func worn() -> String:
 ## Gloves or the revealed sword / staff: the nodes that hide while an item is held.
 func hand_gear() -> Array[Node3D]:
 	return _hand
-
-
-func _wanted(view: Dictionary) -> String:
-	var character := String(view.get("character", ""))
-	if character != _model.character_id() or not StyleGearCatalog.CHARACTER.has(character):
-		return ""
-	return character
 
 
 func _dress(character: String, style: String) -> void:
@@ -70,7 +69,7 @@ func _dress(character: String, style: String) -> void:
 	if _animator != null:
 		_animator.set_clip(AnimMap.Anim.IDLE, String(look["idle_clip"]))
 	_worn = character
-	_hands_busy = false
+	_hands_busy = false  # everything was just shown; follow() hides the hand gear if busy
 
 
 func _undress() -> void:
@@ -79,7 +78,10 @@ func _undress() -> void:
 		if _rest.has(mesh):
 			mesh.transform = _rest[mesh]
 	for node: Node3D in _built:
-		node.get_parent().remove_child(node)
+		if not is_instance_valid(node):
+			continue
+		if node.get_parent() != null:
+			node.get_parent().remove_child(node)  # gone this frame, never doubled on a re-dress
 		node.queue_free()
 	if _animator != null and not _worn.is_empty():
 		_animator.reset_clip(AnimMap.Anim.IDLE)
@@ -132,6 +134,7 @@ func _reveal(mesh_name: String) -> MeshInstance3D:
 		return null
 	var mesh := found[0] as MeshInstance3D
 	mesh.visible = true
-	CharacterModel.apply_toon(mesh)
+	if mesh.get_surface_override_material(0) == null:  # a re-dress keeps the toon it already has
+		CharacterModel.apply_toon(mesh)
 	_revealed.append(mesh)
 	return mesh
