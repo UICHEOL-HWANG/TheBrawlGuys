@@ -3,11 +3,12 @@ extends RefCounted
 ## Camera occlusion check for decor (GD-CAM-01, PRD §6.1 "장식은 경기장 바깥, 카메라 시야를 가리지
 ## 않는다"). A decor piece is an upright cylinder (base, radius, height); it blocks when it cuts a
 ## sight line from a match camera pose to a point of the arena core (the ring the camera always
-## keeps in frame, from the floor to fighter height). Pure math, used by DecorView to drop
-## blocking props and by tests to prove none are left.
+## keeps in frame, from the floor to fighter height). Exact: each sight line is clipped to the
+## cylinder's height slab and its ground track tested against the radius, so thin posts cannot
+## slip between samples. Pure math, used by DecorView to drop blocking props and by tests to
+## prove none are left.
 
 const RING_SAMPLES := 16
-const SEGMENT_SAMPLES := 32
 const MATCH_ASPECT := 16.0 / 9.0
 
 
@@ -54,10 +55,29 @@ static func blocks_any(poses: Array[Dictionary], base: Vector3, radius: float, h
 ## True when the cylinder at base (radius, height) cuts a sight line from eye to any target.
 static func blocks(eye_pos: Vector3, targets: PackedVector3Array, base: Vector3, radius: float, height: float) -> bool:
 	for t: Vector3 in targets:
-		for s: int in range(1, SEGMENT_SAMPLES):
-			var q := eye_pos.lerp(t, float(s) / SEGMENT_SAMPLES)
-			if q.y < base.y or q.y > base.y + height:
-				continue
-			if Vector2(q.x - base.x, q.z - base.z).length() < radius:
-				return true
+		if cuts(eye_pos, t, base, radius, height):
+			return true
 	return false
+
+
+## True when the segment a-b passes through the upright cylinder at base (radius, height): the
+## part of the segment inside the height slab comes closer than radius to the axis.
+static func cuts(a: Vector3, b: Vector3, base: Vector3, radius: float, height: float) -> bool:
+	var span := _slab_span(a.y, b.y, base.y, base.y + height)
+	if span.x > span.y:
+		return false
+	var p := a.lerp(b, span.x)
+	var q := a.lerp(b, span.y)
+	var axis := Vector2(base.x, base.z)
+	var near := Geometry2D.get_closest_point_to_segment(axis, Vector2(p.x, p.z), Vector2(q.x, q.z))
+	return near.distance_to(axis) < radius
+
+
+## The [t0, t1] part of 0..1 where y(t) = lerp(ya, yb, t) lies in [lo, hi]; empty when t0 > t1.
+static func _slab_span(ya: float, yb: float, lo: float, hi: float) -> Vector2:
+	var dy := yb - ya
+	if is_zero_approx(dy):
+		return Vector2(0.0, 1.0) if ya >= lo and ya <= hi else Vector2(1.0, 0.0)
+	var t0 := (lo - ya) / dy
+	var t1 := (hi - ya) / dy
+	return Vector2(maxf(minf(t0, t1), 0.0), minf(maxf(t0, t1), 1.0))

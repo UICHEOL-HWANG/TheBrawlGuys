@@ -27,7 +27,8 @@ var _config: GameConfig
 var _arena: ArenaData
 var _dressing: ArenaDressing
 ## {node, angle, "offset" (outside the ring) or "frac" (inside), and either "y" (fixed height) or
-## "lift" (above the dressing's ground); tall pieces also carry radius and height}
+## "lift" (above the dressing's ground); tall pieces also carry radius, height and "drop" (the
+## node origin's height above the piece's base)}
 var _items: Array[Dictionary] = []
 
 
@@ -58,9 +59,9 @@ func occluders() -> Array[Dictionary]:
 	for item: Dictionary in _items:
 		var node: Node3D = item["node"]
 		if item.has("radius") and node.visible:
-			out.append({"pos": node.position, "radius": item["radius"], "height": item["height"]})
+			out.append({"pos": _base(node, item), "radius": item["radius"], "height": item["height"]})
 	for o: Dictionary in _dressing.occluders():
-		out.append({"pos": (o["node"] as Node3D).position, "radius": o["radius"], "height": o["height"]})
+		out.append({"pos": _base(o["node"], o), "radius": o["radius"], "height": o["height"]})
 	return out
 
 
@@ -84,7 +85,12 @@ func _layout() -> void:
 			continue
 		node.position = Vector3(p.x, y, p.z)
 		if item.has("radius"):
-			node.visible = not DecorOcclusion.blocks_any(poses, node.position, item["radius"], item["height"])
+			node.visible = not DecorOcclusion.blocks_any(poses, _base(node, item), item["radius"], item["height"])
+
+
+## Bottom of a tall piece: its node origin lowered by the piece's drop.
+static func _base(node: Node3D, piece: Dictionary) -> Vector3:
+	return node.position - Vector3(0.0, float(piece.get("drop", 0.0)), 0.0)
 
 
 ## Fixed height, the arena floor (inside the ring) or the dressing's ground plus lift (NAN = none).
@@ -151,7 +157,7 @@ func _add_rock() -> void:
 	mi.material_override = ToonMaterials.toon(DS.STONE_CREAM)
 	add_child(mi)
 	_items.append({"node": mi, "angle": ROCK_ANGLE, "offset": ROCK_OFFSET, "lift": ROCK_LIFT,
-		"radius": ROCK_SCALE.x * 0.5, "height": ROCK_SCALE.y})
+		"radius": ROCK_SCALE.x * 0.5, "height": ROCK_SCALE.y, "drop": ROCK_SCALE.y * 0.5})
 
 
 ## True when a point is horizontally over the classic meadow lake (grown by margin).
@@ -159,8 +165,9 @@ static func is_over_lake(pos: Vector3, arena_radius: float, margin: float = 0.0)
 	return Vector2(pos.x - (arena_radius + LAKE_OFFSET), pos.z).length() <= LAKE_RADIUS + margin
 
 
-## A ring-out that ends in water splashes (DS-VFX-05): a water zone, or over the meadow lake.
-static func is_water_ringout(event: Dictionary, arena_radius: float) -> bool:
+## A ring-out that ends in water splashes (DS-VFX-05): a water zone, or over the meadow lake
+## when the arena has one (decor_lake: ArenaDressings.has_decor_lake).
+static func is_water_ringout(event: Dictionary, arena_radius: float, decor_lake: bool) -> bool:
 	if WATER_ZONES.has(String(event.get("zone", ""))):
 		return true
-	return is_over_lake(event["pos"], arena_radius)
+	return decor_lake and is_over_lake(event["pos"], arena_radius)

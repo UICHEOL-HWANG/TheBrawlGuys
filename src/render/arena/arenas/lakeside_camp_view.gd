@@ -60,4 +60,4 @@ func _tent() -> void:
 	flap.size = TENT_SIZE * Vector3(0.45, 0.7, 1.02)
 	var door := _piece(flap, DS.CANOPY_DEEP, tent.position + Vector3(0, -TENT_SIZE.y * 0.15, 0))
 	door.rotation.y = -a
-	add_occluder(tent, TENT_SIZE.z * 0.5, TENT_SIZE.y)
+	add_occluder(tent, TENT_SIZE.z * 0.5, TENT_SIZE.y, true)

@@ -11,6 +11,7 @@ var _sfx: SfxDirector
 var _music: MusicDirector
 var _grab_hint: GrabHint
 var _gauges: ChargeGaugeLayer
+var _arena_id: String = ""
 
 
 func setup(config: GameConfig) -> void:
@@ -47,6 +48,7 @@ func play_ui(sound: String) -> void:
 func present(view: Dictionary, events: Array, view_events: Array, delta: float, local_slot: int,
 		touch: TouchInput) -> void:
 	_music.update_from(view)
+	_follow_arena(String(view.get("arena", ArenaCatalog.DEFAULT_ID)))
 	_feel.on_events(events)
 	_feel.on_view_events(view_events)
 	_sfx.on_events(events)
@@ -54,3 +56,12 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 	LocalHints.update(view, local_slot, _config, touch, _grab_hint)
 	_camera.follow(CameraFraming.match_targets(view, _config), delta)
 	_gauges.update_from(view, _config, _camera.unproject)
+
+
+## Ring-out splashes follow the arena being played (only real water splashes).
+func _follow_arena(arena_id: String) -> void:
+	if arena_id == _arena_id:
+		return
+	_arena_id = arena_id
+	_feel.set_arena(arena_id)
+	_sfx.set_arena(arena_id)

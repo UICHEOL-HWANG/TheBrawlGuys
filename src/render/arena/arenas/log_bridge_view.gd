@@ -68,7 +68,7 @@ func _posts(water_y: float) -> void:
 	for sx: float in [-1.0, 1.0]:
 		for sz: float in [-1.0, 1.0]:
 			var p := Vector3(sx * (half.x + POST_OUTSET), water_y + POST_HEIGHT * 0.5, sz * (half.y + POST_OUTSET))
-			add_occluder(_piece(post, _theme.rim, p), POST_RADIUS, POST_HEIGHT)
+			add_occluder(_piece(post, _theme.rim, p), POST_RADIUS, POST_HEIGHT, true)
 
 
 func _river_bits(water_y: float) -> void:

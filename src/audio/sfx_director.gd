@@ -14,6 +14,7 @@ var _config: GameConfig
 var _players: Array[AudioStreamPlayer] = []
 var _next: int = 0
 var _streams: Dictionary = {}
+var _decor_lake: bool = ArenaDressings.has_decor_lake(ArenaCatalog.DEFAULT_ID)
 
 
 func setup(config: GameConfig) -> void:
@@ -29,7 +30,8 @@ func setup(config: GameConfig) -> void:
 			_streams[name] = load(path)
 
 
-static func sound_for(event: Dictionary, config: GameConfig) -> Dictionary:
+## decor_lake: the arena has the classic meadow lake (ring-outs over it splash).
+static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = false) -> Dictionary:
 	match String(event["type"]):
 		"hit":
 			var k := float(event["knockback"])
@@ -40,7 +42,7 @@ static func sound_for(event: Dictionary, config: GameConfig) -> Dictionary:
 		"guard_hit":
 			return {"name": "guard", "pitch": 1.0, "volume_db": 0.0}
 		"ringout":
-			var lake := DecorView.is_water_ringout(event, config.arena_radius)
+			var lake := DecorView.is_water_ringout(event, config.arena_radius, decor_lake)
 			return {"name": "ringout_splash" if lake else "ringout_whistle", "pitch": 1.0, "volume_db": 0.0}
 		"landed":
 			return {"name": "land", "pitch": 1.0, "volume_db": lerpf(LAND_QUIET_DB, 0.0, float(event["intensity"]))}
@@ -53,9 +55,14 @@ static func sound_for(event: Dictionary, config: GameConfig) -> Dictionary:
 	return {}
 
 
+## The arena being played (ring-outs splash only where there is water).
+func set_arena(arena_id: String) -> void:
+	_decor_lake = ArenaDressings.has_decor_lake(arena_id)
+
+
 func on_events(events: Array) -> void:
 	for e: Dictionary in events:
-		var s := sound_for(e, _config)
+		var s := sound_for(e, _config, _decor_lake)
 		if not s.is_empty():
 			play(String(s["name"]), float(s["pitch"]), float(s["volume_db"]))
 
