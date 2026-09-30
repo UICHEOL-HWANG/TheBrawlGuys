@@ -4,14 +4,12 @@ extends Node3D
 ## slot's model for the classic fighter; capsule fallback if the model fails to load), with its
 ## FighterIdentity (shaped foot ring + P-label). Interpolates prev -> curr by alpha, snaps when
 ## spawn_id changes (respawn), blinks while invulnerable, hides when KO. Reads view values only.
-## Shows the carried item in hand, with use dots for bats (DS-VIS-05).
+## Shows the carried item in hand, with use dots for bats (DS-VIS-05), and the style gear (StyleGear, DS-VIS-02).
 
 const RIM := 0.35
 const BLINK_END_SECONDS := 0.5
 const HAND_SIDE := 0.9
 const HAND_FORWARD := 0.4
-const BUBBLE_RADIUS_RATIO := 0.62
-const WOBBLE_SQUASH := Vector3(1.12, 0.88, 1.12)
 
 var _config: GameConfig
 var _body: MeshInstance3D
@@ -21,7 +19,8 @@ var _identity: FighterIdentity
 var _held: HeldItem
 var _charge_glow: ChargeGlow
 var _dots: BatUseDots
-var _bubble: MeshInstance3D
+var _bubble: GuardBubble
+var _gear: StyleGear
 var _blob: BlobShadow
 var _blob_wanted: bool = false
 
@@ -42,17 +41,10 @@ func setup(index: int, config: GameConfig, character: String = CharacterData.DEF
 	_dots = BatUseDots.new()
 	add_child(_dots)
 	_dots.setup(config)
-
-	var sphere := SphereMesh.new()
-	sphere.radius = config.fighter_height * BUBBLE_RADIUS_RATIO
-	sphere.height = sphere.radius * 2.0
-	_bubble = MeshInstance3D.new()
-	_bubble.mesh = sphere
-	_bubble.material_override = ToonMaterials.translucent(DS.GUARD_BUBBLE)
-	_bubble.position.y = config.fighter_height * 0.5
-	_bubble.visible = false
+	_bubble = GuardBubble.new()
 	add_child(_bubble)
-
+	_bubble.setup(config)
+	_gear = StyleGear.new(_model, _animator)
 	_blob = BlobShadow.new()
 	add_child(_blob)
 	_blob.setup(config)
@@ -77,6 +69,7 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	else:
 		_body.visible = shown
 	_show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
+	_gear.follow(curr)
 	_bubble.visible = int(curr["state"]) == Fighter.State.GUARD
 
 
@@ -94,11 +87,13 @@ func model() -> CharacterModel:
 	return _model
 
 
+func gear() -> StyleGear:
+	return _gear
+
+
 ## Soap-bubble wobble when a guarded hit lands (DS-VFX-02).
 func wobble() -> void:
-	_bubble.scale = WOBBLE_SQUASH
-	var tw := create_tween()
-	tw.tween_property(_bubble, "scale", Vector3.ONE, DS.MOTION_SQUISH).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_bubble.wobble()
 
 
 ## Foot ring and P-label (DS-VIS-03). The menu backdrop hides them: no player identity in menus.

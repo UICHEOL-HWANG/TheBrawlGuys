@@ -408,7 +408,7 @@
 **캐릭터**
 - 머리 : 몸 = 1 : 1 치비, 둥근 실루엣. 정면·측면 실루엣만으로 스타일이 구분되어야 한다
 - 채도·명도를 바닥보다 한 단계 높게 + 림 라이트 → 연두 배경에서 떠 보임
-- 스타일 악센트: 권투형 = 큰 둥근 장갑, 무기형 = 등에 멘 통나무 방망이, 원거리형 = 가방·새총 (Phase 5 🖼 게이트)
+- 스타일 악센트 (Phase 5 🖼 게이트 → 2026-10-01 방향 A "장비" 승인): 권투형 = 큰 빨간 둥근 장갑(`danger` + `ui_surface` 커프, Barbarian이 더 큼)과 주먹을 든 가드 대기 자세, 무기형(Knight) = KayKit 양손 대검, 원거리형(Mage) = KayKit 지팡이 + `fire` 구슬. 캐릭터 모자·투구를 다시 씌운다. 검·지팡이는 세워 들어 옆 전투원을 덜 가리고, 아이템을 든 동안 손 장비는 숨긴다(손 슬롯 공유). 클래식 파이터는 장비 없음. 구현 `StyleGear` (`src/render/character/`), 증거 `dev/active/phase-5/evidence/silhouette-final*.png`
 - 에셋: KayKit / Quaternius CC0 모델을 쓰되, 머티리얼은 전부 우리 소프트 툰 셰이더로 교체
 
 ### DS-VIS-03 플레이어 식별
@@ -545,7 +545,7 @@
 | DS-CMP-17 | 컴포넌트 — `TextField` (로그인 이메일 입력) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-step.png`) |
 | DS-CMP-18 | 컴포넌트 — `CodeInput` (6자리 인증코드) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-code.png`·`-error.png`) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
-| DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
+| DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용 · Phase 5 🖼 스타일 룩 A 장비 승인·적용 2026-10-01 `silhouette-final*.png` · Phase 3 🖼 T7 대기) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ✅ (안개 실루엣 Phase 4, 모양 링 P1~P4 Phase 5 T9 — 흑백 캡처 `phase-5/evidence/player-ids-gray.png`) |
 | DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ✅ (Phase 4 T6 위험 표시·장식 가림) |
 | DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2, 4 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |

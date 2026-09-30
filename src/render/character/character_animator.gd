@@ -11,6 +11,8 @@ var _tree: AnimationTree
 var _machine: AnimationNodeStateMachine
 var _playback: AnimationNodeStateMachinePlayback
 var _clips: Dictionary = {}
+var _default_clips: Dictionary = {}
+var _player: AnimationPlayer
 var _current: int = -1
 var _last_kind: int = -1
 
@@ -19,7 +21,9 @@ func setup(player: AnimationPlayer, config: GameConfig) -> void:
 	var available := PackedStringArray()
 	for n: StringName in player.get_animation_list():
 		available.append(String(n))
+	_player = player
 	_clips = AnimClips.resolve(available)
+	_default_clips = _clips.duplicate()
 	_machine = AnimationNodeStateMachine.new()
 	for anim: int in AnimMap.Anim.values():
 		_machine.add_node(AnimMap.anim_name(anim), _node_for(anim, player, config))
@@ -55,6 +59,25 @@ func current_anim() -> int:
 
 func clip_for(anim: int) -> String:
 	return String(_clips[anim])
+
+
+## Swaps the clip a looping state plays (a style's idle, StyleGear). Timed attack states keep
+## their sim-stretched clips. False (and nothing changes) if the state is timed or the clip missing.
+func set_clip(anim: int, clip: String) -> bool:
+	if AnimMap.is_timed(anim) or not _player.has_animation(clip):
+		push_warning("CharacterAnimator: cannot play %s for %s" % [clip, AnimMap.anim_name(anim)])
+		return false
+	var node := _machine.get_node(AnimMap.anim_name(anim)) as AnimationNodeAnimation
+	node.animation = StringName(clip)
+	node.timeline_length = _player.get_animation(clip).length
+	_clips[anim] = clip
+	return true
+
+
+## Back to the clip AnimClips picked at setup.
+func reset_clip(anim: int) -> void:
+	if _clips[anim] != _default_clips[anim]:
+		set_clip(anim, String(_default_clips[anim]))
 
 
 func play_position() -> float:

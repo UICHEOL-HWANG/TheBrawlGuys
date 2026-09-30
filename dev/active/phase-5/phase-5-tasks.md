@@ -11,7 +11,7 @@
 | T5 | 봇 스타일 사거리 · 필살기 사용 | PRD-BOT-02 | `test_bot` · `test_bot_style` | ✅ (feat/phase5-sim) |
 | T6 | 밸런스 시뮬 100판 → 승률표 30~70% | PRD-STYLE-01~03 | `evidence/balance.csv` (35~67%) | ✅ (feat/phase5-sim) |
 | T7 | 로컬 2인 (P2 키 · 게임패드 자동 할당) + 모드 "로컬 2인" + 키 바 필살기 키캡(게이지 링)·플레이어별 바 | PRD-LOCAL-01, DS-CMP-16 | `test_local_input` · `test_local_match` · `test_key_hint_bar` + `evidence/key-hint-*.png` | ✅ (feat/p5-local2p) — 실제 패드·한 키보드 2인 한 판 완주는 사용자 확인 |
-| T8 | 🖼 스타일 실루엣·악센트 시안 → 확정 | DS-VIS-02 | 사용자 승인 | ⬜ |
+| T8 | 🖼 스타일 실루엣·악센트 시안 → 확정 | DS-VIS-02 | 사용자 승인 (`evidence/silhouette-compare.html`) · `test_style_gear` · `test_style_gear_catalog` · `evidence/silhouette-final*.png` | ✅ A(장비) 승인 · 적용 (feat/p5-gear) |
 | T9 | 캐릭터 선택 + PlayerSlot + P1~P4 식별 + 버튼 프롬프트 | DS-CMP-08/10, DS-VIS-03, DS-TOK-06 | `test_character_select_{model,input,screen}` · `test_player_slot` · `test_select_prompts` · `test_player_ring_mesh` · `test_app_flow` + `evidence/char-select-*.png`, `player-ids{,-gray}.png` | ✅ (feat/p5-charselect) — 실제 패드·터치 폰 확인은 사용자 |
 | T10 | 트래킹: character_selected · special_* · gauge_full · 스타일별 요약 | PRD-DATA-03/04 | `test_match_telemetry` · `test_special_telemetry` | ✅ 필살기 부분 (feat/p5-cutin, 스키마 4, 0003) + character_selected(is_bot·input_device)·select_cancelled(character)·match_ended.players[] character/style (feat/p5-charselect, 스키마 5, 새 마이그레이션 없음) |
 | T11 | 온보딩 튜토리얼: 첫 로그인 후 연습장에서 이동→점프→약·강공격→가드→잡기·던지기→아이템→(필살기) 단계별 미션, 건너뛰기·다시보기, 단계별 퍼널 트래킹(tutorial_step_*) | PRD-UI-02, PRD-DATA-03 | `test_tutorial_flow` + 캡처 | ⬜ |

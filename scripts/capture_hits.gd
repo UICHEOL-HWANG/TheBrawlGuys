@@ -6,7 +6,7 @@ extends SceneTree
 ##
 ## Usage (windowed, NOT headless; keep the window on top on macOS):
 ##   godot --path . --resolution 1280x720 --always-on-top -s res://scripts/capture_hits.gd -- \
-##       --out-dir=/abs/dir [--tag=SUFFIX]
+##       --out-dir=/abs/dir [--tag=SUFFIX] [--cam_pitch=N --cam_arena_share=N ...]
 ## Writes <out-dir>/hit-<light|heavy|guard><tag>.png and hit-<...>-late<tag>.png. Also runs on
 ## builds before the comic impact (FeelDirector.on_events with one argument) for before/after.
 
@@ -41,6 +41,7 @@ func _init() -> void:
 	var args := CaptureArgs.parse(OS.get_cmdline_user_args())
 	_out = String(args.get("out-dir", ""))
 	_tag = String(args.get("tag", ""))
+	_apply_camera_overrides(args)
 	if _out.is_empty():
 		push_error("capture_hits: usage: -- --out-dir=/abs/dir [--tag=SUFFIX]")
 		quit(1)
@@ -129,3 +130,11 @@ func _teardown() -> void:
 		root.remove_child(n)
 		n.free()  # at once, so the next scene's camera stays current
 	_world = null
+
+
+## Optional camera tuning for framing comparisons: --cam_pitch=, --cam_arena_share=,
+## --cam_margin=, --cam_zoom_min= (GameConfig property names).
+func _apply_camera_overrides(args: Dictionary) -> void:
+	for key: String in ["cam_pitch", "cam_arena_share", "cam_margin", "cam_zoom_min"]:
+		if args.has(key):
+			_config.set(key, float(args[key]))
