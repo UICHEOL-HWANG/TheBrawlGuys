@@ -2,7 +2,8 @@
 .godot/
 /android/
 # Build output
-build/
+build/*
+!build/.gdignore
 # OS
 .DS_Store
 *.avi

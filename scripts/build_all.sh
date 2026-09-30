@@ -4,6 +4,8 @@ set -euo pipefail
 GODOT="${GODOT:-godot}"
 cd "$(dirname "$0")/.."
 mkdir -p build/android build/ios build/web
+# build/ sits under res://: without .gdignore Godot imports and packs the exports themselves.
+touch build/.gdignore
 "$GODOT" --headless --path . --import >/dev/null
 "$GODOT" --headless --path . --export-debug "Android" build/android/forest-brawl.apk
 "$GODOT" --headless --path . --export-debug "iOS" build/ios/ForestBrawl.xcodeproj
