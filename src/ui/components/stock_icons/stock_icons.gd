@@ -2,6 +2,9 @@ class_name StockIcons
 extends HBoxContainer
 ## Remaining stocks (design.md DS-CMP-02): one player marker per stock, lost ones dimmed.
 
+const LOST_POP := 1.4
+
+
 func setup(index: int, max_stocks: int) -> void:
 	for child: Node in get_children():
 		child.queue_free()
@@ -15,7 +18,11 @@ func setup(index: int, max_stocks: int) -> void:
 
 func set_stocks(n: int) -> void:
 	for i: int in get_child_count():
-		(get_child(i) as PlayerMarker).set_dimmed(i >= n)
+		var marker := get_child(i) as PlayerMarker
+		var losing := i >= n and not marker.is_dimmed()
+		marker.set_dimmed(i >= n)
+		if losing and is_inside_tree():
+			UiMotion.bump(marker, LOST_POP)
 
 
 func shown() -> int:

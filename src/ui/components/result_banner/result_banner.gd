@@ -35,17 +35,18 @@ func show_result(winner_id: int, local_id: int) -> void:
 		_title.text = "승리!"
 	else:
 		_title.text = "패배…"
-	visible = true
 	if is_inside_tree():
-		pivot_offset = size * 0.5
-		scale = Vector2.ONE * POP_FROM
-		create_tween().tween_property(self, "scale", Vector2.ONE, DS.MOTION_SQUISH) \
-				.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		UiMotion.pop_in(self, POP_FROM)
 		_button.grab_focus()
+	else:
+		visible = true
 
 
 func hide_result() -> void:
-	visible = false
+	if is_inside_tree() and visible:
+		UiMotion.fade_out(self)
+	else:
+		visible = false
 
 
 func title() -> String:

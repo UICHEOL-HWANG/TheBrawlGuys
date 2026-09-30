@@ -52,7 +52,10 @@ func set_info(text: String) -> void:
 
 
 func toggle() -> void:
-	_root.visible = not _root.visible
+	if _root.visible:
+		UiMotion.fade_out(_root)
+	else:
+		UiMotion.pop_in(_root, 0.96)
 
 
 func _unhandled_input(event: InputEvent) -> void:

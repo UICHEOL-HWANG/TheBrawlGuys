@@ -64,9 +64,5 @@ func set_preview() -> void:
 
 
 func _pop() -> void:
-	if not is_inside_tree():
-		return
-	pivot_offset = size * 0.5
-	scale = Vector2.ONE * POP_SCALE
-	create_tween().tween_property(self, "scale", Vector2.ONE, DS.MOTION_SQUISH) \
-			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	if is_inside_tree():
+		UiMotion.bump(self, POP_SCALE)

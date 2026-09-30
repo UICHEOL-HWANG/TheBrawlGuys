@@ -23,7 +23,7 @@ func test_restart_after_a_ko_starts_a_clean_match() -> void:
 	var hud: Hud = main.call("get_hud")
 	assert_true(hud.result_visible(), "the KO ends the match and shows the result")
 	hud.restart_requested.emit()
-	await wait_process_frames(1)
+	await wait_seconds(DS.MOTION_BASE + 0.1)  # the banner fades out first
 	var fresh: World = main.call("get_world")
 	assert_ne(fresh, w, "a new world")
 	assert_false(hud.result_visible())

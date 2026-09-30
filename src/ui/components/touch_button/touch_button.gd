@@ -45,9 +45,16 @@ func _process(delta: float) -> void:
 func set_state(s: int) -> void:
 	if s == _state:
 		return  # keep the pulse running and skip the redraw
+	var was_held := _state == State.PRESSED or _state == State.CHARGING
+	var held := s == State.PRESSED or s == State.CHARGING
 	_state = s
 	_pulse_time = 0.0
-	scale = DS.PRESS_SQUISH if s == State.PRESSED or s == State.CHARGING else Vector2.ONE
+	if held:
+		scale = DS.PRESS_SQUISH
+	elif was_held and is_inside_tree():
+		UiMotion.release(self)
+	else:
+		scale = Vector2.ONE
 	queue_redraw()
 
 

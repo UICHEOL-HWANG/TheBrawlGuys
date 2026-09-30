@@ -20,9 +20,12 @@ func test_pressed_and_charging_squish_others_do_not() -> void:
 	for s: int in [TouchButton.State.PRESSED, TouchButton.State.CHARGING]:
 		b.set_state(s)
 		assert_eq(b.scale, DS.PRESS_SQUISH, "state %d" % s)
-	for s: int in [TouchButton.State.IDLE, TouchButton.State.DISABLED]:
-		b.set_state(s)
-		assert_eq(b.scale, Vector2.ONE, "state %d" % s)
+	b.set_state(TouchButton.State.IDLE)  # releasing springs back over the squish token
+	await wait_seconds(DS.MOTION_SQUISH + 0.1)
+	assert_almost_eq(b.scale.x, 1.0, 0.02)
+	assert_almost_eq(b.scale.y, 1.0, 0.02)
+	b.set_state(TouchButton.State.DISABLED)
+	assert_eq(b.scale, Vector2.ONE, "state %d" % TouchButton.State.DISABLED)
 
 
 func test_charge_is_clamped() -> void:

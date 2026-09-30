@@ -41,6 +41,7 @@ func test_result_banner_texts() -> void:
 	banner.show_result(0, 0)
 	assert_eq(banner.title(), "승리!")
 	_hud.hide_result()
+	await wait_seconds(DS.MOTION_BASE + 0.1)  # the banner fades out first
 	assert_false(_hud.result_visible())
 
 
