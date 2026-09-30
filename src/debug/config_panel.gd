@@ -12,6 +12,7 @@ const SCROLLBAR_ALLOWANCE := 24.0
 
 var _config: GameConfig
 var _root: PanelContainer
+var _open := false
 var _info: Label
 
 
@@ -52,7 +53,8 @@ func set_info(text: String) -> void:
 
 
 func toggle() -> void:
-	if _root.visible:
+	_open = not _open
+	if not _open:
 		UiMotion.fade_out(_root)
 	else:
 		UiMotion.pop_in(_root, 0.96)

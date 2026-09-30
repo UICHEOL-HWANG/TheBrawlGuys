@@ -27,6 +27,7 @@ var _state: int = State.IDLE
 var _charge: float = 0.0
 var _font: Font
 var _pulse_time: float = 0.0
+var _release_tween: Tween
 
 
 func _ready() -> void:
@@ -49,10 +50,12 @@ func set_state(s: int) -> void:
 	var held := s == State.PRESSED or s == State.CHARGING
 	_state = s
 	_pulse_time = 0.0
+	if _release_tween != null and _release_tween.is_valid():
+		_release_tween.kill()
 	if held:
 		scale = DS.PRESS_SQUISH
 	elif was_held and is_inside_tree():
-		UiMotion.release(self)
+		_release_tween = UiMotion.release(self)
 	else:
 		scale = Vector2.ONE
 	queue_redraw()

@@ -65,3 +65,13 @@ func test_icon_stays_above_the_caption_band() -> void:
 		assert_gt(half, 0.0, "d=%s icon has size" % d)
 		assert_lte(center.y + half, caption_top, "d=%s icon clears the caption" % d)
 		assert_gte(center.y - half, 0.0, "d=%s icon stays inside the button" % d)
+
+
+func test_repress_during_release_keeps_the_squish() -> void:
+	var b := _button()
+	b.set_state(TouchButton.State.PRESSED)
+	b.set_state(TouchButton.State.IDLE)
+	await wait_process_frames(2)
+	b.set_state(TouchButton.State.PRESSED)
+	await wait_process_frames(3)
+	assert_eq(b.scale, DS.PRESS_SQUISH, "the old release tween must not pop the held button up")
