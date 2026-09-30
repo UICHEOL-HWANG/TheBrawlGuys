@@ -71,3 +71,32 @@ func test_quality_group_is_presentation_only() -> void:
 	var b := GameConfig.new()
 	b.quality_level = 0
 	assert_eq(a.fingerprint(), b.fingerprint())
+
+
+func test_environment_energies_pick_by_renderer_and_glow() -> void:
+	var desktop_glow := EnvironmentRig.energies(false, true)
+	var desktop_plain := EnvironmentRig.energies(false, false)
+	assert_eq(desktop_glow["sun"], EnvironmentRig.SUN_ENERGY)
+	assert_eq(desktop_plain["sun"], EnvironmentRig.SUN_ENERGY, "desktop ignores glow")
+	assert_eq(desktop_plain["ambient"], EnvironmentRig.AMBIENT_ENERGY)
+	var compat_glow := EnvironmentRig.energies(true, true)
+	assert_eq(compat_glow["sun"], EnvironmentRig.SUN_ENERGY_COMPAT)
+	assert_eq(compat_glow["ambient"], EnvironmentRig.AMBIENT_ENERGY_COMPAT)
+	assert_eq(compat_glow["glow"], EnvironmentRig.GLOW_INTENSITY_COMPAT)
+	var compat_plain := EnvironmentRig.energies(true, false)
+	assert_eq(compat_plain["sun"], EnvironmentRig.SUN_ENERGY_COMPAT_NO_GLOW)
+	assert_eq(compat_plain["ambient"], EnvironmentRig.AMBIENT_ENERGY_COMPAT_NO_GLOW)
+	assert_gt(compat_plain["sun"] + compat_plain["ambient"], compat_glow["sun"] + compat_glow["ambient"],
+		"without bloom the compat light must be brighter to keep the DS tone")
+
+
+func test_apply_quality_updates_light_energies() -> void:
+	var rig := EnvironmentRig.new()
+	add_child_autofree(rig)
+	rig.setup()
+	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
+	rig.apply_quality(Quality.Level.LOW)
+	assert_almost_eq(rig.sun().light_energy, float(EnvironmentRig.energies(is_compat, false)["sun"]), 0.0001)
+	rig.apply_quality(Quality.Level.HIGH)
+	assert_almost_eq(rig.sun().light_energy, float(EnvironmentRig.energies(is_compat, true)["sun"]), 0.0001)
+	assert_almost_eq(rig.environment().ambient_light_energy, float(EnvironmentRig.energies(is_compat, true)["ambient"]), 0.0001)
