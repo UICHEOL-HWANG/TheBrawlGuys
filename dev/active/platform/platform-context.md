@@ -24,7 +24,7 @@
 ## 결정
 - P1: 트래킹은 렌더/앱 쪽에서 sim 이벤트를 **소비만** 한다 → sim·리플레이 해시 불변
 - P2: 모바일 Google 로그인(딥링크)은 이번 범위 밖. 모바일 debug 빌드만 "건너뛰기"
-- P3: 클라이언트에는 공개 키(Amplitude API key, Supabase anon key)만. `service_role`은 체크 스크립트로 차단
+- P3: 클라이언트에는 공개 키(Amplitude API key, Supabase anon key)만. 서비스(비공개) 키는 체크 스크립트로 차단
 - P4: Supabase/Vercel CLI 미설치 → 마이그레이션은 SQL Editor, 배포는 `npx vercel`
 
 ## 사용자 대기
@@ -38,3 +38,9 @@
 - 사용자 선택 C: Vercel 프로젝트 생성·도메인 연결·배포는 **Phase 4·5 전부 끝난 뒤** 한 번에 (D1을 맨 마지막으로)
 - 영향: 그 전까지 Google 로그인 검증은 **데스크톱 루프백**으로만. 웹 리다이렉트 경로는 단위 테스트로 검증하고, 배포 시 도메인을 Supabase Redirect URLs + `auth.redirect_web`에 등록 후 실동작 확인
 - Git Import 아님: Vercel 빌드 환경에 Godot 없음 → 로컬 export 후 `npx vercel deploy` (prebuilt)
+
+## A1–A6 병합 (2026-09-30, merge 59ce731)
+- 테스트 496/496, check-all 통과. sim·replay 해시 불변
+- 원시 행 보강(984c0a3): `hit`/`guard_hit` payload에 `attack_kind`(이름), `ringout` payload에 `cause`·`attacker_slot`
+- 남은 리뷰 항목: 데스크톱 콜백 `state` 검사 없음(PKCE라 코드 주입은 불가, 조기 종료만 가능) → B1에서 redirect_to에 nonce 추가 / 세션 파일 평문 / 업로드 재시도 없음(matches.id가 클라이언트 uuid라 중복은 PK로 막힘) / 계정당 insert 한도 없음
+- `AuthService`는 아직 씬에 연결 안 됨 → B1
