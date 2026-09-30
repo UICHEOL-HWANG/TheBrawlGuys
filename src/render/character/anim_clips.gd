@@ -21,10 +21,16 @@ const CANDIDATES := {
 	AnimMap.Anim.LAUNCHED: ["Hit_B", "Jump_Idle", "Hit_A"],
 	AnimMap.Anim.GUARD: ["Blocking", "Block", "Unarmed_Pose"],
 	AnimMap.Anim.KO: ["Death_A", "Death_B", "Lie_Idle"],
+	# Phase 5 specials: the caster's own motion (framed by the cut-in)
+	AnimMap.Anim.SLAM: ["2H_Melee_Attack_Chop", "Unarmed_Melee_Attack_Kick"],
+	AnimMap.Anim.RUSH: ["Dualwield_Melee_Attack_Stab", "Unarmed_Melee_Attack_Punch_B", "Running_A"],
+	AnimMap.Anim.SPIN: ["2H_Melee_Attack_Spinning", "2H_Melee_Attack_Spin"],
+	AnimMap.Anim.CAST: ["Spellcast_Shoot", "Spellcast_Long", "Spellcasting"],
 }
 const LOOPING: Array[int] = [
 	AnimMap.Anim.IDLE, AnimMap.Anim.RUN, AnimMap.Anim.FALL, AnimMap.Anim.CHARGE, AnimMap.Anim.HOLD,
 	AnimMap.Anim.HELD, AnimMap.Anim.GUARD, AnimMap.Anim.LAUNCHED, AnimMap.Anim.JUMP,
+	AnimMap.Anim.RUSH, AnimMap.Anim.SPIN,
 ]
 
 

@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-09-30 22:30 KST
+**Last Updated:** 2026-09-30 23:10 KST
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -27,3 +27,14 @@
 - 봇 아이템 경합 수정: 두 봇이 같은 아이템 앞에서 잡기를 누르면 낮은 id가 줍고 다른 쪽 입력은 잡기 공격이 되어 슬롯 0이 잡혀 던져졌다(슬롯 편향, rogue 슬롯0 vs barbarian 16%). 상대도 줍기 거리 안이면 줍지 않고 싸운다(`BotViewQuery.contested`, `test_does_not_press_grab_for_an_item_the_foe_can_also_reach`)
 - 밸런스 튜닝(2026-09-30): Knight vs Mage가 양 슬롯 약 25%라 `weapon_knockback_taken` 0.9→0.8, 그 대가로 Knight 공격 `weapon_knockback_mul` 1.25→1.15, Barbarian 우세 완화 `slam_base_knockback` 7→6. 설정 fingerprint 변경으로 GOLDEN_HASH·ARENA_HASHES·CHARACTER_HASHES 갱신(BEHAVIOR_HASH·classic compat 불변)
 - 밸런스: `scripts/balance_sim.gd` 결과 `evidence/balance.csv` (16 순서쌍 × 100판, 전부 35~67%)
+
+## T4 컷인 · T10 필살기 트래킹 결정 (2026-09-30, `feat/p5-cutin`)
+- 컷인은 렌더 전용: `SpecialCutIn`(타이밍 모델, `src/render/feel/`) → `SpecialCutInDirector`(MatchPresentation 소유) → `CameraRig.set_focus(점, 가중치)` + `SpecialCutInBanner`(`src/ui/`, CanvasLayer 3). sim·틱 속도·리플레이 해시 불변(`test_director_..._leaves_the_sim_alone`)
+- 타이밍은 DS 모션 토큰: 들어가기 `motion_base` · 유지 `motion_calm` · 복귀 `motion_slow` (총 1.28초). 근접 샷 거리 7 m·피치 38°·가슴 높이 0.9 m는 `SpecialCutIn` 상수(GameConfig은 이미 200줄 초과라 늘리지 않음, Camera 그룹은 fingerprint 밖이라 나중에 옮겨도 해시 무관)
+- 슬로우모션은 넣지 않았다: 렌더만 느리게 하면 sim 위치와 어긋나고, 틱을 늦추면 규칙 위반
+- 두 번째 필살기는 현재 확대 가중치에서 이어 새 시전자로(팝 없음), 시전자 KO면 즉시 복귀, 경기 재시작은 즉시 해제
+- reduce motion: 설정 UI가 아직 없어 `SettingsStore` `[accessibility] reduce_motion` 키만 읽는다(카메라 고정, 띠 페이드만). 설정 화면은 Phase 6 DS-A11Y-02에서
+- 캐릭터 모션: `AnimMap.Anim`에 SLAM·RUSH·SPIN·CAST 추가(기존 인덱스 뒤에), SPECIAL 상태 → view `special` id별 클립. RUSH·SPIN은 반복
+- 트래킹: `SpecialTelemetry`(CombatTelemetry 안) — `gauge_full`(match_time_s), `special_used`(ms_since_full, 없으면 -1 / target_damage = 가장 가까운 생존 상대 %), `special_hit`은 발동 1회당 1번(첫 적중으로 열고 대상 링아웃 시 즉시 caused_ringout=true, 아니면 180틱 창 경과·다음 필살기·경기 종료 때 false)
+- 슬롯 요약: `specials`(발동), `special_hits`(맞힌 대상 수) → `match_players.special_hits`는 새 마이그레이션 `0003_special_hits.sql`(사용자가 SQL Editor에서 0002 다음 실행해야 업로드 성공). `press_special` = 강+가드 동시 성립 횟수. `EventCatalog.SCHEMA_VERSION` 3 → 4
+- 캐릭터 모델은 아직 슬롯 고정(`CharacterCatalog.for_player`)이라 캡처의 외형은 캐릭터와 다를 수 있다 — T9에서 해결

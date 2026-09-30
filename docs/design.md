@@ -464,8 +464,8 @@
 | GD-FEEL-02 | 화면 흔들림 | 진폭 = min(k × `shake_per_knockback`, `shake_max`), 지수 감쇠. hitstop이 끝날 때 시작 | `shake_per_knockback`, `shake_max`, `shake_decay` |
 | GD-FEEL-03 | 무적 깜빡임 | 리스폰 무적 동안 반투명 펄스 10Hz, 마지막 0.5초는 20Hz | `blink_hz`, `blink_hz_end` |
 | GD-FEEL-04 | 넉백 궤적 강도 | DS-VFX-04 강도 = 속도 / `trail_speed_full` | `trail_speed_threshold`, `trail_speed_full` |
-| GD-CAM-01 | 카메라 | 레퍼런스 A의 높은 부감(피치 약 60°), 경기장 중심부(반지름 × `cam_arena_share`, 기본 60%)와 모든 생존 전투원을 여백과 함께 프레이밍(전투원이 가장자리로 가거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 사용자 요청으로 경기장 전체 → 60%로 확대), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth` |
-| GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생) | — |
+| GD-CAM-01 | 카메라 | 레퍼런스 A의 높은 부감(피치 약 60°), 경기장 중심부(반지름 × `cam_arena_share`, 기본 60%)와 모든 생존 전투원을 여백과 함께 프레이밍(전투원이 가장자리로 가거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 사용자 요청으로 경기장 전체 → 60%로 확대), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외. **필살기 컷인 (Phase 5, 렌더 전용)**: sim `special_start`가 오면 시전자 가슴 높이로 완전 확대(거리 7 m, 피치 38°로 낮춤) — 들어가기 `motion_base`(out-quad) → 유지 `motion_calm` → 복귀 `motion_slow`(in-out-cubic). 그동안 시전자는 캐릭터별 필살기 모션(GD-ANIM-01), 화면 위 30% 높이에 시전자 플레이어 색 띠(88%) + `glow` 줄 2개 + "P1 · 대지 강타"(`display_l`, `ui_surface` 글자·`canopy_deep` 외곽선)가 옆에서 밀려 들어온다. 슬로우모션 없음(sim 틱·리플레이 해시 불변). 두 번째 필살기는 현재 확대에서 이어서 새 시전자로, 시전자가 KO면 바로 복귀. `[accessibility] reduce_motion`(SettingsStore)이면 카메라는 그대로, 띠는 페이드만 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth` · 컷인 `SpecialCutIn` 상수 |
+| GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생). SPECIAL은 필살기 id별 모션: 대지 강타 = 양손 내려찍기, 돌진 연타 = 쌍검 찌르기(반복), 회전 베기 = 회전(반복), 거대 화염구 = 주문 발사 | — |
 
 ---
 
@@ -540,7 +540,7 @@
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
 | GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ✅ |
-| GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04, PRD-STYLE-04 | 0, 4.0 (메뉴 궤도), 4, 5 (필살기 컷인) | 🟨 (Phase 4.0·4·5에서 계속) |
+| GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04, PRD-STYLE-04 | 0, 4.0 (메뉴 궤도), 4, 5 (필살기 컷인) | ✅ (5: 필살기 컷인 `SpecialCutInDirector`, 캡처 `dev/active/phase-5/evidence/cutin-*.png`) |
 | GD-ANIM-01 | 애니메이션 매핑 | PRD-FX-01, PRD-ARCH-01 | 3 | ✅ |
 | DS-A11Y-01 | 색각 대응 | PRD-UI-01 | 5, 6 | ⬜ |
 | DS-A11Y-02~03 | 흔들림·진동, 터치 커스텀 | PRD-CTL-03 | 6 | ⬜ |

@@ -1,12 +1,14 @@
 class_name MatchPresentation
 extends Node
 ## Everything a match scene shows and plays around the drawn world (platform B1 extraction from
-## main.gd): the framing camera, game feel, SFX and BGM, the local grab hint and charge gauges.
+## main.gd): the framing camera, game feel, the special cut-in, SFX and BGM, the local grab hint
+## and charge gauges.
 ## Fed the sim view and this frame's events; never writes to the sim.
 
 var _config: GameConfig
 var _camera: CameraRig
 var _feel: FeelDirector
+var _cutin: SpecialCutInDirector
 var _sfx: SfxDirector
 var _music: MusicDirector
 var _grab_hint: GrabHint
@@ -22,6 +24,9 @@ func setup(config: GameConfig) -> void:
 	_feel = FeelDirector.new()
 	add_child(_feel)
 	_feel.setup(config, _camera)
+	_cutin = SpecialCutInDirector.new()
+	add_child(_cutin)
+	_cutin.setup(_camera, SpecialCutInDirector.reduce_motion_setting(SettingsStore.new()))
 	_sfx = SfxDirector.new()
 	add_child(_sfx)
 	_sfx.setup(config)
@@ -38,6 +43,7 @@ func setup(config: GameConfig) -> void:
 ## A new match: calm feel, battle BGM from the top.
 func restart() -> void:
 	_feel.reset()
+	_cutin.reset()
 	_music.play_battle()
 
 
@@ -54,6 +60,7 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 	_sfx.on_events(events)
 	_sfx.on_events(view_events)
 	LocalHints.update(view, local_slot, _config, touch, _grab_hint)
+	_cutin.present(view, events, delta)
 	_camera.follow(CameraFraming.match_targets(view, _config), delta)
 	_gauges.update_from(view, _config, _camera.unproject)
 

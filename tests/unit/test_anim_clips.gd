@@ -40,3 +40,16 @@ func test_kaykit_models_resolve_the_core_states() -> void:
 		for a: int in [AnimMap.Anim.RUN, AnimMap.Anim.JUMP, AnimMap.Anim.LIGHT, AnimMap.Anim.HIT, AnimMap.Anim.GUARD]:
 			assert_ne(map[a], map[AnimMap.Anim.IDLE], "%s: state %d has its own clip" % [c["name"], a])
 		root.free()
+
+
+func test_kaykit_models_have_their_own_special_motions() -> void:
+	var root := (load(String(CharacterCatalog.CHARACTERS[0]["path"])) as PackedScene).instantiate()
+	var player := root.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
+	var available := PackedStringArray()
+	for n: StringName in player.get_animation_list():
+		available.append(String(n))
+	var map := AnimClips.resolve(available)
+	for a: int in [AnimMap.Anim.SLAM, AnimMap.Anim.RUSH, AnimMap.Anim.SPIN, AnimMap.Anim.CAST]:
+		assert_ne(map[a], map[AnimMap.Anim.IDLE], "special motion %d has its own clip" % a)
+	assert_true(AnimClips.loops(AnimMap.Anim.SPIN), "the spin keeps turning for the whole special")
+	root.free()
