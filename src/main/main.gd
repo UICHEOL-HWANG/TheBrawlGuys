@@ -100,6 +100,8 @@ func _ready() -> void:
 		_panel.setup(_config)
 	_apply_quality()
 	_config.changed.connect(_apply_quality)
+	LookPreset.apply(_config.look_preset)
+	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
 	_start_match()
 

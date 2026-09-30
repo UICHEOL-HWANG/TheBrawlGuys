@@ -67,3 +67,19 @@ func test_perf_match_runs_four_bots() -> void:
 		if w.fighters[i].pos != Rules.spawn_point(i, 4, w.config):
 			moved += 1
 	assert_eq(moved, 4, "all four fighters are bots")
+
+
+func test_look_preset_follows_the_config() -> void:
+	LookPreset.last_applied = LookPreset.Look.C  # stale value: _ready must overwrite it
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	add_child_autofree(main)
+	await wait_seconds(0.2)
+	var cfg: GameConfig = main.get("_config")
+	assert_eq(LookPreset.last_applied, cfg.look_preset, "applied on ready")
+	cfg.look_preset = LookPreset.Look.C
+	cfg.emit_changed()
+	assert_eq(LookPreset.last_applied, LookPreset.Look.C, "the debug-panel Look slider takes effect")
+	cfg.look_preset = LookPreset.Look.B
+	cfg.emit_changed()
+	assert_eq(LookPreset.last_applied, LookPreset.Look.B)
+	LookPreset.apply(LookPreset.Look.A)
