@@ -5,6 +5,7 @@ extends Node
 ## select screens (SELECT_STEPS: character, arena) → match — and the app owns the
 ## login gate. Each select screen fills the MatchSetup that mode select starts. Entering a match
 ## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
+## First sign-in on a device → onboarding tutorial (Phase 5 T11, also 튜토리얼 다시 보기) → title.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
 const MATCH_SCENE := preload("res://src/main/main.tscn")
@@ -14,12 +15,15 @@ const TITLE := "title"
 const MATCH := "match"
 const ARENA := "arena"
 const CHARACTER := "character"
+const TUTORIAL := "tutorial"
 ## Select screens between mode select and the match, in order.
 const SELECT_STEPS: Array[String] = [CHARACTER, ARENA]
 
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
 var gate: LoginGate = null
+## Tests point it at their own settings file.
+var tutorial: TutorialProgress = TutorialProgress.new()
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 ## Seed for each new match (tests pin it); the sim never draws its own.
 var new_seed: Callable = MatchSeed.fresh
@@ -87,6 +91,7 @@ func _show_title() -> void:
 	var screen := TitleScreen.new()
 	screen.mode_chosen.connect(_on_mode_chosen)
 	screen.logout_requested.connect(_on_logout)
+	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
 	if _router.depth() == 0:
 		_router.push(TITLE, screen)
 	else:
@@ -104,6 +109,8 @@ func _on_signed_in() -> void:
 	_restoring = false
 	if _router.depth() == 0 or _router.current_id() == LOGIN:
 		_show_title()
+		if tutorial.is_pending():
+			_start_tutorial(TutorialFlow.SOURCE_FIRST_LOGIN)
 
 
 ## A stored session could not be resumed: the login screen becomes usable (and is counted).
@@ -117,6 +124,8 @@ func _on_restore_failed(session_dropped: bool) -> void:
 
 
 func _on_mode_chosen(mode: String) -> void:
+	if _router.is_busy():
+		return  # a key press on the title while a curtain (e.g. the first-login tutorial) comes down
 	track.call("mode_selected", {"mode": mode})
 	var setup := new_setup(mode)
 	if setup != null:
@@ -170,6 +179,12 @@ func _start_match(setup: MatchSetup) -> void:
 	match_scene.set("new_seed", new_seed)
 	match_scene.connect("menu_requested", _back_to_title)
 	_router.push(MATCH, match_scene, true, _detach_backdrop)
+
+
+func _start_tutorial(source: String) -> void:
+	if _router.is_busy() or _router.current_id() == TUTORIAL:
+		return
+	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title), true, _detach_backdrop)
 
 
 func _back_to_title() -> void:

@@ -1,6 +1,6 @@
 # TheBrawlGuys — 디자인 시스템
 
-> 버전 0.6 · 2026-09-30 (0.6+: Phase 4.0 계획 — LoginPanel 초안, 메뉴 디오라마 배경) (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
+> 버전 0.6 · 2026-09-30 (0.6++ 2026-10-01: Phase 5 T11 온보딩 튜토리얼 — DS-CMP-19, KeyHintBar target 링) (0.6+: Phase 4.0 계획 — LoginPanel 초안, 메뉴 디오라마 배경) (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떻게 보이고, 들리고, 느껴지는지**를 소유한다.
@@ -292,7 +292,11 @@
                            └─ 온라인 ─▶ 로비(방 코드) ┘                                ▲        │
                                                                                      └─ 다시 ─┘
 설정 (어디서든 진입): 접근성 · 조작 편집 · 사운드
+튜토리얼 (Phase 5 T11): 기기에서 첫 로그인 ─▶ 타이틀 위에 연습 경기장 튜토리얼 ─▶ (완료 · 건너뛰기) ─▶ 타이틀
+                       타이틀 "튜토리얼 다시 보기" ─▶ 같은 튜토리얼 ─▶ 타이틀
 ```
+
+**온보딩 튜토리얼** (Phase 5 T11, 근거 PRD-UI-02): 고전 경기장에서 Barbarian(필살기가 있는 캐릭터) 대 가만히 서 있는 연습 상대(가드 미션에서만 다가와 약공격). 미션 8개 — 이동 → 점프 → 약공격 → 강공격(모아치기) → 가드 → 잡기·던지기 → 아이템(가운데 떨어지는 방망이 줍기·쓰기) → 필살기(게이지를 채워 줌). 미션마다 위쪽 `TutorialCard`(DS-CMP-19)가 한 줄 안내를, 아래 `KeyHintBar`가 지금 누를 키캡을 target 링으로 보여 준다. 성공하면 카드가 "좋아요!"로 바뀌며 통 튀고(`motion_squish`) `ui_confirm` 소리, 1.2초 뒤 다음 미션. 스톡이 줄지 않고 아이템 상자가 떨어지지 않는다. 안내 문구는 손에 든 장치를 따른다: 터치 컨트롤이 보이면 화면 버튼·스틱 이름(키 바는 숨음), 패드를 쓰면 패드 버튼(Xbox A/X/Y/B/RB, PS × □ △ ○ R1), 아니면 P1 키(InputMap에서 읽음). 건너뛰기 버튼·Esc·패드 Start → 확인창(그동안 일시정지) → 타이틀. 완료 카드 "튜토리얼 완료!" + "타이틀로". 증거 `phase-5/evidence/tutorial-*.png`(1920×1080) · `tutorial-*-phone.png`(1624×750, UI 배율 1.6, 터치)
 
 **메뉴 배경 — 궤도 디오라마** (`MenuBackdrop`, Phase 4.0, 근거 PRD-AUTH-01 · PRD-UI-02)
 
@@ -344,9 +348,10 @@
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
 | DS-CMP-14 | `LoginPanel` | 첫 화면 로그인 (Google · 이메일 코드) | idle · loading(브라우저 대기) · error(재시도) / 모드: methods · email(이메일 단계 → 코드 단계) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `MenuButton`(이메일, ghost), `TextField`·`CodeInput`, `motion_calm` 등장, 모드 전환 `motion_base` 페이드 | 4.0 | PRD-AUTH-01 |
 | DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
-| DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
+| DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed (+ ready 링 · target 링) | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
 | DS-CMP-17 | `TextField` (`UiTextField`) | 짧은 텍스트 입력 (로그인 이메일) | idle · focus(호버 포함) · error(다시 입력하면 해제) · disabled | `ui_surface` 바탕, `radius_m`, `body` `ui_text`, placeholder `ui_text_soft`, 포커스 `stroke_focus` `petal_yellow`, 오류 `stroke_focus` `danger`, `shadow_pressed`, 높이 `field_height`. 모바일 키보드 힌트는 호출자가 지정(이메일) | 4.0 | PRD-AUTH-01 |
 | DS-CMP-18 | `CodeInput` | 6자리 인증코드 입력 | idle · focus(다음 칸 링) · error(모든 칸 `danger` 링) · disabled | 숫자 칸 6개 `code_box`(`ui_surface`, `radius_s`, 간격 `s3`), 숫자 `title` 크기 `ui_text`. 숨은 LineEdit가 입력·붙여넣기·숫자 키보드(모바일)를 받고 숫자만 최대 6자리 남긴다 | 4.0 | PRD-AUTH-01 |
+| DS-CMP-19 | `TutorialCard` · `TutorialSkipDialog` | 온보딩 튜토리얼 미션 안내 · 건너뛰기 확인 | 카드: mission · success("좋아요!", `motion_squish` 통 튐) · complete("튜토리얼 완료!" + primary "타이틀로") / 확인창: 닫힘 · 열림(일시정지) | 카드 = `Panel`(DS-CMP-07) 폭 760, 위쪽 가운데 safe area `s5`: 캡션 "튜토리얼 · n/8"(`caption` `ui_text_soft`) + secondary `MenuButton` "건너뛰기"(높이 `s7`, 포커스 안 받음 — Space가 점프), 제목(`title` Jua), 안내 한 줄(`body`, 줄바꿈). 확인창 = 전체 `ui_shadow` 막(터치 컨트롤 위 레이어, 입력 차단) + 가운데 `Panel`: 제목 "튜토리얼을 건너뛸까요?"(`title`) · 다시 보기 안내(`body` `ui_text_soft`) · secondary "계속하기"(포커스) · primary "건너뛰기", `pop_in` | 5 | PRD-UI-02 |
 
 `SelectCard` 구현 (Phase 4 T7, 2026-09-30): `ui_surface` 카드(`radius_l`, `shadow_soft`, 너비 `card_width` 320) 안에 코드로 그린 위에서 본 디오라마 썸네일(`ArenaThumb`, 높이 `card_thumb_height` 200: 바깥 초원·링아웃 물·흙 띠 위 바닥·나무 고리·기믹 표시, 경기장 테마 색) · `title` 이름 · `caption` 한 줄 설명(`ui_text_soft`) · 기믹 아이콘(`GimmickIcon` `card_icon` 48: 물·불·균열·튕김·안개). focus = `petal_yellow` 링 + ×1.04, selected = `ring_color` 링(경기장은 `ui_accent`, Phase 5 캐릭터는 플레이어 색) + ×1.07, locked = `ui_surface_dim` + "준비 중". 경기장 선택 화면: 제목 위, 카드 4장 아래 한 줄, "뒤로" + 조작 안내(←/→ · Z/Enter · X/Esc), 호버 = 포커스, 클릭·탭 = 확정
 
@@ -366,6 +371,7 @@
 - 좁을 때(compact): 두 바가 한 줄에 안 들어가면(DS-LAY-04 폰 배율 1.6 = 논리 폭 약 1458) 묶음 간격 `s4`→`s2`, 바 좌우 여백 `s5`→`s3`. 글자 크기는 줄이지 않는다. 증거 `phase-5/evidence/key-hint-{lit,ready,special,hidden}-1080.png`, `key-hint-2p{,-hidden}-{1080,phone}.png`
 - 키 글자와 눌림은 그 플레이어의 InputMap 액션(`p1_*` / `p2_*`)에서 읽는다 — 재지정하면 키캡 글자도 바뀐다
 - 키보드 플레이어에게만: 터치 컨트롤이 보이면 바 전체가 숨는다 (터치와 겹치지 않음). 게임패드 글리프는 Phase 5 T9(버튼 프롬프트). 메뉴 배경 난투에는 없다 (HUD 없음)
+- target 링 (Phase 5 T11 튜토리얼 "지금 누를 키"): `set_highlight(ids)`로 켠 키캡 둘레에 플레이어 색(`accent`) 링(`stroke_focus`, ready 링 바깥), 알파가 `motion_slow`로 숨 쉬듯 0.35↔1. `petal_yellow` 포커스 링은 크림 바 위에서 안 보여서 플레이어 색을 쓴다. 이동 묶음은 네 키캡 링이 겹쳐 묶음 전체 테두리처럼 보인다. 튜토리얼은 숨긴 바도 저장 없이 다시 보인다
 - 숨기기/보이기: 칩 클릭 또는 F2 (F1은 디버그 패널, H는 P2 가드). 숨기면 칩만 남는다. 선택은 `user://settings.cfg` `[hud] key_hints`에 저장하고 `settings_changed {key: "hud.key_hints", old, new}` 트래킹
 
 **컴포넌트 공통 규약**
@@ -544,6 +550,7 @@
 | DS-CMP-16 | 컴포넌트 — `KeyHintBar` (키보드 조작 안내 바) | PRD-CTL-02, PRD-UI-01 | 4 | ✅ (2026-09-30, `evidence/key-hint-*.png`) |
 | DS-CMP-17 | 컴포넌트 — `TextField` (로그인 이메일 입력) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-step.png`) |
 | DS-CMP-18 | 컴포넌트 — `CodeInput` (6자리 인증코드) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-code.png`·`-error.png`) |
+| DS-CMP-19 | 컴포넌트 — `TutorialCard` · `TutorialSkipDialog` (온보딩 튜토리얼) | PRD-UI-02 | 5 | ✅ (2026-10-01, `phase-5/evidence/tutorial-*.png` 데스크톱 + 폰 터치) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용 · Phase 5 🖼 스타일 룩 A 장비 승인·적용 2026-10-01 `silhouette-final*.png` · Phase 3 🖼 T7 대기) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ✅ (안개 실루엣 Phase 4, 모양 링 P1~P4 Phase 5 T9 — 흑백 캡처 `phase-5/evidence/player-ids-gray.png`) |

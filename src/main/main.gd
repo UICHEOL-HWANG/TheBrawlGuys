@@ -42,7 +42,7 @@ var _stats := TickStats.new()
 
 
 func _ready() -> void:
-	_tracking = MatchTracking.new(Analytics.track, MatchRecorder.create_default())  # load time starts here
+	_tracking = _new_tracking()  # load time starts here
 	_config = load(CONFIG_PATH) as GameConfig
 	if _config == null:
 		push_error("main: GameConfig missing at %s" % CONFIG_PATH)
@@ -87,6 +87,11 @@ func _build_ui() -> void:
 		_panel = ConfigPanel.new()
 		add_child(_panel)
 		_panel.setup(_config)
+
+
+## Match telemetry; the tutorial (extends main) swaps in a silent one (it is not a match).
+func _new_tracking() -> MatchTracking:
+	return MatchTracking.new(Analytics.track, MatchRecorder.create_default())
 
 
 ## Fighter count of the default setup; scenes that extend main override it (perf_match uses four).
@@ -159,6 +164,7 @@ func _process(delta: float) -> void:
 		events.append_array(_curr_state["events"])
 		view_events.append_array(tick_view_events)
 		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state, inputs)
+		_after_tick(inputs)
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.on_events(events)
@@ -172,6 +178,11 @@ func _process(delta: float) -> void:
 	_tracking.on_frame_time(delta)
 	if _panel != null:
 		_panel.set_info(_stats.info(_world.tick_count, _alpha))
+
+
+## After each sim tick (_curr_state is its view); scenes that extend main hook in here.
+func _after_tick(_inputs: Array[InputFrame]) -> void:
+	pass
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -22,6 +22,7 @@ const COMPONENTS: Array[Array] = [
 	["PlayerSlot · DS-CMP-10", "res://src/ui/components/player_slot/player_slot.tscn"],
 	["TextField · DS-CMP-17", "res://src/ui/components/text_field/text_field.tscn"],
 	["CodeInput · DS-CMP-18", "res://src/ui/components/code_input/code_input.tscn"],
+	["TutorialCard · DS-CMP-19", "res://src/ui/tutorial/tutorial_card.tscn"],
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"

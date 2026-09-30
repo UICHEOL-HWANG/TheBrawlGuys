@@ -5,6 +5,8 @@ extends GutTest
 const APP_SCENE := preload("res://src/app/app.tscn")
 const FakeHttp := preload("res://tests/unit/support/fake_http_transport.gd")
 const STORE_PATH := "user://test_app_session.cfg"
+## A device that already saw the tutorial (the first-login tutorial: test_app_tutorial).
+const TUTORIAL_PATH := "user://test_app_tutorial_done.cfg"
 const NOW := 1_700_000_000
 
 var _tracked: Array = []
@@ -12,8 +14,9 @@ var _http: FakeHttp
 
 
 func after_each() -> void:
-	if FileAccess.file_exists(STORE_PATH):
-		DirAccess.remove_absolute(STORE_PATH)
+	for path: String in [STORE_PATH, TUTORIAL_PATH]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 
 
 func _app(with_auth: bool) -> App:
@@ -39,6 +42,8 @@ func _app(with_auth: bool) -> App:
 	app.animate = false
 	app.gate = gate
 	app.track = spy
+	app.tutorial = TutorialProgress.new(SettingsStore.new(TUTORIAL_PATH))
+	app.tutorial.mark(TutorialProgress.COMPLETED)
 	add_child_autofree(app)
 	return app
 

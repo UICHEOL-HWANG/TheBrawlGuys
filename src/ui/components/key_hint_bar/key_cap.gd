@@ -5,6 +5,9 @@ extends Control
 ## pressed fills with the accent (player color) and squishes (PRESS_SQUISH, motion_fast); the
 ## release fades the color back (motion_base) and springs back (motion_squish). ready (the special
 ## cap while the gauge is full, PRD-STYLE-04) adds a `fire` ring around the cap in either state.
+## target (the tutorial's "press this now", Phase 5 T11) adds a breathing ring in the accent (the
+## player color: petal_yellow focus rings vanish on the cream bar) outside that (stroke_focus,
+## alpha pulsing on motion_slow).
 
 enum State { IDLE, PRESSED }
 
@@ -19,6 +22,9 @@ const ARROW_RATIO := 0.28
 ## Ready ring: stroke width and gap outside the cap.
 const READY_STROKE := DS.S1
 const READY_GAP := DS.S1
+## Target ring: outside the ready ring; its alpha breathes between these.
+const TARGET_GAP := READY_GAP + READY_STROKE
+const TARGET_ALPHA_LOW := 0.35
 
 @export var key_text: String = "Z"
 ## Non-zero: draw this arrow instead of the text.
@@ -32,8 +38,16 @@ var fill_amount: float = 0.0:
 		fill_amount = v
 		queue_redraw()
 
+## Target ring alpha (0 = no ring); animated while the cap is a target.
+var target_glow: float = 0.0:
+	set(v):
+		target_glow = v
+		queue_redraw()
+
 var _state: int = State.IDLE
 var _ready_ring: bool = false
+var _target: bool = false
+var _target_tween: Tween
 var _font: Font
 var _tween: Tween
 
@@ -43,6 +57,8 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = _min_size()
 	resized.connect(func() -> void: pivot_offset = Vector2(size.x * 0.5, size.y))
+	if _target:
+		_target_tween = UiMotion.pulse(self, "target_glow", TARGET_ALPHA_LOW, 1.0, UiMotion.Token.SLOW)
 
 
 func set_state(s: int) -> void:
@@ -79,6 +95,21 @@ func is_ready() -> bool:
 	return _ready_ring
 
 
+func set_target(on: bool) -> void:
+	if on == _target:
+		return
+	_target = on
+	if _target_tween != null and _target_tween.is_valid():
+		_target_tween.kill()
+	target_glow = 1.0 if on else 0.0
+	if on and is_inside_tree():
+		_target_tween = UiMotion.pulse(self, "target_glow", TARGET_ALPHA_LOW, 1.0, UiMotion.Token.SLOW)
+
+
+func is_target() -> bool:
+	return _target
+
+
 func fill() -> float:
 	return fill_amount
 
@@ -102,6 +133,8 @@ func _draw() -> void:
 	draw_style_box(sb, Rect2(Vector2.ZERO, size))
 	if _ready_ring:
 		_draw_ready_ring()
+	if _target:
+		_draw_target_ring()
 	var ink := DS.UI_TEXT.lerp(DS.UI_SURFACE, fill_amount)
 	if arrow != Vector2.ZERO:
 		_draw_arrow(ink)
@@ -118,6 +151,17 @@ func _draw_ready_ring() -> void:
 	ring.set_border_width_all(READY_STROKE)
 	ring.border_color = DS.FIRE
 	draw_style_box(ring, Rect2(Vector2.ZERO, size).grow(READY_GAP + READY_STROKE))
+
+
+func _draw_target_ring() -> void:
+	var ring := StyleBoxFlat.new()
+	ring.draw_center = false
+	ring.set_corner_radius_all(DS.RADIUS_S + TARGET_GAP)
+	ring.set_border_width_all(DS.STROKE_FOCUS)
+	var c := accent
+	c.a = target_glow
+	ring.border_color = c
+	draw_style_box(ring, Rect2(Vector2.ZERO, size).grow(TARGET_GAP + DS.STROKE_FOCUS))
 
 
 ## A soft arrow: a round-ended stem with a chevron head (no sharp spikes, design.md §3).

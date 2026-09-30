@@ -7,6 +7,7 @@ const PLAN_EVENTS: Array[String] = [
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
 	"screen_viewed", "mode_selected", "character_selected", "arena_selected", "select_cancelled",
+	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
 	"match_started", "match_ended", "match_abandoned", "rematch_clicked",
 	"stock_lost", "special_used", "special_hit", "gauge_full",
 	"item_picked_up", "item_used", "item_hit", "gimmick_triggered", "gimmick_ringout",
@@ -52,8 +53,17 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_phase5_character_select() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 5)
+func test_schema_version_is_bumped_for_the_phase5_tutorial() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 6)
+
+
+func test_tutorial_events_carry_the_funnel_step() -> void:
+	assert_eq(EventCatalog.validate("tutorial_started", {"source": "first_login"}).size(), 0)
+	var done := {"step": "jump", "index": 2, "ms_in_step": 1800, "attempts": 1}
+	assert_eq(EventCatalog.validate("tutorial_step_completed", done).size(), 0)
+	assert_eq(EventCatalog.validate("tutorial_step_completed", {"step": "jump"}).size(), 3)
+	assert_eq(EventCatalog.validate("tutorial_skipped", {"step": "guard"}).size(), 1, "index")
+	assert_eq(EventCatalog.validate("tutorial_completed", {}).size(), 1, "total_ms")
 
 
 func test_character_selected_names_the_slot_style_and_device() -> void:
