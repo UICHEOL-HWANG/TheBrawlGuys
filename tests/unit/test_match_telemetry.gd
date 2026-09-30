@@ -250,3 +250,40 @@ func test_match_and_player_rows() -> void:
 	assert_eq(players[1]["character"], "Barbarian")
 	assert_true(players[1]["is_bot"])
 	assert_eq(players[1]["stocks_left"], 1)
+
+
+func test_match_row_carries_the_reproducibility_header() -> void:
+	var t := MatchTelemetry.new(func(_n: String, _p: Dictionary) -> void: pass)
+	var setup := _setup()
+	setup.merge({"config_fingerprint": 123, "sim_version": World.SNAPSHOT_VERSION, "event_schema_version": 2,
+		"session_id": 1_700_000_000_000, "user_match_seq": 3, "config_variant": "control"})
+	setup["slots"][1].merge({"controller": "bot", "bot_difficulty": "normal", "bot_params_hash": 77})
+	t.begin(setup)
+	t.end(_view, false, 987654321)
+	var m := t.match_row()
+	assert_eq(m["config_fingerprint"], 123)
+	assert_eq(m["sim_version"], World.SNAPSHOT_VERSION)
+	assert_eq(m["event_schema_version"], 2)
+	assert_eq(m["final_state_hash"], 987654321)
+	assert_eq(m["session_id"], 1_700_000_000_000)
+	assert_eq(m["user_match_seq"], 3)
+	assert_eq(m["config_variant"], "control")
+	var bot: Dictionary = t.player_rows()[1]
+	assert_eq(bot["controller"], "bot")
+	assert_eq(bot["bot_difficulty"], "normal")
+	assert_eq(bot["bot_params_hash"], 77)
+	assert_eq(t.player_rows()[0]["controller"], "local", "derived from is_bot when the setup has none")
+
+
+func test_inputs_fed_per_tick_become_match_inputs_rows() -> void:
+	for tick: int in range(1, 11):
+		var inputs: Array[InputFrame] = [InputFrame.make(1.0 if tick > 5 else 0.0, 0.0), InputFrame.neutral()]
+		_t.on_frame([], [], _view.merged({"tick": tick}, true), inputs)
+	_t.end(_view, true)
+	var rows := _t.input_rows()
+	assert_eq(rows.size(), 2)
+	assert_eq(rows[0]["frame_count"], 10)
+	assert_eq(rows[0]["match_id"], "m-1")
+	var log := InputLog.from_rows(rows)
+	assert_eq(log.track(0).run_count(), 2)
+	assert_eq(log.track(1).run_count(), 1)

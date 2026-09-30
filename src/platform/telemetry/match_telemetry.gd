@@ -23,6 +23,7 @@ var _dealer: Dictionary = {}  # target -> attacker of this tick's last hit
 var _active: bool = false
 var _match_row: Dictionary = {}
 var _player_rows: Array[Dictionary] = []
+var _inputs := InputLog.new()
 
 
 func _init(sink: Callable) -> void:
@@ -30,11 +31,13 @@ func _init(sink: Callable) -> void:
 
 
 ## setup: match_id, mode, arena, seed, local_slot, started_at, build_version, platform,
-## slots [{slot, is_bot, character, style, input_device}].
+## slots [{slot, is_bot, character, style, input_device, controller?, bot_difficulty?, bot_params_hash?}]
+## and the optional reproducibility header (TelemetrySetup, RawRows.HEADER_KEYS).
 func begin(setup: Dictionary) -> void:
 	_setup = setup
 	_active = true
 	_stats.clear()
+	_inputs = InputLog.new((setup["slots"] as Array).size())
 	var characters: Array = []
 	var bots := 0
 	for s: Dictionary in setup["slots"]:
@@ -46,9 +49,12 @@ func begin(setup: Dictionary) -> void:
 		"bot_count": bots, "characters": characters, "input_device": local["input_device"]})
 
 
-func on_frame(events: Array, view_events: Array, view: Dictionary) -> void:
+## inputs: the InputFrames World.tick() got for this tick (slot order), recorded for replay (A7).
+func on_frame(events: Array, view_events: Array, view: Dictionary, inputs: Array = []) -> void:
 	if not _active:
 		return
+	if not inputs.is_empty():
+		_inputs.record(inputs)
 	var tick := int(view["tick"])
 	var fighters: Array = view["fighters"]
 	_observe_attacks(fighters)
@@ -70,7 +76,8 @@ func on_frame(events: Array, view_events: Array, view: Dictionary) -> void:
 
 
 ## Ends the match once: match_ended (or match_abandoned) with slot summaries and final rows.
-func end(view: Dictionary, abandoned: bool = false) -> void:
+## final_state_hash: World.state_hash() now, so an offline replay can be checked (A7).
+func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = null) -> void:
 	if not _active:
 		return
 	_active = false
@@ -87,7 +94,7 @@ func end(view: Dictionary, abandoned: bool = false) -> void:
 		_player_rows.append(RawRows.player_row(match_id(), _setup["slots"][s.slot], summary))
 	var ticks := int(view["tick"])
 	var local_result := MatchSummary.result(int(_setup.get("local_slot", 0)), over, winner)
-	_match_row = RawRows.match_row(_setup, ticks, winner, local_result)
+	_match_row = RawRows.match_row(_setup, ticks, winner, local_result, final_state_hash)
 	var props := {"mode": _setup["mode"], "arena": _setup["arena"], "duration_s": MatchSummary.seconds(ticks)}
 	if abandoned:
 		_emit("match_abandoned", props)
@@ -114,6 +121,11 @@ func match_row() -> Dictionary:
 
 func player_rows() -> Array[Dictionary]:
 	return _player_rows
+
+
+## match_inputs rows (A7): every slot's recorded inputs, encoded.
+func input_rows() -> Array[Dictionary]:
+	return _inputs.rows(match_id())
 
 
 ## Handles one sim event; returns extra payload fields for its raw row (analysis.sql reads them).

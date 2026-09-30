@@ -4,6 +4,8 @@ extends Node
 ## otherwise it still validates every event (invalid ones fail tests) and drops it.
 
 var _client: AnalyticsClient = null
+## Offline runs still stamp matches with a per-run session id (epoch ms at startup).
+var _offline_session_id: int = int(Time.get_unix_time_from_system() * 1000.0)
 
 
 func _ready() -> void:
@@ -17,12 +19,18 @@ func _ready() -> void:
 	_client = AnalyticsClient.new(secrets.amplitude_api_key, DeviceId.load_or_create(),
 			GodotHttpTransport.new(self), BatchQueue.new())
 	_client.context = PlatformEnv.amplitude_context()
+	_client.set_super_property("event_schema_version", EventCatalog.SCHEMA_VERSION)
 	track("app_opened")
 	_client.flush()
 
 
 func is_enabled() -> bool:
 	return _client != null
+
+
+## Amplitude session id (epoch ms); matches rows carry it so both stores join.
+func session_id() -> int:
+	return _client.session_id if _client != null else _offline_session_id
 
 
 func track(event_name: String, props: Dictionary = {}) -> void:

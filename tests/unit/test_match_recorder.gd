@@ -27,8 +27,9 @@ func _finished_match() -> MatchTelemetry:
 		return {"id": id, "spawn_id": 0, "pos": Vector3.ZERO, "state": 0, "on_ground": true, "damage": 0.0,
 			"stocks": 1, "attack_kind": 0, "attack_ticks": 0}
 	var view := {"tick": 30, "arena_radius": 10.0, "match_over": true, "winner": 1, "fighters": [f.call(0), f.call(1)]}
-	t.on_frame([{"type": "grab", "attacker": 0, "target": 1, "pos": Vector3.ZERO}], [], view)
-	t.end(view)
+	var inputs: Array[InputFrame] = [InputFrame.make(1.0, 0.0), InputFrame.neutral()]
+	t.on_frame([{"type": "grab", "attacker": 0, "target": 1, "pos": Vector3.ZERO}], [], view, inputs)
+	t.end(view, false, 42)
 	return t
 
 
@@ -61,6 +62,12 @@ func test_uploads_in_order_with_the_user_id() -> void:
 	assert_eq(_http.last()["url"], URL + "/rest/v1/match_events")
 	var rows: Array = _http.last_json()
 	assert_eq(rows.size(), 3, "grab + two position samples")
+	_http.respond(201)
+	assert_eq(_http.last()["url"], URL + "/rest/v1/match_inputs")
+	var inputs: Array = _http.last_json()
+	assert_eq(inputs.size(), 2, "one input row per slot")
+	assert_eq(inputs[0]["encoding"], InputBlob.ENCODING)
+	assert_eq(int(inputs[0]["frame_count"]), 1)
 	_http.respond(201)
 	assert_eq(_results, [true])
 

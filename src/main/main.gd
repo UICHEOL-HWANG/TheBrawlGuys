@@ -115,7 +115,7 @@ func _start_match() -> void:
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 	_presentation.restart()
-	_tracking.begin(setup)
+	_tracking.begin(setup, _world)
 
 
 ## One input per slot in slot order: the local device or that slot's bot.
@@ -138,14 +138,15 @@ func _process(delta: float) -> void:
 	var view_events: Array = []
 	for i: int in ticks:
 		_prev_state = _curr_state
+		var inputs := _gather_inputs()
 		var started := Time.get_ticks_usec()
-		_world.tick(_gather_inputs())
+		_world.tick(inputs)
 		_stats.add_sim_cost(Time.get_ticks_usec() - started)
 		_curr_state = _world.state_view()
 		var tick_view_events := ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config)
 		events.append_array(_curr_state["events"])
 		view_events.append_array(tick_view_events)
-		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state)
+		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state, inputs)
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.wobble_guards(events)

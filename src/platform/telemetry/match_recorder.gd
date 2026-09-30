@@ -1,7 +1,8 @@
 class_name MatchRecorder
 extends RefCounted
 ## Uploads a finished match's raw rows to Supabase (platform A6, PRD-DATA-04):
-## matches -> match_players -> match_events (chunked by SupabaseClient). Only when signed in;
+## matches -> match_players -> match_events (chunked by SupabaseClient) -> match_inputs (A7, the
+## replay log). Children follow their matches row so RLS finds it. Only when signed in;
 ## otherwise nothing is sent. done(ok: bool) fires once.
 
 var _client: SupabaseClient
@@ -25,7 +26,7 @@ func record(telemetry: MatchTelemetry, done: Callable = Callable()) -> bool:
 	var match_row := telemetry.match_row().duplicate()
 	match_row["user_id"] = _client.session.user_id
 	var steps: Array = [["matches", [match_row]], ["match_players", telemetry.player_rows()],
-		["match_events", telemetry.event_rows()]]
+		["match_events", telemetry.event_rows()], ["match_inputs", telemetry.input_rows()]]
 	_run(steps, 0, done)
 	return true
 

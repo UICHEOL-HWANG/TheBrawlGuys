@@ -4,6 +4,10 @@ extends RefCounted
 ## it must carry. Extra properties are allowed; values must be JSON-safe. docs/tracking-plan.md
 ## describes each event; this table is what code and tests enforce.
 
+## Bumped with every change to event names, properties or Supabase row shapes (tracking-plan §7).
+## Stamped on matches rows and sent as an Amplitude super property. 1 = platform A6.
+const SCHEMA_VERSION := 2
+
 const EVENTS: Dictionary = {
 	# App and session
 	"app_opened": [],
