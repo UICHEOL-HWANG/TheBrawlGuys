@@ -4,7 +4,8 @@ extends HBoxContainer
 ## strip (ui_surface 50%, radius_l) of KeyCaps — the arrow cluster, then one cap per action with
 ## a caption under it, ending with the special chord cap — plus a hide/show chip at its right
 ## edge. States shown · hidden (only the chip is left). Caps light from set_pressed(); the special
-## cap rings from set_ready() while the gauge is full; the bar never reads input itself. Local
+## cap rings from set_ready() while the gauge is full; the tutorial rings the caps to press now
+## from set_highlight() (Phase 5 T11); the bar never reads input itself. Local
 ## 2-player bars start with a "P1"/"P2" tag (set_tag) and only the last one keeps the chip; when
 ## two bars do not fit side by side they go compact (tighter gaps and padding, same text sizes).
 
@@ -14,8 +15,6 @@ enum State { SHOWN, HIDDEN }
 
 const GROUP_GAP := DS.S4
 const COMPACT_GROUP_GAP := DS.S2
-## Gallery preview: seconds each key stays lit while the preview walks along the bar.
-const PREVIEW_STEP_S := 0.35
 
 var _panel: PanelContainer
 var _row: HBoxContainer
@@ -26,9 +25,7 @@ var _state: int = State.SHOWN
 var _accent: Color = DS.UI_ACCENT
 var _tag: String = ""
 var _compact: bool = false
-var _preview: bool = false
-var _preview_s: float = 0.0
-var _preview_index: int = 0
+var _highlight: Array = []
 
 
 func _ready() -> void:
@@ -48,7 +45,6 @@ func _ready() -> void:
 	_chip.pressed.connect(func() -> void: toggle_requested.emit())
 	add_child(_chip)
 	build(KeyHintSource.caps())
-	set_process(false)  # only the gallery preview animates
 
 
 ## (Re)builds the caps from KeyHintSource.caps()-shaped entries.
@@ -71,6 +67,7 @@ func build(caps: Array[Dictionary]) -> void:
 		_row.add_child(_move_group(move))
 	for g: Control in groups:
 		_row.add_child(g)
+	set_highlight(_highlight)
 
 
 ## Player tag shown first ("P2"); call before build().
@@ -121,6 +118,22 @@ func cap_ready(id: String) -> bool:
 	return _caps.has(id) and (_caps[id] as KeyCap).is_ready()
 
 
+## Rings exactly these caps as "press this now" (tutorial, KeyCap target ring); [] clears. Ids
+## the bar does not have are ignored; the set survives build().
+func set_highlight(ids: Array) -> void:
+	_highlight = ids.duplicate()
+	for id: String in _caps:
+		(_caps[id] as KeyCap).set_target(_highlight.has(id))
+
+
+func highlighted() -> Array:
+	var out: Array = []
+	for id: String in _caps:
+		if (_caps[id] as KeyCap).is_target():
+			out.append(id)
+	return out
+
+
 func cap_text(id: String) -> String:
 	return String(_texts.get(id, ""))
 
@@ -152,28 +165,12 @@ func chip() -> KeyHintChip:
 	return _chip
 
 
-## Gallery: player-1 blue caps lighting up one after another.
+## Gallery: player-1 blue caps lighting up one after another (KeyHintPreview).
 func set_preview() -> void:
 	if not is_node_ready():
 		await ready
 	set_accent(DS.P1)
-	_preview = true
-	set_process(true)
-	_preview_index = 0
-	set_pressed(String(cap_ids()[0]), true)
-
-
-func _process(delta: float) -> void:
-	if not _preview:
-		return
-	_preview_s += delta
-	if _preview_s < PREVIEW_STEP_S:
-		return
-	_preview_s = 0.0
-	var ids := cap_ids()
-	set_pressed(String(ids[_preview_index]), false)
-	_preview_index = (_preview_index + 1) % ids.size()
-	set_pressed(String(ids[_preview_index]), true)
+	add_child(KeyHintPreview.new(self))
 
 
 func _make_cap(c: Dictionary) -> KeyCap:
