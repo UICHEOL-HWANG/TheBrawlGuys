@@ -4,12 +4,20 @@ extends RefCounted
 ## it must carry. Extra properties are allowed; values must be JSON-safe. docs/tracking-plan.md
 ## describes each event; this table is what code and tests enforce.
 
+## Bumped with every change to event names, properties or Supabase row shapes (tracking-plan §7).
+## Stamped on matches rows and sent as an Amplitude super property. 1 = platform A6,
+## 2 = A7 replay header, 3 = A8 features and session / load / result / perf events.
+const SCHEMA_VERSION := 3
+
 const EVENTS: Dictionary = {
 	# App and session
 	"app_opened": [],
 	"app_backgrounded": [],
 	"app_closed": [],
-	"perf_sampled": ["avg_fps", "p95_frame_ms", "avg_tick_ms"],
+	"session_started": [],
+	"session_ended": ["duration_s", "matches", "last_screen"],
+	"load_timed": ["stage", "ms"],
+	"perf_sampled": ["match_id", "fps_p5", "fps_p50", "spike_count", "frame_count"],
 	# Login
 	"login_viewed": [],
 	"login_started": ["provider", "platform"],
@@ -25,9 +33,11 @@ const EVENTS: Dictionary = {
 	"arena_selected": ["arena"],
 	"select_cancelled": ["screen"],
 	# Match
-	"match_started": ["match_id", "mode", "arena", "player_count", "bot_count", "characters", "input_device"],
+	"match_started": ["match_id", "mode", "arena", "player_count", "bot_count", "characters", "input_device",
+		"loss_streak"],
 	"match_ended": ["match_id", "mode", "arena", "result", "winner_slot", "duration_s", "players"],
-	"match_abandoned": ["match_id", "mode", "arena", "duration_s"],
+	"match_abandoned": ["match_id", "mode", "arena", "duration_s", "stock_diff", "ms_since_last_ringout"],
+	"result_viewed": ["match_id", "dwell_ms", "next"],
 	"rematch_clicked": ["match_id"],
 	# Combat highlights
 	"stock_lost": ["match_id", "victim_slot", "attacker_slot", "cause", "damage_at_death", "angle_deg", "zone",

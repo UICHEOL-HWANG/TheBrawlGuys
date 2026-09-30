@@ -92,6 +92,17 @@ func test_event_payload_fields() -> void:
 	assert_ne(e["insert_id"], (events[1] as Dictionary)["insert_id"], "insert_id deduplicates")
 
 
+func test_install_user_properties_survive_identify() -> void:
+	_client.set_user_properties({"first_seen_at": "2026-09-30T12:00:00Z", "install_build": "0.4.0"})
+	_client.identify("user-1")
+	_client.set_user_properties({"input_device_primary": "touch"})
+	_screen(0)
+	_client.flush()
+	var e: Dictionary = ((_http.last_json() as Dictionary)["events"] as Array)[0]
+	assert_eq(e["user_properties"], {"first_seen_at": "2026-09-30T12:00:00Z", "install_build": "0.4.0",
+		"input_device_primary": "touch"})
+
+
 func test_anonymous_events_have_no_user_id() -> void:
 	_screen(0)
 	_client.flush()

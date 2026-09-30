@@ -1,6 +1,6 @@
 # Platform (로그인 · 트래킹 · 배포) — Context
 
-**Last Updated:** 2026-09-30
+**Last Updated:** 2026-09-30 (A7/A8, feat/telemetry-v2)
 **상태:** 시작
 **계획:** [`platform-plan.md`](./platform-plan.md) · **체크리스트:** [`platform-tasks.md`](./platform-tasks.md)
 
@@ -58,3 +58,17 @@
 ## 도메인 (2026-09-30)
 - `thebrawlguys.cloud` 구매 완료 (호스팅케이알). 네임서버는 호스팅케이알 기본 유지, 배포(D1) 시 A/CNAME 레코드로 Vercel 연결, HTTPS는 Vercel 자동
 - 배포 시: Vercel 프로젝트 도메인 추가 → 호스팅케이알 DNS 레코드 → Supabase Redirect URLs에 `https://thebrawlguys.cloud` → `secrets.local.cfg`의 `auth.redirect_web`
+
+## A7·A8 텔레메트리 v2 (2026-09-30, 브랜치 feat/telemetry-v2, 미병합)
+- 범위 변경(사용자): 저장 용량 최적화는 아직 불필요 → `match_events`의 0.5초 `pos` 행 **유지**, `match_timeline`(1Hz) **보류**. 나머지(A7 입력 로그·재현 헤더·재생 검증, A8 피처·이벤트)는 그대로
+- **A7 L0 입력 로그**: `src/platform/telemetry/input_log/` — `InputCodec`(프레임→24비트, 축은 1/127 양자화라 정확) · `InputTrack`(슬롯별 런렝스, 바이너리 `BGIL` v1: varint 틱 델타 + 코드 바이트 평면) · `InputBlob`(gzip→base64, `encoding = bgil1+gzip+base64`) · `InputLog`(슬롯 묶음, `match_inputs` 행)
+- 재현 헤더: `matches.config_fingerprint`·`sim_version`·`event_schema_version`·`final_state_hash`(추적 종료 시 `World.state_hash()`)·`session_id`·`user_match_seq`(`MatchCounter`, `user://match_seq.cfg`, 유저 id별)·`config_variant`(기본 control); `match_players.controller`·`bot_difficulty`(봇만 normal)·`bot_params_hash`(Bot 그룹 해시)
+- 오프라인 재생: `scripts/replay_verify.gd -- match.json` (`MatchExport` 형식) → `OK`/`MISMATCH`/`ERROR <이유>`, 종료 코드 0/1/2. SQL로 내보내는 법은 `supabase/README.md`
+- 경기 씬 변경은 배선만: `MatchTracking.begin(setup, world)`, 틱마다 입력 전달, `on_frame_time`, `on_menu`, `MatchTracking` 생성을 `_ready` 맨 앞으로(로드 시간 기준점). sim·리플레이 해시 불변
+- **A8 피처**: `src/platform/telemetry/features/` (`InputFeatures`·`SpatialFeatures`·`FlowFeatures` → `MatchFeatures.COLUMNS`), `match_players` 열 + `match_ended.players[]`. 전투 집계는 `CombatTelemetry`로 분리(match_telemetry.gd 208→150줄)
+- **A8 이벤트**: `session_started`/`session_ended`·`load_timed`(boot_to_login·login_to_title은 `SessionTracker`가 `screen_viewed`에서 유도, match_load는 `MatchTracking`) · `result_viewed`(rematch/menu/quit) · `perf_sampled` 재정의(fps_p5/p50·spike_count, 경기마다) · `match_abandoned`+`stock_diff`·`ms_since_last_ringout` · `match_started.loss_streak`. 사용자 속성 `first_seen_at`·`install_build`·`input_device_primary`(`InstallInfo`, `user://install.cfg`). `event_schema_version` 3 (super property)
+- `screen_viewed`의 이전 화면·체류는 기존 `from_screen`·`dwell_ms_prev`로 이미 발행 중 → 이름 유지(추적 플랜 §7: 이름 변경 금지)
+- **용량 실측** (`tests/replay/test_match_capture_size.gd`, 봇 4명·3분·10,800틱, PostgREST JSON 기준): `match_inputs` ≈ 21 KB (슬롯당 gzip ≈ 3.7–4.5 KB, base64 포함) · `match_events` ≈ 422 KB (2,223행 중 `pos` 1,389행 ≈ 254 KB) · `match_players` ≈ 3.7 KB · `matches` ≈ 0.4 KB → **합계 ≈ 447 KB/경기** (JSON 전송량; Postgres 저장은 행 오버헤드·TOAST 압축으로 다름). `pos` 행을 타임라인으로 바꾸면 ≈ 190 KB 감소
+- 미해결: 세션 경계(백그라운드 30분 후 새 session_id)는 아직 없음 — `session_ended`는 종료·일시정지 때 1회. 봇 난이도는 아직 단일(normal)
+- 사용자 할 일: Supabase SQL Editor에서 `supabase/migrations/0002_replay_and_features.sql` 실행 (0001 다음). 실행 전 빌드는 새 열 때문에 업로드가 400으로 실패한다
+

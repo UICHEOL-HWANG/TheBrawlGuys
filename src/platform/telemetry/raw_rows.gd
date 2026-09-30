@@ -7,6 +7,12 @@ extends RefCounted
 const FIGHTER_ID_TYPES: Array[String] = ["ringout", "jumped", "landed", "respawned"]
 const ACTOR_KEYS: Array[String] = ["attacker", "fighter"]
 const TARGET_KEYS: Array[String] = ["target", "victim"]
+## Reproducibility header copied from the setup onto the matches row (null when absent).
+const HEADER_KEYS: Array[String] = [
+	"config_fingerprint", "sim_version", "event_schema_version", "session_id", "user_match_seq",
+]
+## matches.config_variant is NOT NULL: setups without an experiment are the control group.
+const VARIANT_DEFAULT := "control"
 
 
 static func event_row(match_id: String, tick: int, e: Dictionary) -> Dictionary:
@@ -26,13 +32,20 @@ static func position_row(match_id: String, tick: int, fighter: Dictionary) -> Di
 	return _row(match_id, tick, "pos", int(fighter["id"]), null, payload)
 
 
-static func match_row(setup: Dictionary, duration_ticks: int, winner_slot: Variant, result: String) -> Dictionary:
-	return {
+## final_state_hash: World.state_hash() when tracking ended (null when unknown).
+static func match_row(setup: Dictionary, duration_ticks: int, winner_slot: Variant, result: String,
+		final_state_hash: Variant = null) -> Dictionary:
+	var row := {
 		"id": setup["match_id"], "mode": setup["mode"], "arena": setup["arena"],
 		"player_count": (setup["slots"] as Array).size(), "seed": setup["seed"],
 		"started_at": setup["started_at"], "duration_ticks": duration_ticks, "winner_slot": winner_slot,
 		"result": result, "build_version": setup.get("build_version", ""), "platform": setup.get("platform", ""),
+		"final_state_hash": final_state_hash,
 	}
+	for key: String in HEADER_KEYS:
+		row[key] = setup.get(key)
+	row["config_variant"] = setup.get("config_variant", VARIANT_DEFAULT)
+	return row
 
 
 static func player_row(match_id: String, slot_setup: Dictionary, summary: Dictionary) -> Dictionary:
@@ -40,6 +53,10 @@ static func player_row(match_id: String, slot_setup: Dictionary, summary: Dictio
 	row["match_id"] = match_id
 	for key: String in ["is_bot", "character", "style", "input_device"]:
 		row[key] = slot_setup[key]
+	var is_bot := bool(slot_setup["is_bot"])
+	row["controller"] = slot_setup.get("controller", "bot" if is_bot else "local")
+	row["bot_difficulty"] = slot_setup.get("bot_difficulty")
+	row["bot_params_hash"] = slot_setup.get("bot_params_hash")
 	return row
 
 

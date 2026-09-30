@@ -250,3 +250,25 @@ func test_match_and_player_rows() -> void:
 	assert_eq(players[1]["character"], "Barbarian")
 	assert_true(players[1]["is_bot"])
 	assert_eq(players[1]["stocks_left"], 1)
+
+
+func test_slot_summaries_carry_the_behaviour_features() -> void:
+	_play_scenario()
+	var p0: Dictionary = _props("match_ended")["players"][0]
+	for key: String in MatchFeatures.COLUMNS:
+		assert_true(p0.has(key), "match_ended.players has %s" % key)
+		assert_true(_t.player_rows()[0].has(key), "match_players row has %s" % key)
+	assert_almost_eq(float(p0["hit_accuracy"]), 1.0, 0.001, "two swings, two hits")
+	assert_eq(p0["first_item_tick"], 7)
+	assert_true(p0["first_blood"], "slot 0 is credited with the first ringout")
+	assert_eq(_props("match_started")["loss_streak"], 0, "no session context in this setup")
+
+
+func test_abandon_names_the_stock_gap_and_time_since_the_last_ringout() -> void:
+	_frame(60, [{"type": "ringout", "id": 0, "pos": Vector3(0, -20, 0), "stocks_left": 2}], [],
+			{0: {"spawn_id": 1, "stocks": 2}})
+	_frame(180)
+	_t.end(_view, true)
+	var p := _props("match_abandoned")
+	assert_eq(p["stock_diff"], -1)
+	assert_eq(p["ms_since_last_ringout"], 2000)

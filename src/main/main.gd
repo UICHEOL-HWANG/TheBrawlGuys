@@ -38,6 +38,7 @@ var _stats := TickStats.new()
 
 
 func _ready() -> void:
+	_tracking = MatchTracking.new(Analytics.track, MatchRecorder.create_default())  # load time starts here
 	_config = load(CONFIG_PATH) as GameConfig
 	if _config == null:
 		push_error("main: GameConfig missing at %s" % CONFIG_PATH)
@@ -59,7 +60,6 @@ func _ready() -> void:
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
-	_tracking = MatchTracking.new(Analytics.track, MatchRecorder.create_default())
 	_start_match()
 
 
@@ -73,7 +73,9 @@ func _build_ui() -> void:
 	add_child(_hud)
 	_hud.restart_requested.connect(_start_match)
 	_hud.restart_requested.connect(func() -> void: _presentation.play_ui("ui_confirm"))
-	_hud.menu_requested.connect(func() -> void: menu_requested.emit())
+	_hud.menu_requested.connect(func() -> void:
+		_tracking.on_menu()
+		menu_requested.emit())
 	if setup.local_slot() >= 0:
 		_hud.show_key_hints(PlayerStyle.color(setup.local_slot()), func() -> bool: return _touch.visible)
 	if OS.is_debug_build():
@@ -117,7 +119,7 @@ func _start_match() -> void:
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 	_presentation.restart()
-	_tracking.begin(setup)
+	_tracking.begin(setup, _world)
 
 
 ## One input per slot in slot order: the local device or that slot's bot.
@@ -140,14 +142,15 @@ func _process(delta: float) -> void:
 	var view_events: Array = []
 	for i: int in ticks:
 		_prev_state = _curr_state
+		var inputs := _gather_inputs()
 		var started := Time.get_ticks_usec()
-		_world.tick(_gather_inputs())
+		_world.tick(inputs)
 		_stats.add_sim_cost(Time.get_ticks_usec() - started)
 		_curr_state = _world.state_view()
 		var tick_view_events := ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config)
 		events.append_array(_curr_state["events"])
 		view_events.append_array(tick_view_events)
-		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state)
+		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state, inputs)
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.wobble_guards(events)
@@ -158,6 +161,7 @@ func _process(delta: float) -> void:
 		_hud.show_result(int(_curr_state["winner"]), setup.local_slot())
 		_tracking.finish(_curr_state)
 	_stats.add_frame(delta, ticks)
+	_tracking.on_frame_time(delta)
 	if _panel != null:
 		_panel.set_info(_stats.info(_world.tick_count, _alpha))
 
