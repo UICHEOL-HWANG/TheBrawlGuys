@@ -2,7 +2,8 @@ class_name Combat
 extends RefCounted
 ## Hit resolution (PRD §4.2): active hitboxes vs fighter capsules, damage %, knockback formula,
 ## hitstun and hitstop. Damage is added before knockback is computed (context D7).
-## All hit sources share apply_hit, which also handles guard (context E4).
+## All hit sources share apply_hit, which also handles guard (context E4) and the target style's
+## knockback_taken (Phase 5). Melee numbers come from each attacker's style (StyleBook).
 
 
 static func knockback(attack: AttackData, target_damage: float, config: GameConfig) -> float:
@@ -28,10 +29,10 @@ static func hitbox_center(attacker: Fighter, attack: AttackData) -> Vector3:
 ## state at the start of the step, then all of them are applied. A fighter hit this tick still
 ## lands its own active hit, whatever the fighter ids, and everyone in a contact ends up frozen
 ## for the longest hitstop among its contacts this tick (order-free).
-static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameConfig) -> Array[Dictionary]:
+static func resolve(fighters: Array[Fighter], book: StyleBook, config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	var freeze := {}  # Fighter -> longest hitstop from this pass
-	for h: Dictionary in _contacts(fighters, attacks, config):
+	for h: Dictionary in _contacts(fighters, book, config):
 		var attacker: Fighter = h["attacker"]
 		var target: Fighter = h["target"]
 		var attack: AttackData = h["attack"]
@@ -48,13 +49,13 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 
 ## Active hitbox vs capsule contacts, in attacker then target id order, with everything the hit
 ## needs captured before any hit changes a fighter.
-static func _contacts(fighters: Array[Fighter], attacks: AttackSet, config: GameConfig) -> Array[Dictionary]:
+static func _contacts(fighters: Array[Fighter], book: StyleBook, config: GameConfig) -> Array[Dictionary]:
 	var found: Array[Dictionary] = []
 	for attacker: Fighter in fighters:
 		if attacker.state != Fighter.State.ATTACK or attacker.attack_kind == AttackSet.Kind.GRAB:
 			continue
-		var attack := attacks.get_attack(attacker.attack_kind)
-		if not attack.is_active(attacker.attack_ticks):
+		var attack := book.attacks(attacker.id).get_attack(attacker.attack_kind)
+		if not attack.hits_melee(attacker.attack_ticks):
 			continue
 		var center := hitbox_center(attacker, attack)
 		var yaw := Collision.yaw_of(attacker.facing)
@@ -78,11 +79,13 @@ static func _contacts(fighters: Array[Fighter], attacks: AttackSet, config: Game
 static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: float,
 		config: GameConfig, at: Vector3, source_id: int) -> Dictionary:
 	var guarded := target.state == Fighter.State.GUARD
-	target.damage += attack.damage * power * (config.guard_damage_mul if guarded else 1.0)
-	var kb := knockback(attack, target.damage, config) * power
+	var dealt := attack.damage * power * (config.guard_damage_mul if guarded else 1.0)
+	target.damage += dealt
+	var kb := knockback(attack, target.damage, config) * power * StyleCatalog.knockback_taken(
+			CharacterData.style_of(target.character), config)
 	target.hitstop_ticks = attack.hitstop_ticks
 	var event := {
-		"type": "hit", "attacker": source_id, "target": target.id, "pos": at,
+		"type": "hit", "attacker": source_id, "target": target.id, "pos": at, "damage": dealt,
 		"knockback": kb, "hitstop_ticks": attack.hitstop_ticks, "power": power,
 	}
 	var flat_dir := Vector3(dir.x, 0.0, dir.z)

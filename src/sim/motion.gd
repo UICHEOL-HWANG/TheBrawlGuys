@@ -2,34 +2,39 @@ class_name Motion
 extends RefCounted
 ## Per-tick fighter movement (PRD §4): input -> state, gravity, landing, walking off the edge,
 ## and capsule separation. Hitstop freezes a fighter completely (PRD §4.2). Floors come from the
-## arena (ArenaFloor.ground_top), which also owns the landing tolerance.
+## arena (ArenaFloor.ground_top), which also owns the landing tolerance. Run speed, jump and air
+## control come from the fighter's style (StyleBook, Phase 5).
 
 
-static func step(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet, arena: ArenaData) -> void:
+## Returns true when the fighter advanced this tick (alive and not frozen in hitstop).
+static func step(f: Fighter, input: InputFrame, config: GameConfig, book: StyleBook, arena: ArenaData) -> bool:
 	if not f.is_alive():
-		return
+		return false
 	if f.hitstop_ticks > 0:
 		f.hitstop_ticks -= 1
-		return
+		return false
 	if f.invuln_ticks > 0:
 		f.invuln_ticks -= 1
 	match f.state:
 		Fighter.State.HITSTUN:
 			_step_hitstun(f, config)
 		Fighter.State.ATTACK:
-			Actions.step_attack(f, input, config, attacks)
+			Actions.step_attack(f, input, config, book.attacks(f.id))
 		Fighter.State.CHARGE:
 			Actions.step_charge(f, input, config)
 		Fighter.State.GUARD:
 			Actions.step_guard(f, input, config)
+		Fighter.State.SPECIAL:
+			SpecialRunner.step(f, config, book)
 		Fighter.State.HOLDING, Fighter.State.HELD:
 			pass  # Grab.step drives holds; the held fighter's position comes from the holder
 		_:
 			if not Actions.try_start(f, input, config):
-				_step_control(f, input, config)
+				_step_control(f, input, config, book.kit(f.id).style)
 	if f.state != Fighter.State.HELD:
 		_integrate(f, config, arena)
 	f.state_ticks += 1
+	return true
 
 
 static func separate(fighters: Array[Fighter], config: GameConfig) -> void:
@@ -44,21 +49,21 @@ static func separate(fighters: Array[Fighter], config: GameConfig) -> void:
 			b.pos -= push
 
 
-static func _step_control(f: Fighter, input: InputFrame, config: GameConfig) -> void:
+static func _step_control(f: Fighter, input: InputFrame, config: GameConfig, style: StyleData) -> void:
 	var dir := Vector3(input.move_x, 0.0, input.move_z)
 	if dir.length() > 1.0:
 		dir = dir.normalized()
 	if input.jump and f.jumps_left > 0:
-		f.vel.y = config.jump_velocity
+		f.vel.y = style.jump_velocity
 		f.jumps_left -= 1
 		f.on_ground = false
-	var target := Vector2(dir.x, dir.z) * config.move_speed
+	var target := Vector2(dir.x, dir.z) * style.move_speed
 	if f.on_ground:
 		f.vel.x = target.x
 		f.vel.z = target.y
 	else:
 		# airborne: steer toward the input, or drift with light drag, never snap to zero
-		var accel := config.air_acceleration if dir.length_squared() > 0.0 else config.air_drag
+		var accel := style.air_acceleration if dir.length_squared() > 0.0 else config.air_drag
 		var flat := Vector2(f.vel.x, f.vel.z).move_toward(target, accel * SimTime.TICK_DT)
 		f.vel.x = flat.x
 		f.vel.z = flat.y

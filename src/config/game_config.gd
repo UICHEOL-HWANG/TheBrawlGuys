@@ -1,5 +1,6 @@
 class_name GameConfig
-extends Resource
+extends StyleConfig
+## Phase 5 style and special tunables live in the base scripts StyleConfig and SpecialConfig.
 ## Value ownership: GameConfig holds gameplay/feel tunables exposed on the debug panel.
 ## Art-direction constants (prop counts, light energies, mesh sizes) stay as named consts
 ## in render code; colors and UI sizes live only in DS tokens (src/ui/theme/tokens.gd).
@@ -230,7 +231,8 @@ extends Resource
 ## can be tuned or added without invalidating snapshots and replay hashes.
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
-	"Arena Gimmicks",
+	"Arena Gimmicks", "StyleBoxer", "StyleWeapon", "StyleRanged", "Special", "SpecialSlam", "SpecialRush",
+	"SpecialSpin", "SpecialFireball",
 ]
 
 @export_group("Audio")
@@ -242,7 +244,11 @@ const SIM_GROUPS: Array[String] = [
 ## Seconds for the last-stock intensity layer to fade in or out (context F10).
 @export_range(0.1, 5.0, 0.1) var music_intense_fade: float = 1.2
 
-const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio"]
+const NON_SIM_GROUPS: Array[String] = [
+	"Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio", "BotStyle",
+]
+## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig).
+const CONFIG_SCRIPTS: Array[String] = ["game_config.gd", "style_config.gd", "special_config.gd"]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays
@@ -266,7 +272,7 @@ static func group_names() -> Array[String]:
 	for p: Dictionary in GameConfig.new().get_property_list():
 		var usage := int(p["usage"])
 		if usage & PROPERTY_USAGE_CATEGORY:
-			in_script = String(p["name"]) == "game_config.gd"
+			in_script = CONFIG_SCRIPTS.has(String(p["name"]))
 		elif in_script and usage & PROPERTY_USAGE_GROUP:
 			names.append(String(p["name"]))
 	return names

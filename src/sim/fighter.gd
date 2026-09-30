@@ -5,7 +5,7 @@ extends RefCounted
 ## View reading: "launched" = HITSTUN and not on_ground; "respawn" = invuln_ticks > 0.
 ## New states are appended so Phase 1 values (KO = 5) never move.
 
-enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD }
+enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD, SPECIAL }
 
 ## "No fighter" / "no item" marker for partner_id and item_kind.
 const NONE := -1
@@ -19,7 +19,7 @@ const DATA_TYPES := {
 	"attack_kind": TYPE_INT, "combo_queued": TYPE_BOOL, "charge_ticks": TYPE_INT,
 	"charge_mul": TYPE_FLOAT, "grab_ticks": TYPE_INT, "partner_id": TYPE_INT,
 	"item_kind": TYPE_INT, "item_uses": TYPE_INT, "burn_ticks": TYPE_INT, "burn_clock": TYPE_INT,
-	"held_presses": TYPE_INT,
+	"held_presses": TYPE_INT, "character": TYPE_STRING, "gauge": TYPE_FLOAT,
 }
 
 var id: int = 0
@@ -59,6 +59,9 @@ var burn_ticks: int = 0
 var burn_clock: int = 0
 ## PressBuffer mask of presses made during hitstop, replayed when the freeze ends.
 var held_presses: int = 0
+## CharacterData id ("" = classic) and special gauge 0..SpecialGauge.MAX (Phase 5).
+var character: String = CharacterData.DEFAULT
+var gauge: float = 0.0
 
 
 func is_alive() -> bool:
@@ -76,13 +79,7 @@ func set_state(s: int) -> void:
 
 
 func to_view() -> Dictionary:
-	return {
-		"id": id, "spawn_id": spawn_id, "pos": pos, "facing": facing, "state": state,
-		"on_ground": on_ground, "damage": damage, "stocks": stocks, "jumps_left": jumps_left,
-		"invuln_ticks": invuln_ticks, "hitstop_ticks": hitstop_ticks, "attack_ticks": attack_ticks,
-		"attack_kind": attack_kind, "charge_ticks": charge_ticks, "partner_id": partner_id,
-		"item_kind": item_kind, "item_uses": item_uses, "burning": burn_ticks > 0,
-	}
+	return FighterViewData.of(self)
 
 
 func to_data() -> Dictionary:

@@ -8,7 +8,7 @@ extends RefCounted
 ## item lying on a floor that breaks away falls again.
 
 
-static func step(field: ItemField, fighters: Array[Fighter], attacks: AttackSet,
+static func step(field: ItemField, fighters: Array[Fighter], book: StyleBook,
 		config: GameConfig, arena: ArenaData) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	var keep: Array[Item] = []
@@ -16,9 +16,9 @@ static func step(field: ItemField, fighters: Array[Fighter], attacks: AttackSet,
 		if it.fuse_ticks > 0:
 			it.fuse_ticks -= 1
 			if it.fuse_ticks == 0:
-				events.append_array(_explode(it, fighters, attacks.get_attack(AttackSet.Kind.BOMB), config))
+				events.append_array(_explode(it, fighters, book.base_attacks().get_attack(AttackSet.Kind.BOMB), config))
 				continue
-		if _advance(it, fighters, attacks, config, arena, events):
+		if _advance(it, fighters, book, config, arena, events):
 			keep.append(it)
 	field.items = keep
 	return events
@@ -42,7 +42,7 @@ static func _explode(it: Item, fighters: Array[Fighter], attack: AttackData, con
 
 
 ## Moves one item; returns false when it is gone.
-static func _advance(it: Item, fighters: Array[Fighter], attacks: AttackSet, config: GameConfig,
+static func _advance(it: Item, fighters: Array[Fighter], book: StyleBook, config: GameConfig,
 		arena: ArenaData, events: Array[Dictionary]) -> bool:
 	if it.state == Item.State.GROUND:
 		if ArenaFloor.supports(arena, it.pos):
@@ -58,7 +58,7 @@ static func _advance(it: Item, fighters: Array[Fighter], attacks: AttackSet, con
 				it.vel.x = 0.0
 				it.vel.z = 0.0
 			else:
-				events.append(_projectile_hit(it, target, attacks.get_attack(AttackSet.Kind.ROCK), config))
+				events.append(_projectile_hit(it, target, book.base_attacks().get_attack(AttackSet.Kind.ROCK), config))
 				return false
 	var top := _landing_top(it, prev_y, arena)
 	if top != ArenaFloor.NO_GROUND:

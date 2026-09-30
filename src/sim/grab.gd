@@ -6,12 +6,12 @@ extends RefCounted
 ## Grabs ignore guard (context E4). cleanup() frees any pair broken by hits or ring-outs.
 
 
-static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameConfig) -> Array[Dictionary]:
+static func resolve(fighters: Array[Fighter], book: StyleBook, config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
-	var grab := attacks.get_attack(AttackSet.Kind.GRAB)
 	for holder: Fighter in fighters:
 		if holder.state != Fighter.State.ATTACK or holder.attack_kind != AttackSet.Kind.GRAB:
 			continue
+		var grab := book.attacks(holder.id).get_attack(AttackSet.Kind.GRAB)
 		if not grab.is_active(holder.attack_ticks):
 			continue
 		var center := Combat.hitbox_center(holder, grab)
@@ -27,7 +27,7 @@ static func resolve(fighters: Array[Fighter], attacks: AttackSet, config: GameCo
 	return events
 
 
-static func step(fighters: Array[Fighter], inputs: Array[InputFrame], attacks: AttackSet,
+static func step(fighters: Array[Fighter], inputs: Array[InputFrame], book: StyleBook,
 		config: GameConfig) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	for holder: Fighter in fighters:
@@ -42,7 +42,7 @@ static func step(fighters: Array[Fighter], inputs: Array[InputFrame], attacks: A
 			holder.facing = dir.normalized()
 		_place(holder, target, config)
 		if input.grab:
-			events.append(_throw(holder, target, attacks.get_attack(AttackSet.Kind.THROW), config))
+			events.append(_throw(holder, target, book.attacks(holder.id).get_attack(AttackSet.Kind.THROW), config))
 			continue
 		holder.grab_ticks -= 1
 		if holder.grab_ticks <= 0:

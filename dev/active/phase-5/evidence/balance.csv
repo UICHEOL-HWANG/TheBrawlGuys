@@ -1,0 +1,17 @@
+a,b,matches,a_wins,b_wins,draws,a_win_rate,avg_ticks
+barbarian,barbarian,100,49,51,0,0.490,2898.9
+barbarian,rogue,100,42,58,0,0.420,2866.4
+barbarian,knight,100,40,60,0,0.400,3070.9
+barbarian,mage,100,63,37,0,0.630,2656.2
+rogue,barbarian,100,41,59,0,0.410,2872.8
+rogue,rogue,100,52,48,0,0.520,2848.7
+rogue,knight,100,34,66,0,0.340,3048.4
+rogue,mage,100,55,45,0,0.550,2570.1
+knight,barbarian,100,42,58,0,0.420,3293.0
+knight,rogue,100,43,57,0,0.430,3139.7
+knight,knight,100,45,55,0,0.450,3157.9
+knight,mage,100,35,65,0,0.350,2643.8
+mage,barbarian,100,31,69,0,0.310,2647.7
+mage,rogue,100,37,63,0,0.370,2589.7
+mage,knight,100,54,46,0,0.540,2770.1
+mage,mage,100,50,49,1,0.505,2482.5
