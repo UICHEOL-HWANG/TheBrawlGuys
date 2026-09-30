@@ -551,7 +551,7 @@
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
 | DS-VFX-07~09 | 가드 클랭·피격 플래시·대미지 숫자 | PRD-FX-02, PRD-RULE-05 | 5 | ✅ (2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
-| DS-VFX-10~13 | 방어 연출 (회피 잔상·내구도 버블·브레이크 별·저스트 가드 링) | PRD-CMB-03 | combat-depth A | ✅ (2026-09-30, 증거 스크린샷 미촬영) |
+| DS-VFX-10~13 | 방어 연출 (회피 잔상·내구도 버블·브레이크 별·저스트 가드 링) | PRD-CMB-03 | combat-depth A | ✅ (2026-09-30, 증거 `dev/active/combat-depth/evidence/defense-sheet.png`) |
 | DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
