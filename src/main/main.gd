@@ -29,6 +29,9 @@ var _feel: FeelDirector
 var _sfx: SfxDirector
 var _music: MusicDirector
 var _result_shown: bool = false
+## Platform A6: reads sim/view events only, never writes to the sim.
+var _telemetry: MatchTelemetry = null
+var _recorder: MatchRecorder
 ## Render interpolation contract: views lerp prev -> curr by _alpha.
 var _prev_state: Dictionary = {}
 var _curr_state: Dictionary = {}
@@ -103,6 +106,7 @@ func _ready() -> void:
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
+	_recorder = MatchRecorder.create_default()
 	_start_match()
 
 
@@ -131,7 +135,12 @@ func get_item_layer() -> ItemLayer:
 	return _item_layer
 
 
+func get_telemetry() -> MatchTelemetry:
+	return _telemetry
+
+
 func _start_match() -> void:
+	_close_telemetry()
 	_local_input.reset()
 	_feel.reset()
 	_item_layer.clear()
@@ -145,6 +154,24 @@ func _start_match() -> void:
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 	_music.play_battle()
+	_telemetry = MatchTelemetry.new(Analytics.track)
+	_telemetry.begin(TelemetrySetup.for_local_match(_player_count(), LOCAL_PLAYER, SEED))
+
+
+## Restart: an unfinished match is abandoned; after the result it is a rematch.
+func _close_telemetry() -> void:
+	if _telemetry == null:
+		return
+	if _telemetry.is_active():
+		_telemetry.end(_curr_state, true)
+	elif _result_shown:
+		Analytics.track("rematch_clicked", {"match_id": _telemetry.match_id()})
+
+
+func _finish_telemetry() -> void:
+	_telemetry.end(_curr_state)
+	Analytics.flush()
+	_recorder.record(_telemetry)
 
 
 func _gather_inputs() -> Array[InputFrame]:
@@ -165,8 +192,10 @@ func _process(delta: float) -> void:
 		_world.tick(_gather_inputs())
 		_sim_us = lerpf(_sim_us, float(Time.get_ticks_usec() - started), SIM_COST_SMOOTHING)
 		_curr_state = _world.state_view()
+		var tick_view_events := ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config)
 		events.append_array(_curr_state["events"])
-		view_events.append_array(ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config))
+		view_events.append_array(tick_view_events)
+		_telemetry.on_frame(_curr_state["events"], tick_view_events, _curr_state)
 	_alpha = _ticker.alpha()
 	_draw_fighters(delta)
 	_item_layer.sync(_prev_state["items"], _curr_state["items"], _alpha, int(_curr_state["tick"]))
@@ -183,6 +212,7 @@ func _process(delta: float) -> void:
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
 		_hud.show_result(int(_curr_state["winner"]), LOCAL_PLAYER)
+		_finish_telemetry()
 	_update_info(delta, ticks)
 
 

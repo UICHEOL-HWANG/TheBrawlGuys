@@ -7,6 +7,10 @@ config/name="TheBrawlGuys"
 config/features=PackedStringArray("4.7", "Mobile")
 run/main_scene="res://src/main/main.tscn"
 
+[autoload]
+
+Analytics="*res://src/platform/analytics/analytics.gd"
+
 [debug]
 
 gdscript/warnings/untyped_declaration=2
