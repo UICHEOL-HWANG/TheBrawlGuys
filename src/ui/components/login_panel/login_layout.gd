@@ -1,13 +1,14 @@
 class_name LoginLayout
 extends RefCounted
 ## LoginPanel layout (design.md DS-CMP-14, decided 2026-09-30 after the calm-forest reference):
-## one frosted GlassCard centered on screen holding, top to bottom, the leaf emblem, the big
+## one frosted GlassCard centered on screen holding, top to bottom, the CrestLogo, the big
 ## white title, a letter-spaced tagline, the white Google pill, the status message, a helper
 ## line, the language link and (debug only) a skip link. Returns
 ## {root, card, parts: {name: Control}, items: stagger order, focus}; focus is the screen point
 ## (NDC, x right / y up) left free for the backdrop fight, beside the card.
 
 const FOCUS := Vector2(0.58, -0.3)
+const CREST_SCENE := preload("res://src/ui/components/crest_logo/crest_logo.tscn")
 const TITLE_SHADOW_OFFSET := Vector2(0, 3)
 const CAPTION_SHADOW_OFFSET := Vector2(0, 1)
 
@@ -43,7 +44,7 @@ static func _parts() -> Dictionary:
 	language.add_child(language_link)
 	var gap := Control.new()
 	gap.custom_minimum_size.y = DS.S3
-	var emblem := LoginIcon.new(LoginIcon.Icon.LEAF, DS.S8)
+	var emblem := CREST_SCENE.instantiate() as CrestLogo
 	emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	return {
 		"emblem": emblem, "title": title_label(LoginText.TITLE), "tagline": _caption(true),

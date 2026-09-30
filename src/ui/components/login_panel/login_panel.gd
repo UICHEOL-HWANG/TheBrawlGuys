@@ -2,7 +2,7 @@ class_name LoginPanel
 extends Control
 ## First-screen Google sign-in (design.md DS-CMP-14, decided 2026-09-30; reference
 ## docs/references/ref-login-calmforest.webp): a frosted glass card centered over the hazy menu
-## diorama with the leaf emblem, title, tagline, "Google로 시작하기", a helper line, the language
+## diorama with the crest (DS-CMP-15), title, tagline, "Google로 시작하기", a helper line, the language
 ## link and a debug-only skip link. States idle · loading (waiting for the browser) · error
 ## (one-line cause + retry) live inside the card. Shows only what it is given.
 
@@ -34,6 +34,7 @@ func _ready() -> void:
 	skip_button().pressed.connect(func() -> void: skip_pressed.emit())
 	(_parts["language_link"] as LinkButton).pressed.connect(toggle_language)
 	skip_button().visible = false
+	crest().set_state(CrestLogo.State.ANIMATED)
 	_apply_texts()
 
 
@@ -109,6 +110,10 @@ func logo() -> Label:
 
 func card() -> Control:
 	return _layout["card"] as Control
+
+
+func crest() -> CrestLogo:
+	return _parts["emblem"] as CrestLogo
 
 
 func set_preview() -> void:

@@ -70,6 +70,14 @@ static func release(node: Control) -> Tween:
 	return tw
 
 
+## Endless low <-> high loop of one property on a token (idle flickers, e.g. the crest spark).
+static func pulse(node: Node, property: String, low: Variant, high: Variant, token: int) -> Tween:
+	var tw := node.create_tween().set_loops()
+	step(tw, node, property, high, token)
+	step(tw, node, property, low, token)
+	return tw
+
+
 ## An empty parallel tween for choreographies built from step() (login entrances).
 static func parallel(node: Node) -> Tween:
 	return node.create_tween().set_parallel(true)
