@@ -4,9 +4,9 @@ extends RefCounted
 ## Game code reads actions, never raw keys, so rebinding only edits InputMap.
 
 const P1 := {
-	"p1_left": [KEY_A], "p1_right": [KEY_D], "p1_up": [KEY_W], "p1_down": [KEY_S],
-	"p1_jump": [KEY_SPACE], "p1_light": [KEY_J], "p1_heavy": [KEY_K],
-	"p1_guard": [KEY_L], "p1_grab": [KEY_U],
+	"p1_left": [KEY_LEFT], "p1_right": [KEY_RIGHT], "p1_up": [KEY_UP], "p1_down": [KEY_DOWN],
+	"p1_jump": [KEY_SPACE], "p1_light": [KEY_Z], "p1_heavy": [KEY_X],
+	"p1_guard": [KEY_C], "p1_grab": [KEY_V],
 }
 
 
