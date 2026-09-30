@@ -385,7 +385,7 @@
 | GD-FEEL-02 | 화면 흔들림 | 진폭 = min(k × `shake_per_knockback`, `shake_max`), 지수 감쇠. hitstop이 끝날 때 시작 | `shake_per_knockback`, `shake_max`, `shake_decay` |
 | GD-FEEL-03 | 무적 깜빡임 | 리스폰 무적 동안 반투명 펄스 10Hz, 마지막 0.5초는 20Hz | `blink_hz`, `blink_hz_end` |
 | GD-FEEL-04 | 넉백 궤적 강도 | DS-VFX-04 강도 = 속도 / `trail_speed_full` | `trail_speed_threshold`, `trail_speed_full` |
-| GD-CAM-01 | 카메라 | 레퍼런스 A의 높은 부감(피치 약 60°), 경기장 전체와 모든 생존 전투원을 여백과 함께 프레이밍(링아웃 가장자리가 항상 보이고, 전투원이 그 밖으로 날아가면 시야가 넓어진다), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외 | `cam_pitch`, `cam_margin`, `cam_zoom_min/max`, `cam_smooth` |
+| GD-CAM-01 | 카메라 | 레퍼런스 A의 높은 부감(피치 약 60°), 경기장 중심부(반지름 × `cam_arena_share`, 기본 60%)와 모든 생존 전투원을 여백과 함께 프레이밍(전투원이 가장자리로 가거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 사용자 요청으로 경기장 전체 → 60%로 확대), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth` |
 | GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생) | — |
 
 ---

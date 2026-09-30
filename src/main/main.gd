@@ -224,8 +224,7 @@ func _update_local_hints() -> void:
 
 
 func _camera_targets() -> PackedVector3Array:
-	var r := _config.arena_radius
-	var pts := PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
+	var pts := CameraFraming.arena_anchors(_config.arena_radius, _config.cam_arena_share)
 	for f: Dictionary in _curr_state["fighters"]:
 		if int(f["state"]) != Fighter.State.KO:
 			pts.append(f["pos"])

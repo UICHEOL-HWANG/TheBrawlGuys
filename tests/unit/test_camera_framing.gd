@@ -95,3 +95,22 @@ func test_tilted_camera_frames_near_extent_exactly() -> void:
 	var b := _ndc(Vector3(0, 0, -4), f, 60.0, 1.0, 45.0)
 	assert_almost_eq(maxf(absf(a.y), absf(b.y)), 1.0, 0.001)
 	assert_almost_eq(a.y, -b.y, 0.001)
+
+
+func test_arena_anchors_scale_with_share() -> void:
+	var pts := CameraFraming.arena_anchors(10.0, 0.6)
+	assert_eq(pts.size(), 4)
+	for q: Vector3 in pts:
+		assert_almost_eq(q.length(), 6.0, 0.0001, "anchor %s" % q)
+		assert_eq(q.y, 0.0)
+
+
+func test_smaller_arena_share_zooms_in() -> void:
+	var c := GameConfig.new()
+	var fighters := PackedVector3Array([Vector3(-2, 0, 0), Vector3(2, 0, 0)])
+	var whole := CameraFraming.arena_anchors(10.0, 1.0)
+	var part := CameraFraming.arena_anchors(10.0, c.cam_arena_share)
+	whole.append_array(fighters)
+	part.append_array(fighters)
+	assert_lt(c.cam_arena_share, 1.0, "default frames only part of the arena")
+	assert_lt(float(_default_frame(part)["distance"]), float(_default_frame(whole)["distance"]))

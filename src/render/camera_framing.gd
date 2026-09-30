@@ -18,6 +18,12 @@ const SEARCH_ITERATIONS := 48
 const REBALANCE_PASSES := 4
 
 
+## Four ground anchors on a circle of radius * share: the part of the arena always kept in frame.
+static func arena_anchors(radius: float, share: float) -> PackedVector3Array:
+	var r := radius * share
+	return PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
+
+
 ## Returns {"center": Vector3, "distance": float}. Defaults (aspect 1, pitch 90) are top-down.
 static func compute(targets: PackedVector3Array, margin: float, zoom_min: float, zoom_max: float,
 		fov_deg: float, aspect: float = 1.0, pitch_deg: float = 90.0) -> Dictionary:
