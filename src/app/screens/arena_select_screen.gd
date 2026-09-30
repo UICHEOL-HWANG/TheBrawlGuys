@@ -58,6 +58,8 @@ func _input(event: InputEvent) -> void:
 	var step := _step(event)
 	if step != 0:
 		move(step)
+	elif _stick.owns(event):
+		pass  # a held or returning stick: consumed so GUI focus navigation cannot repeat it
 	elif _is_press(event, "ui_accept", CONFIRM_KEYS):
 		confirm()
 	elif _is_press(event, "ui_cancel", BACK_KEYS):
@@ -138,6 +140,7 @@ func _on_visibility_changed() -> void:
 		return
 	_done = false
 	_browse = 0
+	_stick = StickNav.new()  # the stick may have been released while the screen was away
 	_shown_ms = int(clock_ms.call())
 	_set_cards_live(true)
 	for i: int in _cards.size():

@@ -11,6 +11,12 @@ var axis: JoyAxis = JOY_AXIS_LEFT_X
 var _latched: int = 0
 
 
+## True for motion on this axis (the caller consumes it even when it does not step).
+func owns(event: InputEvent) -> bool:
+	var motion := event as InputEventJoypadMotion
+	return motion != null and motion.axis == axis
+
+
 ## -1 / +1 when this motion event starts a push along the axis, else 0.
 func step(event: InputEventJoypadMotion) -> int:
 	if event.axis != axis:

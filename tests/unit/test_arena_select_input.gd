@@ -60,6 +60,26 @@ func test_holding_the_stick_steps_once_per_push() -> void:
 	assert_eq(_tracked[0][1]["browse_count"], 3)
 
 
+func test_a_held_stick_does_not_leak_into_gui_focus_navigation() -> void:
+	var s := _screen()
+	await wait_process_frames(2)
+	for v: float in [0.6, 0.8, 1.0, 0.9, 0.7, 0.8]:
+		s.get_viewport().push_input(_stick(v))
+	assert_eq(s.focus_index(), 1, "one step through the whole input pipeline")
+	assert_true(s.cards()[1].has_focus(), "the GUI focus did not run on")
+
+
+func test_a_stick_held_through_a_pick_is_re_armed_on_return() -> void:
+	var s := _screen()
+	await wait_process_frames(1)
+	s._input(_stick(1.0))
+	s.confirm()
+	s.visible = false
+	s.visible = true
+	s._input(_stick(1.0))
+	assert_eq(s.focus_index(), 2, "the first push after coming back steps")
+
+
 func test_stick_nav_latch() -> void:
 	var nav := StickNav.new()
 	assert_eq(nav.step(_stick(0.8)), 1)
