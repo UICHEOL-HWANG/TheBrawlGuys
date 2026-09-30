@@ -4,15 +4,17 @@ extends GutTest
 ## fighter character / gauge, v = 5, no config fingerprint) must still equal the last Phase 4
 ## BEHAVIOR_HASH. So adding styles and specials moved no classic fighter by a single bit.
 ## Combat-depth A deliberately changed every fighter (rolls, guard meter, perfect guard), so the
-## constant was re-recorded then (Phase 4 value 11665018) with the v7 defense fields stripped too.
+## constant was re-recorded then (Phase 4 value 11665018) with the v7 defense fields stripped too,
+## and again for the defense review's buffered rolls (previous value 2661913497).
 
 const R := preload("res://tests/replay/test_replay.gd")
 const DEFENSE_FIELDS: Array[String] = [
-	"guard_prev", "guard_press_age", "guard_hp", "guard_idle_ticks", "guard_break_left", "perfect_by",
+	"guard_prev", "guard_press_age", "guard_rest_ticks", "guard_hp", "guard_idle_ticks", "guard_break_left",
+	"perfect_by",
 	"dodge_kind", "dodge_ticks", "dodge_total", "dodge_dir", "intangible", "air_dodge_used",
 	"roll_streak", "roll_recent",
 ]
-const PHASE_4_BEHAVIOR_HASH := 2661913497
+const PHASE_4_BEHAVIOR_HASH := 3799200070
 const PHASE_4_SNAPSHOT_VERSION := 5
 
 

@@ -2,7 +2,8 @@ class_name SpecialRunner
 extends RefCounted
 ## Runs specials inside World.tick (PRD §6.2.1). A fighter whose character has a special, whose
 ## gauge is full and who holds heavy and guard on the same tick (X+C) starts it once from IDLE,
-## MOVE, AIR, GUARD or CHARGE: the gauge empties, it turns SPECIAL (attack_kind SPECIAL,
+## MOVE, AIR, GUARD or CHARGE, or cancelling a dodge at most special_cancel_window ticks old (the
+## chord's guard landed a tick before its heavy and started a roll): the gauge empties, it turns SPECIAL (attack_kind SPECIAL,
 ## attack_ticks from 0) and is invulnerable for special_invuln_ticks. It faces the move input
 ## when there is one (aim the rush or the fireball). Getting hit ends it.
 ## Events: special_start {fighter, character, special, pos}; hits come from SpecialHits.
@@ -19,7 +20,7 @@ static func try_start(fighters: Array[Fighter], frame: Array[InputFrame], book: 
 	for f: Fighter in fighters:
 		var input := frame[f.id]
 		var kit := book.kit(f.id)
-		if not can_start(f, input, kit.special):
+		if not can_start(f, input, kit.special, config):
 			continue
 		var aim := Vector3(input.move_x, 0.0, input.move_z)
 		if aim.length_squared() > 0.0:
@@ -32,17 +33,23 @@ static func try_start(fighters: Array[Fighter], frame: Array[InputFrame], book: 
 	return events
 
 
-static func can_start(f: Fighter, input: InputFrame, special: String) -> bool:
+static func can_start(f: Fighter, input: InputFrame, special: String, config: GameConfig) -> bool:
 	return not special.is_empty() and f.gauge >= SpecialGauge.MAX and input.heavy and input.guard \
-			and f.hitstop_ticks <= 0 and f.is_alive() and STARTABLE.has(f.state)
+			and f.hitstop_ticks <= 0 and f.is_alive() and (STARTABLE.has(f.state) or _fresh_dodge(f, config))
 
 
 static func start(f: Fighter, config: GameConfig) -> void:
+	if f.state == Fighter.State.DODGE:
+		Dodge.cancel(f)
 	Actions.start_attack(f, AttackSet.Kind.SPECIAL)
 	f.set_state(Fighter.State.SPECIAL)
 	f.charge_ticks = 0
 	f.gauge = 0.0
 	f.invuln_ticks = maxi(f.invuln_ticks, config.special_invuln_ticks)
+
+
+static func _fresh_dodge(f: Fighter, config: GameConfig) -> bool:
+	return f.state == Fighter.State.DODGE and f.dodge_ticks <= config.special_cancel_window
 
 
 ## Motion's step for a fighter in SPECIAL: advance the clock, move, end after the recovery.

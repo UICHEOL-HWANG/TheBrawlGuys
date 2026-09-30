@@ -135,3 +135,36 @@ func test_a_late_guard_is_not_perfect() -> void:
 	var events := _swing(w)
 	assert_true(_of(events, "perfect_guard").is_empty())
 	assert_gt(w.fighters[1].damage, 0.0)
+
+
+## P2 held guard, lets go for `rest` ticks (P1 starts its swing on the first), then presses again
+## just before the hit lands; returns the swing's events.
+func _repress(rest: int) -> Array[Dictionary]:
+	var w := _world(20)
+	var events: Array[Dictionary] = []
+	w.tick(_inputs(_light()))
+	for i: int in rest - 1:
+		w.tick(_inputs(InputFrame.neutral()))
+	for i: int in w.config.light_startup_ticks + 1:
+		w.tick(_inputs(InputFrame.neutral(), _guard()))
+		events.append_array(w.state_view()["events"])
+	return events
+
+
+func test_mashing_guard_does_not_keep_perfect_guard() -> void:
+	assert_true(_of(_repress(1), "perfect_guard").is_empty(), "released for one tick: no perfect guard")
+
+
+func test_a_clean_repress_after_the_rearm_time_is_perfect() -> void:
+	var rearm: int = GameConfig.new().perfect_guard_rearm_ticks
+	var w := _world(20)
+	for i: int in rearm:
+		w.tick(_inputs(InputFrame.neutral()))
+	w.tick(_inputs(_light()))
+	for i: int in w.config.light_startup_ticks - 1:
+		w.tick(_inputs(InputFrame.neutral()))
+	var events: Array[Dictionary] = []
+	for i: int in 3:
+		w.tick(_inputs(InputFrame.neutral(), _guard()))
+		events.append_array(w.state_view()["events"])
+	assert_eq(_of(events, "perfect_guard").size(), 1)

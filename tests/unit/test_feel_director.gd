@@ -83,3 +83,18 @@ func test_bursts_are_capped_by_the_pool() -> void:
 		many.append(_hit(2.0, 3.0))
 	feel.on_events(many, _fighters(3.0))
 	assert_eq(feel.active_bursts().size(), ImpactTier.pool_cap(Quality.particle_scale(c)))
+
+
+func test_perfect_guard_replaces_the_clang_with_a_bigger_star_flash() -> void:
+	var feel := FeelDirector.new()
+	add_child_autofree(feel)
+	feel.setup(GameConfig.new(), null)
+	feel.on_events([
+		{"type": "guard_hit", "attacker": 0, "target": 1, "pos": Vector3(0, 1, 0), "knockback": 0.0, "hitstop_ticks": 4, "power": 1.0},
+		{"type": "perfect_guard", "fighter": 1, "attacker": 0, "pos": Vector3.ZERO},
+	])
+	var bursts := feel.active_bursts()
+	assert_eq(bursts.size(), 1, "one effect: no clang under the flash")
+	assert_true(bursts[0].star_visible(), "a star flash, unlike the clang")
+	assert_gt(bursts[0].radius(), ImpactBurst.CLANG_RADIUS)
+	assert_gt(ImpactBurst.PERFECT_FADE, ImpactBurst.CLANG_FADE, "lingers longer than a clang")

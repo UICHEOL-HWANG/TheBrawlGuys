@@ -3,7 +3,8 @@ extends GutTest
 ## continues exactly like the uninterrupted run, and the fighter data carries every new field.
 
 const FIELDS: Array[String] = [
-	"guard_prev", "guard_press_age", "guard_hp", "guard_idle_ticks", "guard_break_left", "perfect_by",
+	"guard_prev", "guard_press_age", "guard_rest_ticks", "guard_hp", "guard_idle_ticks", "guard_break_left",
+	"perfect_by",
 	"dodge_kind", "dodge_ticks", "dodge_total", "dodge_dir", "intangible", "air_dodge_used",
 	"roll_streak", "roll_recent",
 ]

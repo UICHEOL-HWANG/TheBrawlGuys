@@ -3,9 +3,10 @@ extends RefCounted
 ## World snapshot bytes (PRD-ARCH-04), split out of World. The config fingerprint is part of
 ## every snapshot (context D1). v3 added the Phase 2 fighter fields, v4 the item field, v5 the
 ## arena state and burn fields (Phase 4), v6 the fighter character and special gauge and the
-## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A).
+## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A), v8
+## guard_rest_ticks (perfect-guard rearm).
 
-const VERSION := 7
+const VERSION := 8
 const TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,

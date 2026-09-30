@@ -4,7 +4,9 @@ extends Node3D
 ## spiky star facing the camera (dark ink rim, the attacker's player color, a hot core), a shock
 ## ring whose plane faces the hit direction, and on heavy hits radial speed lines. It pops in at
 ## once, holds through hitstop, then shrinks and fades. play_clang() is the guard version
-## (DS-VFX-07): small flat blue needles and ring, no star. Pooled: FeelDirector reuses nodes.
+## (DS-VFX-07): small flat blue needles and ring, no star. play_perfect() replaces the clang on a
+## perfect guard (DS-VFX-13): a bigger, longer white star with an ink rim, white needles and
+## ring. Pooled: FeelDirector reuses nodes.
 
 const STAR_INNER := 0.42
 const CORE_INNER := 0.5
@@ -23,6 +25,10 @@ const CLANG_RADIUS := 0.9
 const CLANG_NEEDLES := 8
 const CLANG_NEEDLE_WIDTH := 0.09
 const CLANG_FADE := 0.14
+const PERFECT_POINTS := 8
+const PERFECT_RADIUS := 1.3
+const PERFECT_NEEDLES := 12
+const PERFECT_FADE := 0.26
 
 var _face: Node3D
 var _ink: MeshInstance3D
@@ -37,6 +43,9 @@ var _radius: float = 1.0
 var _roll: float = 0.0
 var _dir: Vector3 = Vector3.RIGHT
 var _active: bool = false
+## Layers that fade together / the star layers (members: advance() runs every frame).
+var _fading: Array[MeshInstance3D] = []
+var _star_layers: Array[MeshInstance3D] = []
 
 
 func _init() -> void:
@@ -48,6 +57,8 @@ func _init() -> void:
 	_core = _layer(_face, 2)
 	_ring = _layer(self, 1)
 	_ring.mesh = StarShape.ring_mesh()
+	_fading.assign([_ink, _color, _core, _needles])
+	_star_layers.assign([_ink, _color, _core])
 	visible = false
 
 
@@ -75,6 +86,25 @@ func play_clang(at: Vector3, dir: Vector3, hold: float, roll: float) -> void:
 	_tint(_needles, DS.PETAL_BLUE)
 	_tint(_ring, DS.CLANG)
 	_start(at, dir, CLANG_RADIUS, hold, CLANG_FADE, roll, false)
+
+
+## A perfect guard: a big white star flash with an ink rim in place of the clang.
+func play_perfect(at: Vector3, dir: Vector3, hold: float, roll: float) -> void:
+	_ink.mesh = StarShape.star_mesh(PERFECT_POINTS, STAR_INNER)
+	_color.mesh = _ink.mesh
+	_core.mesh = StarShape.star_mesh(PERFECT_POINTS, CORE_INNER)
+	_tint(_ink, DS.CANOPY_DEEP)
+	_tint(_color, DS.WHITE)
+	_tint(_core, DS.CLANG)
+	_needles.mesh = StarShape.needle_mesh(PERFECT_NEEDLES)
+	_needles.visible = true
+	_tint(_needles, DS.WHITE)
+	_tint(_ring, DS.WHITE)
+	_start(at, dir, PERFECT_RADIUS, hold, PERFECT_FADE, roll, true)
+
+
+func radius() -> float:
+	return _radius
 
 
 func stop() -> void:
@@ -113,7 +143,7 @@ func advance(delta: float) -> void:
 	_needles.scale = Vector3.ONE * _radius * lerpf(NEEDLE_FROM, NEEDLE_TO, t)
 	_ring.basis = Basis.looking_at(_dir, Vector3.UP).scaled(Vector3.ONE * _radius * lerpf(RING_FROM, RING_TO, t))
 	var alpha := 1.0 - fade
-	for mi: MeshInstance3D in [_ink, _color, _core, _needles]:
+	for mi: MeshInstance3D in _fading:
 		_set_alpha(mi, alpha)
 	_set_alpha(_ring, (1.0 - t) * 0.9)
 
@@ -126,7 +156,7 @@ func _start(at: Vector3, dir: Vector3, radius: float, hold: float, fade: float, 
 	_fade = fade
 	_roll = roll
 	_age = 0.0
-	for mi: MeshInstance3D in [_ink, _color, _core]:
+	for mi: MeshInstance3D in _star_layers:
 		mi.visible = star
 	_active = true
 	visible = true

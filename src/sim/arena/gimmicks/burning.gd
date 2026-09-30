@@ -6,9 +6,9 @@ extends RefCounted
 ## each tick so a fresh ignition waits a full interval for its next damage.
 
 
-## Sets fighter f burning; returns the gimmick_damage event of a fresh ignition, or {}.
+## Sets fighter f burning (not while untouchable: respawn, special or a dodge window); returns the gimmick_damage event of a fresh ignition, or {}.
 static func ignite(f: Fighter, config: GameConfig) -> Dictionary:
-	if not f.is_alive() or f.invuln_ticks > 0:
+	if not f.is_alive() or f.untouchable():
 		return {}
 	var fresh := f.burn_ticks <= 0
 	f.burn_ticks = maxi(SimTime.to_ticks(config.burn_duration), 1)

@@ -455,10 +455,10 @@
 | DS-VFX-07 | 가드 클랭 | 가드 피격 | 별 없이 작은 평면 `petal_blue` 바늘 8개 + `clang` 링 (가드 버블 출렁임과 함께) | 5 |
 | DS-VFX-08 | 피격 플래시·반동 | 타격 성공 | 피격자 모델 `hit_flash` 흰색 덮개(hitstop 동안 유지 후 0.1초 페이드) + 타격 방향으로 밀렸다 떨리며 복귀 + 단계별 스쿼시. 근접 공격자는 hitstop 동안 앞으로 살짝 내딛은 자세. 렌더 전용(sim 위치 불변) | 5 |
 | DS-VFX-09 | 대미지 숫자 | 타격 성공 (가드 제외) | 피격자 머리 위 "+12%" (`display_l` × 단계 배율, `canopy_deep` 외곽선), 색 = 피격 후 누적 % 의 DamageCounter 램프 색. 튀어나와 떠오르며 0.75초에 사라짐. `damage_popups` = 0 이면 끔 | 5 |
-| DS-VFX-10 | 회피 잔상 | 구르기·공중 회피 무적 구간 (`is_dodging`) | 캐릭터 반투명 + 플레이어 색 캡슐 잔상이 `MOTION_BASE` 동안 사라짐 (`DefenseFx`) | combat-depth A |
+| DS-VFX-10 | 회피 잔상 | 구르기·공중 회피 무적 구간 (`is_dodging`) | 캐릭터 반투명 + 플레이어 색 캡슐 잔상이 `MOTION_BASE` 동안 사라짐 (`DodgeGhosts`, 메시 1개 공유·풀링) | combat-depth A |
 | DS-VFX-11 | 가드 내구도 버블 | 가드 중 | 버블 반지름 = 내구도 비율(최소 45%), 30% 미만이면 `GUARD_BUBBLE_LOW`와 번갈아 깜빡임 | combat-depth A |
-| DS-VFX-12 | 가드 브레이크 | `guard_break` (내구도 0) | 머리 위로 `petal_yellow` 별 3개가 도는 기절 표시, 기절 동안 유지 | combat-depth A |
-| DS-VFX-13 | 저스트 가드 | `perfect_guard` | `glow` 링이 몸통에서 퍼지며 `MOTION_SLOW` 동안 사라짐 | combat-depth A |
+| DS-VFX-12 | 가드 브레이크 | `guard_break` (내구도 0) | 머리 위 높이 `petal_yellow` 평면 별 3개(`canopy_deep` 잉크 외곽선, 카메라를 향함)가 도는 기절 표시, 기절 동안 유지 (`DizzyStars`) | combat-depth A |
+| DS-VFX-13 | 저스트 가드 | `perfect_guard` | 가드 클랭 대신 흰 별 플래시(`canopy_deep` 잉크 외곽선, 클랭보다 크고 길게) + 몸통에서 흰 링(잉크 테두리)이 퍼지며 `MOTION_SLOW` 동안 사라짐 (`PerfectRing`) | combat-depth A |
 
 | ID | 사운드 세트 | 내용 |
 |---|---|---|

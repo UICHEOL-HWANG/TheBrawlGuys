@@ -7,15 +7,16 @@ extends GutTest
 const SEED := 7
 const TICKS := 1200
 const HALF := 600
-const GOLDEN_HASH := 1710413323
+const GOLDEN_HASH := 412175140
 ## Sim behavior without the config fingerprint (context F1). Changes only with deliberate sim
 ## changes, each explained in its commit message (Phase 4: snapshot v5 arena/burn fields, then
 ## the carried-over combat fixes; Phase 5: snapshot v6 adds fighter character/gauge and the
 ## projectile field — test_classic_compat proves the classic behaviour itself is unchanged;
 ## combat-depth A: P1's guard presses with a move input now roll, guards drain the guard meter and
-## early guards are perfect guards, snapshot v7 adds the defense fields).
+## early guards are perfect guards, snapshot v7 adds the defense fields; defense review: guard
+## presses made during hitstun/hitstop are buffered into rolls, snapshot v8).
 ## Presentation work must never move it.
-const BEHAVIOR_HASH := 2849175016
+const BEHAVIOR_HASH := 855875985
 
 
 ## P0 walks back and forth with jumps, light presses, a held heavy every 4 s and grab presses;
