@@ -162,6 +162,16 @@ func wobble() -> void:
 	tw.tween_property(_bubble, "scale", Vector3.ONE, DS.MOTION_SQUISH).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 
+## Foot ring and P-label (DS-VIS-03). The menu backdrop hides them: no player identity in menus.
+func set_identity_visible(on: bool) -> void:
+	_ring.visible = on
+	_label.visible = on
+
+
+func identity_visible() -> bool:
+	return _label.visible
+
+
 func set_blob_shadow(on: bool) -> void:
 	_blob_wanted = on
 	_blob.visible = on

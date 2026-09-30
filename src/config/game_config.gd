@@ -187,9 +187,16 @@ extends Resource
 @export_range(10.0, 150.0, 0.5) var cam_zoom_max: float = 70.0
 @export_range(0.0, 20.0, 0.1) var cam_smooth: float = 6.0
 @export_range(10.0, 70.0, 0.5) var cam_fov: float = 40.0
-## Menu backdrop orbit (design.md DS-LAY-03): yaw speed and the arena share kept in frame.
+## Menu backdrop orbit (design.md DS-LAY-03): yaw speed, a lower pitch than the match camera so
+## the fighters read, the arena core kept in frame, the zoom floor of that close framing, and how
+## fast the orbit pivot drifts after the fight (per second, slower than cam_smooth).
 @export_range(0.0, 30.0, 0.5) var menu_orbit_deg_per_s: float = 6.0
-@export_range(0.5, 1.5, 0.05) var menu_orbit_arena_share: float = 1.0
+@export_range(10.0, 60.0, 0.5) var menu_orbit_pitch: float = 24.0
+@export_range(0.2, 1.5, 0.05) var menu_orbit_arena_share: float = 0.5
+@export_range(4.0, 40.0, 0.5) var menu_orbit_zoom_min: float = 8.0
+@export_range(0.0, 10.0, 0.1) var menu_orbit_follow: float = 1.2
+## Menu depth fog (design.md DS-LAY-03 haze): exponential density.
+@export_range(0.0, 0.2, 0.002) var menu_fog_density: float = 0.03
 
 @export_group("Touch")
 @export_range(0.05, 0.5, 0.01) var touch_hold_threshold: float = 0.15

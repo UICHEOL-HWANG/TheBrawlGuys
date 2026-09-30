@@ -9,7 +9,7 @@ signal skipped
 
 const PANEL_SCENE := preload("res://src/ui/components/login_panel/login_panel.tscn")
 
-var variant: int = LoginPanel.Variant.CARD
+var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 var _gate: LoginGate
 var _restoring: bool = false
 var _panel: LoginPanel
@@ -25,10 +25,11 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel = PANEL_SCENE.instantiate() as LoginPanel
-	_panel.variant = variant as LoginPanel.Variant
 	add_child(_panel)
 	_panel.google_pressed.connect(_on_google)
 	_panel.skip_pressed.connect(_on_skip)
+	_panel.language_changed.connect(func(old: String, new: String) -> void:
+		track.call("settings_changed", {"key": "language", "old": old, "new": new}))
 	_gate.failed.connect(_on_failed)
 	show_idle("")
 	if _restoring:
@@ -50,6 +51,10 @@ func show_idle(note: String) -> void:
 
 func panel() -> LoginPanel:
 	return _panel
+
+
+func backdrop_focus() -> Vector2:
+	return _panel.backdrop_focus()
 
 
 func _on_google() -> void:

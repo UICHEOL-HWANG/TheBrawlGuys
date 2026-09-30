@@ -2,9 +2,9 @@ class_name UiMotion
 extends RefCounted
 ## Motion tokens (design.md DS-TOK-05) as ready-made tweens, so every UI transition uses the
 ## same timings: fast = press, base = panels, squish = pops and banners, slow = screens,
-## spring / drop = big menu entrances (login panel).
+## calm = unhurried menu entrances (haze clearing, login card).
 
-enum Token { FAST, BASE, SQUISH, SLOW, SPRING, DROP }
+enum Token { FAST, BASE, SQUISH, SLOW, CALM }
 
 const FADE_META := &"ui_motion_fade"
 
@@ -17,10 +17,8 @@ static func spec(token: int) -> Dictionary:
 			return {"duration": DS.MOTION_SQUISH, "trans": Tween.TRANS_ELASTIC, "ease": Tween.EASE_OUT}
 		Token.SLOW:
 			return {"duration": DS.MOTION_SLOW, "trans": Tween.TRANS_CUBIC, "ease": Tween.EASE_IN_OUT}
-		Token.SPRING:
-			return {"duration": DS.MOTION_ENTRANCE, "trans": Tween.TRANS_BACK, "ease": Tween.EASE_OUT}
-		Token.DROP:
-			return {"duration": DS.MOTION_ENTRANCE, "trans": Tween.TRANS_BOUNCE, "ease": Tween.EASE_OUT}
+		Token.CALM:
+			return {"duration": DS.MOTION_CALM, "trans": Tween.TRANS_SINE, "ease": Tween.EASE_OUT}
 	return {"duration": DS.MOTION_BASE, "trans": Tween.TRANS_QUAD, "ease": Tween.EASE_OUT}
 
 

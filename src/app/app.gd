@@ -13,8 +13,6 @@ const LOGIN := "login"
 const TITLE := "title"
 const MATCH := "match"
 
-## 🖼 DS-CMP-14 candidate shown on the login screen (① until the user picks).
-@export var login_variant: LoginPanel.Variant = LoginPanel.Variant.CARD
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
 var gate: LoginGate = null
@@ -36,6 +34,7 @@ func _ready() -> void:
 	_router.track = track
 	_router.world_parent = self
 	ui.add_child(_router)
+	_router.screen_shown.connect(_on_screen_shown)
 	if gate == null:
 		gate = LoginGate.create_default()
 	add_child(gate)
@@ -45,6 +44,8 @@ func _ready() -> void:
 	_restoring = gate.restore()
 	if _router.depth() == 0:
 		_show_login("no_session", _restoring)
+	if animate:
+		_backdrop.reveal()
 
 
 func _exit_tree() -> void:
@@ -62,7 +63,7 @@ func backdrop() -> MenuBackdrop:
 
 func _show_login(reason: String, restoring: bool = false) -> void:
 	var screen := LoginScreen.new()
-	screen.variant = login_variant
+	screen.track = track
 	screen.setup(gate, restoring)
 	screen.skipped.connect(_show_title)
 	if _router.depth() == 0:
@@ -81,6 +82,13 @@ func _show_title() -> void:
 		_router.push(TITLE, screen)
 	else:
 		_router.replace(TITLE, screen)
+
+
+## Menu screens say where they leave room; the backdrop slides its fight there.
+func _on_screen_shown(_id: String, _from: String) -> void:
+	var screen := _router.current()
+	if screen != null and screen.has_method("backdrop_focus"):
+		_backdrop.set_focus(screen.call("backdrop_focus") as Vector2)
 
 
 func _on_signed_in() -> void:

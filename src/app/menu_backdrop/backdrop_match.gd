@@ -51,6 +51,19 @@ func alpha() -> float:
 	return _ticker.alpha()
 
 
+## Ground centroid of the fighters still in play, kept within max_radius of the arena center.
+func fight_center(max_radius: float) -> Vector3:
+	var sum := Vector3.ZERO
+	var n := 0
+	for f: Dictionary in curr_state["fighters"]:
+		if int(f["state"]) != Fighter.State.KO:
+			var p: Vector3 = f["pos"]
+			sum += Vector3(p.x, 0.0, p.z)
+			n += 1
+	var c := sum / n if n > 0 else Vector3.ZERO
+	return c.limit_length(max_radius)
+
+
 func matches_started() -> int:
 	return _matches
 

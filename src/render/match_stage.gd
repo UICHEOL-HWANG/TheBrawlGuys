@@ -61,6 +61,15 @@ func wobble_guards(events: Array) -> void:
 				_views[id].wobble()
 
 
+func set_identity_visible(on: bool) -> void:
+	for v: FighterView in _views:
+		v.set_identity_visible(on)
+
+
+func views() -> Array[FighterView]:
+	return _views
+
+
 func clear_items() -> void:
 	_items.clear()
 

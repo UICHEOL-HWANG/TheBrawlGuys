@@ -15,7 +15,7 @@ const COMPONENTS: Array[Array] = [
 	["ChargeGauge · DS-CMP-05", "res://src/ui/components/charge_gauge/charge_gauge.tscn"],
 	["MenuButton · DS-CMP-06", "res://src/ui/components/menu_button/menu_button.tscn"],
 	["Panel · DS-CMP-07", "res://src/ui/components/panel/panel.tscn"],
-	["LoginPanel · DS-CMP-14 (🖼 ① card)", "res://src/ui/components/login_panel/login_panel.tscn"],
+	["LoginPanel · DS-CMP-14","res://src/ui/components/login_panel/login_panel.tscn"],
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"

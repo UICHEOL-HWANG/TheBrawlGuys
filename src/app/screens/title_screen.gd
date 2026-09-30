@@ -1,7 +1,7 @@
 class_name TitleScreen
 extends Control
-## Title / mode select (platform B1, design.md DS-LAY-03): the logo over the backdrop and a Panel
-## of MenuButtons — 봇 대전 is live, 로컬 2인 and 온라인 are shown disabled ("준비 중") until
+## Title / mode select (platform B1, design.md DS-LAY-03): the logo on top and, in the lower
+## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 is live, 로컬 2인 and 온라인 are shown disabled ("준비 중") until
 ## Phase 5/6 — plus a small 로그아웃 in the top-right corner.
 
 signal mode_chosen(mode: String)
@@ -13,9 +13,10 @@ const MODES: Array[Array] = [
 	[MatchSetup.MODE_LOCAL_2P, "로컬 2인 · 준비 중", false],
 	[MatchSetup.MODE_ONLINE, "온라인 · 준비 중", false],
 ]
-const LOGO_TEXT := LoginPanel.TITLE_TEXT
+const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
 const PANEL_POP_FROM := 0.9
+const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
 var _buttons: Dictionary = {}
 var _logout: UiMenuButton
@@ -25,20 +26,19 @@ var _panel: UiPanel
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(center)
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", DS.S6)
-	center.add_child(col)
-	var logo := Label.new()
-	logo.text = LOGO_TEXT
-	LoginLayout.style_world_text(logo, DS.SIZE_DISPLAY_XL)
-	col.add_child(logo)
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(col)
+	var logo := LoginLayout.title_label(LOGO_TEXT)
+	logo.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_XL)
+	var fill := Control.new()
+	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel = UiPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	col.add_child(_panel)
+	for c: Control in [_gap(DS.S6), logo, fill, _panel, _gap(DS.S7)]:
+		col.add_child(c)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", DS.S4)
 	_panel.add_child(list)
@@ -55,6 +55,18 @@ func mode_button(mode: String) -> UiMenuButton:
 
 func logout_button() -> UiMenuButton:
 	return _logout
+
+
+## Logo on top, mode panel in the lower third: the backdrop fight plays in between.
+func backdrop_focus() -> Vector2:
+	return BACKDROP_FOCUS
+
+
+func _gap(height: int) -> Control:
+	var gap := Control.new()
+	gap.custom_minimum_size.y = height
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return gap
 
 
 func _mode_button(mode: String, label: String, enabled: bool) -> UiMenuButton:

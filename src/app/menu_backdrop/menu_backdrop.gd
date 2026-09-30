@@ -1,20 +1,20 @@
 class_name MenuBackdrop
 extends Node3D
 ## Orbit diorama behind every menu screen (platform B2, design.md DS-LAY-03): the match's
-## MatchStage (sun, arena, decor, fighters, items) drawn from a BackdropMatch of four bots, an
-## OrbitCamera and the menu BGM. A light cream veil sinks it one step below the UI. No HUD, no
-## hit SFX, no telemetry. Leaving the tree (entering a match) pauses it; re-entering resumes it.
+## MatchStage (sun, arena, decor, fighters, items) drawn from a BackdropMatch of four bots, a low
+## 3/4 OrbitCamera and the menu BGM, softened by sage-gray depth fog and the MenuHaze overlay so
+## it reads as a calm background. No HUD, no player rings or labels, no hit SFX, no telemetry.
+## Leaving the tree (entering a match) pauses it; re-entering resumes it.
 
 const CONFIG_PATH := "res://src/config/default_config.tres"
 const SEED := 11
-## Veil sits above the 3D view and below the app UI layer.
-const VEIL_LAYER := 1
 
 var _config: GameConfig
 var _stage: MatchStage
 var _match: BackdropMatch
 var _camera: OrbitCamera
 var _music: MusicDirector
+var _haze: MenuHaze
 var _menu_music: bool = false
 
 
@@ -28,6 +28,8 @@ func _ready() -> void:
 	_stage = MatchStage.new()
 	add_child(_stage)
 	_stage.setup(_config, SEED, BackdropMatch.PLAYERS)
+	_stage.set_identity_visible(false)
+	_add_fog(_stage.environment_rig().environment())
 	_match = BackdropMatch.new(_config, SEED)
 	_camera = OrbitCamera.new()
 	add_child(_camera)
@@ -35,7 +37,8 @@ func _ready() -> void:
 	_music = MusicDirector.new()
 	add_child(_music)
 	_music.setup(_config)
-	_add_veil()
+	_haze = MenuHaze.new()
+	add_child(_haze)
 	_resume()
 
 
@@ -54,7 +57,13 @@ func _process(delta: float) -> void:
 	var events := _match.advance(delta)
 	_stage.draw(_match.prev_state, _match.curr_state, _match.alpha(), delta)
 	_stage.wobble_guards(events)
+	_camera.follow(_match.fight_center(_config.arena_radius * _config.menu_orbit_arena_share))
 	_camera.advance(delta)
+
+
+## The diorama fades in out of full haze (first screen).
+func reveal() -> Tween:
+	return _haze.reveal()
 
 
 func world() -> World:
@@ -63,6 +72,19 @@ func world() -> World:
 
 func camera() -> OrbitCamera:
 	return _camera
+
+
+func stage() -> MatchStage:
+	return _stage
+
+
+func haze() -> MenuHaze:
+	return _haze
+
+
+## Keeps the fight in the screen area the current menu leaves free (NDC, x right / y up).
+func set_focus(ndc: Vector2, instant: bool = false) -> void:
+	_camera.set_focus(ndc, instant)
 
 
 func is_playing_menu_music() -> bool:
@@ -77,12 +99,9 @@ func _resume() -> void:
 	_menu_music = true
 
 
-func _add_veil() -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = VEIL_LAYER
-	add_child(layer)
-	var veil := ColorRect.new()
-	veil.color = DS.BACKDROP_VEIL
-	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(veil)
+## Depth fog in the haze color: far decor melts into the sky, the close fight stays crisp.
+func _add_fog(env: Environment) -> void:
+	env.fog_enabled = true
+	env.fog_light_color = DS.HAZE
+	env.fog_density = _config.menu_fog_density
+	env.fog_sky_affect = 1.0

@@ -1,128 +1,98 @@
 class_name LoginLayout
 extends RefCounted
-## The three LoginPanel layouts (design.md DS-CMP-14 🖼 candidates). Each takes the shared parts
-## {logo, tagline, google, message, skip} and returns {root, mover, logo, items}: root fills the
-## panel, mover is what the entrance slides (null = none), items are staggered in variant 3.
+## LoginPanel layout (design.md DS-CMP-14, decided 2026-09-30 after the calm-forest reference):
+## one frosted GlassCard centered on screen holding, top to bottom, the leaf emblem, the big
+## white title, a letter-spaced tagline, the white Google pill, the status message, a helper
+## line, the language link and (debug only) a skip link. Returns
+## {root, card, parts: {name: Control}, items: stagger order, focus}; focus is the screen point
+## (NDC, x right / y up) left free for the backdrop fight, beside the card.
 
-## Variant values mirror LoginPanel.Variant (CARD, SIDE, LOGO_DROP).
-const CARD := 0
-const SIDE := 1
-const LOGO_DROP := 2
-const SIDE_HEADING := "시작하기"
-
-
-static func build(variant: int, parts: Dictionary) -> Dictionary:
-	match variant:
-		SIDE:
-			return _side(parts)
-		LOGO_DROP:
-			return _logo_drop(parts)
-	return _card(parts)
+const FOCUS := Vector2(0.58, -0.3)
+const TITLE_SHADOW_OFFSET := Vector2(0, 3)
+const CAPTION_SHADOW_OFFSET := Vector2(0, 1)
 
 
-## ① Centered card: logo, tagline and buttons on one cream panel.
-static func _card(parts: Dictionary) -> Dictionary:
-	var root := _center()
-	var card := UiPanel.new()
-	card.custom_minimum_size.x = DS.PANEL_WIDTH
+static func build() -> Dictionary:
+	var root := CenterContainer.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var card := GlassCard.new()
+	card.custom_minimum_size.x = DS.LOGIN_CARD_WIDTH
 	root.add_child(card)
-	var col := _column()
-	card.add_child(col)
-	_style_dark(parts["logo"], DS.SIZE_DISPLAY_L)
-	_style_caption(parts["tagline"], false)
-	_style_caption(parts["message"], false)
-	_add_all(col, [parts["logo"], parts["tagline"], parts["google"], parts["message"], parts["skip"]])
-	return {"root": root, "mover": card, "logo": parts["logo"], "items": [] as Array[Control]}
-
-
-## ② Left vertical panel with the buttons, big outlined logo on the right.
-static func _side(parts: Dictionary) -> Dictionary:
-	var root := _full(Control.new())
-	var side := UiPanel.new()
-	side.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	side.offset_left = DS.S7
-	side.offset_top = DS.S7
-	side.offset_bottom = -DS.S7
-	side.offset_right = DS.S7 + DS.SIDE_PANEL_WIDTH
-	root.add_child(side)
-	var col := _column()
-	side.add_child(col)
-	var heading := Label.new()
-	heading.text = SIDE_HEADING
-	_style_dark(heading, DS.SIZE_TITLE)
-	_style_caption(parts["tagline"], false)
-	_style_caption(parts["message"], false)
-	_add_all(col, [heading, parts["tagline"], parts["google"], parts["message"], parts["skip"]])
-	var right := CenterContainer.new()
-	right.set_anchors_preset(Control.PRESET_FULL_RECT)
-	right.offset_left = DS.S7 * 2 + DS.SIDE_PANEL_WIDTH
-	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(right)
-	style_world_text(parts["logo"], DS.SIZE_DISPLAY_XL)
-	right.add_child(parts["logo"])
-	return {"root": root, "mover": side, "logo": parts["logo"], "items": [] as Array[Control]}
-
-
-## ③ Big outlined logo alone, buttons in a column under it (they stagger in after the drop).
-static func _logo_drop(parts: Dictionary) -> Dictionary:
-	var root := _center()
-	var col := _column()
-	root.add_child(col)
-	style_world_text(parts["logo"], DS.SIZE_DISPLAY_XL)
-	_style_caption(parts["tagline"], true)
-	_style_caption(parts["message"], true)
-	for key: String in ["google", "skip"]:
-		(parts[key] as Control).size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	for key: String in ["tagline", "message"]:
-		(parts[key] as Control).custom_minimum_size.x = DS.PANEL_WIDTH  # wrapped labels need a width
-	var items: Array[Control] = [parts["tagline"], parts["google"], parts["skip"], parts["message"]]
-	_add_all(col, [parts["logo"], parts["tagline"], parts["google"], parts["skip"], parts["message"]])
-	return {"root": root, "mover": null, "logo": parts["logo"], "items": items}
-
-
-static func _center() -> CenterContainer:
-	return _full(CenterContainer.new()) as CenterContainer
-
-
-static func _full(c: Control) -> Control:
-	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return c
-
-
-static func _column() -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_theme_constant_override("separation", DS.S5)
-	return col
+	col.add_theme_constant_override("separation", DS.S4)
+	card.add_child(col)
+	var parts := _parts()
+	for key: String in ["emblem", "title", "tagline", "gap", "google", "message", "helper", "language", "skip"]:
+		col.add_child(parts[key] as Control)
+	var items: Array[Control] = []
+	for key: String in ["emblem", "title", "tagline", "google", "message", "helper", "language", "skip"]:
+		items.append(parts[key] as Control)
+	return {"root": root, "card": card, "parts": parts, "items": items, "focus": FOCUS}
 
 
-static func _add_all(parent: Control, nodes: Array) -> void:
-	for n: Control in nodes:
-		parent.add_child(n)
+static func _parts() -> Dictionary:
+	var google := GoogleButton.new()
+	google.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var language := HBoxContainer.new()
+	language.alignment = BoxContainer.ALIGNMENT_CENTER
+	language.add_theme_constant_override("separation", DS.S2)
+	language.add_child(LoginIcon.new(LoginIcon.Icon.GLOBE, DS.S5))
+	var language_link := _link()
+	language.add_child(language_link)
+	var gap := Control.new()
+	gap.custom_minimum_size.y = DS.S3
+	var emblem := LoginIcon.new(LoginIcon.Icon.LEAF, DS.S8)
+	emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	return {
+		"emblem": emblem, "title": title_label(LoginText.TITLE), "tagline": _caption(true),
+		"gap": gap, "google": google, "message": _caption(false), "helper": _caption(false),
+		"language": language, "language_link": language_link, "skip": _link(),
+	}
 
 
-static func _style_dark(l: Label, font_size: int) -> void:
+## Big white title with a soft shadow (also used by the title screen).
+static func title_label(text: String) -> Label:
+	var l := Label.new()
+	l.text = text
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", load(DS.FONT_DISPLAY_PATH) as Font)
-	l.add_theme_font_size_override("font_size", font_size)
-	l.add_theme_color_override("font_color", DS.UI_TEXT)
+	l.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_L)
+	_white_with_shadow(l, TITLE_SHADOW_OFFSET, DS.S1)
+	return l
 
 
-## World-overlay text (DS-TOK-02): cream fill, deep-teal outline, readable over the diorama.
-static func style_world_text(l: Label, font_size: int) -> void:
-	_style_dark(l, font_size)
-	l.add_theme_color_override("font_color", DS.UI_SURFACE)
-	l.add_theme_color_override("font_outline_color", DS.CANOPY_DEEP)
-	l.add_theme_constant_override("outline_size", DS.LOGO_OUTLINE)
-
-
-static func _style_caption(l: Label, over_world: bool) -> void:
+static func _caption(spaced: bool) -> Label:
+	var l := Label.new()
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_override("font", load(DS.FONT_CAPTION_PATH) as Font)
+	var font := load(DS.FONT_CAPTION_PATH) as Font
+	if spaced:
+		var wide := FontVariation.new()
+		wide.base_font = font
+		wide.spacing_glyph = DS.TRACKING_WIDE
+		font = wide
+	l.add_theme_font_override("font", font)
 	l.add_theme_font_size_override("font_size", DS.SIZE_CAPTION)
-	l.add_theme_color_override("font_color", DS.UI_SURFACE if over_world else DS.UI_TEXT_SOFT)
-	if over_world:
-		l.add_theme_color_override("font_outline_color", DS.CANOPY_DEEP)
-		l.add_theme_constant_override("outline_size", DS.TEXT_OUTLINE * 2)
+	_white_with_shadow(l, CAPTION_SHADOW_OFFSET, 0)
+	return l
+
+
+static func _link() -> LinkButton:
+	var b := LinkButton.new()
+	b.underline = LinkButton.UNDERLINE_MODE_ALWAYS
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b.add_theme_font_override("font", load(DS.FONT_CAPTION_PATH) as Font)
+	b.add_theme_font_size_override("font_size", DS.SIZE_CAPTION)
+	for state: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		b.add_theme_color_override(state, DS.UI_SURFACE)
+	return b
+
+
+static func _white_with_shadow(l: Label, offset: Vector2, spread: int) -> void:
+	l.add_theme_color_override("font_color", DS.UI_SURFACE)
+	l.add_theme_color_override("font_shadow_color", DS.TEXT_SHADOW)
+	l.add_theme_constant_override("shadow_offset_x", int(offset.x))
+	l.add_theme_constant_override("shadow_offset_y", int(offset.y))
+	l.add_theme_constant_override("shadow_outline_size", spread)
