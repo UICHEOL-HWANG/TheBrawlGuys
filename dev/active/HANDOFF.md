@@ -1,6 +1,6 @@
 # 인수인계 — 다음 세션 시작점
 
-**Last Updated:** 2026-09-30 19:10
+**Last Updated:** 2026-09-30 21:00
 **main:** `0c7a470` 뒤 인수인계 커밋 (Phase 4 render 병합까지). GitHub push는 이 파일 커밋까지 반영.
 **배포:** https://thebrawlguys.cloud (Vercel `cheorish/thebrawlguys`, 네임서버 vercel-dns). 배포된 빌드는 `c88d9a4` 시점(경기장 선택 이전)
 
@@ -9,7 +9,7 @@
 
 ---
 
-## 1. 병합 대기 브랜치 (완료·테스트 통과, main에 아직 안 들어감)
+## 1. 병합 대기 브랜치 — ✅ 2026-09-30 21:00 세 개 모두 main 병합(812 테스트·check-all 통과), 재배포(Ready), push `749b3ec`
 
 | 순서 | 브랜치 | 내용 | 테스트 | 예상 충돌 |
 |---|---|---|---|---|
