@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-10-01 00:00 KST (main 병합: phase5-sim · p5-cutin · p5-local2p)
+**Last Updated:** 2026-10-01 01:30 KST (T8 A 장비 룩 적용, `feat/p5-gear`)
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -49,7 +49,11 @@
 - 키 바: `KeyHintSource.caps(prefix)`, 필살기 키캡(`special`, 동시 입력)이 마지막. 게이지 가득(view `special` ≠ "" 이고 `gauge` ≥ 100)이면 `fire` 링. 로컬 2인은 P1 왼쪽·P2 오른쪽 바 + "P1/P2" 태그, 칩은 P2 바에 하나. 두 바가 안 들어가면 compact(간격·여백만 줄임). 폰 배율 1.6(812×375, 논리 폭 1458)에서 compact로 들어감(`evidence/key-hint-2p-phone.png`)
 - 주의: `main.gd`는 아직 `World.new`에 캐릭터를 넘기지 않아 실제 경기에서는 모두 클래식 파이터(필살기 없음) → 게이지 링은 T9에서 캐릭터를 넘기면 보인다(증거 캡처는 파이터 게이지를 강제로 채움). 리플레이 검증기도 캐릭터를 모르므로 T9에서 함께 처리
 
-## T8 스타일 실루엣 시안 (2026-09-30, `feat/p5-silhouette`) — 🖼 승인 대기
-- 디버그 전용 `src/debug/silhouette/` (`StyleMockup` + A `MockupGear` · B `MockupTrim` · C `MockupStance`/`StyleIcon`). 기본 룩(`CharacterCatalog`·`FighterView`)은 건드리지 않음 (`test_style_mockup` 확인)
-- 캡처 `scripts/capture_silhouette.gd` → `evidence/silhouette-{base,A,B,C}{,-bw,-sil}.png`, 비교 `evidence/silhouette-compare.html`
-- A 장비(장갑·대검·지팡이+구슬, 모자) 실루엣 3/3 · B 악센트 트림 흑백에서 0/3 · C 자세+아이콘 아이콘으로만 3/3. 추천 A (아이템 들 때 장비 숨김 규칙 필요)
+## T8 스타일 룩 — 방향 A(장비) 승인 · 적용 (2026-10-01, `feat/p5-gear`)
+- 시안(`feat/p5-silhouette`): A 장비 실루엣 3/3 · B 악센트 트림 흑백 0/3 · C 자세+아이콘은 아이콘으로만 3/3 → 사용자가 **A 승인**. 비교 `evidence/silhouette-compare.html` · `silhouette-{base,A,B,C}*.png`(기록용으로 남김)
+- 실제 룩: `StyleGear`(`src/render/character/style_gear.gd`) + 표 `StyleGearCatalog` + 메시 `StyleGearParts`. 스타일 → 장비 종류(권투 = 빨간 둥근 장갑·Barbarian이 더 큼, 무기 = KayKit 양손 대검 ×1.15, 원거리 = 지팡이 + `fire` 구슬), 캐릭터 → 모자/투구·장갑 크기. 색은 DS 토큰(`danger`·`ui_surface`·`fire`·`glow`)만
+- 키는 슬롯이 아니라 sim 뷰의 `character`·`style`. **그린 KayKit 모델이 그 캐릭터일 때만** 입힌다(`CharacterModel.character_id()`) → 클래식 파이터·슬롯 모델 불일치는 기본 룩 그대로. T9에서 캐릭터별 모델을 고르면 자동으로 켜짐. `FighterView` 훅은 `_gear = StyleGear.new(_model, _animator)` + `apply()`의 `_gear.follow(curr)` 두 줄(가드 거품은 `GuardBubble`로 빼서 파일은 235 → 232줄)
+- 후속 반영: (a) 아이템을 들면(`item_kind` ≠ NONE) 손 장비(장갑·검·지팡이)를 숨기고 놓으면 복원, 모자는 유지 (b) 검·지팡이를 손잡이 기준으로 세움(검 x20°·z40° → 끝이 머리 옆 약 1.7 m, 지팡이 z30° → 구슬이 모자 챙 아래로 나옴) — 시안처럼 옆으로 뻗어 이웃을 가리지 않음 (c) 권투는 C의 가드 자세 `Unarmed_Pose`를 대기 클립으로(`CharacterAnimator.set_clip`), 검·지팡이는 `2H_Melee_Idle`(기본 Idle에선 바닥에 끌림)
+- 스타일·캐릭터가 바뀌면 벗기고 다시 입힘(메시 변환·재질·대기 클립 복원). 디버그 B/C·`StyleMockup`은 삭제
+- 증거: `evidence/silhouette-final{,-bw,-sil,-held}.png` (`scripts/capture_silhouette.gd`, 슬롯별 캐릭터 강제) · 경기 화면 `silhouette-final-match{,-zoom}.png` (`scripts/capture_gear_match.gd`, 밀집 4인 · Barbarian이 방망이를 들어 장갑 숨김)
+- 한계: 경기 카메라(위에서 내려봄)에선 Mage 구슬이 모자 챙에 일부 가려진다. 필살기·공격 모션 중에도 검·지팡이 기울기가 그대로라 스윙 궤적과 칼날 각도가 조금 어긋날 수 있음 — 실제 플레이 확인 후 조정
