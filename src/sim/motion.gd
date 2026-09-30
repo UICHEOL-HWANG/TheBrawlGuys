@@ -15,6 +15,7 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, book: StyleB
 		return false
 	if f.invuln_ticks > 0:
 		f.invuln_ticks -= 1
+	Dodge.cool(f)
 	match f.state:
 		Fighter.State.HITSTUN:
 			_step_hitstun(f, config)
@@ -26,6 +27,8 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, book: StyleB
 			Actions.step_guard(f, input, config)
 		Fighter.State.SPECIAL:
 			SpecialRunner.step(f, config, book)
+		Fighter.State.DODGE:
+			Dodge.step(f, config)
 		Fighter.State.HOLDING, Fighter.State.HELD:
 			pass  # Grab.step drives holds; the held fighter's position comes from the holder
 		_:
@@ -98,6 +101,7 @@ static func _integrate(f: Fighter, config: GameConfig, arena: ArenaData) -> void
 		if not f.on_ground:
 			f.on_ground = true
 			f.jumps_left = config.max_jumps
+			f.air_dodge_used = false
 			if f.state == Fighter.State.AIR:
 				f.set_state(Fighter.State.IDLE)
 		return

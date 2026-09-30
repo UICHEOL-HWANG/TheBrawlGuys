@@ -1,6 +1,7 @@
 class_name GameConfig
 extends StyleConfig
-## Phase 5 style and special tunables live in the base scripts StyleConfig and SpecialConfig.
+## Phase 5 style and special tunables live in the base scripts StyleConfig and SpecialConfig,
+## defense tunables (rolls, guard meter) in DefenseConfig.
 ## Value ownership: GameConfig holds gameplay/feel tunables exposed on the debug panel.
 ## Art-direction constants (prop counts, light energies, mesh sizes) stay as named consts
 ## in render code; colors and UI sizes live only in DS tokens (src/ui/theme/tokens.gd).
@@ -162,7 +163,7 @@ extends StyleConfig
 @export_range(0, 120, 1) var bot_attack_cooldown_ticks: int = 30
 @export_range(0.3, 1.0, 0.01) var bot_edge_ratio: float = 0.8
 @export_range(0.5, 6.0, 0.1) var bot_guard_range: float = 2.2
-@export_range(1, 90, 1) var bot_guard_ticks: int = 20
+@export_range(1, 90, 1) var bot_guard_ticks: int = 34
 @export_range(0.0, 20.0, 0.5) var bot_item_seek_range: float = 8.0
 @export_range(1.0, 15.0, 0.5) var bot_throw_range: float = 6.0
 ## Bots never walk where this far ahead of them has no floor (bridge gaps, edges).
@@ -232,7 +233,7 @@ extends StyleConfig
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 	"Arena Gimmicks", "StyleBoxer", "StyleWeapon", "StyleRanged", "Special", "SpecialSlam", "SpecialRush",
-	"SpecialSpin", "SpecialFireball",
+	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter",
 ]
 
 @export_group("Audio")
@@ -245,10 +246,13 @@ const SIM_GROUPS: Array[String] = [
 @export_range(0.1, 5.0, 0.1) var music_intense_fade: float = 1.2
 
 const NON_SIM_GROUPS: Array[String] = [
-	"Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio", "BotStyle",
+	"Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio", "BotStyle", "BotDefense",
 ]
-## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig).
-const CONFIG_SCRIPTS: Array[String] = ["game_config.gd", "style_config.gd", "special_config.gd"]
+## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig
+## extends DefenseConfig).
+const CONFIG_SCRIPTS: Array[String] = [
+	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd",
+]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays

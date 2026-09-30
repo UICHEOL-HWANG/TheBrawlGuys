@@ -1,10 +1,10 @@
 class_name WorldStep
 extends RefCounted
 ## One World tick's step order (split out of World). StyleBook.build -> PressBuffer.apply ->
-## ItemActions.pre_step -> SpecialRunner.try_start -> Motion.step per fighter -> separate ->
-## ProjectileMotion.fire -> SpecialRunner.advance -> Grab.step -> Grab.resolve ->
+## GuardMeter.track_presses -> ItemActions.pre_step -> SpecialRunner.try_start -> Motion.step per
+## fighter -> separate -> Dodge.started_events -> ProjectileMotion.fire -> SpecialRunner.advance -> Grab.step -> Grab.resolve ->
 ## SpecialRunner.contacts -> Combat.resolve -> SpecialRunner.apply -> ProjectileMotion.step -> ItemMotion.step -> GimmickRunner.step ->
-## ItemField.spawn_step -> SpecialGauge.apply -> Rules.apply -> Grab.cleanup ->
+## ItemField.spawn_step -> GuardMeter.step -> SpecialGauge.apply -> Rules.apply -> Grab.cleanup ->
 ## ItemActions.drop_from_disabled. Fire/advance only see fighters that advanced (not frozen).
 
 
@@ -15,6 +15,7 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 	var book := StyleBook.build(w.fighters, c)
 	var events: Array[Dictionary] = []
 	PressBuffer.apply(w.fighters, frame)
+	GuardMeter.track_presses(w.fighters, frame)
 	events.append_array(ItemActions.pre_step(w.fighters, frame, w.items, c))
 	events.append_array(SpecialRunner.try_start(w.fighters, frame, book, c))
 	var advanced: Array[Fighter] = []
@@ -22,6 +23,7 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 		if Motion.step(f, frame[f.id], c, book, w.arena):
 			advanced.append(f)
 	Motion.separate(w.fighters, c)
+	events.append_array(Dodge.started_events(advanced))
 	events.append_array(ProjectileMotion.fire(advanced, book, w.projectiles, c))
 	events.append_array(SpecialRunner.advance(advanced, book, w.projectiles, c))
 	events.append_array(Grab.step(w.fighters, frame, book, c))
@@ -33,6 +35,7 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 	events.append_array(ItemMotion.step(w.items, w.fighters, book, c, w.arena))
 	events.append_array(GimmickRunner.step(w.arena, w.fighters, c, w.tick_count, events))
 	events.append_array(w.items.spawn_step(w.tick_count, rng, c, w.arena.item_area))
+	events.append_array(GuardMeter.step(w.fighters, c))
 	events.append_array(SpecialGauge.apply(w.fighters, events, c))
 	events.append_array(Rules.apply(w.fighters, c, w.arena))
 	Grab.cleanup(w.fighters)

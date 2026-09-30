@@ -3,9 +3,9 @@ extends RefCounted
 ## World snapshot bytes (PRD-ARCH-04), split out of World. The config fingerprint is part of
 ## every snapshot (context D1). v3 added the Phase 2 fighter fields, v4 the item field, v5 the
 ## arena state and burn fields (Phase 4), v6 the fighter character and special gauge and the
-## projectile field (Phase 5).
+## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A).
 
-const VERSION := 6
+const VERSION := 7
 const TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,
@@ -68,18 +68,24 @@ static func _checked(w: World, data: PackedByteArray) -> Dictionary:
 
 
 ## Values later used as indices stay in range: fighter ids are their slots, states / attack kinds
-## are known enum values, gauges are 0..MAX, projectiles belong to a fighter and use known kinds.
+## are known enum values, gauges and guard meters are 0..MAX, a perfect guard names a fighter,
+## projectiles belong to a fighter and use known kinds.
 static func _consistent(fighters: Array[Fighter], projectiles: ProjectileField) -> bool:
 	for i: int in fighters.size():
 		var f := fighters[i]
 		if f.id != i or not _in_enum(f.state, Fighter.State) or not _in_enum(f.attack_kind, AttackSet.Kind) \
-				or not (f.gauge >= 0.0 and f.gauge <= SpecialGauge.MAX):
+				or not (f.gauge >= 0.0 and f.gauge <= SpecialGauge.MAX) or not _defense_ok(f, fighters.size()):
 			return false
 	for p: Projectile in projectiles.list:
 		if p.owner_id < 0 or p.owner_id >= fighters.size() or not _in_enum(p.kind, Projectile.Kind) \
 				or not _in_enum(p.attack_kind, AttackSet.Kind):
 			return false
 	return true
+
+
+static func _defense_ok(f: Fighter, count: int) -> bool:
+	return f.guard_hp >= 0.0 and f.guard_hp <= GuardMeter.MAX and _in_enum(f.dodge_kind, Dodge.Kind) \
+			and f.perfect_by >= Fighter.NONE and f.perfect_by < count
 
 
 static func _in_enum(value: int, e: Dictionary) -> bool:

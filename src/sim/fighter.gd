@@ -3,9 +3,10 @@ extends RefCounted
 ## One fighter's sim state. Serialized in World snapshots (to_data/from_data) and exposed to
 ## views only as value copies (to_view) — never by reference (PRD §5.2, context D4).
 ## View reading: "launched" = HITSTUN and not on_ground; "respawn" = invuln_ticks > 0.
-## New states are appended so Phase 1 values (KO = 5) never move.
+## New states are appended so Phase 1 values (KO = 5) never move. DODGE = a roll or air dodge
+## (combat-depth A); a broken guard is HITSTUN with guard_break_left > 0.
 
-enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD, SPECIAL }
+enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD, SPECIAL, DODGE }
 
 ## "No fighter" / "no item" marker for partner_id and item_kind.
 const NONE := -1
@@ -20,6 +21,10 @@ const DATA_TYPES := {
 	"charge_mul": TYPE_FLOAT, "grab_ticks": TYPE_INT, "partner_id": TYPE_INT,
 	"item_kind": TYPE_INT, "item_uses": TYPE_INT, "burn_ticks": TYPE_INT, "burn_clock": TYPE_INT,
 	"held_presses": TYPE_INT, "character": TYPE_STRING, "gauge": TYPE_FLOAT,
+	"guard_prev": TYPE_BOOL, "guard_press_age": TYPE_INT, "guard_hp": TYPE_FLOAT, "guard_idle_ticks": TYPE_INT,
+	"guard_break_left": TYPE_INT, "perfect_by": TYPE_INT, "dodge_kind": TYPE_INT, "dodge_ticks": TYPE_INT,
+	"dodge_total": TYPE_INT, "dodge_dir": TYPE_VECTOR3, "intangible": TYPE_BOOL, "air_dodge_used": TYPE_BOOL,
+	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT,
 }
 
 var id: int = 0
@@ -62,10 +67,34 @@ var held_presses: int = 0
 ## CharacterData id ("" = classic) and special gauge 0..SpecialGauge.MAX (Phase 5).
 var character: String = CharacterData.DEFAULT
 var gauge: float = 0.0
+## Guard (combat-depth A, GuardMeter): last tick's guard level, ticks since the last guard press,
+## meter points, ticks since the last guard, ticks of guard-break stun left, and the attacker
+## whose hit this fighter perfect-guarded this tick (NONE otherwise).
+var guard_prev: bool = false
+var guard_press_age: int = GuardMeter.AGE_CAP
+var guard_hp: float = GuardMeter.MAX
+var guard_idle_ticks: int = 0
+var guard_break_left: int = 0
+var perfect_by: int = NONE
+## Dodge (Dodge): Dodge.Kind, ticks since it started, its length, direction, whether hits pass
+## through right now, the air dodge spent this airtime, and the roll-spam streak and window.
+var dodge_kind: int = 0
+var dodge_ticks: int = 0
+var dodge_total: int = 0
+var dodge_dir: Vector3 = Vector3.ZERO
+var intangible: bool = false
+var air_dodge_used: bool = false
+var roll_streak: int = 0
+var roll_recent: int = 0
 
 
 func is_alive() -> bool:
 	return state != State.KO
+
+
+## Hits, grabs and projectiles pass through: respawn / special invulnerability or a dodge window.
+func untouchable() -> bool:
+	return invuln_ticks > 0 or intangible
 
 
 func can_act() -> bool:

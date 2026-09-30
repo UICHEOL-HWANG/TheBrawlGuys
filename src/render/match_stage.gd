@@ -2,7 +2,7 @@ class_name MatchStage
 extends Node3D
 ## The world a match is drawn in (platform B1/B2, Phase 4 T6): the sun and sky in the arena's
 ## theme (DS-THM-02), the arena with its gimmick views, the decor around it, one FighterView plus
-## its FighterHazards (burning, fog silhouette) per slot and the item layer, drawn from
+## its FighterHazards (burning, fog silhouette) and DefenseFx (dodges, guard meter) per slot and the item layer, drawn from
 ## interpolated sim views. Shared by the match scene and the menu backdrop so both look the same;
 ## cameras, HUD, feel and sound stay with their owners.
 
@@ -17,6 +17,7 @@ var _decor_seed: int = 0
 var _requested_id: String = ""
 var _views: Array[FighterView] = []
 var _hazards: Array[FighterHazards] = []
+var _defense: Array[DefenseFx] = []
 var _items: ItemLayer
 
 
@@ -33,6 +34,10 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 		add_child(view)
 		view.setup(i, config)
 		_views.append(view)
+		var fx := DefenseFx.new()
+		view.add_child(fx)
+		fx.setup(i, config, view)
+		_defense.append(fx)
 		var hazards := FighterHazards.new()
 		add_child(hazards)
 		hazards.setup(i, config)
@@ -76,17 +81,20 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 		var before: Dictionary = before_all[i] if i < before_all.size() else {}
 		_views[i].apply(before, now_all[i], alpha, tick)
 		_views[i].animate(now_all[i], delta)
+		_defense[i].apply(now_all[i], delta)
 		_hazards[i].apply(now_all[i], _views[i].position, fog)
 	_items.sync(prev["items"], curr["items"], alpha, tick)
 
 
-## This frame's sim events: guard wobbles and arena reactions (mushroom squash).
+## This frame's sim events: guard wobbles, perfect-guard rings and arena reactions (mushroom squash).
 func on_events(events: Array) -> void:
 	for e: Dictionary in events:
 		if String(e["type"]) == "guard_hit":
 			var id := int(e["target"])
 			if id < _views.size():
 				_views[id].wobble()
+		elif String(e["type"]) == "perfect_guard" and int(e["fighter"]) < _defense.size():
+			_defense[int(e["fighter"])].perfect_flash()
 	_arena_view.on_events(events)
 
 

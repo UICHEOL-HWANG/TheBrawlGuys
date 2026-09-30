@@ -184,6 +184,11 @@ func bubble_visible() -> bool:
 	return _bubble.visible
 
 
+## The guard bubble (DefenseFx sizes and flashes it by the guard meter).
+func bubble() -> MeshInstance3D:
+	return _bubble
+
+
 ## The carried item rides on the character's hand slot (or a fixed spot on the capsule).
 func _attach_held(config: GameConfig, hand_spot: Vector3) -> void:
 	_held = HeldItem.new()

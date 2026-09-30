@@ -81,6 +81,8 @@ const GROUND_SHADOW := Color("#17525A66")
 
 ## Guard bubble (design.md DS-VFX-02): sky at 40%, a soap bubble around the guarding fighter.
 const GUARD_BUBBLE := Color("#C4E8F666")
+## Guard bubble about to break (combat-depth A): danger at 40%, flashed with GUARD_BUBBLE.
+const GUARD_BUBBLE_LOW := Color("#F0584A66")
 ## Respawn light pillar (design.md DS-VFX-06): glow at 40%.
 const RESPAWN_BEAM := Color("#FFF3C466")
 

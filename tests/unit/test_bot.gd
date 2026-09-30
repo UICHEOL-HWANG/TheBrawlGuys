@@ -94,9 +94,13 @@ func test_guards_every_other_attack_that_starts_in_range() -> void:
 		bot.sample(calm)
 	var attacking := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
 	_foe(attacking)["state"] = Fighter.State.ATTACK
-	assert_true(bot.sample(attacking).guard, "first threat: guard")
+	for i: int in c.bot_guard_react_ticks:
+		bot.sample(attacking)
+	assert_true(bot.sample(attacking).guard, "first threat: guard (after the reaction delay)")
 	for i: int in c.bot_guard_ticks:
 		bot.sample(calm)
+	for i: int in c.bot_guard_react_ticks:
+		bot.sample(attacking)
 	assert_false(bot.sample(attacking).guard, "second threat: no guard (every other)")
 
 
@@ -204,7 +208,7 @@ func test_guard_tracking_survives_edge_and_recovery_ticks() -> void:
 	_foe(edge)["state"] = Fighter.State.ATTACK
 	bot.sample(edge)  # threat #1 starts on the edge tick (early return) and must be counted
 	var calm := _view(Vector3(9.0, 0, 0), Vector3(9.0, 0, 8.0))
-	for i: int in c.bot_guard_ticks + 1:
+	for i: int in c.bot_guard_react_ticks + c.bot_guard_ticks + 1:
 		bot.sample(calm)
 	var center := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
 	_foe(center)["state"] = Fighter.State.ATTACK

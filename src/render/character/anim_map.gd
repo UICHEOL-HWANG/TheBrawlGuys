@@ -39,6 +39,8 @@ static func anim_for(view: Dictionary) -> int:
 			return Anim.KO
 		Fighter.State.SPECIAL:
 			return int(SPECIAL_ANIMS.get(String(view.get("special", "")), Anim.HEAVY))
+		Fighter.State.DODGE:
+			return Anim.RUN if on_ground else Anim.JUMP  # a roll / air dodge (combat-depth A)
 	return Anim.IDLE
 
 

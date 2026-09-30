@@ -50,7 +50,7 @@ static func in_blast(center: Vector3, radius: float, fighters: Array[Fighter], o
 		config: GameConfig) -> Array[Fighter]:
 	var out: Array[Fighter] = []
 	for t: Fighter in fighters:
-		if t.id == owner_id or not t.is_alive() or t.invuln_ticks > 0:
+		if t.id == owner_id or not t.is_alive() or t.untouchable():
 			continue
 		var offset := t.pos + Vector3.UP * (config.fighter_height * 0.5) - center
 		if offset.length() <= radius + config.fighter_radius:
@@ -59,4 +59,4 @@ static func in_blast(center: Vector3, radius: float, fighters: Array[Fighter], o
 
 
 static func _hittable(f: Fighter, t: Fighter) -> bool:
-	return t != f and t.is_alive() and t.invuln_ticks <= 0 and not f.hit_ids.has(t.id)
+	return t != f and t.is_alive() and not t.untouchable() and not f.hit_ids.has(t.id)

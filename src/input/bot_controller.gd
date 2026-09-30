@@ -1,7 +1,7 @@
 class_name BotController
 extends RefCounted
 ## Bot step 2 (PRD §6.4): step 1 (approach, attack in range, retreat from the edge, recover) plus
-## guarding every other attack that starts in range (so it can still be hit), racing for nearby
+## guarding every other attack that starts in range (BotDefense, so it can still be hit), racing for nearby
 ## items (also while they are still falling), swinging bats, throwing rocks and bombs at range, mashing the light combo, grabbing a
 ## guarding foe and throwing held fighters toward the nearest edge. Reads only state_view() values
 ## and produces InputFrames — never touches the sim. Deterministic (no randomness).
@@ -10,6 +10,7 @@ extends RefCounted
 ## bot never walks where bot_ground_lookahead ahead has no floor.
 ## Styles (Phase 5, BotStyleSense): swing range scales with the style's reach, ranged bots keep
 ## their distance and shoot, and a full gauge fires the special (heavy+guard) once a foe is in reach.
+## Defense (combat-depth A, BotDefense): guards after a reaction delay, rolls on the other turns.
 
 ## Pick up when the item is this deep inside the pickup radius (a margin against rounding).
 const PICKUP_REACH_RATIO := 0.8
@@ -19,14 +20,13 @@ var _config: GameConfig
 var _arena: ArenaData = null
 var _cooldown: int = 0
 var _combo_left: int = 0
-var _guard_left: int = 0
-var _guard_next_threat: bool = true
-var _foe_was_threat: bool = false
+var _defense: BotDefense
 
 
 func _init(p_self_id: int, p_config: GameConfig) -> void:
 	_self_id = p_self_id
 	_config = p_config
+	_defense = BotDefense.new(p_config)
 
 
 ## Light presses after the first swing so hits 2 and 3 land inside the combo buffer.
@@ -40,6 +40,12 @@ static func attack_range(id: int, config: GameConfig) -> float:
 
 
 func sample(view: Dictionary) -> InputFrame:
+	var sent := _sample(view)
+	_defense.note(sent)
+	return sent
+
+
+func _sample(view: Dictionary) -> InputFrame:
 	if _cooldown > 0:
 		_cooldown -= 1
 	var me := BotViewQuery.find(view, _self_id)
@@ -47,20 +53,20 @@ func sample(view: Dictionary) -> InputFrame:
 		return InputFrame.neutral()
 	var arena := _arena_for(view)
 	var my_pos: Vector3 = me["pos"]
-	# Tracked every tick (even during recovery/edge/holding) so the every-other-threat toggle
-	# never goes stale.
 	var foe := BotViewQuery.nearest_foe(view, _self_id, my_pos)
-	var guarding := _update_guard(foe, my_pos)
 	var safe := BotViewQuery.flat(my_pos, ArenaFloor.safe_point(arena, my_pos, _config.bot_edge_ratio)).normalized()
+	# Decided every tick (even during recovery/edge/holding) so the every-other toggle never goes stale.
+	var defense := _defense.decide(me, foe, safe)
 	if not bool(me["on_ground"]) and my_pos.y < 0.0 and not ArenaFloor.over_floor(arena, my_pos):
 		return InputFrame.make(safe.x, safe.y, int(me["jumps_left"]) > 0)
 	if int(me["state"]) == Fighter.State.HOLDING:
 		var out := ArenaFloor.outward(arena, my_pos)
 		return InputFrame.make(out.x, out.y, false, false, false, false, true)
-	if safe != Vector2.ZERO:
+	var rolling := defense != null and (defense.move_x != 0.0 or defense.move_z != 0.0)
+	if safe != Vector2.ZERO and not rolling:
 		return InputFrame.make(safe.x, safe.y)
-	if guarding:
-		return InputFrame.make(0, 0, false, false, false, true)
+	if defense != null:
+		return defense
 	if _combo_left > 0:
 		_combo_left -= 1
 		return InputFrame.make(0, 0, false, true)
@@ -113,21 +119,6 @@ func _walk(dir: Vector2, my_pos: Vector3, arena: ArenaData) -> InputFrame:
 		if d != Vector2.ZERO and ArenaFloor.over_floor(arena, ahead):
 			return InputFrame.make(d.x, d.y)
 	return InputFrame.neutral()
-
-
-## Starts a guard on every other new threat and keeps it for bot_guard_ticks.
-func _update_guard(foe: Dictionary, my_pos: Vector3) -> bool:
-	var threat := not foe.is_empty() and BotViewQuery.flat(my_pos, foe["pos"]).length() <= _config.bot_guard_range \
-			and (int(foe["state"]) == Fighter.State.ATTACK or int(foe["state"]) == Fighter.State.CHARGE)
-	if threat and not _foe_was_threat:
-		if _guard_next_threat:
-			_guard_left = _config.bot_guard_ticks
-		_guard_next_threat = not _guard_next_threat
-	_foe_was_threat = threat
-	if _guard_left > 0:
-		_guard_left -= 1
-		return true
-	return false
 
 
 func _use_throwable(foe: Dictionary, my_pos: Vector3, arena: ArenaData) -> InputFrame:

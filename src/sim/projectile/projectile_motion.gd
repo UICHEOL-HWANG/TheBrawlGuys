@@ -68,7 +68,7 @@ static func _expire(p: Projectile, fighters: Array[Fighter], attack: AttackData,
 static func _first_hit(p: Projectile, fighters: Array[Fighter], config: GameConfig) -> Fighter:
 	var half := Vector3.ONE * p.radius
 	for f: Fighter in fighters:
-		if f.id == p.owner_id or not f.is_alive() or f.invuln_ticks > 0:
+		if f.id == p.owner_id or not f.is_alive() or f.untouchable():
 			continue
 		if Collision.capsule_hits_box(f.pos, config.fighter_radius, config.fighter_height, p.pos, 0.0, half):
 			return f
