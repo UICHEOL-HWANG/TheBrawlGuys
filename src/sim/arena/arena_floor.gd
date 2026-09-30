@@ -76,7 +76,9 @@ static func safe_point(arena: ArenaData, pos: Vector3, ratio: float) -> Vector3:
 	return pos if best_dist <= 0.0 else best
 
 
-## Direction toward the nearest edge of the floor pos stands on most deeply (for throws).
+## Unit (x, z) direction toward the nearest real edge of the ground under pos (for throws): the
+## nearest edge of the floor pos stands on most deeply, unless that edge is a seam with another
+## floor, in which case the compass direction that leaves the ground soonest.
 static func outward(arena: ArenaData, pos: Vector3) -> Vector2:
 	var best_i := -1
 	var best := -INF
@@ -88,4 +90,25 @@ static func outward(arena: ArenaData, pos: Vector3) -> Vector2:
 				best_i = i
 	if best_i < 0:
 		return Vector2(1, 0)
-	return arena.floors[best_i].outward(pos)
+	var out := arena.floors[best_i].outward(pos)
+	var past_edge := pos + Vector3(out.x, 0.0, out.y) * (maxf(best, 0.0) + EXIT_STEP)
+	return out if not over_floor(arena, past_edge) else _nearest_exit(arena, pos)
+
+
+const EXIT_DIRECTIONS := 8
+const EXIT_STEP := 0.25
+const EXIT_MAX := 40.0
+
+
+static func _nearest_exit(arena: ArenaData, pos: Vector3) -> Vector2:
+	var best_dir := Vector2(1, 0)
+	var best_len := INF
+	for k: int in EXIT_DIRECTIONS:
+		var dir := Vector2.from_angle(TAU * k / EXIT_DIRECTIONS)
+		var reach := 0.0
+		while reach < EXIT_MAX and reach < best_len and over_floor(arena, pos + Vector3(dir.x, 0.0, dir.y) * reach):
+			reach += EXIT_STEP
+		if reach < best_len:
+			best_len = reach
+			best_dir = dir
+	return best_dir

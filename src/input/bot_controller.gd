@@ -97,12 +97,19 @@ func _arena_for(view: Dictionary) -> ArenaData:
 	return _arena
 
 
-## Moves along dir unless that walks off the floor within bot_ground_lookahead (then stands).
+## Moves along dir, or slides along its larger then smaller axis, whichever first keeps floor
+## within bot_ground_lookahead ahead; stands still when none does.
 func _walk(dir: Vector2, my_pos: Vector3, arena: ArenaData) -> InputFrame:
-	var ahead := my_pos + Vector3(dir.x, 0.0, dir.y) * _config.bot_ground_lookahead
-	if not ArenaFloor.over_floor(arena, ahead):
-		return InputFrame.neutral()
-	return InputFrame.make(dir.x, dir.y)
+	var ax := Vector2(signf(dir.x), 0.0)
+	var az := Vector2(0.0, signf(dir.y))
+	var options: Array[Vector2] = [dir, ax, az]
+	if absf(dir.y) > absf(dir.x):
+		options = [dir, az, ax]
+	for d: Vector2 in options:
+		var ahead := my_pos + Vector3(d.x, 0.0, d.y) * _config.bot_ground_lookahead
+		if d != Vector2.ZERO and ArenaFloor.over_floor(arena, ahead):
+			return InputFrame.make(d.x, d.y)
+	return InputFrame.neutral()
 
 
 ## Starts a guard on every other new threat and keeps it for bot_guard_ticks.

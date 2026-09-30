@@ -231,6 +231,29 @@ func test_bridge_avoids_a_broken_plank() -> void:
 	assert_true(bot.sample(v).move_z >= 0.0, "does not step onto the gap")
 
 
+func test_throws_off_the_bridge_not_across_the_plank_seam() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _bridge_view(Vector3(3, 0, 1.2), Vector3(3, 0, 2.15))
+	_me(v)["state"] = Fighter.State.HOLDING
+	var f := bot.sample(v)
+	assert_true(f.grab)
+	assert_gt(f.move_z, 0.9, "the plank's inner edge touches the spine; the water is the other way")
+
+
+func test_slides_along_the_spine_instead_of_stalling_at_a_gap() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _bridge_view(Vector3(0, 0, -0.6), Vector3(4, 0, -3.0))
+	var floors: Array[bool] = []
+	floors.resize(9)
+	floors.fill(true)
+	for i: int in [1, 2, 3, 4]:
+		floors[i] = false  # every -z plank is gone
+	v["arena_floors"] = floors
+	var f := bot.sample(v)
+	assert_gt(f.move_x, 0.9, "keeps closing in along the spine")
+	assert_eq(f.move_z, 0.0)
+
+
 func test_recovers_toward_the_bridge_when_falling_beside_it() -> void:
 	var bot := BotController.new(1, GameConfig.new())
 	var v := _bridge_view(Vector3(0, -0.3, 3.0), Vector3(-5, 0, 0))
