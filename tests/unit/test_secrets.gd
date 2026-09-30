@@ -52,6 +52,12 @@ func test_default_port_when_absent() -> void:
 	assert_eq(Secrets.from_config(ConfigFile.new()).loopback_port, Secrets.DEFAULT_LOOPBACK_PORT)
 
 
+func test_invalid_port_falls_back() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("auth", "loopback_port", "abc")
+	assert_eq(Secrets.from_config(cfg).loopback_port, Secrets.DEFAULT_LOOPBACK_PORT)
+
+
 func test_service_jwt_is_refused() -> void:
 	var s := Secrets.from_config(_cfg("amp", "https://abc.supabase.co", _jwt(Secrets.SERVICE_ROLE)))
 	assert_false(s.has_supabase(), "a service-role key must never be used by the client")

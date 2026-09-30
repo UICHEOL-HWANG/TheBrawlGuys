@@ -23,6 +23,7 @@ var net_error_sink: Callable = func(endpoint: String, status: int) -> void:
 var _url: String
 var _anon_key: String
 var _transport: HttpTransport
+var _refresh_waiters: Array[Callable] = []
 
 
 func _init(url: String, anon_key: String, transport: HttpTransport) -> void:
@@ -43,11 +44,20 @@ func exchange_pkce(auth_code: String, code_verifier: String, done: Callable) -> 
 	_token_grant("pkce", {"auth_code": auth_code, "code_verifier": code_verifier}, done)
 
 
+## Concurrent callers share one request: Supabase rotates the refresh token on use.
 func refresh(done: Callable) -> void:
 	if session == null:
 		done.call(false, STATUS_NO_SESSION, "not signed in")
 		return
-	_token_grant("refresh_token", {"refresh_token": session.refresh_token}, done)
+	_refresh_waiters.append(done)
+	if _refresh_waiters.size() > 1:
+		return
+	_token_grant("refresh_token", {"refresh_token": session.refresh_token},
+			func(ok: bool, status: int, message: String) -> void:
+				var waiters := _refresh_waiters.duplicate()
+				_refresh_waiters.clear()
+				for w: Callable in waiters:
+					w.call(ok, status, message))
 
 
 func sign_out() -> void:
@@ -103,13 +113,14 @@ func _token_grant(grant: String, payload: Dictionary, done: Callable) -> void:
 	var headers := PackedStringArray(["apikey: " + _anon_key, "Content-Type: application/json"])
 	_transport.request("%s/auth/v1/token?grant_type=%s" % [_url, grant], headers, HTTPClient.METHOD_POST,
 			JSON.stringify(payload), func(code: int, body: String) -> void:
-				_on_token(code, body, done))
+				_on_token(grant, code, body, done))
 
 
-func _on_token(code: int, body: String, done: Callable) -> void:
+func _on_token(grant: String, code: int, body: String, done: Callable) -> void:
 	if code < 200 or code >= 300:
 		_net_error("auth/token", code)
-		if session != null and (code == HTTP_BAD_REQUEST or code == HTTP_UNAUTHORIZED):
+		var rejected := code == HTTP_BAD_REQUEST or code == HTTP_UNAUTHORIZED
+		if grant == "refresh_token" and session != null and rejected:
 			sign_out()  # the refresh token is no longer valid
 		done.call(false, code, body)
 		return

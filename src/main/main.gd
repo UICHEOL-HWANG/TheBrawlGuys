@@ -106,7 +106,7 @@ func _ready() -> void:
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
-	_recorder = MatchRecorder.create_default(self)
+	_recorder = MatchRecorder.create_default()
 	_start_match()
 
 

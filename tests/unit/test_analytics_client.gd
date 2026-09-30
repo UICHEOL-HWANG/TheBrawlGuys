@@ -150,6 +150,28 @@ func test_one_request_at_a_time() -> void:
 	assert_eq(((_http.last_json() as Dictionary)["events"] as Array).size(), 1, "only the unsent event")
 
 
+func test_cap_drops_during_a_send_do_not_lose_unsent_events() -> void:
+	var small := AnalyticsClient.new("k", "d", _http, BatchQueue.new("", 3))
+	small.clock_ms = func() -> int: return _now
+	small.track("screen_viewed", {"screen": "a"})
+	small.flush()  # "a" in flight
+	for s: String in ["b", "c", "d"]:
+		small.track("screen_viewed", {"screen": s})  # cap 3 pushes "a" out
+	_http.respond(200)
+	assert_eq(small.queued(), 3, "b, c, d are still waiting")
+
+
+func test_a_request_that_never_answers_is_given_up() -> void:
+	_screen(0)
+	_client.flush()
+	_now = AnalyticsClient.IN_FLIGHT_TIMEOUT_MS
+	_client.flush()
+	assert_eq(_http.requests.size(), 2, "retried after the lost request")
+	_http.respond(200)  # the stale answer arrives late
+	_http.respond(200)
+	assert_eq(_client.queued(), 0)
+
+
 func test_offline_queue_survives_a_restart() -> void:
 	_screen(0)
 	_screen(1)

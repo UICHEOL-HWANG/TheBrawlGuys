@@ -12,22 +12,9 @@ func _init(client: SupabaseClient) -> void:
 	_client = client
 
 
-## Live recorder for the game: stored session + keys, or an offline one in tests/headless runs.
-static func create_default(host: Node) -> MatchRecorder:
-	if not PlatformEnv.is_live():
-		return MatchRecorder.new(null)
-	var secrets := Secrets.load_from()
-	if not secrets.has_supabase():
-		return MatchRecorder.new(null)
-	var client := SupabaseClient.new(secrets.supabase_url, secrets.supabase_anon_key, GodotHttpTransport.new(host))
-	var store := SessionStore.new()
-	client.session = store.load_session()
-	client.session_changed.connect(func(s: SupabaseSession) -> void:
-		if s != null:
-			store.save(s)
-		else:
-			store.clear())
-	return MatchRecorder.new(client)
+## Live recorder on the shared client, or an offline one in tests/headless runs.
+static func create_default() -> MatchRecorder:
+	return MatchRecorder.new(SupabaseHub.client())
 
 
 ## Returns false (and calls done(false)) when the match is skipped.

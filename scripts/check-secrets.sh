@@ -31,7 +31,8 @@ if [ -f "$local_file" ]; then
   for token in $(grep -oE "$jwt"'\.[A-Za-z0-9_-]*' <<<"$values" || true); do
     payload=$(printf '%s' "$token" | cut -d. -f2 | tr '_-' '/+')
     while [ $(( ${#payload} % 4 )) -ne 0 ]; do payload="$payload="; done
-    if printf '%s' "$payload" | base64 -d 2>/dev/null | grep -q "$role"; then
+    decoded=$(printf '%s' "$payload" | base64 -d 2>/dev/null || true)
+    if grep -qF "$role" <<<"$decoded"; then
       echo "FAIL: $local_file holds a service-role JWT"
       fail=1
     fi

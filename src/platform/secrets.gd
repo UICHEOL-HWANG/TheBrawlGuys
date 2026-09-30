@@ -5,6 +5,9 @@ extends RefCounted
 
 const DEFAULT_PATH := "res://config/secrets.local.cfg"
 const DEFAULT_LOOPBACK_PORT := 54321
+## The loopback port must be a fixed, unprivileged port (it is listed in Supabase redirect URLs).
+const MIN_PORT := 1024
+const MAX_PORT := 65535
 ## Supabase secret-key prefix (new key format); never valid in a client.
 const SECRET_KEY_PREFIX := "sb_secret_"
 const SERVICE_ROLE := "service" + "_role"
@@ -36,6 +39,10 @@ static func from_config(cfg: ConfigFile) -> Secrets:
 	s.supabase_anon_key = _text(cfg, "supabase", "anon_key")
 	s.redirect_web = _text(cfg, "auth", "redirect_web")
 	s.loopback_port = int(cfg.get_value("auth", "loopback_port", DEFAULT_LOOPBACK_PORT))
+	if s.loopback_port < MIN_PORT or s.loopback_port > MAX_PORT:
+		push_warning("Secrets: auth.loopback_port %d outside %d-%d, using %d"
+				% [s.loopback_port, MIN_PORT, MAX_PORT, DEFAULT_LOOPBACK_PORT])
+		s.loopback_port = DEFAULT_LOOPBACK_PORT
 	if is_service_key(s.supabase_anon_key):
 		push_error("Secrets: supabase.anon_key is a service-role/secret key — refused. Use the anon/publishable key.")
 		s.supabase_anon_key = ""

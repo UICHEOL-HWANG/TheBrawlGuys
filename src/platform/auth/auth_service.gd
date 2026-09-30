@@ -43,9 +43,12 @@ func is_signed_in() -> bool:
 func restore() -> bool:
 	if platform_kind == "web":
 		var query := web.read_query()
-		if query.has("code") or query.has("error"):
+		# Only our own redirect: a sign-in left a verifier before leaving the page.
+		var pending := not _store.peek_verifier().is_empty()
+		if pending and (query.has("code") or query.has("error")):
 			web.clean_url()
 			if query.has("error"):
+				_store.take_verifier()
 				_fail(String(query["error"]))
 			else:
 				_exchange(String(query["code"]), _store.take_verifier())
@@ -57,9 +60,13 @@ func restore() -> bool:
 	if not stored.is_expiring(int(_client.now_s.call()), SupabaseClient.REFRESH_MARGIN_S):
 		_restored()
 		return true
-	_client.refresh(func(ok: bool, _status: int, _message: String) -> void:
+	_client.refresh(func(ok: bool, status: int, _message: String) -> void:
 		if ok:
-			_restored())
+			_restored()
+		elif _client.has_session():
+			# Not rejected (offline, server error): stay signed out for now, keep the file for next start.
+			_client.session = null
+			_fail("refresh_%d" % status))
 	return true
 
 

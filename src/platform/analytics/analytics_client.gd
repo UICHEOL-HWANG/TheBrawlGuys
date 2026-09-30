@@ -11,6 +11,8 @@ const MAX_EVENTS_PER_REQUEST := 100
 const HEADERS: PackedStringArray = ["Content-Type: application/json", "Accept: */*"]
 const HTTP_TOO_MANY_REQUESTS := 429
 const HTTP_SERVER_ERROR := 500
+## An open request older than this is treated as lost (transport timeout is 15 s).
+const IN_FLIGHT_TIMEOUT_MS := 30_000
 
 ## Monotonic milliseconds (batch timer, backoff).
 var clock_ms: Callable = Time.get_ticks_msec
@@ -29,6 +31,8 @@ var _super: Dictionary = {}
 var _user_props: Dictionary = {}
 var _seq: int = 0
 var _sending: int = 0
+var _dropped_at_send: int = 0
+var _request_id: int = 0
 var _last_send_ms: int = 0
 
 
@@ -77,13 +81,20 @@ func poll() -> void:
 ## Sends what is queued now (match end, app pause), unless a request is open or backing off.
 func flush() -> void:
 	var now := int(clock_ms.call())
+	if _sending > 0 and now - _last_send_ms >= IN_FLIGHT_TIMEOUT_MS:
+		_sending = 0  # the answer was lost (host freed, dropped socket); a late one is ignored
 	if _sending > 0 or _queue.size() == 0 or not _queue.can_send(now):
 		return
 	var batch := _queue.peek(MAX_EVENTS_PER_REQUEST)
 	_sending = batch.size()
+	_dropped_at_send = _queue.dropped_count()
 	_last_send_ms = now
+	_request_id += 1
+	var id := _request_id
 	_transport.request(ENDPOINT, HEADERS, HTTPClient.METHOD_POST, AmplitudePayload.body(_api_key, batch),
-			_on_response)
+			func(status: int, body: String) -> void:
+				if id == _request_id and _sending > 0:
+					_on_response(status, body))
 
 
 func persist() -> void:
@@ -101,14 +112,16 @@ func in_flight() -> bool:
 func _on_response(status: int, body: String) -> void:
 	var sent := _sending
 	_sending = 0
+	# Events of this batch the cap already pushed out while the request was open.
+	var still_queued := maxi(sent - (_queue.dropped_count() - _dropped_at_send), 0)
 	if status >= 200 and status < 300:
-		_queue.drop_front(sent)
+		_queue.drop_front(still_queued)
 		_queue.mark_success()
 	elif status == 0 or status == HTTP_TOO_MANY_REQUESTS or status >= HTTP_SERVER_ERROR:
 		_queue.mark_failure(int(clock_ms.call()))
 	else:
 		push_error("AnalyticsClient: Amplitude rejected %d events (HTTP %d): %s" % [sent, status, body.left(300)])
-		_queue.drop_front(sent)
+		_queue.drop_front(still_queued)
 	_queue.save()
 
 

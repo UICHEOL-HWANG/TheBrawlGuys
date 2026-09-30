@@ -99,6 +99,15 @@ func test_unauthorized_insert_refreshes_and_retries_once() -> void:
 	assert_eq(_results[0][1], 401)
 
 
+func test_concurrent_refreshes_share_one_request() -> void:
+	_sign_in(NOW)
+	_client.refresh(_done())
+	_client.refresh(_done())
+	assert_eq(_http.requests.size(), 1, "a rotated refresh token must not be spent twice")
+	_http.respond(200, _token_json("access-2", "refresh-2"))
+	assert_eq(_results, [[true, 200, ""], [true, 200, ""]])
+
+
 func test_server_error_surfaces_status_and_tracks_net_error() -> void:
 	_sign_in()
 	_client.rest_insert("matches", _rows(1), _done())
@@ -131,6 +140,14 @@ func test_pkce_exchange_stores_the_session() -> void:
 	assert_eq(_client.session.user_id, "user-1")
 	assert_eq(_client.session.access_token, "access-9")
 	assert_true(_results[0][0])
+
+
+func test_failed_code_exchange_keeps_an_existing_session() -> void:
+	_sign_in()
+	_client.exchange_pkce("bad-code", "verifier-1", _done())
+	_http.respond(400, "{}")
+	assert_true(_client.has_session(), "only a rejected refresh token signs out")
+	assert_false(_results[0][0])
 
 
 func test_malformed_token_response_is_an_error() -> void:

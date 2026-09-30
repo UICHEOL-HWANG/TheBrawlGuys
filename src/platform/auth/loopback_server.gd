@@ -8,11 +8,14 @@ const TIMEOUT_MS := 180_000
 const DONE_MESSAGE := "로그인 완료, 게임으로 돌아가세요"
 const FAIL_MESSAGE := "로그인 실패 — 게임에서 다시 시도해 주세요"
 const MAX_REQUEST_BYTES := 8192
+## A connection must deliver its request line within this time.
+const PEER_TIMEOUT_MS := 2000
 
 var _server: TCPServer = null
 var _peer: StreamPeerTCP = null
 var _buffer: PackedByteArray = PackedByteArray()
 var _deadline_ms: int = 0
+var _peer_deadline_ms: int = 0
 
 
 func start(port: int, now_ms: int) -> Error:
@@ -27,13 +30,10 @@ func start(port: int, now_ms: int) -> Error:
 
 
 func stop() -> void:
-	if _peer != null:
-		_peer.disconnect_from_host()
-	_peer = null
+	_drop_peer()
 	if _server != null:
 		_server.stop()
 	_server = null
-	_buffer.clear()
 
 
 func poll(now_ms: int) -> Dictionary:
@@ -42,12 +42,13 @@ func poll(now_ms: int) -> Dictionary:
 	if now_ms >= _deadline_ms:
 		stop()
 		return {"error": "timeout"}
-	if _peer == null and _server.is_connection_available():
-		_peer = _server.take_connection()
-		_buffer.clear()
+	_take_new_peer(now_ms)
 	if _peer == null:
 		return {}
 	_peer.poll()
+	if _peer.get_status() != StreamPeerTCP.STATUS_CONNECTED or now_ms >= _peer_deadline_ms:
+		_drop_peer()  # closed, or an idle browser preconnect
+		return {}
 	var available := _peer.get_available_bytes()
 	if available > 0:
 		_buffer.append_array(_peer.get_data(available)[1])
@@ -57,11 +58,26 @@ func poll(now_ms: int) -> Dictionary:
 	return _answer(parse_request_line(text.get_slice("\r\n", 0)))
 
 
+## A newer connection replaces a peer that has sent nothing yet (browsers open spare sockets).
+func _take_new_peer(now_ms: int) -> void:
+	if not _server.is_connection_available() or (_peer != null and not _buffer.is_empty()):
+		return
+	_drop_peer()
+	_peer = _server.take_connection()
+	_peer_deadline_ms = now_ms + PEER_TIMEOUT_MS
+
+
+func _drop_peer() -> void:
+	if _peer != null:
+		_peer.disconnect_from_host()
+	_peer = null
+	_buffer.clear()
+
+
 func _answer(result: Dictionary) -> Dictionary:
 	if result.is_empty():
 		_peer.put_data(http_response(404, "").to_utf8_buffer())
-		_peer.disconnect_from_host()
-		_peer = null
+		_drop_peer()
 		return {}
 	var message := DONE_MESSAGE if result.has("code") else FAIL_MESSAGE
 	_peer.put_data(http_response(200, message).to_utf8_buffer())

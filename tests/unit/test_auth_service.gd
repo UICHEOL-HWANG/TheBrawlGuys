@@ -209,10 +209,30 @@ func test_web_sign_in_redirects_and_resumes() -> void:
 
 func test_web_callback_error_is_reported() -> void:
 	platform("web")
+	_store.save_verifier("v")
 	_web.query = {"error": "access_denied"}
 	assert_true(_auth.restore())
 	assert_eq(_signals, [["failed", "access_denied"]])
 	assert_true(_web.cleaned)
+	assert_eq(_store.peek_verifier(), "", "the attempt is over")
+
+
+func test_web_query_without_our_sign_in_is_ignored() -> void:
+	platform("web")
+	_web.query = {"code": "someone-elses"}
+	assert_false(_auth.restore())
+	assert_false(_web.cleaned)
+	assert_eq(_http.requests.size(), 0)
+
+
+func test_offline_refresh_fails_but_keeps_the_stored_session() -> void:
+	platform("desktop")
+	_store.save(SupabaseSession.new("a", "r", NOW, "user-7"))
+	_auth.restore()
+	_http.respond(0, "")
+	assert_eq(_signals, [["failed", "refresh_0"]])
+	assert_false(_auth.is_signed_in())
+	assert_not_null(_store.load_session(), "try again next start")
 
 
 func test_sign_out_forgets_the_session() -> void:
