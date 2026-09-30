@@ -98,6 +98,7 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_false(app.backdrop().is_inside_tree(), "the backdrop stops during a match")
 	var match_scene := app.router().current()
 	assert_eq((match_scene.get("setup") as MatchSetup).mode, MatchSetup.MODE_BOT)
+	assert_eq(match_scene.get("new_seed"), app.new_seed, "rematches draw from the app's seed source")
 	assert_eq((match_scene.get("setup") as MatchSetup).arena_id, arenas.card_ids()[2], "the match is on the chosen arena")
 	var world_now: World = match_scene.call("get_world")
 	assert_eq(world_now.fighters[0].character, CharacterData.KNIGHT, "the sim plays the chosen character")

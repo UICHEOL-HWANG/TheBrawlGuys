@@ -17,6 +17,9 @@ const BOT_PLAYER := 1
 var setup: MatchSetup = null
 ## Shows "메뉴로" on the result banner (only when an app shell can take the player back).
 var menu_available: bool = false
+## Seed for each rematch (the App passes MatchSeed.fresh); empty = rematches replay setup.seed
+## (perf / debug scenes, main.tscn alone).
+var new_seed: Callable = Callable()
 
 var _config: GameConfig
 var _world: World
@@ -111,6 +114,8 @@ func _start_match() -> void:
 	_tracking.close_for_restart(_curr_state, _result_shown)
 	_locals.reset()
 	_stage.clear_items()
+	if _world != null and new_seed.is_valid():
+		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
 	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config), setup.characters())
 	_bots.clear()
 	for slot: int in setup.bot_slots():

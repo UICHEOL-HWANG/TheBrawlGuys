@@ -167,6 +167,7 @@ func _start_match(setup: MatchSetup) -> void:
 	var match_scene := MATCH_SCENE.instantiate()
 	match_scene.set("setup", setup)
 	match_scene.set("menu_available", true)
+	match_scene.set("new_seed", new_seed)
 	match_scene.connect("menu_requested", _back_to_title)
 	_router.push(MATCH, match_scene, true, _detach_backdrop)
 

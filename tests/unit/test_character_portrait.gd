@@ -17,6 +17,21 @@ func test_portrait_shows_the_character_model_and_goes_still_when_not_live() -> v
 	assert_eq(p.viewport().render_target_update_mode, SubViewport.UPDATE_ONCE)
 
 
+## The whole weapon stays in the full-body frame (the Knight's raised sword tip used to be cut off).
+func test_hand_gear_fits_inside_the_full_portrait_frame() -> void:
+	for id: String in [CharacterData.KNIGHT, CharacterData.MAGE]:
+		var p := CharacterPortrait.new()
+		add_child_autofree(p)
+		p.setup(CharacterCatalog.for_character(id, 0), GameConfig.new())
+		await wait_process_frames(2)
+		for node: Node3D in p.gear().hand_gear():
+			var mesh := node as MeshInstance3D
+			var out := 0
+			for v: Vector3 in mesh.mesh.get_faces():
+				out += 0 if p.camera().is_position_in_frustum(mesh.global_transform * v) else 1
+			assert_eq(out, 0, "%s %s: every vertex is in frame" % [id, mesh.name])
+
+
 func test_every_portrait_wears_its_style_gear_and_idle() -> void:
 	for id: String in CharacterData.IDS:
 		var p := CharacterPortrait.new()

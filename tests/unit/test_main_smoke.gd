@@ -144,3 +144,35 @@ func test_look_preset_follows_the_config() -> void:
 	cfg.emit_changed()
 	assert_eq(LookPreset.last_applied, LookPreset.Look.B)
 	LookPreset.apply(LookPreset.Look.A)
+
+
+func _seeded_main(new_seed: Callable) -> Node:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	main.set("setup", MatchSetup.vs_bots(2, 7))
+	if new_seed.is_valid():
+		main.set("new_seed", new_seed)
+	add_child_autofree(main)
+	return main
+
+
+func test_rematch_draws_a_fresh_seed_from_the_app_source() -> void:
+	var next := [100]
+	var main := _seeded_main(func() -> int:
+		next[0] += 1
+		return next[0])
+	await wait_process_frames(2)
+	var setup: MatchSetup = main.get("setup")
+	assert_eq(setup.seed, 7, "the first match plays the seed it was set up with")
+	var picks := setup.characters()
+	(main.call("get_hud") as Hud).restart_requested.emit()
+	assert_eq(setup.seed, 101, "a rematch gets a new seed")
+	assert_eq(setup.characters(), picks, "and keeps the line-up")
+	(main.call("get_hud") as Hud).restart_requested.emit()
+	assert_eq(setup.seed, 102)
+
+
+func test_rematch_keeps_the_seed_without_a_source() -> void:
+	var main := _seeded_main(Callable())
+	await wait_process_frames(2)
+	(main.call("get_hud") as Hud).restart_requested.emit()
+	assert_eq((main.get("setup") as MatchSetup).seed, 7, "perf, debug and main.tscn alone stay fixed")
