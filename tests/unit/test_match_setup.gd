@@ -34,6 +34,19 @@ func test_validate_reports_problems() -> void:
 	assert_string_contains(s.validate()[0], "slot")
 
 
+func test_arena_id_selects_the_sim_arena() -> void:
+	var cfg := GameConfig.new()
+	var s := MatchSetup.vs_bots(2, 1)
+	assert_eq(s.arena_id, ArenaCatalog.DEFAULT_ID)
+	assert_eq(s.build_arena(cfg).id, ArenaCatalog.DEFAULT_ID)
+	s.arena_id = "log_bridge"
+	assert_eq(s.validate().size(), 0)
+	assert_eq(s.build_arena(cfg).id, "log_bridge")
+	s.arena_id = "nowhere"
+	assert_string_contains(s.validate()[0], "arena")
+	assert_eq(s.build_arena(cfg).id, ArenaCatalog.DEFAULT_ID, "unknown ids fall back to classic")
+
+
 func test_copy_is_independent() -> void:
 	var s := MatchSetup.vs_bots(2, 1)
 	var c := s.copy()

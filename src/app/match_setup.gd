@@ -7,7 +7,7 @@ extends RefCounted
 const MODE_BOT := "bot"
 const MODE_LOCAL_2P := "local_2p"
 const MODE_ONLINE := "online"
-const ARENA_DEFAULT := "default"
+const ARENA_DEFAULT := ArenaCatalog.DEFAULT_ID
 const CONTROLLER_LOCAL := "local"
 const CONTROLLER_BOT := "bot"
 const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT]
@@ -41,6 +41,12 @@ static func all_bots(player_count: int, p_seed: int = DEFAULT_SEED) -> MatchSetu
 static func slot_entry(slot: int, controller: String, input_device: String) -> Dictionary:
 	return {"slot": slot, "character": String(CharacterCatalog.for_player(slot)["name"]),
 		"controller": controller, "input_device": input_device}
+
+
+## A fresh sim arena for arena_id (Phase 4 ArenaCatalog; unknown ids fall back to classic).
+func build_arena(config: GameConfig) -> ArenaData:
+	var arena := ArenaCatalog.build(arena_id, config) if ArenaCatalog.ids().has(arena_id) else null
+	return arena if arena != null else ArenaCatalog.default(config)
 
 
 func player_count() -> int:
@@ -78,6 +84,8 @@ func validate() -> PackedStringArray:
 	var errors := PackedStringArray()
 	if slots.is_empty():
 		errors.append("no slots")
+	if not ArenaCatalog.ids().has(arena_id):
+		errors.append("unknown arena '%s'" % arena_id)
 	for i: int in slots.size():
 		var s := slots[i]
 		if int(s.get("slot", -1)) != i:

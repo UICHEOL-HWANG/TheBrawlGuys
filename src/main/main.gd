@@ -131,7 +131,7 @@ func _start_match() -> void:
 	_local_input.reset()
 	_feel.reset()
 	_stage.clear_items()
-	_world = World.new(_config, setup.seed, setup.player_count())
+	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config))
 	_bots.clear()
 	for slot: int in setup.bot_slots():
 		_bots.append(BotController.new(slot, _config))
