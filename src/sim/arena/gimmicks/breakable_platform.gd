@@ -85,7 +85,7 @@ func _hits_on_top(ctx: GimmickContext) -> int:
 				count += 1
 		elif type == "explosion":
 			var at: Vector3 = e["pos"]
-			if area.contains_xz(at) and at.y - area.center.y <= ctx.config.bomb_radius:
+			if area.contains_xz(at) and absf(at.y - area.center.y) <= ctx.config.bomb_radius:
 				count += 1
 	return count
 
@@ -108,6 +108,8 @@ func load_data(d: Dictionary) -> bool:
 	for key: String in ["state", "timer", "hits"]:
 		if typeof(d.get(key)) != TYPE_INT:
 			return false
+	if not State.values().has(d["state"]) or int(d["hits"]) < 0:
+		return false
 	state = d["state"]
 	timer = d["timer"]
 	hits = d["hits"]

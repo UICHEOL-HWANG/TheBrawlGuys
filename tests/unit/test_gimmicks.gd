@@ -69,6 +69,18 @@ func test_invulnerable_fighter_does_not_catch_fire() -> void:
 	assert_eq(_collect(w, 10, "gimmick_damage").size(), 0)
 
 
+func test_jumping_over_the_fire_is_safe() -> void:
+	var c := GameConfig.new()
+	var w := _world("lakeside_camp", c)
+	var f := w.fighters[0]
+	f.pos = _gimmick(w, "burn_zone").area.center + Vector3.UP * (c.burn_reach_height + 0.5)
+	f.on_ground = false
+	f.vel = Vector3(0, 5, 0)
+	f.set_state(Fighter.State.AIR)
+	w.tick(_neutral())
+	assert_eq(f.burn_ticks, 0, "above burn_reach_height")
+
+
 func test_respawn_puts_the_fire_out() -> void:
 	var c := GameConfig.new()
 	var f := Rules.spawn_fighter(0, 2, c)
@@ -127,6 +139,26 @@ func test_hits_on_a_segment_crack_it_early() -> void:
 	p.step(ctx)
 	assert_eq(p.state, BreakablePlatform.State.CRACKING, "two hits reach platform_hits_to_break")
 	assert_eq(p.timer, SimTime.to_ticks(c.platform_warn_time))
+
+
+func test_explosion_deep_under_a_segment_does_not_count() -> void:
+	var c := GameConfig.new()
+	c.platform_hits_to_break = 1
+	var w := _world("log_bridge", c)
+	var p := _first_platform(w)
+	var deep := {"type": "explosion", "id": 0, "pos": p.area.center + Vector3.DOWN * (c.bomb_radius + 1.0)}
+	p.step(GimmickContext.new(w.fighters, w.arena, c, 5, [deep]))
+	assert_eq(p.state, BreakablePlatform.State.INTACT)
+	var near := {"type": "explosion", "id": 1, "pos": p.area.center + Vector3.UP * 0.5}
+	p.step(GimmickContext.new(w.fighters, w.arena, c, 6, [near]))
+	assert_eq(p.state, BreakablePlatform.State.CRACKING)
+
+
+func test_platform_rejects_an_unknown_state() -> void:
+	var p := BreakablePlatform.new()
+	assert_false(p.load_data({"state": 7, "timer": 3, "hits": 0}))
+	assert_false(p.load_data({"state": 0, "timer": 3, "hits": -1}))
+	assert_true(p.load_data({"state": BreakablePlatform.State.BROKEN, "timer": 3, "hits": 0}))
 
 
 func test_mushroom_bounces_a_landing_fighter() -> void:

@@ -136,6 +136,8 @@ extends Resource
 @export_range(0.0, 20.0, 0.5) var burn_damage: float = 2.0
 @export_range(0.1, 3.0, 0.05) var burn_interval: float = 0.5
 @export_range(0.1, 10.0, 0.1) var burn_duration: float = 2.0
+## Feet higher than this above the fire (m) jump over it unharmed.
+@export_range(0.1, 3.0, 0.05) var burn_reach_height: float = 1.0
 ## Log bridge planks (PRD-ARENA-02): first crack at start + order * interval, cracked for
 ## warn_time, gone for respawn_time, back for rebreak_time before cracking again.
 @export_range(1.0, 120.0, 0.5) var platform_break_start_time: float = 20.0
