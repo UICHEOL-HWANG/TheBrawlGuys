@@ -45,6 +45,16 @@
 - 남은 리뷰 항목: 데스크톱 콜백 `state` 검사 없음(PKCE라 코드 주입은 불가, 조기 종료만 가능) → B1에서 redirect_to에 nonce 추가 / 세션 파일 평문 / 업로드 재시도 없음(matches.id가 클라이언트 uuid라 중복은 PK로 막힘) / 계정당 insert 한도 없음
 - `AuthService`는 아직 씬에 연결 안 됨 → B1
 
+## B1–B4 (2026-09-30, 브랜치 feat/app-shell)
+- 메인 씬 `src/app/app.tscn`: `MenuBackdrop` + `ScreenRouter`(login → title → match, 커튼 전환, `screen_viewed`) + `LoginGate`(AuthService 래핑, 세션 복원 시 바로 타이틀, 모바일·키 없음은 이유 표시 + debug 건너뛰기 `login_skipped`)
+- `MatchSetup`(mode, arena_id→`ArenaCatalog.build`, seed, slots) → `main.tscn`이 재사용 가능한 경기 씬. 단독 실행은 1 vs 봇 기본값. `MatchStage`·`MatchPresentation`·`MatchTracking`·`TickStats`·`LocalHints`로 분리(main.gd 274→170줄)
+- 결과 배너 "메뉴로" → 타이틀 복귀(배경 다시 붙임). 타이틀: 봇 대전 / 로컬 2인·온라인 "준비 중" 비활성 / 로그아웃
+- 루프백 `state` nonce: redirect_to = `http://127.0.0.1:<port>/callback?state=<nonce>`, 콜백은 nonce 일치 요청만 받음 (다른 요청은 404 후 계속 대기)
+- ⚠ Supabase Redirect URLs가 쿼리 붙은 redirect_to를 허용하는지 실로그인으로 확인 필요. 막히면 허용 목록에 `http://127.0.0.1:54321/**` 추가
+- 로그인 디자인 결정: 시안 3개 → 하단 박스안 → 최종 **calm forest 레퍼런스**(`docs/references/ref-login-calmforest.webp`) 유리 카드 + 크레스트(`CrestLogo`, 글자 없음, `assets/branding/crest-1024.png`). 증거 `evidence/login-final*.png`(1920·1280, 등장 6프레임씩)
+- 배경: 낮은 3/4 궤도(pitch 24°), 난투 중심 추적, 화면별 NDC focus, `haze` 거리 안개 + 헤이즈 오버레이, P1~P4 숨김, 텔레메트리 없음
+- 이월: 기존 `scripts/capture_evidence.gd`로 `main.tscn`/`app.tscn`을 `-s` 모드에서 열면 autoload(`Analytics`)가 아직 없어 컴파일 실패 (A6부터 있던 문제). 로그인 캡처는 `scripts/capture_login.gd`(autoload 불필요) 사용. macOS는 가려진 창을 그리지 않으므로 캡처 시 `--always-on-top`
+
 ## 도메인 (2026-09-30)
 - `thebrawlguys.cloud` 구매 완료 (호스팅케이알). 네임서버는 호스팅케이알 기본 유지, 배포(D1) 시 A/CNAME 레코드로 Vercel 연결, HTTPS는 Vercel 자동
 - 배포 시: Vercel 프로젝트 도메인 추가 → 호스팅케이알 DNS 레코드 → Supabase Redirect URLs에 `https://thebrawlguys.cloud` → `secrets.local.cfg`의 `auth.redirect_web`

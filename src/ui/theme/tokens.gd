@@ -40,6 +40,18 @@ const WHITE := Color("#FFFFFF")
 ## Translucent cream surfaces for touch controls over the 3D scene (design.md DS-LAY-01).
 const UI_SURFACE_50 := Color("#FFFDF680")
 const UI_SURFACE_70 := Color("#FFFDF6B3")
+## Menu haze (design.md DS-LAY-03): warm light sage-gray fog over the backdrop diorama.
+const HAZE := Color("#DAD9CB")
+## Frosted glass card (DS-CMP-14): sage tint over the blurred scene, thin light edge.
+const GLASS_TINT := Color("#B9C9B0")
+const GLASS_EDGE := Color("#F4F7EEB3")
+## Soft text shadow for white titles over the scene (canopy_deep 35%).
+const TEXT_SHADOW := Color("#17525A59")
+## Google "G" brand colors — only for the Google mark on the sign-in button (brand rule).
+const GOOGLE_BLUE := Color("#4285F4")
+const GOOGLE_RED := Color("#EA4335")
+const GOOGLE_YELLOW := Color("#FBBC05")
+const GOOGLE_GREEN := Color("#34A853")
 ## Soft ground shadows under falling boxes (design.md DS-VIS-05): deep teal at 40%.
 const GROUND_SHADOW := Color("#17525A66")
 
@@ -104,5 +116,26 @@ const MOTION_FAST := 0.08
 const MOTION_BASE := 0.18
 const MOTION_SQUISH := 0.28
 const MOTION_SLOW := 0.40
+## Calm menu entrances: haze clearing, login card rising (design.md DS-TOK-05).
+const MOTION_CALM := 0.70
 ## Button press squish (design.md DS-TOK-05).
 const PRESS_SQUISH := Vector2(1.04, 0.92)
+
+# --- Menu layout sizes (DS-TOK-03 menu sizes), at 1920x1080 ---
+const BUTTON_MIN_WIDTH := 400
+const BUTTON_HEIGHT := 80
+## Frosted login card (DS-CMP-14): width and the extra-large corner radius.
+const LOGIN_CARD_WIDTH := 560
+const RADIUS_XL := 40
+## Letter spacing of spaced-out taglines.
+const TRACKING_WIDE := 4
+
+# --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
+## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).
+const GLASS_TINT_STRENGTH := 0.5
+const GLASS_TINT_STRENGTH_NO_BLUR := 0.82
+## Blur mip level of the screen texture behind the card.
+const GLASS_BLUR_LOD := 3.5
+## Resting haze over the backdrop and its desaturation; the entrance starts fully hazed.
+const HAZE_AMOUNT := 0.34
+const HAZE_DESATURATE := 0.4

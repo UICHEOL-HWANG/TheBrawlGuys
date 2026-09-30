@@ -24,6 +24,15 @@ static func arena_anchors(radius: float, share: float) -> PackedVector3Array:
 	return PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
 
 
+## The match camera's targets: the arena anchors plus every fighter still in play.
+static func match_targets(view: Dictionary, config: GameConfig) -> PackedVector3Array:
+	var pts := arena_anchors(config.arena_radius, config.cam_arena_share)
+	for f: Dictionary in view["fighters"]:
+		if int(f["state"]) != Fighter.State.KO:
+			pts.append(f["pos"])
+	return pts
+
+
 ## Returns {"center": Vector3, "distance": float}. Defaults (aspect 1, pitch 90) are top-down.
 static func compute(targets: PackedVector3Array, margin: float, zoom_min: float, zoom_max: float,
 		fov_deg: float, aspect: float = 1.0, pitch_deg: float = 90.0) -> Dictionary:

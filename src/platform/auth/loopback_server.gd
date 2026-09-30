@@ -16,6 +16,16 @@ var _peer: StreamPeerTCP = null
 var _buffer: PackedByteArray = PackedByteArray()
 var _deadline_ms: int = 0
 var _peer_deadline_ms: int = 0
+## Only callbacks carrying this state nonce count; others are answered 404 and ignored.
+var _expected_state: String = ""
+
+
+func expect_state(nonce: String) -> void:
+	_expected_state = nonce
+
+
+func expected_state() -> String:
+	return _expected_state
 
 
 func start(port: int, now_ms: int) -> Error:
@@ -55,7 +65,7 @@ func poll(now_ms: int) -> Dictionary:
 	var text := _buffer.get_string_from_utf8()
 	if not text.contains("\r\n") and _buffer.size() < MAX_REQUEST_BYTES:
 		return {}
-	return _answer(parse_request_line(text.get_slice("\r\n", 0)))
+	return _answer(parse_request_line(text.get_slice("\r\n", 0), _expected_state))
 
 
 ## A newer connection replaces a peer that has sent nothing yet (browsers open spare sockets).
@@ -86,8 +96,9 @@ func _answer(result: Dictionary) -> Dictionary:
 
 
 ## "GET /callback?code=X HTTP/1.1" -> {"code": X}; provider errors -> {"error": ...};
-## anything else (favicon, other methods) -> {} so the server keeps waiting.
-static func parse_request_line(line: String) -> Dictionary:
+## anything else (favicon, other methods, a missing or wrong state nonce) -> {} so the server
+## keeps waiting: a stray or forged request can neither finish nor abort the sign-in.
+static func parse_request_line(line: String, expected_state: String = "") -> Dictionary:
 	var parts := line.split(" ")
 	if parts.size() < 2 or parts[0] != "GET":
 		return {}
@@ -95,6 +106,8 @@ static func parse_request_line(line: String) -> Dictionary:
 	if target.get_slice("?", 0) != AuthUrls.CALLBACK_PATH:
 		return {}
 	var query := WebCallback.parse_query(target.substr(target.find("?")) if target.contains("?") else "")
+	if not expected_state.is_empty() and String(query.get(AuthUrls.STATE_PARAM, "")) != expected_state:
+		return {}
 	if query.has("error"):
 		return {"error": String(query["error"])}
 	if String(query.get("code", "")).is_empty():

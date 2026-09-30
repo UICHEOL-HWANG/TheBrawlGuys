@@ -152,7 +152,10 @@ func test_desktop_sign_in_via_loopback() -> void:
 	assert_eq(_opened.size(), 1)
 	var url := _opened[0]
 	assert_string_contains(url, URL + "/auth/v1/authorize?provider=google")
-	assert_string_contains(url, "redirect_to=http%3A%2F%2F127.0.0.1%3A54321%2Fcallback")
+	assert_string_contains(url, "redirect_to=http%3A%2F%2F127.0.0.1%3A54321%2Fcallback%3Fstate%3D")
+	var nonce := _loop.expected_state()
+	assert_eq(nonce.length(), AuthUrls.STATE_LENGTH, "the loopback waits for this sign-in's nonce")
+	assert_string_contains(url, "state%3D" + nonce)
 	_auth.poll()
 	assert_eq(_http.requests.size(), 0, "waiting for the browser")
 	_loop.result = {"code": "code-1"}

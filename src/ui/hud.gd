@@ -4,6 +4,7 @@ extends CanvasLayer
 ## (1v1 at the far left and right, N players spread evenly), result banner in the center.
 
 signal restart_requested
+signal menu_requested
 
 const DAMAGE_COUNTER_SCENE := preload("res://src/ui/components/damage_counter/damage_counter.tscn")
 const STOCK_ICONS_SCENE := preload("res://src/ui/components/stock_icons/stock_icons.tscn")
@@ -63,6 +64,14 @@ func hide_result() -> void:
 	_banner.hide_result()
 
 
+func set_menu_available(on: bool) -> void:
+	_banner.set_menu_available(on)
+
+
+func menu_button() -> UiMenuButton:
+	return _banner.menu_button()
+
+
 func counter_text(i: int) -> String:
 	return _counters[i].text()
 
@@ -91,6 +100,7 @@ func _build_frame() -> void:
 	_banner = RESULT_BANNER_SCENE.instantiate() as ResultBanner
 	center.add_child(_banner)
 	_banner.restart_requested.connect(func() -> void: restart_requested.emit())
+	_banner.menu_requested.connect(func() -> void: menu_requested.emit())
 	get_viewport().size_changed.connect(_apply_safe_area)
 
 

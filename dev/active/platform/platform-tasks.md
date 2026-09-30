@@ -11,10 +11,11 @@
 | A4 | Google OAuth PKCE (웹 리다이렉트·데스크톱 루프백) + 세션 저장 | PRD-AUTH-01 | `test_auth_pkce` + 실로그인 | ✅ |
 | A5 | 마이그레이션 SQL + RLS | PRD-DATA-04 | database-reviewer | ✅ |
 | A6 | MatchTelemetry + MatchRecorder (Amplitude·Supabase) | PRD-DATA-03/04 | `test_match_telemetry` | ✅ |
-| B1 | App 셸 + MatchSetup + 화면 스택 | PRD-UI-02 | `test_app_flow` | ⬜ |
-| B2 | MenuBackdrop 궤도 디오라마 | DS-LAY-03 | 캡처 | ⬜ |
-| B3 | 🖼 로그인 시안 3개 → LoginPanel 확정 | DS-CMP-14 | 사용자 승인 | ⬜ |
-| B4 | MenuButton · Panel | DS-CMP-06/07 | 갤러리 | ⬜ |
+| B1 | App 셸 + MatchSetup + 화면 스택 | PRD-UI-02 | `test_app_flow` | ✅ (feat/app-shell, 미병합) |
+| B2 | MenuBackdrop 궤도 디오라마 | DS-LAY-03 | `test_menu_backdrop` + 캡처 | ✅ (feat/app-shell) |
+| B3 | 🖼 로그인 → LoginPanel 확정 (calm forest 유리 카드) + CrestLogo | DS-CMP-14/15 | 사용자 결정 + `evidence/login-final*.png` | ✅ (feat/app-shell) |
+| B4 | MenuButton · Panel | DS-CMP-06/07 | 갤러리 | ✅ (feat/app-shell) |
+| B5 | 데스크톱 실로그인 확인 (nonce 포함 redirect_to 허용 여부) | PRD-AUTH-01 | 실로그인 | ⬜ 사용자 |
 | D1 | vercel.json + deploy_web.sh + 배포 | PRD-PLT-03 | Vercel URL 동작 | ⬜ |
 | A7 | 리플레이급 입력 로그 `match_inputs` + 재현 메타·`final_state_hash` + 재생 검증, 위치 샘플 행 → `match_timeline` 1Hz 압축 (마이그레이션 0002) | PRD-DATA-04 | `test_input_log`, 재생 일치 | ⬜ |
 | A8 | 식별·버전·맥락, 행동 피처 컬럼, 세션·좌절·성능 이벤트 (analytics-strategy §3) | PRD-DATA-03/04 | `test_event_catalog`, `test_match_telemetry` | ⬜ |

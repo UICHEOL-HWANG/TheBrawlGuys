@@ -84,12 +84,15 @@ func sign_in() -> void:
 		_store.save_verifier(verifier)
 		web.redirect(AuthUrls.authorize(_client.url(), PROVIDER, target, Pkce.challenge(verifier)))
 		return
+	var nonce := AuthUrls.new_state()
+	loopback.expect_state(nonce)
 	if loopback.start(_port, int(clock_ms.call())) != OK:
 		_fail("loopback_port_busy")
 		return
 	_verifier = verifier
 	_listening = true
-	var url := AuthUrls.authorize(_client.url(), PROVIDER, AuthUrls.loopback_redirect(_port), Pkce.challenge(verifier))
+	var redirect := AuthUrls.loopback_redirect(_port, nonce)
+	var url := AuthUrls.authorize(_client.url(), PROVIDER, redirect, Pkce.challenge(verifier))
 	if open_url.call(url) != OK:
 		_stop_listening()
 		_fail("browser_open_failed")

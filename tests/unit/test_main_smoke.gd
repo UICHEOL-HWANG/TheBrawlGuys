@@ -88,6 +88,35 @@ func test_restart_clears_item_views_immediately() -> void:
 	assert_eq(layer.view_count(), 0, "no stale item view survives a restart")
 
 
+func test_match_scene_plays_the_given_setup() -> void:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	var setup := MatchSetup.vs_bots(3, 5)
+	main.set("setup", setup)
+	main.set("menu_available", true)
+	add_child_autofree(main)
+	await wait_seconds(0.3)
+	var w: World = main.call("get_world")
+	assert_eq(w.fighters.size(), 3)
+	var hud: Hud = main.call("get_hud")
+	for i: int in [1, 2]:
+		w.fighters[i].stocks = 1
+		w.fighters[i].pos = Vector3(0, w.config.kill_y - 1, 0)
+	await wait_seconds(0.2)
+	assert_true(hud.result_visible())
+	assert_true(hud.menu_button().visible, "메뉴로 next to 다시 하기")
+	watch_signals(main)
+	hud.menu_button().pressed.emit()
+	assert_signal_emitted(main, "menu_requested")
+
+
+func test_standalone_match_hides_the_menu_button() -> void:
+	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
+	add_child_autofree(main)
+	await wait_seconds(0.1)
+	var hud: Hud = main.call("get_hud")
+	assert_false(hud.menu_button().visible)
+
+
 func test_perf_match_runs_four_bots() -> void:
 	var scene: Node = (load("res://src/debug/perf_match.tscn") as PackedScene).instantiate()
 	add_child_autofree(scene)
