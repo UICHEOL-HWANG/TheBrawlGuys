@@ -111,6 +111,16 @@ func test_walks_to_a_nearby_item_and_picks_it_up() -> void:
 	assert_true(bot.sample(v).grab, "grabs to pick it up when in reach")
 
 
+## Both bots pressing grab at one item: the lower id picks it up and the other's press becomes a
+## grab attack on it (a slot bias in the balance sim), so neither contests an item the foe is at.
+func test_does_not_press_grab_for_an_item_the_foe_can_also_reach() -> void:
+	var c := GameConfig.new()
+	var bot := BotController.new(1, c)
+	var v := _view(Vector3(0, 0, 0), Vector3(0.8, 0, 0))
+	v["items"] = [{"id": 0, "kind": Item.Kind.BAT, "state": Item.State.GROUND, "pos": Vector3(0.4, 0, 0), "uses": 5, "fuse_ticks": Item.UNLIT}]
+	assert_false(bot.sample(v).grab, "the foe stands at the item too: fight instead")
+
+
 func test_ignores_lit_bombs_and_far_items() -> void:
 	var c := GameConfig.new()
 	var bot := BotController.new(1, c)

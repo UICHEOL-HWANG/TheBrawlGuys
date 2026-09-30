@@ -57,12 +57,13 @@ func test_trade_freezes_do_not_depend_on_fighter_ids() -> void:
 	var freezes: Array[Vector2i] = []
 	for heavy_id: int in [0, 1]:
 		var w := _face_off(1.2)
-		var attacks := AttackSet.from_config(w.config)
+		var book := StyleBook.build(w.fighters, w.config)
+		var attacks := book.attacks(0)
 		for f: Fighter in w.fighters:
 			var kind := AttackSet.Kind.HEAVY if f.id == heavy_id else AttackSet.Kind.LIGHT_1
 			Actions.start_attack(f, kind)
 			f.attack_ticks = attacks.get_attack(kind).startup_ticks + 1
-		Combat.resolve(w.fighters, attacks, w.config)
+		Combat.resolve(w.fighters, book, w.config)
 		var light_id := 1 - heavy_id
 		freezes.append(Vector2i(w.fighters[heavy_id].hitstop_ticks, w.fighters[light_id].hitstop_ticks))
 	assert_eq(freezes[0], freezes[1], "same freezes whichever fighter swings the heavy")

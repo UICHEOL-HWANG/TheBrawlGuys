@@ -1,10 +1,12 @@
 class_name AttackSet
 extends RefCounted
 ## Every attack's numbers for one tick, keyed by Kind (PRD §4.3-4.4). Built from GameConfig
-## every tick so debug-panel tuning applies at once; Phase 5 styles will build this table instead.
-## LIGHT_1/2 are link hits and LIGHT_3 is the Phase 1 light attack (context E1).
+## every tick so debug-panel tuning applies at once; Phase 5 styles derive their tables from this
+## one with with_attacks (StyleCatalog). LIGHT_1/2 are link hits and LIGHT_3 is the Phase 1 light
+## attack (context E1). SPECIAL (Phase 5, appended so older values never move) holds the
+## character's special; the classic table keeps a heavy-shaped placeholder there.
 
-enum Kind { LIGHT_1, LIGHT_2, LIGHT_3, HEAVY, GRAB, THROW, BAT, ROCK, BOMB }
+enum Kind { LIGHT_1, LIGHT_2, LIGHT_3, HEAVY, GRAB, THROW, BAT, ROCK, BOMB, SPECIAL }
 
 var _table: Array[AttackData] = []
 
@@ -13,8 +15,17 @@ static func from_config(config: GameConfig) -> AttackSet:
 	var s := AttackSet.new()
 	s._table.assign([
 		_link(config), _link(config), AttackData.light_from(config), _heavy(config), _grab(config),
-		_throw(config), _bat(config), _rock(config), _bomb(config),
+		_throw(config), _bat(config), _rock(config), _bomb(config), _heavy(config),
 	])
+	return s
+
+
+## A new set with the given {Kind: AttackData} entries replaced; this set is left unchanged.
+func with_attacks(overrides: Dictionary) -> AttackSet:
+	var s := AttackSet.new()
+	s._table.assign(_table)
+	for kind: int in overrides:
+		s._table[kind] = overrides[kind]
 	return s
 
 
