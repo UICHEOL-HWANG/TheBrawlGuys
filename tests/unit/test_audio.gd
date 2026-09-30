@@ -46,6 +46,10 @@ func test_director_plays_through_a_voice_pool() -> void:
 	add_child_autofree(d)
 	d.setup(GameConfig.new())
 	assert_eq(d.voices(), SfxDirector.VOICES)
+	assert_eq(d.next_voice(), 0)
+	assert_null(d.voice_stream(0), "no voice has a stream before the first play")
 	for i: int in SfxDirector.VOICES + 3:
 		d.play("hit_light")
-	assert_true(true, "more requests than voices never errors")
+	for i: int in SfxDirector.VOICES:
+		assert_not_null(d.voice_stream(i), "voice %d was used" % i)
+	assert_eq(d.next_voice(), 3, "the round-robin wrapped past the last voice")

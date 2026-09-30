@@ -79,3 +79,13 @@ func play_ui(name: String) -> void:
 
 func voices() -> int:
 	return _players.size()
+
+
+## Index of the voice the next play() will take (read-only, for tests).
+func next_voice() -> int:
+	return _next
+
+
+## The stream a voice last played, or null if it was never used.
+func voice_stream(index: int) -> AudioStream:
+	return _players[index].stream
