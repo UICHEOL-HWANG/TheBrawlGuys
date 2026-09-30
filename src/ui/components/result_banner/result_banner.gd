@@ -2,7 +2,8 @@ class_name ResultBanner
 extends PanelContainer
 ## Match result (design.md DS-CMP-09): "승리!" / "패배…" / "무승부" in Jua display_l with an
 ## elastic pop, plus "다시 하기" and, when an app shell can take the player back, "메뉴로"
-## (both DS-CMP-06 MenuButtons). Hidden until show_result().
+## (both DS-CMP-06 MenuButtons). Hidden until show_result(). With no single local viewer (local
+## 2-player, PRD-LOCAL-01) the winner is named instead: "P2 승리!".
 
 signal restart_requested
 signal menu_requested
@@ -10,6 +11,8 @@ signal menu_requested
 const POP_FROM := 0.8
 const RESTART_TEXT := "다시 하기"
 const MENU_TEXT := "메뉴로"
+## show_result() local_id when no one human's point of view applies.
+const NO_LOCAL := -1
 
 var _title: Label
 var _button: UiMenuButton
@@ -41,6 +44,8 @@ func _ready() -> void:
 func show_result(winner_id: int, local_id: int) -> void:
 	if winner_id == Rules.DRAW:
 		_title.text = "무승부"
+	elif local_id == NO_LOCAL:
+		_title.text = "%s 승리!" % PlayerStyle.label(winner_id)
 	elif winner_id == local_id:
 		_title.text = "승리!"
 	else:

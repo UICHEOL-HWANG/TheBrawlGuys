@@ -2,7 +2,7 @@ class_name Hud
 extends CanvasLayer
 ## In-match HUD (design.md DS-LAY-02): damage counter + stocks per player along the top edge
 ## (1v1 at the far left and right, N players spread evenly), result banner in the center, the
-## local player's key hints along the bottom (DS-CMP-16).
+## local players' key hints along the bottom (DS-CMP-16, one bar per human in local 2-player).
 
 signal restart_requested
 signal menu_requested
@@ -56,6 +56,8 @@ func update_from(view: Dictionary) -> void:
 		_counters[i].set_damage(float(f["damage"]))
 		_counters[i].set_ko(int(f["state"]) == Fighter.State.KO)
 		_stocks[i].set_stocks(int(f["stocks"]))
+	if _key_hints != null:
+		_key_hints.update_gauges(view)
 
 
 func show_result(winner_id: int, local_id: int) -> void:
@@ -74,13 +76,14 @@ func menu_button() -> UiMenuButton:
 	return _banner.menu_button()
 
 
-## Keyboard key bar at the bottom (DS-CMP-16) for the local player; hidden while touch is active.
-func show_key_hints(accent: Color, touch_active: Callable) -> void:
+## Keyboard key bars at the bottom (DS-CMP-16), one per local player {prefix, slot, accent}
+## (LocalPlayers.hint_players()); hidden while touch is active.
+func show_key_hints(players: Array[Dictionary], touch_active: Callable) -> void:
 	if _key_hints != null:
 		return
 	_key_hints = KeyHintHud.new()
 	add_child(_key_hints)
-	_key_hints.setup(accent, touch_active, SettingsStore.new(),
+	_key_hints.setup_players(players, touch_active, SettingsStore.new(),
 			func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props))
 
 

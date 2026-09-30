@@ -12,6 +12,9 @@ const CONTROLLER_LOCAL := "local"
 const CONTROLLER_BOT := "bot"
 const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT]
 const INPUT_BOT := "bot"
+const INPUT_KEYBOARD := "keyboard"
+## Humans in a local 2-player match (PRD-LOCAL-01): P1 and P2, always the first two slots.
+const LOCAL_2P_HUMANS := 2
 const DEFAULT_SEED := 1
 const DEFAULT_PLAYERS := 2
 
@@ -30,6 +33,16 @@ static func vs_bots(player_count: int = DEFAULT_PLAYERS, p_seed: int = DEFAULT_S
 		var is_local := i == local_slot_index
 		s.slots.append(slot_entry(i, CONTROLLER_LOCAL if is_local else CONTROLLER_BOT,
 				PlatformEnv.default_input_device() if is_local else INPUT_BOT))
+	return s
+
+
+## Local 2-player (PRD-LOCAL-01): P1 and P2 on slots 0 and 1 (P2 on the keyboard until a pad is
+## assigned at match start), bots fill any slot after them. Default characters per slot.
+static func local_versus(player_count: int = DEFAULT_PLAYERS, p_seed: int = DEFAULT_SEED) -> MatchSetup:
+	var s := vs_bots(player_count, p_seed)
+	s.mode = MODE_LOCAL_2P
+	if player_count > 1:
+		s.slots[1] = slot_entry(1, CONTROLLER_LOCAL, INPUT_KEYBOARD)
 	return s
 
 
@@ -59,6 +72,26 @@ func local_slot() -> int:
 		if s["controller"] == CONTROLLER_LOCAL:
 			return int(s["slot"])
 	return -1
+
+
+## Every local slot in slot order (P1, P2, ...).
+func local_slots() -> Array[int]:
+	var out: Array[int] = []
+	for s: Dictionary in slots:
+		if s["controller"] == CONTROLLER_LOCAL:
+			out.append(int(s["slot"]))
+	return out
+
+
+## slot -> input_device for local slots (the device each human plays with at match start); bot
+## slots and unknown slots are left alone. Slot entries are replaced, never edited in place.
+func set_input_devices(devices: Dictionary) -> void:
+	for i: int in slots.size():
+		var s := slots[i]
+		if s["controller"] == CONTROLLER_LOCAL and devices.has(int(s["slot"])):
+			var updated := s.duplicate()
+			updated["input_device"] = String(devices[int(s["slot"])])
+			slots[i] = updated
 
 
 func bot_slots() -> Array[int]:

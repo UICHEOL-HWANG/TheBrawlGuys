@@ -76,7 +76,7 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_true(_names().has("login_skipped"))
 	var title := app.router().current() as TitleScreen
 	await wait_process_frames(1)
-	assert_true(title.mode_button(MatchSetup.MODE_LOCAL_2P).disabled, "로컬 2인 · 준비 중")
+	assert_false(title.mode_button(MatchSetup.MODE_LOCAL_2P).disabled, "로컬 2인 is live on desktop")
 	assert_true(title.mode_button(MatchSetup.MODE_ONLINE).disabled)
 	title.mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
@@ -122,6 +122,23 @@ func test_backing_out_of_arena_select_returns_to_the_title() -> void:
 	assert_eq(app.router().current_id(), App.TITLE)
 	assert_eq(_props("select_cancelled")[0]["screen"], App.ARENA)
 	assert_true(app.backdrop().is_inside_tree(), "the backdrop never left")
+
+
+func test_local_2p_picks_an_arena_then_starts_two_humans() -> void:
+	var app := _app(false)
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	var title := app.router().current() as TitleScreen
+	await wait_process_frames(1)
+	title.mode_button(MatchSetup.MODE_LOCAL_2P).pressed.emit()
+	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_LOCAL_2P)
+	assert_eq(app.router().current_id(), App.ARENA, "local 2P also picks an arena")
+	await wait_process_frames(1)
+	(app.router().current() as ArenaSelectScreen).cards()[0].press()
+	assert_eq(app.router().current_id(), App.MATCH)
+	var setup := app.router().current().get("setup") as MatchSetup
+	assert_eq(setup.mode, MatchSetup.MODE_LOCAL_2P)
+	assert_eq(setup.local_slots(), [0, 1] as Array[int])
 
 
 func test_restored_session_skips_the_login_screen() -> void:

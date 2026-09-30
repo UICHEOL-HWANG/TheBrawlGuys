@@ -1,8 +1,9 @@
 class_name TitleScreen
 extends Control
 ## Title / mode select (platform B1, design.md DS-LAY-03): the logo on top and, in the lower
-## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 is live, 로컬 2인 and 온라인 are shown disabled ("준비 중") until
-## Phase 5/6 — plus a small 로그아웃 in the top-right corner.
+## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 and 로컬 2인
+## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) are live, 온라인 is shown
+## disabled ("준비 중") until Phase 6 — plus a small 로그아웃 in the top-right corner.
 
 signal mode_chosen(mode: String)
 signal logout_requested
@@ -10,9 +11,11 @@ signal logout_requested
 ## [mode, label, enabled]
 const MODES: Array[Array] = [
 	[MatchSetup.MODE_BOT, "봇 대전", true],
-	[MatchSetup.MODE_LOCAL_2P, "로컬 2인 · 준비 중", false],
+	[MatchSetup.MODE_LOCAL_2P, "로컬 2인", true],
 	[MatchSetup.MODE_ONLINE, "온라인 · 준비 중", false],
 ]
+## Local 2-player needs a keyboard or pads: touch-only mobile shows it disabled with this label.
+const LOCAL_2P_MOBILE_TEXT := "로컬 2인 · 데스크톱 전용"
 const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
 const PANEL_POP_FROM := 0.9
@@ -43,7 +46,10 @@ func _ready() -> void:
 	list.add_theme_constant_override("separation", DS.S4)
 	_panel.add_child(list)
 	for m: Array in MODES:
-		list.add_child(_mode_button(String(m[0]), String(m[1]), bool(m[2])))
+		var mode := String(m[0])
+		var mobile_2p := mode == MatchSetup.MODE_LOCAL_2P and PlatformEnv.kind() == "mobile"
+		list.add_child(_mode_button(mode, LOCAL_2P_MOBILE_TEXT if mobile_2p else String(m[1]),
+				bool(m[2]) and not mobile_2p))
 	_add_logout()
 	(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred()
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)

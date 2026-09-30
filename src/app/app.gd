@@ -112,10 +112,14 @@ func _on_restore_failed(session_dropped: bool) -> void:
 
 func _on_mode_chosen(mode: String) -> void:
 	track.call("mode_selected", {"mode": mode})
-	if mode != MatchSetup.MODE_BOT:
-		return  # 로컬 2인 · 온라인: shown disabled until Phase 5/6
-	var setup := MatchSetup.vs_bots()
-	setup.mode = mode
+	var setup: MatchSetup
+	match mode:
+		MatchSetup.MODE_BOT:
+			setup = MatchSetup.vs_bots()
+		MatchSetup.MODE_LOCAL_2P:
+			setup = MatchSetup.local_versus()  # P1 vs P2, default characters (select screen: T9)
+		_:
+			return  # 온라인: shown disabled until Phase 6
 	_select_step(setup, 0)
 
 
