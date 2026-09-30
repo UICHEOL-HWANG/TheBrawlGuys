@@ -304,16 +304,16 @@
 
 | 파라미터 (글로벌 유니폼) | 초안 값 | 비고 |
 |---|---|---|
-| `ds_band_count` | 2 | 밝음 · 그림자 (레퍼런스처럼 단순하게) |
+| `ds_band_count` | 2 | 밝음 · 그림자 (레퍼런스처럼 단순하게). 셰이더에 고정, 글로벌 유니폼은 아님 |
 | `ds_band_softness` | 0.12 | 경계가 부드럽게 번짐 |
-| `ds_shadow_tint` | `grass_shade` 쪽 청록 이동 | 그림자는 절대 회색·검정이 아님 |
-| `ds_shadow_strength` | 0.45 | 바닥에 드리운 그림자의 반투명도 |
+| `ds_shadow_tint` | `grass_shade` 쪽 청록 이동 (project.godot 값 `Color(0.42, 0.6, 0.58)`) | 그림자는 절대 회색·검정이 아님 |
+| `ds_shadow_strength` | 0.45 | 바닥에 드리운 그림자의 반투명도. 초안 값, 유니폼으로 구현되지 않음 (발밑 블롭은 `GROUND_SHADOW` 40%, 실시간 그림자는 라이트 설정) |
 | `ds_rim_strength` | 0.35 | 캐릭터·아이템만. 외곽선 대신 형태를 떼어냄. Phase 3: 글로벌 유니폼(룩 프리셋이 설정) |
 | `ds_char_saturation` | 1.0 | Phase 3 글로벌 유니폼. 캐릭터 채도 배율 (룩 프리셋 B는 +15%) |
 | `ds_outline_width` | 0.0 | Phase 3 글로벌 유니폼. 캐릭터 전용 외곽선(inverted hull) 두께, 0이면 없음 |
 | `ds_outline_color` | `canopy_deep` | Phase 3 글로벌 유니폼. 외곽선 색 (룩 프리셋 C에서 사용) |
-| `ds_ao_strength` | 0.3 | 구 클러스터 사이 접촉부만 살짝 어둡게 (버텍스 AO로 베이크) |
-| `ds_bloom` | 약하게 | 캠프파이어·햇빛 반사·차지 광만 번짐 |
+| `ds_ao_strength` | 0.3 | 구 클러스터 사이 접촉부만 살짝 어둡게 (버텍스 AO로 베이크). 초안 값, 미구현 |
+| `ds_bloom` | 약하게 | 캠프파이어·햇빛 반사·차지 광만 번짐. 구현: `EnvironmentRig` glow 강도 0.35 (웹 0.20), 품질 LOW·MEDIUM에서는 끔 |
 
 - **외곽선 정책**: 월드·소품에는 쓰지 않는다. 캐릭터 가독성이 부족하면 Phase 3 🖼 게이트에서 "캐릭터 전용 얇은 `canopy_deep` 외곽선" 옵션을 비교한다.
 - 그림자: 실시간 그림자 1개(태양) + 블롭 그림자(캐릭터 발밑, 저사양 대체)
@@ -449,7 +449,7 @@
 | DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
-| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | ✅ |
+| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
 | GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ✅ |

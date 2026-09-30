@@ -209,7 +209,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 - [ ] 🖼 캐릭터 룩 시안 비교 (림 강도 · 채도 · 캐릭터 전용 외곽선 유무) — 레퍼런스 A와 나란히 비교 → 확정 `[DS-VIS-01]` `[DS-VIS-02]` — 🖼 대기 (T7): 룩 프리셋 A 유지, 근접 캡처 `evidence/look-closeup-{0,1,2}.png`
 - [x] 소프트 툰 셰이딩 최종화, 셰이더 파라미터를 글로벌 유니폼 토큰화 `[DS-VIS-01]` `[PRD-FX-03]`
-- [x] VFX 라이브러리: 히트 퍼프, 착지 먼지, 넉백 궤적, 링아웃(물보라·별 폭발), 리스폰, 차지 광 `[DS-VFX-01~06]` `[PRD-FX-02]`
+- [x] VFX 라이브러리: 히트 퍼프, 착지 먼지, 넉백 궤적, 링아웃(물보라·별 폭발), 리스폰, 차지 광 `[DS-VFX-01~06]` `[PRD-FX-02]` — 히트 퍼프(DS-VFX-01)는 Phase 3에서 바뀌지 않은 v1 그대로
 - [x] 넉백 궤적 강도 = 넉백 크기 연동 `[GD-FEEL-04]`
 - [x] SFX 세트: 타격(약·강), 점프, 착지, 링아웃, 아이템, UI 클릭 `[DS-SFX-01]` `[PRD-FX-02]`
 - [x] BGM: 대전 루프 + 마지막 스톡 인텐스 레이어 + 메뉴 변주 (오리지널, 라이선스 `ASSETS.md`) `[DS-SFX-02]` `[PRD-FX-02]`
@@ -224,8 +224,8 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 - [x] 캡슐 버전과 같은 리플레이 해시 → 조작감 동일 — `BEHAVIOR_HASH` 1822125224 (커밋 61bd3ba에서 고정) Phase 3 내내 불변. `GOLDEN_HASH`는 cf80ce7(지문을 sim 그룹으로 한정)에서 한 번만 변경 (2953754395)
 - [ ] 중급 모바일 기기 4인 봇전 60fps 유지 (프로파일러 캡처) `[PRD-NFR-01]` — 실기기 확인 대기 (데스크톱 품질별 4인 봇전: `dev/active/phase-3/evidence/performance.md`, 상한 해제 후 LOW·MEDIUM·HIGH 모두 평균 6.9ms/145fps, p95 7.3ms 이하)
-- [x] 모바일 빌드 ≤ 150MB, 웹 초기 로딩 ≤ 40MB `[PRD-NFR-05]` — `check_build_size.sh`: android apk 36 MB (≤150), web pck+wasm gzip -9 18 MB (≤40, 원본 47 MB). 웹 예산은 압축 전송 크기로 측정 (컨트롤러 판정)
-- [ ] 웹(Compatibility)에서도 툰 룩이 유지된다 (스크린샷 비교) — 최종 수정 단계에서 조정 중 (현재 웹 캡처가 데스크톱보다 어둡고 올리브 톤: `evidence/web-toon.png` vs `evidence/desktop-toon.png`)
+- [x] 모바일 빌드 ≤ 150MB, 웹 초기 로딩 ≤ 40MB `[PRD-NFR-05]` — `check_build_size.sh`: android apk 36 MB (≤150), web pck+wasm gzip -9 18 MB (≤40, 원본 47 MB). `build/.gdignore` 추가 후 재빌드: apk 37.9MB, web pck 9.87MB(이전 10.03MB)·wasm 39.5MB, iOS export 로그의 `res://build` 오류 45건 → 0건. 웹 예산은 압축 전송 크기로 측정 (컨트롤러 판정)
+- [x] 웹(Compatibility)에서도 툰 룩이 유지된다 (스크린샷 비교) `[PRD-PLT-05]` — 웹 기본 품질 LOW(블룸 끔)에서 어둡던 문제를 `EnvironmentRig`의 (Compat, 블룸 끔) 전용 광량으로 보정. 웹 LOW 캡처의 아레나 윗면 픽셀 (160,215,84) vs `DS.GRASS` (165,214,90), 채널당 ±12 이내. `evidence/web-toon.png` vs `evidence/desktop-toon.png`
 
 ---
 

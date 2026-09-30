@@ -1,7 +1,7 @@
 # Phase 3 — Context
 
 **Last Updated:** 2026-09-30
-**상태:** 구현 완료, 최종 리뷰 대기 (🖼 T7 대기, 웹 툰 룩 최종 수정 단계에서 조정 중)
+**상태:** 구현 완료, 최종 수정 웨이브(F1~F9) 반영 (🖼 T7 대기)
 **계획:** [`phase-3-plan.md`](./phase-3-plan.md) · **체크리스트:** [`phase-3-tasks.md`](./phase-3-tasks.md)
 **이전 Phase:** [`dev/done/phase-2/phase-2-context.md`](../../done/phase-2/phase-2-context.md)
 
@@ -105,10 +105,10 @@
 
 ### 측정값
 
-- 테스트: 388개 (387 통과, 1 보류: `test_apply_sets_global_uniforms`, 헤드리스 렌더러는 글로벌 셰이더 파라미터를 읽지 못함). `check-all.sh` ALL CHECKS PASSED
+- 테스트: 398개 전부 통과, 보류 0 (보류였던 `test_apply_sets_global_uniforms`는 `LookPreset.uniforms_for` 실검증으로 대체). `check-all.sh` ALL CHECKS PASSED `check-all.sh` ALL CHECKS PASSED
 - 성능 (데스크톱 Mac14,7, 4인 봇전, vsync 끔, `evidence/performance.md`): 상한 해제(Engine.max_fps 0) 측정: LOW 평균 6.9ms/144.9fps (p95 7.3ms, 출시 상한 30), MEDIUM 6.9ms/144.9fps (p95 7.2ms, 상한 60), HIGH 6.9ms/144.9fps (p95 7.2ms, 상한 60). 세 단계가 같은 값으로 수렴하므로 렌더 비용이 창/디스플레이 한계보다 작다는 뜻이며, 60fps 상한(16.7ms) 대비 2배 이상 여유
-- 빌드 크기 (`check_build_size.sh`): Android APK 36MB (예산 150). 웹 pck+wasm 원본 47MB, gzip -9 18MB (예산 40). 웹 예산은 압축 전송 크기로 측정한다 (컨트롤러 판정)
-- 웹 비교: `evidence/web-toon.png` vs `evidence/desktop-toon.png`. 웹이 데스크톱보다 어둡고 올리브 톤이라 "웹 툰 룩 유지"는 미체크. 최종 수정 단계에서 재캡처 후 갱신
+- 빌드 크기 (`check_build_size.sh`): Android APK 36MB (예산 150). 웹 pck+wasm 원본 47MB, gzip -9 18MB (예산 40). `build/.gdignore` 추가 후: apk 37.9MB, pck 9.87MB(이전 10.03MB), wasm 39.5MB, iOS export의 `res://build` 오류 45건 → 0건. 웹 예산은 압축 전송 크기로 측정한다 (컨트롤러 판정)
+- 웹 비교: `evidence/web-toon.png` vs `evidence/desktop-toon.png`. 원인: 웹 기본 품질 LOW가 블룸을 끄는데 COMPAT 광량은 블룸 켠 상태로 맞춰져 있었음 (LOW 웹 아레나 윗면 (114,155,58), HIGH 강제 시 (162,224,80)). (Compat, 블룸 끔) 전용 광량 sun 0.62/ambient 0.56으로 (160,215,84), `DS.GRASS` (165,214,90) 대비 채널당 ±12 이내. "웹 툰 룩 유지" 체크
 
 ### 알려진 차이
 
