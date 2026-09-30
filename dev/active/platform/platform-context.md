@@ -91,3 +91,8 @@
 - 미해결: 세션 경계(백그라운드 30분 후 새 session_id)는 아직 없음 — `session_ended`는 종료·일시정지 때 1회. 봇 난이도는 아직 단일(normal)
 - 사용자 할 일: Supabase SQL Editor에서 `supabase/migrations/0002_replay_and_features.sql` 실행 (0001 다음). 실행 전 빌드는 새 열 때문에 업로드가 400으로 실패한다
 
+
+## 웹 로딩 화면 (2026-10-01, 사용자 선택: 시안 B "깊은 숲")
+- Godot 로고 제거: `project.godot` `application/boot_splash/image` = `assets/branding/boot-splash.png`(크레스트 + 제목, `scripts/export_boot_splash.gd`로 생성), `bg_color` = canopy_deep
+- 웹은 커스텀 셸 `deploy/web_shell.html`(Godot 4.7 기본 셸 기반, export preset `html/custom_html_shell`): 같은 스플래시 이미지 + canopy 트랙·grass 진행 바 + "불러오는 중… N%", 한국어 오류 문구. 페이지 → 엔진 부트 스플래시가 같은 그림·색이라 끊김 없음
+- 시안 비교: `evidence/loading-compare.html`

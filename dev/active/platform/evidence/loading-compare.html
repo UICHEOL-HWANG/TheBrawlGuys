@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로딩 화면 시안</title>
+<style>
+  body { margin: 0; padding: 24px 16px; background: #F3EEE7; font-family: -apple-system, "Pretendard", sans-serif; color: #17525A; }
+  h1 { font-size: 20px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .shot { aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 10px #0002; }
+  .crest { width: 72px; height: 72px; }
+  .bar { width: 55%; height: 8px; border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 62%; border-radius: 4px; animation: fill 3s ease-in-out infinite; }
+  @keyframes fill { 0% { width: 5%; } 100% { width: 100%; } }
+  .fillmask { animation: rise 3s ease-in-out infinite; }
+  @keyframes rise { 0% { height: 5%; } 100% { height: 100%; } }
+  p { font-size: 14px; line-height: 1.5; margin: 8px 2px 0; }
+  b { font-size: 15px; }
+</style>
+</head>
+<body>
+<h1>웹 로딩 화면 시안 (Godot 로고 대체)</h1>
+<div class="grid">
+  <div>
+    <div class="shot" style="background:#DCEBEF">
+      <img class="crest" src="../../../../assets/branding/crest-1024.png" alt="">
+      <div style="font-size:22px;font-weight:700;color:#17525A">The Brawl Guys</div>
+      <div style="font-size:12px;color:#4E7F78;letter-spacing:3px">치고, 날리고, 끝까지 버티기</div>
+      <div class="bar" style="background:#FFFFFFAA"><i style="background:#F5D53D"></i></div>
+      <div style="font-size:12px;color:#4E7F78">숲으로 가는 중…</div>
+    </div>
+    <p><b>A. 로그인 톤 (추천)</b> — 안개 낀 하늘색 배경 + 노란 진행 바. 로딩이 끝나면 같은 톤의 로그인 화면으로 끊김 없이 이어짐</p>
+  </div>
+  <div>
+    <div class="shot" style="background:#17525A">
+      <img class="crest" src="../../../../assets/branding/crest-1024.png" alt="">
+      <div style="font-size:22px;font-weight:700;color:#F3EEE7">The Brawl Guys</div>
+      <div class="bar" style="background:#2E8C86"><i style="background:#A5D65A"></i></div>
+      <div style="font-size:12px;color:#9CB79A">불러오는 중…</div>
+    </div>
+    <p><b>B. 깊은 숲</b> — 진한 청록 배경 + 풀색 바. 대비가 강해 로고가 또렷함. 로그인 화면(밝은 톤)으로 넘어갈 때 밝기 차가 큼</p>
+  </div>
+  <div>
+    <div class="shot" style="background:#F3EEE7">
+      <div style="position:relative;width:96px;height:96px">
+        <img src="../../../../assets/branding/crest-1024.png" alt="" style="width:96px;height:96px;filter:grayscale(1);opacity:.3;position:absolute;left:0;top:0">
+        <div class="fillmask" style="position:absolute;left:0;right:0;bottom:0;overflow:hidden">
+          <img src="../../../../assets/branding/crest-1024.png" alt="" style="width:96px;height:96px;position:absolute;left:0;bottom:0">
+        </div>
+      </div>
+      <div style="font-size:13px;color:#6C5A66">불러오는 중</div>
+    </div>
+    <p><b>C. 미니멀</b> — 크림 배경, 진행 바 없이 크레스트가 아래부터 색으로 차오름. 가장 깔끔하지만 진행률 읽기는 덜 직관적</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: $GODOT_SPLASH_COLOR;
+	overflow: hidden;
+	touch-action: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+/* Loading screen (DS "deep forest" option B): canopy_deep backdrop, the boot splash image
+   (crest + title, scripts/export_boot_splash.gd) and a grass progress pill. Godot then shows the
+   same image on the same colour, so the page hands off to the engine without a jump. */
+#status {
+	position: absolute;
+	inset: 0;
+	background-color: $GODOT_SPLASH_COLOR;
+	visibility: hidden;
+}
+
+#status-splash {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	position: absolute;
+	left: 50%;
+	/* Just under the title: the splash is 16:9, scaled to fit, title bottom ~20 % of its height
+	   below the centre, so this tracks it in landscape and portrait alike. */
+	top: calc(50% + min(25vh, 14vw));
+	transform: translateX(-50%);
+	width: min(360px, 60vw);
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+#status-track {
+	width: 100%;
+	height: 8px;
+	border-radius: 4px;
+	background-color: #2E8C86; /* canopy */
+	overflow: hidden;
+}
+
+#status-fill {
+	width: 8%;
+	height: 100%;
+	border-radius: 4px;
+	background-color: #A5D65A; /* grass */
+	transition: width 0.25s ease-out;
+}
+
+#status-fill.indeterminate {
+	width: 30%;
+	animation: sweep 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes sweep {
+	from { transform: translateX(0); }
+	to { transform: translateX(233%); }
+}
+
+#status-label {
+	color: #9CB79A; /* grass_mist */
+	font: 500 14px/1.2 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+	letter-spacing: 1px;
+}
+
+#status-notice {
+	position: absolute;
+	left: 16px;
+	right: 16px;
+	bottom: 12%;
+	background-color: #FFFDF6; /* ui_surface */
+	border-radius: 12px;
+	color: #17525A; /* canopy_deep */
+	font: 14px/1.4 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
+			<div id="status-progress" role="progressbar" aria-label="불러오는 중">
+				<div id="status-track"><div id="status-fill" class="indeterminate"></div></div>
+				<div id="status-label">불러오는 중…</div>
+			</div>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+	const statusFill = document.getElementById('status-fill');
+	const statusLabel = document.getElementById('status-label');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'flex' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('알 수 없는 오류가 났어요. 새로고침해 주세요.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			// There's a chance that installing the service worker would fix the issue
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				// For some reason, `getRegistration()` can stall
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				// Reload if there was no error.
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			// Display the message as usual
+			const missingMsg = '이 브라우저에서는 게임을 실행할 수 없어요. 최신 Chrome·Safari·Edge로 열어 주세요.\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					const pct = Math.min(100, Math.round((current / total) * 100));
+					statusFill.classList.remove('indeterminate');
+					statusFill.style.width = pct + '%';
+					statusLabel.textContent = '불러오는 중… ' + pct + '%';
+				} else {
+					statusFill.classList.add('indeterminate');
+					statusLabel.textContent = '불러오는 중…';
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>

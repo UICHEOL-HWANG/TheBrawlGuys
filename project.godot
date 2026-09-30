@@ -6,6 +6,8 @@ config_version=5
 config/name="TheBrawlGuys"
 config/features=PackedStringArray("4.7", "Mobile")
 run/main_scene="res://src/app/app.tscn"
+boot_splash/bg_color=Color(0.0901961, 0.321569, 0.352941, 1)
+boot_splash/image="res://assets/branding/boot-splash.png"
 
 [autoload]
 
