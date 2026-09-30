@@ -22,8 +22,9 @@ var _reactions: Array[HitReaction] = []
 var _items: ItemLayer
 
 
+## characters[i]: slot i's CharacterData id, which picks its model ("" / missing = slot model).
 func setup(config: GameConfig, decor_seed: int, player_count: int,
-		arena_id: String = ArenaCatalog.DEFAULT_ID) -> void:
+		arena_id: String = ArenaCatalog.DEFAULT_ID, characters: Array[String] = []) -> void:
 	_config = config
 	_decor_seed = decor_seed
 	_env = EnvironmentRig.new()
@@ -33,7 +34,7 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 	for i: int in player_count:
 		var view := FighterView.new()
 		add_child(view)
-		view.setup(i, config)
+		view.setup(i, config, characters[i] if i < characters.size() else CharacterData.DEFAULT)
 		_views.append(view)
 		var fx := DefenseFx.new()
 		view.add_child(fx)

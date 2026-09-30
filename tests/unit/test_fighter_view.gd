@@ -115,3 +115,16 @@ func test_fighter_view_draws_the_catalog_character() -> void:
 		v.apply(d, d, 1.0, t)
 		seen[v.model().visible] = true
 	assert_eq(seen.size(), 2, "the model blinks while invulnerable")
+
+
+func test_the_chosen_character_picks_the_model_and_the_slot_picks_the_ring() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	v.setup(1, GameConfig.new(), CharacterData.MAGE)
+	assert_not_null(v.model())
+	assert_eq(v.identity().ring_shape(), PlayerStyle.Shape.TRIANGLE, "P2's ring is a triangle")
+	assert_eq(v.identity().label().text, "P2")
+	var mage := v.model().find_children("*", "MeshInstance3D", true, false).map(func(n: Node) -> String: return n.name)
+	assert_has(mage, "Mage_Body", "P2 plays the Mage model, not the slot's Knight/Barbarian")
+	v.set_identity_visible(false)
+	assert_false(v.identity().ring().visible)

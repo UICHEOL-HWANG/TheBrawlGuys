@@ -158,6 +158,8 @@ func test_match_ended_summaries() -> void:
 	assert_eq(p1["falls"], 2)
 	assert_eq(p1["falls_by_gimmick"], 1)
 	assert_eq(p1["result"], "loss")
+	assert_eq([p0["character"], p0["style"]], ["Knight", "default"], "per-style summary: who played what")
+	assert_eq([p1["character"], p1["style"]], ["Barbarian", "default"])
 
 
 func test_guard_and_grab_counts() -> void:

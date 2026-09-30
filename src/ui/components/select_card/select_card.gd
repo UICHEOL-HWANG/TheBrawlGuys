@@ -5,9 +5,12 @@ extends PanelContainer
 ## (GimmickIcon). States: idle · focus (petal-yellow ring, slightly larger, also on hover) ·
 ## selected (ring in ring_color — the accent for arenas, the player color for characters — and
 ## larger) · locked (dim surface, "준비 중", cannot be pressed). A click or tap — pressed and
-## released on this card — emits pressed.
+## released on this card — emits pressed. Character cards swap the diorama for a portrait
+## (set_thumb), show whose cursor is on them (set_marks: player markers) and let the screen own
+## the state (follow_focus off: hover emits hovered instead of taking the GUI focus).
 
 signal pressed
+signal hovered
 
 enum State { IDLE, FOCUS, SELECTED, LOCKED }
 
@@ -15,7 +18,10 @@ const LOCK_TEXT := "준비 중"
 
 ## Ring of the selected state (Phase 5 passes the player color).
 var ring_color: Color = DS.UI_ACCENT
+## Off: focus and hover never change the state (a screen with several cursors sets it).
+var follow_focus: bool = true
 var _state: int = State.IDLE
+var _marks: CardMarks
 var _thumb: ArenaThumb
 var _title: Label
 var _caption: Label
@@ -30,6 +36,8 @@ func _init() -> void:
 	col.add_theme_constant_override("separation", DS.S3)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(col)
+	_marks = CardMarks.new()
+	add_child(_marks)  # a second panel child: overlays the thumbnail's top corner, takes no height
 	_thumb = ArenaThumb.new()
 	col.add_child(_thumb)
 	_title = _label(DS.FONT_DISPLAY_PATH, DS.SIZE_TITLE)
@@ -54,8 +62,12 @@ func _ready() -> void:
 	focus_entered.connect(func() -> void: _follow(State.FOCUS))
 	focus_exited.connect(func() -> void: _follow(State.IDLE))
 	mouse_entered.connect(func() -> void:
-		if _state != State.LOCKED:
-			grab_focus())
+		if _state == State.LOCKED:
+			return
+		if follow_focus:
+			grab_focus()
+		else:
+			hovered.emit())
 	resized.connect(func() -> void: pivot_offset = size * 0.5)
 	_apply()
 
@@ -104,6 +116,21 @@ func thumb() -> ArenaThumb:
 	return _thumb
 
 
+## Replaces the diorama with another thumbnail (a CharacterPortrait) in the same place.
+func set_thumb(node: Control) -> void:
+	_thumb.visible = false
+	_thumb.add_sibling(node)
+
+
+## Player indices whose cursor is on this card (DS-VIS-03 markers above the thumbnail).
+func set_marks(players: Array[int]) -> void:
+	_marks.set_players(players)
+
+
+func marks() -> Array[int]:
+	return _marks.players()
+
+
 func set_preview() -> void:
 	var icons: Array[String] = ["water", "fire"]
 	var diorama := {"extent": 13.0, "floors": [ArenaShape.circle(Vector3.ZERO, 10.0).to_view()],
@@ -128,7 +155,7 @@ func _gui_input(event: InputEvent) -> void:
 
 ## Focus / hover changes never override selected or locked.
 func _follow(s: int) -> void:
-	if _state == State.SELECTED or _state == State.LOCKED:
+	if not follow_focus or _state == State.SELECTED or _state == State.LOCKED:
 		return
 	set_state(s)
 

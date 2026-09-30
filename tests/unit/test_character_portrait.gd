@@ -1,0 +1,17 @@
+extends GutTest
+## Character portraits on the character select cards (DS-CMP-08 썸네일): the character's own model
+## on a small stage, redrawn every frame only while live (focused or picked) to save the GPU.
+
+
+func test_portrait_shows_the_character_model_and_goes_still_when_not_live() -> void:
+	var p := CharacterPortrait.new()
+	add_child_autofree(p)
+	p.setup(CharacterCatalog.for_character(CharacterData.MAGE, 0), GameConfig.new())
+	await wait_process_frames(2)
+	assert_not_null(p.model(), "the model loaded")
+	assert_eq(p.custom_minimum_size, Vector2(DS.CARD_WIDTH - DS.S5 * 2, DS.CARD_THUMB_HEIGHT))
+	p.set_live(true)
+	assert_eq(p.viewport().render_target_update_mode, SubViewport.UPDATE_WHEN_VISIBLE,
+			"live, but never drawn while the select screen hides under the arena screen or the match")
+	p.set_live(false)
+	assert_eq(p.viewport().render_target_update_mode, SubViewport.UPDATE_ONCE)

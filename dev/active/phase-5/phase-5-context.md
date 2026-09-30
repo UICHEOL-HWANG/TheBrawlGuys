@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-10-01 00:00 KST (main 병합: phase5-sim · p5-cutin · p5-local2p)
+**Last Updated:** 2026-10-01 03:00 KST (feat/p5-charselect: 캐릭터 선택·P1~P4 식별·프롬프트·캐릭터 sim 연결)
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -48,3 +48,17 @@
 - 트래킹: 스키마 변경 없음. 경기 시작 때 `main`이 `LocalPlayers.input_devices()`로 로컬 슬롯의 `input_device`를 채운다(패드 = `gamepad`, P1 기본 = 플랫폼, P2 = `keyboard`) → `match_ended.players[]`/`match_players.input_device`. `match_started.input_device`는 여전히 P1 슬롯
 - 키 바: `KeyHintSource.caps(prefix)`, 필살기 키캡(`special`, 동시 입력)이 마지막. 게이지 가득(view `special` ≠ "" 이고 `gauge` ≥ 100)이면 `fire` 링. 로컬 2인은 P1 왼쪽·P2 오른쪽 바 + "P1/P2" 태그, 칩은 P2 바에 하나. 두 바가 안 들어가면 compact(간격·여백만 줄임). 폰 배율 1.6(812×375, 논리 폭 1458)에서 compact로 들어감(`evidence/key-hint-2p-phone.png`)
 - 주의: `main.gd`는 아직 `World.new`에 캐릭터를 넘기지 않아 실제 경기에서는 모두 클래식 파이터(필살기 없음) → 게이지 링은 T9에서 캐릭터를 넘기면 보인다(증거 캡처는 파이터 게이지를 강제로 채움). 리플레이 검증기도 캐릭터를 모르므로 T9에서 함께 처리
+
+## T9 캐릭터 선택 · T10 나머지 결정 (2026-10-01, `feat/p5-charselect`)
+- 흐름: `App.SELECT_STEPS = [character, arena]` → 모드 → 캐릭터 → 경기장 → 대전. 경기장에서 뒤로 = 캐릭터 화면(모두 다시 고르는 중), 캐릭터에서 고르는 중 취소/뒤로/Esc = 타이틀
+- `MatchSetup` 슬롯 `character`는 이제 CharacterData id(기본 `""` = 클래식). `assign_characters(human_picks)` = 사람 선택 + 봇은 `CharacterPicks.for_bots(seed, taken, n)`(사람이 안 고른 캐릭터에서 겹치지 않게, 시드 결정적). 두 사람은 같은 캐릭터 가능(미러)
+- 규칙(`CharacterSelectModel`): 사람마다 커서(P1 카드 0, P2 카드 1에서 시작), 확정 = 잠금(준비), 준비 중 취소 = 잠금 해제, 고르는 중 취소 = P1만 화면 나가기(P2의 G/패드 B는 아무것도 안 함 — 실수로 P1 선택을 날리지 않게, 리뷰 반영). 뒤로 버튼·Esc는 P1. 모두 준비되면 즉시 다음 단계
+- 입력(`CharacterSelectInput`): 1인 = 모든 키·패드가 P1(화살표, Z/Enter/Space 확정, X/Esc 취소). 2인 = InputBindings로 나눔 — P1 ←→·Z·X(+Enter·Esc), P2 A D·F·G. 패드는 선택 화면 동안 붙는 `GamepadAssigner`(경기와 같은 규칙) 주인에게: 십자키/스틱 고르기(좌석별 StickNav), A 확정, B 취소. 마우스·터치는 P1(호버 = 고르기, 클릭/탭 = 확정). 화면이 가려지면 assigner를 떼서 경기 assigner와 겹치지 않음
+- 화면: `SelectCard` 재사용(`follow_focus=false`, `set_thumb(CharacterPortrait)`, `set_marks` 커서 배지), 선택 링 = 잠근 플레이어 색. `PlayerSlot`(DS-CMP-10) 한 줄 머리 + `PromptRow`. 봇 슬롯은 "봇 · 자동 선택 · 준비 완료". 폰(논리 높이 < 900, 창 크기가 바뀌면 다시 판정)은 compact: 초상 112px 머리·가슴 구도, 캡션 한 줄, 간격 s3, 넘치면 FitCenter 스크롤
+- 초상은 포커스·선택된 카드만 `UPDATE_WHEN_VISIBLE`(화면이 경기장·경기 아래 숨으면 안 그림), 나머지는 `UPDATE_ONCE`(크기 바뀌면 한 번 다시)
+- 프롬프트(`SelectPrompts`/`SeatDevices`): 마지막 사용 장치 → 잡은 패드 → (1인) 터치 → 키보드. PS 계열 패드 이름이면 ✕/○
+- P1~P4 식별: `PlayerRingMesh`(모양 띠) → `FighterIdentity`(링+라벨)와 `FogSilhouette`. `FighterView.setup(index, config, character)`가 `CharacterCatalog.for_character`로 모델 선택(클래식은 슬롯 모델). fighter_view.gd 200줄로 줄이려 `BatUseDots` 분리
+- sim 연결: `main.gd`가 `World.new(..., setup.characters())`·`MatchStage.setup(..., characters)`. 메뉴 배경·perf 장면은 계속 클래식(해시 불변)
+- 리플레이: `ReplayVerifier.characters(export)` = `players[].character`(=`match_players.character`) 슬롯 순, `event_schema_version` ≥ 5일 때만(4 이하 = 모델 이름이 기록됐지만 sim은 클래식). 새 열·마이그레이션 없음. sim·해시 기대값 변경 없음
+- 트래킹(스키마 4 → 5): `character_selected` 필수 `slot, character, style, is_bot, input_device`(+사람 `browse_count`) — 모두 확정한 순간 슬롯마다(봇 포함), 같은 조합 재확정은 한 번만(`CharacterSelectTracking.same_as`). `select_cancelled{screen:"character"}`. 슬롯 `style` = `CharacterData.style_of`(클래식 `classic`, 전엔 `default`), `match_ended.players[]`에 `character`·`style` 추가
+- 증거: `evidence/char-select-{1p-browse,1p-ready,2p}{,-phone}.png`(폰 = 1624×750 창, UI 배율 1.6), `player-ids.png`·`player-ids-gray.png`(4인, 흑백에서 ●▲■◆ 구분). 캡처 스크립트 `scripts/capture_char_select.gd`, `scripts/capture_player_ids.gd`

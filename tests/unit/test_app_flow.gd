@@ -80,7 +80,15 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_true(title.mode_button(MatchSetup.MODE_ONLINE).disabled)
 	title.mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
-	assert_eq(app.router().current_id(), App.ARENA, "bot match: pick an arena first")
+	assert_eq(app.router().current_id(), App.CHARACTER, "bot match: pick a character first")
+	var chars := app.router().current() as CharacterSelectScreen
+	await wait_process_frames(1)
+	chars.view().cards[2].press()
+	var picked := _props("character_selected")
+	assert_eq(picked.size(), 2, "one per slot: the human and the bot")
+	assert_eq([picked[0]["character"], picked[0]["is_bot"]], [CharacterData.KNIGHT, false])
+	assert_true(bool(picked[1]["is_bot"]))
+	assert_eq(app.router().current_id(), App.ARENA, "then the arena")
 	var arenas := app.router().current() as ArenaSelectScreen
 	assert_same(arenas.config, app.backdrop().config(), "the previews use the app's config")
 	await wait_process_frames(1)
@@ -91,6 +99,9 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	var match_scene := app.router().current()
 	assert_eq((match_scene.get("setup") as MatchSetup).mode, MatchSetup.MODE_BOT)
 	assert_eq((match_scene.get("setup") as MatchSetup).arena_id, arenas.card_ids()[2], "the match is on the chosen arena")
+	var world_now: World = match_scene.call("get_world")
+	assert_eq(world_now.fighters[0].character, CharacterData.KNIGHT, "the sim plays the chosen character")
+	assert_eq(world_now.fighters[1].character, String(picked[1]["character"]), "and the bot's drawn one")
 	await wait_seconds(0.2)
 	var w: World = match_scene.call("get_world")
 	w.fighters[1].stocks = 1
@@ -110,21 +121,29 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_eq(_props("login_viewed").back()["reason"], "logged_out")
 
 
-func test_backing_out_of_arena_select_returns_to_the_title() -> void:
+func test_backing_out_walks_the_select_steps_back_to_the_title() -> void:
 	var app := _app(false)
 	await wait_process_frames(2)
 	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
 	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
-	assert_eq(app.router().current_id(), App.ARENA)
+	assert_eq(app.router().current_id(), App.CHARACTER)
 	var viewed := _props("screen_viewed").back() as Dictionary
-	assert_eq([viewed["screen"], viewed["from_screen"]], [App.ARENA, App.TITLE])
+	assert_eq([viewed["screen"], viewed["from_screen"]], [App.CHARACTER, App.TITLE])
+	var chars := app.router().current() as CharacterSelectScreen
+	await wait_process_frames(1)
+	chars.confirm(0, "keyboard")
+	assert_eq(app.router().current_id(), App.ARENA)
 	(app.router().current() as ArenaSelectScreen).back()
-	assert_eq(app.router().current_id(), App.TITLE)
-	assert_eq(_props("select_cancelled")[0]["screen"], App.ARENA)
+	assert_eq(app.router().current_id(), App.CHARACTER, "back from the arena: the character select again")
+	assert_eq(chars.model().state(0), CharacterSelectModel.CHOOSING, "and the pick is open again")
+	chars.cancel(0)
+	assert_eq(app.router().current_id(), App.TITLE, "cancel while choosing leaves")
+	var screens: Array = _props("select_cancelled").map(func(p: Dictionary) -> String: return p["screen"])
+	assert_eq(screens, [App.ARENA, App.CHARACTER])
 	assert_true(app.backdrop().is_inside_tree(), "the backdrop never left")
 
 
-func test_local_2p_picks_an_arena_then_starts_two_humans() -> void:
+func test_local_2p_picks_characters_and_an_arena_then_starts_two_humans() -> void:
 	var app := _app(false)
 	await wait_process_frames(2)
 	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
@@ -132,6 +151,12 @@ func test_local_2p_picks_an_arena_then_starts_two_humans() -> void:
 	await wait_process_frames(1)
 	title.mode_button(MatchSetup.MODE_LOCAL_2P).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_LOCAL_2P)
+	assert_eq(app.router().current_id(), App.CHARACTER, "local 2P: both pick a character")
+	var chars := app.router().current() as CharacterSelectScreen
+	await wait_process_frames(1)
+	chars.confirm(1, "keyboard")
+	assert_eq(app.router().current_id(), App.CHARACTER, "P2 alone is not enough")
+	chars.confirm(0, "keyboard")
 	assert_eq(app.router().current_id(), App.ARENA, "local 2P also picks an arena")
 	await wait_process_frames(1)
 	(app.router().current() as ArenaSelectScreen).cards()[0].press()
@@ -139,6 +164,10 @@ func test_local_2p_picks_an_arena_then_starts_two_humans() -> void:
 	var setup := app.router().current().get("setup") as MatchSetup
 	assert_eq(setup.mode, MatchSetup.MODE_LOCAL_2P)
 	assert_eq(setup.local_slots(), [0, 1] as Array[int])
+	assert_eq(setup.characters(), [CharacterData.BARBARIAN, CharacterData.ROGUE] as Array[String],
+			"P1 kept the first card, P2 the second")
+	var picked := _props("character_selected")
+	assert_eq(picked.map(func(p: Dictionary) -> bool: return p["is_bot"]), [false, false])
 
 
 func test_restored_session_skips_the_login_screen() -> void:

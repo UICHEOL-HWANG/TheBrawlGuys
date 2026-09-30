@@ -1,7 +1,7 @@
 class_name ReplayVerifier
 extends RefCounted
 ## Offline replay check (platform A7, analytics-strategy §1): rebuilds the World from a MatchExport
-## header (seed, arena, player count) with the given sim config, feeds the recorded inputs tick by
+## header (seed, arena, player count) and the players' characters with the given sim config, feeds the recorded inputs tick by
 ## tick and compares World.state_hash() with the recorded final_state_hash. Matches that fail are
 ## excluded from analysis. Result: {ok, reason, match_id, ticks, expected, actual}.
 
@@ -13,6 +13,8 @@ const REASON_CONFIG := "config_fingerprint"
 const REASON_HASH := "final_state_hash"
 const HEADER_KEYS: Array[String] = ["seed", "arena", "player_count", "sim_version", "config_fingerprint",
 	"final_state_hash"]
+## First event schema whose matches passed their characters to the sim (Phase 5 T9).
+const CHARACTERS_SINCE_SCHEMA := 5
 
 
 static func verify_file(path: String, config: GameConfig) -> Dictionary:
@@ -34,8 +36,27 @@ static func verify(export: Dictionary, config: GameConfig) -> Dictionary:
 	elif int(header["config_fingerprint"]) != config.fingerprint():
 		result["reason"] = REASON_CONFIG
 	else:
-		_replay(header, log, config, result)
+		_replay(header, log, config, result, characters(export))
 	return result
+
+
+## Each slot's character from the match_players rows (slot order). Exports older than
+## CHARACTERS_SINCE_SCHEMA stored the slot model name while the sim ran the classic fighter, so
+## they replay with no characters.
+static func characters(export: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	var header: Dictionary = export.get("match", {})
+	var schema: Variant = header.get("event_schema_version")
+	var players: Variant = export.get("players")
+	if schema == null or int(schema) < CHARACTERS_SINCE_SCHEMA or not players is Array:
+		return out
+	var by_slot := {}
+	for p: Variant in players:
+		if p is Dictionary and (p as Dictionary).get("slot") != null:
+			by_slot[int(p["slot"])] = String((p as Dictionary).get("character", CharacterData.DEFAULT))
+	for slot: int in int(header["player_count"]):
+		out.append(String(by_slot.get(slot, CharacterData.DEFAULT)))
+	return out
 
 
 ## One printable line: "OK ...", "MISMATCH ..." (hash differs) or "ERROR <reason> ...".
@@ -45,10 +66,11 @@ static func line(result: Dictionary) -> String:
 		result["ticks"], result["expected"], result["actual"]]
 
 
-static func _replay(header: Dictionary, log: InputLog, config: GameConfig, result: Dictionary) -> void:
+static func _replay(header: Dictionary, log: InputLog, config: GameConfig, result: Dictionary,
+		characters: Array[String]) -> void:
 	var setup := MatchSetup.new()
 	setup.arena_id = String(header["arena"])
-	var world := World.new(config, int(header["seed"]), log.slot_count(), setup.build_arena(config))
+	var world := World.new(config, int(header["seed"]), log.slot_count(), setup.build_arena(config), characters)
 	for t: int in log.frame_count():
 		world.tick(log.inputs_at(t))
 	result["ticks"] = world.tick_count
