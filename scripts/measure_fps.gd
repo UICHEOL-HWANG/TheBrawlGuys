@@ -1,11 +1,11 @@
 extends SceneTree
 ## Frame time of the four-bot match per quality level (PRD-NFR-01). Windowed run, vsync off.
 ## Run: godot --path . -s res://scripts/measure_fps.gd
-## Writes dev/active/phase-3/evidence/performance.md.
+## Writes dev/done/phase-3/evidence/performance.md.
 
 const WARMUP := 120
 const SAMPLES := 600
-const OUT := "res://dev/active/phase-3/evidence/performance.md"
+const OUT := "res://dev/done/phase-3/evidence/performance.md"
 
 var _config: GameConfig
 var _level: int = 0

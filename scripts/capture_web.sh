@@ -4,7 +4,7 @@
 # Needs build/web from scripts/build_all.sh.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-OUT="${1:-dev/active/phase-3/evidence/web-toon.png}"
+OUT="${1:-dev/done/phase-3/evidence/web-toon.png}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 python3 -m http.server 8060 -d build/web >/dev/null 2>&1 &
 SERVER=$!

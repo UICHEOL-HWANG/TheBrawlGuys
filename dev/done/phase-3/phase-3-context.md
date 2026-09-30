@@ -1,7 +1,7 @@
 # Phase 3 — Context
 
 **Last Updated:** 2026-09-30
-**상태:** 구현 완료, 최종 수정 웨이브(F1~F9) 반영 (🖼 T7 대기)
+**상태:** 완료 (최종 리뷰·수정 반영, 2026-09-30) — 🖼 캐릭터 룩 게이트(T7)·모바일 실기기 60fps는 대기
 **계획:** [`phase-3-plan.md`](./phase-3-plan.md) · **체크리스트:** [`phase-3-tasks.md`](./phase-3-tasks.md)
 **이전 Phase:** [`dev/done/phase-2/phase-2-context.md`](../../done/phase-2/phase-2-context.md)
 
@@ -124,3 +124,18 @@
 - 본곡 BGM (같은 파일명으로 교체)
 - 🖼 대기: 캐릭터 룩(T7), 4버튼 배치, HUD, 캐릭터 크기·`cam_margin`
 - 웹: 원본 크기가 문제면 커스텀 템플릿으로 줄이기
+
+## SDD 진행 중 컨트롤러 판단 (Rulings)
+
+- - Ruling: execute on main (user-approved project practice since Phase 0) — cost if wrong: none.
+- - Ruling: T2 download needs explicit user approval (plan + permission rules); controller asks right before dispatching T2 — cost if wrong: none.
+- - Ruling: T7 (🖼 character look gate) is user+controller, not dispatched; continue with look A (0); captures shown to user at the end — cost if wrong: one default value.
+- - Ruling: T18 git mv is controller-only after final review — cost: none.
+- - Ruling: model tiers — sonnet implementers and reviewers, opus final review — cost: token spend.
+- Ruling: T7 look-gate evidence will be close-up captures from the T15 gallery "Characters" section (one per look via --look=N, needs capture_evidence --look + --characters-only together) instead of the zoomed match captures — cost if wrong: one extra capture step in T15.
+- Task 7: skipped by preflight Ruling (🖼 look gate, user) — evidence moved to T15 close-ups
+- Ruling: accept T10 burst-y clamp — the brief's position was below the ground plane (invisible), clamping to the decor ground is the root fix — cost if wrong: none.
+- Ruling: fix the jumped rule — only a takeoff into State.AIR is a jump (hit/explosion launches are HITSTUN) — the brief's wording was a spec gap — cost if wrong: none.
+- Ruling: PRD-NFR-05 "웹 초기 로딩 ≤ 40MB" is measured as the compressed transfer size (gzip -9 of index.pck + index.wasm, what Cloudflare Pages serves); raw size is still printed and recorded — cost if wrong: the web budget needs a custom smaller wasm template later.
+- Ruling: fold T17's two Important findings into the final fix wave (one dispatch) instead of a separate fix round — the web-parity root cause needs the whole-branch view and the demo fix is one line — cost if wrong: none; also add a smoke test that loads every src/debug/*.tscn so parse errors in demo scenes fail CI.
+- Ruling: T18 (docs only) is reviewed as part of the final whole-branch review rather than a separate task review — cost if wrong: none (final reviewer covers docs claims).
