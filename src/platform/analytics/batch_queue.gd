@@ -89,6 +89,6 @@ func restore() -> int:
 	var loaded := 0
 	for e: Variant in (parsed as Array):
 		if e is Dictionary:
-			push(e)
+			push(AmplitudePayload.with_int_fields(e))
 			loaded += 1
 	return loaded

@@ -67,3 +67,18 @@ func test_backoff_doubles_and_caps() -> void:
 	assert_eq(q.next_attempt_ms(), BatchQueue.BACKOFF_MAX_MS)
 	q.mark_success()
 	assert_true(q.can_send(0))
+
+
+## JSON.parse turns every number into a float, and Amplitude rejects "time": 1790756911847.0 with
+## HTTP 400 — events restored from an earlier run must go out with integer id and time fields.
+func test_restored_events_keep_integer_time_and_session() -> void:
+	var q := BatchQueue.new(PATH, 10)
+	q.push({"event_type": "app_closed", "time": 1790756911847, "session_id": 1790756808792})
+	assert_eq(q.save(), OK)
+	var r := BatchQueue.new(PATH, 10)
+	assert_eq(r.restore(), 1)
+	var e: Dictionary = r.peek(1)[0]
+	assert_eq(typeof(e["time"]), TYPE_INT)
+	assert_eq(typeof(e["session_id"]), TYPE_INT)
+	assert_string_contains(AmplitudePayload.body("k", [e]), "\"time\":1790756911847")
+	assert_false(AmplitudePayload.body("k", [e]).contains("1790756911847.0"))
