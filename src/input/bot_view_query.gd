@@ -48,5 +48,11 @@ static func nearest_item(view: Dictionary, my_pos: Vector3, arena: ArenaData, co
 	return best
 
 
+## True when the foe stands within `reach` of the item too: both pressing grab there hands the
+## item to the lower id and turns the other press into a grab attack on it.
+static func contested(item: Dictionary, foe: Dictionary, reach: float) -> bool:
+	return not foe.is_empty() and flat(foe["pos"], item["pos"]).length() <= reach
+
+
 static func is_safe(arena: ArenaData, pos: Vector3, config: GameConfig) -> bool:
 	return ArenaFloor.over_floor(arena, pos) and ArenaFloor.safe_point(arena, pos, config.bot_edge_ratio) == pos

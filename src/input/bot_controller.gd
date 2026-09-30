@@ -67,7 +67,7 @@ func sample(view: Dictionary) -> InputFrame:
 	return _act(view, me, foe, arena)
 
 
-## Items first (throwables, then pickups), otherwise fight the nearest foe.
+## Items first (throwables, then pickups the foe cannot also reach), otherwise fight the nearest foe.
 func _act(view: Dictionary, me: Dictionary, foe: Dictionary, arena: ArenaData) -> InputFrame:
 	var my_pos: Vector3 = me["pos"]
 	var item_kind := int(me.get("item_kind", Fighter.NONE))
@@ -75,9 +75,10 @@ func _act(view: Dictionary, me: Dictionary, foe: Dictionary, arena: ArenaData) -
 		return _use_throwable(foe, my_pos, arena)
 	if item_kind == Fighter.NONE:
 		var it := BotViewQuery.nearest_item(view, my_pos, arena, _config)
-		if not it.is_empty():
+		var reach := _config.item_pickup_radius * PICKUP_REACH_RATIO
+		if not it.is_empty() and not BotViewQuery.contested(it, foe, reach):
 			var to_item := BotViewQuery.flat(my_pos, it["pos"])
-			if to_item.length() <= _config.item_pickup_radius * PICKUP_REACH_RATIO and bool(me["on_ground"]):
+			if to_item.length() <= reach and bool(me["on_ground"]):
 				if int(it["state"]) == Item.State.FALLING:
 					return InputFrame.neutral()  # wait under it; a grab press now would start a grab attack
 				return InputFrame.make(0, 0, false, false, false, false, true)
