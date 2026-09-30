@@ -8,6 +8,10 @@ const SEED := 7
 const TICKS := 1200
 const HALF := 600
 const GOLDEN_HASH := 2973674052
+## Sim behavior without the config fingerprint (context F1). Fixed in Phase 3 Task 1 from the
+## Phase 2 code before the fingerprint scope changed; it must never change during Phase 3
+## (presentation work must not touch the sim).
+const BEHAVIOR_HASH := 1822125224
 
 
 ## P0 walks back and forth with jumps, light presses, a held heavy every 4 s and grab presses;
@@ -80,3 +84,20 @@ func test_golden_hash() -> void:
 	var h := _run(World.new(GameConfig.new(), SEED), TICKS)
 	assert_ne(GOLDEN_HASH, 0, "GOLDEN_HASH not set yet; set it to %d" % h)
 	assert_eq(h, GOLDEN_HASH, "sim behavior changed; if deliberate, update GOLDEN_HASH to %d" % h)
+
+
+## Hash of each tick's snapshot with config_fp removed, so tuning outside the sim cannot move it.
+static func _behavior_run(w: World, ticks: int) -> int:
+	var seq: Array[int] = []
+	for i: int in ticks:
+		w.tick(_inputs_at(w.tick_count))
+		var s: Dictionary = bytes_to_var(w.snapshot())
+		s.erase("config_fp")
+		seq.append(hash(s))
+	return hash(seq)
+
+
+func test_behavior_hash() -> void:
+	var h := _behavior_run(World.new(GameConfig.new(), SEED), TICKS)
+	assert_ne(BEHAVIOR_HASH, 0, "BEHAVIOR_HASH not set yet; set it to %d" % h)
+	assert_eq(h, BEHAVIOR_HASH, "sim behavior changed; Phase 3 must not change it (got %d)" % h)
