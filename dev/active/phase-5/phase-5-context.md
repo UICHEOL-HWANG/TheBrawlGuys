@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-09-30 22:30 KST
+**Last Updated:** 2026-09-30 23:10 KST
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -27,3 +27,8 @@
 - 봇 아이템 경합 수정: 두 봇이 같은 아이템 앞에서 잡기를 누르면 낮은 id가 줍고 다른 쪽 입력은 잡기 공격이 되어 슬롯 0이 잡혀 던져졌다(슬롯 편향, rogue 슬롯0 vs barbarian 16%). 상대도 줍기 거리 안이면 줍지 않고 싸운다(`BotViewQuery.contested`, `test_does_not_press_grab_for_an_item_the_foe_can_also_reach`)
 - 밸런스 튜닝(2026-09-30): Knight vs Mage가 양 슬롯 약 25%라 `weapon_knockback_taken` 0.9→0.8, 그 대가로 Knight 공격 `weapon_knockback_mul` 1.25→1.15, Barbarian 우세 완화 `slam_base_knockback` 7→6. 설정 fingerprint 변경으로 GOLDEN_HASH·ARENA_HASHES·CHARACTER_HASHES 갱신(BEHAVIOR_HASH·classic compat 불변)
 - 밸런스: `scripts/balance_sim.gd` 결과 `evidence/balance.csv` (16 순서쌍 × 100판, 전부 35~67%)
+
+## T8 스타일 실루엣 시안 (2026-09-30, `feat/p5-silhouette`) — 🖼 승인 대기
+- 디버그 전용 `src/debug/silhouette/` (`StyleMockup` + A `MockupGear` · B `MockupTrim` · C `MockupStance`/`StyleIcon`). 기본 룩(`CharacterCatalog`·`FighterView`)은 건드리지 않음 (`test_style_mockup` 확인)
+- 캡처 `scripts/capture_silhouette.gd` → `evidence/silhouette-{base,A,B,C}{,-bw,-sil}.png`, 비교 `evidence/silhouette-compare.html`
+- A 장비(장갑·대검·지팡이+구슬, 모자) 실루엣 3/3 · B 악센트 트림 흑백에서 0/3 · C 자세+아이콘 아이콘으로만 3/3. 추천 A (아이템 들 때 장비 숨김 규칙 필요)
