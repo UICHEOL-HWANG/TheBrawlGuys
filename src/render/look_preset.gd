@@ -15,13 +15,27 @@ const PRESETS := {
 }
 
 
+## The look most recently passed to apply() (resolved: unknown values become A).
+static var last_applied: int = Look.A
+
+
 static func values_for(look: int) -> Dictionary:
 	return PRESETS.get(look, PRESETS[Look.A])
 
 
-static func apply(look: int) -> void:
+## Shader-uniform values for a look, keyed by global uniform name (testable without a renderer).
+static func uniforms_for(look: int) -> Dictionary:
 	var p := values_for(look)
-	RenderingServer.global_shader_parameter_set("ds_rim_strength", float(p["rim"]))
-	RenderingServer.global_shader_parameter_set("ds_char_saturation", float(p["saturation"]))
-	RenderingServer.global_shader_parameter_set("ds_outline_width", float(p["outline"]))
-	RenderingServer.global_shader_parameter_set("ds_outline_color", DS.CANOPY_DEEP)
+	return {
+		"ds_rim_strength": float(p["rim"]),
+		"ds_char_saturation": float(p["saturation"]),
+		"ds_outline_width": float(p["outline"]),
+		"ds_outline_color": DS.CANOPY_DEEP,
+	}
+
+
+static func apply(look: int) -> void:
+	last_applied = look if PRESETS.has(look) else Look.A
+	var u := uniforms_for(look)
+	for key: String in u:
+		RenderingServer.global_shader_parameter_set(key, u[key])
