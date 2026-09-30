@@ -29,12 +29,9 @@ void fragment() {
 void light() {
 	float ndl = dot(NORMAL, LIGHT);
 	float lit = smoothstep(-ds_band_softness, ds_band_softness, ndl) * ATTENUATION;
-	vec3 band = mix(ds_shadow_tint.rgb, vec3(1.0), lit);
-	if (!LIGHT_IS_DIRECTIONAL) {
-		// Local lights (campfire, glowing mushrooms, Phase 4) fade out with distance; only the sun
-		// lays the tinted shadow band over everything.
-		band *= ATTENUATION;
-	}
+	// Only the sun lays the tinted shadow band over everything. Local lights (campfire, glowing
+	// mushrooms, Phase 4) just add their lit side, faded once by distance: no tint on back faces.
+	vec3 band = LIGHT_IS_DIRECTIONAL ? mix(ds_shadow_tint.rgb, vec3(1.0), lit) : vec3(lit);
 	float rim_amount = is_character ? ds_rim_strength : rim_strength;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0) * rim_amount * lit;
 	DIFFUSE_LIGHT += (band + vec3(rim)) * LIGHT_COLOR / PI;
