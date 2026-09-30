@@ -21,10 +21,10 @@ func _fx() -> Array:
 
 func test_dodging_leaves_afterimages_and_fades_the_fighter() -> void:
 	var fx: DefenseFx = _fx()[1]
-	fx.apply(_view(Fighter.State.DODGE, 1.0, true), DefenseFx.GHOST_INTERVAL)
+	fx.apply(_view(Fighter.State.DODGE, 1.0, true), DodgeGhosts.GHOST_INTERVAL)
 	assert_true(fx.faded(), "semi-transparent while intangible")
 	assert_gt(fx.ghost_count(), 0, "an afterimage")
-	fx.apply(_view(Fighter.State.IDLE), DefenseFx.GHOST_INTERVAL)
+	fx.apply(_view(Fighter.State.IDLE), DodgeGhosts.GHOST_INTERVAL)
 	assert_false(fx.faded())
 
 
@@ -55,4 +55,37 @@ func test_perfect_guard_flashes_a_ring() -> void:
 	var fx: DefenseFx = _fx()[1]
 	var before := fx.get_child_count()
 	fx.perfect_flash()
-	assert_eq(fx.get_child_count(), before + 1)
+	assert_true(fx.ring_visible())
+	assert_eq(fx.get_child_count(), before, "the ring is built once and replayed")
+	fx.apply(_view(Fighter.State.IDLE), PerfectRing.LIFE + 0.01)
+	assert_false(fx.ring_visible(), "gone after its life")
+
+
+func test_afterimages_are_pooled() -> void:
+	var fx: DefenseFx = _fx()[1]
+	var before := fx.get_child_count()
+	var nodes := -1
+	for i: int in 40:
+		fx.apply(_view(Fighter.State.DODGE, 1.0, true), DodgeGhosts.GHOST_INTERVAL)
+		if i == 0:
+			nodes = _node_count(fx)
+	assert_eq(_node_count(fx), nodes, "no node per afterimage")
+	assert_eq(fx.get_child_count(), before)
+	assert_lte(fx.ghost_count(), DodgeGhosts.pool_size())
+	fx.apply(_view(Fighter.State.IDLE), DS.MOTION_BASE + 0.01)
+	assert_eq(fx.ghost_count(), 0, "every afterimage fades out")
+
+
+func test_dizzy_stars_are_big_inked_flat_stars_above_the_head() -> void:
+	assert_gt(DizzyStars.RADIUS, 0.2, "readable from the top-down camera")
+	var fx: DefenseFx = _fx()[1]
+	fx.apply(_view(Fighter.State.HITSTUN, 0.3, false, true), 0.016)
+	var stars := fx.get_children().filter(func(n: Node) -> bool: return n is DizzyStars)
+	assert_eq(stars.size(), 1)
+	var meshes := (stars[0] as Node).find_children("*", "MeshInstance3D", true, false)
+	assert_eq(meshes.size(), DizzyStars.COUNT * 2, "each star has an ink rim")
+	assert_true((meshes[0] as MeshInstance3D).mesh is ArrayMesh, "a flat star shape")
+
+
+func _node_count(root: Node) -> int:
+	return root.find_children("*", "", true, false).size()

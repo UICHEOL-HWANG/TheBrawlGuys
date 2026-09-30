@@ -2,7 +2,8 @@ class_name FeelDirector
 extends Node3D
 ## Turns sim events into game feel (design.md §9): comic impact bursts sized by the knockback tier
 ## in the attacker's color, damage numbers over the victim, a screen flash and camera punch on
-## heavy hits (DS-VFX-01 v2, DS-VFX-09), a blue clang on guarded hits (DS-VFX-07), screen shake
+## heavy hits (DS-VFX-01 v2, DS-VFX-09), a blue clang on guarded hits (DS-VFX-07) or a white star
+## flash when the same tick says it was a perfect guard (DS-VFX-13), screen shake
 ## that starts when hitstop ends, a full-strength shake on ring-out and a large puff plus shake on
 ## bomb explosions. Landing dust and knockback trails come from ViewEvents. Render-side only.
 ## Bursts and numbers are pooled (ImpactTier.pool_cap, fewer on low quality).
@@ -49,14 +50,14 @@ func set_arena(arena_id: String) -> void:
 
 ## fighters: this tick's fighter views (positions and damage for direction and numbers).
 func on_events(events: Array, fighters: Array = []) -> void:
+	var perfect := _perfect_guards(events)
 	for e: Dictionary in events:
 		match String(e["type"]):
 			"hit":
 				_impact(e, fighters)
 				_shake.add(float(e["knockback"]), _hold(e))
 			"guard_hit":
-				_hits += 1
-				_next_burst().play_clang(e["pos"], _direction(e, fighters), _hold(e), _hits * ROLL_STEP)
+				_guarded(e, fighters, perfect.has(int(e["target"])))
 			"explosion":
 				_spark(e["pos"], true)
 				_shake.add(_full_shake_knockback() * EXPLOSION_SHAKE_RATIO, 0.0)
@@ -139,6 +140,25 @@ func _impact(e: Dictionary, fighters: Array) -> void:
 		_flash.flash()
 		if _camera != null:
 			_camera.punch(_config.impact_heavy_punch)
+
+
+## A guarded hit clangs; a perfect guard (perfect_guard for the same target this tick) flashes.
+func _guarded(e: Dictionary, fighters: Array, perfect: bool) -> void:
+	_hits += 1
+	var burst := _next_burst()
+	if perfect:
+		burst.play_perfect(e["pos"], _direction(e, fighters), _hold(e), _hits * ROLL_STEP)
+	else:
+		burst.play_clang(e["pos"], _direction(e, fighters), _hold(e), _hits * ROLL_STEP)
+
+
+## Fighter ids that perfect-guarded this tick (the sim emits perfect_guard after its guard_hit).
+static func _perfect_guards(events: Array) -> Dictionary:
+	var ids := {}
+	for e: Dictionary in events:
+		if String(e["type"]) == "perfect_guard":
+			ids[int(e["fighter"])] = true
+	return ids
 
 
 func _direction(e: Dictionary, fighters: Array) -> Vector3:
