@@ -32,6 +32,12 @@ static func to_json_value(v: Variant) -> Variant:
 	return v
 
 
+## Parses without printing engine errors; null when the text is not JSON.
+static func parse(text: String) -> Variant:
+	var json := JSON.new()
+	return json.data if json.parse(text) == OK else null
+
+
 static func is_safe(v: Variant) -> bool:
 	match typeof(v):
 		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:

@@ -82,8 +82,7 @@ func save() -> Error:
 func restore() -> int:
 	if _path.is_empty() or not FileAccess.file_exists(_path):
 		return 0
-	var json := JSON.new()
-	var parsed: Variant = json.data if json.parse(FileAccess.get_file_as_string(_path)) == OK else null
+	var parsed: Variant = JsonSafe.parse(FileAccess.get_file_as_string(_path))
 	if not (parsed is Array):
 		push_warning("BatchQueue: %s is not a JSON array, offline events discarded" % _path)
 		return 0
