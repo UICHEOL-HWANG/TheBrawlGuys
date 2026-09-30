@@ -134,6 +134,7 @@ func _process(delta: float) -> void:
 	_local_input.poll()
 	var ticks := _ticker.advance(delta)
 	var events: Array = []
+	var view_events: Array = []
 	for i: int in ticks:
 		_prev_state = _curr_state
 		var started := Time.get_ticks_usec()
@@ -141,11 +142,13 @@ func _process(delta: float) -> void:
 		_sim_us = lerpf(_sim_us, float(Time.get_ticks_usec() - started), SIM_COST_SMOOTHING)
 		_curr_state = _world.state_view()
 		events.append_array(_curr_state["events"])
+		view_events.append_array(ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config))
 	_alpha = _ticker.alpha()
 	_draw_fighters(delta)
 	_item_layer.sync(_prev_state["items"], _curr_state["items"], _alpha, int(_curr_state["tick"]))
 	_hud.update_from(_curr_state)
 	_feel.on_events(events)
+	_feel.on_view_events(view_events)
 	_wobble_guards(events)
 	_update_local_hints()
 	_camera.follow(_camera_targets(), delta)

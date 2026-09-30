@@ -174,6 +174,14 @@ extends Resource
 ## -1 = platform default (mobile MEDIUM, web LOW, desktop HIGH); 0 LOW, 1 MEDIUM, 2 HIGH (context F7).
 @export_range(-1, 2, 1) var quality_level: int = -1
 
+@export_group("FeelVfx")
+## Knockback trail (design.md GD-FEEL-04): off below threshold, full strength at full (m/s).
+@export_range(1.0, 40.0, 0.5) var trail_speed_threshold: float = 9.0
+@export_range(2.0, 60.0, 0.5) var trail_speed_full: float = 20.0
+## Landing dust (DS-VFX-03) by fall speed (m/s).
+@export_range(0.0, 20.0, 0.5) var dust_min_fall_speed: float = 4.0
+@export_range(1.0, 40.0, 0.5) var dust_full_fall_speed: float = 14.0
+
 
 ## Groups whose values change the simulation. Only these enter the fingerprint (context F1):
 ## camera, touch, feel, bot, loop and later presentation groups never alter a replay, so they
@@ -181,7 +189,7 @@ extends Resource
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 ]
-const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality"]
+const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx"]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays

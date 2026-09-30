@@ -2,7 +2,8 @@ class_name FeelDirector
 extends Node3D
 ## Turns sim events into game feel (design.md §9): hit puffs sized by knockback, screen shake that
 ## starts when hitstop ends, a full-strength shake on ring-out, a small puff on guarded hits and a
-## large puff plus shake on bomb explosions. Render-side only.
+## large puff plus shake on bomb explosions. Landing dust and knockback trails come from
+## ViewEvents. Render-side only.
 
 ## Explosion shake as a fraction of shake_max.
 const EXPLOSION_SHAKE_RATIO := 0.8
@@ -10,12 +11,15 @@ const EXPLOSION_SHAKE_RATIO := 0.8
 var _config: GameConfig
 var _camera: CameraRig
 var _shake: ShakeModel
+var _trail: KnockbackTrail
 
 
 func setup(config: GameConfig, camera: CameraRig) -> void:
 	_config = config
 	_camera = camera
 	_shake = ShakeModel.new(config)
+	_trail = KnockbackTrail.new()
+	add_child(_trail)
 
 
 func on_events(events: Array) -> void:
@@ -32,6 +36,19 @@ func on_events(events: Array) -> void:
 				_shake.add(_full_shake_knockback() * EXPLOSION_SHAKE_RATIO, 0.0)
 			"ringout":
 				_shake.add(_full_shake_knockback(), 0.0)
+
+
+## Render-side events from ViewEvents (context F8).
+func on_view_events(events: Array) -> void:
+	var scale := Quality.particle_scale(_config)
+	for e: Dictionary in events:
+		match String(e["type"]):
+			"landed":
+				var dust := DustPuff.new()
+				add_child(dust)
+				dust.play(e["pos"], float(e["intensity"]), scale)
+			"trail":
+				_trail.add_sample(e["pos"], float(e["intensity"]), PlayerStyle.color(int(e["id"])), scale)
 
 
 ## A restart starts with a still camera (Phase 1 carry-over).
