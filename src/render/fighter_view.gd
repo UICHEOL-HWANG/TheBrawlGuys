@@ -1,7 +1,7 @@
 class_name FighterView
 extends Node3D
-## Draws one fighter (design.md DS-VIS-03, GD-FEEL-03): toon capsule in the player color with a
-## rim light, a flat foot ring and a P-label. Interpolates prev -> curr by alpha, snaps when
+## Draws one fighter (design.md DS-VIS-03, GD-FEEL-03): the KayKit character for its slot (capsule fallback if the model fails to load),
+## with a flat foot ring and a P-label. Interpolates prev -> curr by alpha, snaps when
 ## spawn_id changes (respawn), blinks while invulnerable, hides when KO. Reads view values only.
 ## Shows the carried item in hand, with use dots for bats (DS-VIS-05).
 
@@ -24,6 +24,7 @@ const WOBBLE_SQUASH := Vector3(1.12, 0.88, 1.12)
 
 var _config: GameConfig
 var _body: MeshInstance3D
+var _model: CharacterModel = null
 var _ring: MeshInstance3D
 var _label: Label3D
 var _held: MeshInstance3D
@@ -44,6 +45,13 @@ func setup(index: int, config: GameConfig) -> void:
 	_body.material_override = ToonMaterials.toon(color, RIM)
 	_body.position.y = config.fighter_height * 0.5
 	add_child(_body)
+	_model = CharacterModel.new()
+	add_child(_model)
+	if _model.setup(CharacterCatalog.for_player(index), config):
+		_body.visible = false
+	else:
+		_model.queue_free()
+		_model = null
 
 	var torus := TorusMesh.new()
 	torus.inner_radius = config.fighter_radius * RING_INNER_RATIO
@@ -104,9 +112,17 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	position = interpolate(prev, curr, alpha)
 	var facing: Vector3 = curr["facing"]
 	rotation.y = Collision.yaw_of(facing)
-	_body.visible = blink_visible(int(curr["invuln_ticks"]), tick, _config)
+	var shown := blink_visible(int(curr["invuln_ticks"]), tick, _config)
+	if _model != null:
+		_model.visible = shown
+	else:
+		_body.visible = shown
 	_show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
 	_bubble.visible = int(curr["state"]) == Fighter.State.GUARD
+
+
+func model() -> CharacterModel:
+	return _model
 
 
 ## Soap-bubble wobble when a guarded hit lands (DS-VFX-02).

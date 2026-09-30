@@ -80,3 +80,17 @@ func test_guard_bubble_follows_the_guard_state() -> void:
 	var idle := _fighter_view_data(Fighter.NONE, 0)
 	v.apply(idle, idle, 1.0, 1)
 	assert_false(v.bubble_visible())
+
+
+func test_fighter_view_draws_the_catalog_character() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	v.setup(2, GameConfig.new())
+	assert_not_null(v.model(), "slot 2 uses a KayKit character")
+	var d := _fighter_view_data(Fighter.NONE, 0)
+	d["invuln_ticks"] = 60
+	var seen := {}
+	for t: int in 30:
+		v.apply(d, d, 1.0, t)
+		seen[v.model().visible] = true
+	assert_eq(seen.size(), 2, "the model blinks while invulnerable")
