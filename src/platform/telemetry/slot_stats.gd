@@ -5,7 +5,7 @@ extends RefCounted
 
 const COUNTERS: Array[String] = [
 	"hits", "guards", "grabs", "jumps", "whiffs", "ringouts_scored", "falls", "falls_by_gimmick",
-	"specials", "items_used",
+	"specials", "special_hits", "items_used",
 ]
 ## Damage is reported in 0.1 % steps.
 const DAMAGE_STEP := 0.1
