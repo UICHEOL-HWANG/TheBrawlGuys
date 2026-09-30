@@ -1,6 +1,6 @@
 # TheBrawlGuys — 개발 Phase
 
-> 버전 1.0 · 2026-09-28
+> 버전 1.1 · 2026-09-30 (1.1: Phase 4.0 플랫폼 추가, 트래킹 태스크, Vercel)
 > 상위: [`PRD.md`](./PRD.md) (무엇·왜) · 병행: [`design.md`](./design.md) (디자인 시스템) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **언제·어떤 순서로·무엇이 끝나야 하는지**를 소유한다.
@@ -28,9 +28,11 @@ Phase 2  전투 확장 + 아이템 + 4버튼      🎨 터치 v2 · 전투 인�
    │
 Phase 3  캐릭터와 연출                  🎨 비주얼 시스템 확정 · VFX · SFX
    │
+Phase 4.0 플랫폼 (로그인·트래킹·배포)   🎨 로그인 패널 · 메뉴 디오라마 · 메뉴 버튼/패널
+   │      (Phase 4 sim 작업과 병렬 가능)
    ├── Phase 4  경기장                  🎨 선택 카드 · 경기장 테마 변형
-   ├── Phase 5  스타일 + 로컬 2인        🎨 캐릭터 선택 · P1~P4 식별 체계
-   │                                     (4·5는 순서 교체 가능)
+   ├── Phase 5  스타일 + 필살기 + 로컬 2인 🎨 캐릭터 선택 · P1~P4 식별 체계
+   │                                     (4·5는 순서 교체 가능, 둘 다 트래킹 포함)
 Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/접근성
 ```
 
@@ -40,7 +42,8 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 | 1 | 과장된 넉백 | Android 실기기 터치 | HUD 코어 컴포넌트 |
 | 2 | 아이템 쟁탈 | — | 인게임 컴포넌트 완비 |
 | 3 | 넉백 연출 강화 | 모바일 60fps, iOS | 3D 비주얼·VFX·SFX 확정 |
-| 4 | 넉백 × 지형 | — | 메뉴 컴포넌트 시작 |
+| 4.0 | — (측정 기반 마련) | Vercel 웹 배포, Google 로그인 | 로그인·메뉴 컴포넌트 시작 |
+| 4 | 넉백 × 지형 | — | 선택 카드·경기장 테마 |
 | 5 | 스타일 차이 | 게임패드, 로컬 2인 | 선택 화면 완비 |
 | 6 | 전부 (사람 대 사람) | 헤드리스 서버, 크로스플레이 | DS v1.0 |
 
@@ -229,6 +232,52 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ---
 
+## Phase 4.0 — 플랫폼 (로그인·트래킹·배포)
+
+**목표**: 첫 화면이 로그인 창이고, Vercel 웹에서 Google 로그인 후 한 판을 하면 Amplitude 이벤트와 Supabase 경기 기록이 남는다. 이후 Phase의 기능은 만들 때 트래킹을 같이 단다 ([`tracking-plan.md`](./tracking-plan.md)).
+
+**결정**: `dev/active/platform/platform-context.md` (2026-09-30 사용자 승인). 트래킹은 sim 이벤트를 소비만 한다 → sim·리플레이 해시 불변.
+
+### ⚙️ 개발 트랙
+
+**플랫폼 레이어 (`src/platform/`)**
+- [ ] 문서: PRD·PHASES·design·tracking-plan 갱신 `[PRD-AUTH-01]` `[PRD-DATA-03]` `[PRD-DATA-04]`
+- [ ] 비밀키 로더: `config/secrets.example.cfg`(커밋) + `secrets.local.cfg`(gitignore), 없으면 트래킹·로그인 비활성 + 경고, `service_role` 문자열 차단 검사 `[PRD-DATA-03]`
+- [ ] `EventCatalog`(이벤트 이름·필수 속성 스키마) + `Analytics` autoload (Amplitude HTTP API v2 배치, 오프라인 큐, 지수 백오프 재시도, 공통 속성) `[PRD-DATA-03]`
+- [ ] `SupabaseClient`: Auth·REST insert·토큰 자동 갱신 `[PRD-DATA-04]`
+- [ ] Google OAuth PKCE: 웹 리다이렉트 · 데스크톱 루프백, 세션 `user://session.cfg` 저장·자동 갱신 `[PRD-AUTH-01]`
+- [ ] 마이그레이션 SQL `supabase/migrations/0001_match_telemetry.sql` (`profiles`·`matches`·`match_players`·`match_events`) + RLS 본인 행만 `[PRD-DATA-04]`
+- [ ] `MatchTelemetry` + `MatchRecorder`: 매 프레임 sim `events`·view 이벤트를 소비 → Amplitude 경기 요약·핵심 순간, Supabase 원시 로그 청크 insert `[PRD-DATA-03]` `[PRD-DATA-04]`
+
+**앱 셸**
+- [ ] `src/app/app.tscn` 메인 씬 + 화면 스택(로그인 → 타이틀/모드 → 캐릭터 → 경기장 → 대전 → 결과) + `MatchSetup` 주입 `[PRD-UI-02]` `[PRD-AUTH-01]`
+- [ ] 메뉴 퍼널·로그인·앱 세션 트래킹 (`screen_viewed`, `login_*`, `app_*`) `[PRD-DATA-03]`
+
+**배포**
+- [ ] `vercel.json`(정적, `.wasm`/`.pck` 캐시·MIME 헤더) + `scripts/deploy_web.sh` → Vercel 배포, 도메인을 Supabase redirect 허용 목록에 등록 `[PRD-PLT-03]`
+
+### 🎨 DS 트랙
+
+- [ ] `MenuBackdrop` 궤도 디오라마: 봇 4명 난투 + 경기장 주위를 도는 카메라 + 메뉴 BGM `[DS-LAY-03]` `[GD-CAM-01]`
+- [ ] 🖼 로그인 시안 3개 비교 (① 중앙 카드 스프링 팝 ② 좌측 세로 패널 슬라이드 + 우측 로고 ③ 로고가 먼저 떨어진 뒤 버튼 순차 등장) → `LoginPanel` 확정 `[DS-CMP-14]`
+- [ ] `MenuButton`, `Panel` 메뉴용 확정 `[DS-CMP-06]` `[DS-CMP-07]`
+- [ ] 신규 컴포넌트 DS 갤러리 등록 `[DS-GOV-02]`
+
+### 테스트
+
+- 단위: `EventCatalog` 스키마(카탈로그 밖 이벤트·필수 속성 누락 → 실패), `Analytics` 배치·오프라인 큐(HTTP 모킹), PKCE 생성·콜백 파싱, 비밀키 로더
+- 단위: `MatchTelemetry` — 고정 이벤트 시퀀스 → 기대 이벤트·요약값
+- 리플레이: GOLDEN/BEHAVIOR 해시 불변 (트래킹이 sim을 건드리지 않음)
+
+### 완료 기준
+
+- [ ] 데스크톱에서 Google 로그인 → 봇전 한 판 → Amplitude에 `match_started`·`match_ended` 도착, Supabase `matches`·`match_events` 행 확인
+- [ ] Vercel URL에서 로그인 리다이렉트 → 한 판 → 이벤트 수신 확인
+- [ ] 저장된 세션이 있으면 재시작 시 로그인 화면을 건너뛴다
+- [ ] 클라이언트 빌드에 `service_role` 키가 없다 (검사 스크립트) · security-reviewer 통과 (키·RLS)
+
+---
+
 ## Phase 4 — 경기장
 
 **목표**: 경기장마다 싸우는 방식이 달라진다.
@@ -240,11 +289,11 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] 호숫가 캠프장 `[PRD-ARENA-01]` · 통나무 다리 `[PRD-ARENA-02]` · 버섯 숲 `[PRD-ARENA-03]` · 안개 낀 숲 `[PRD-ARENA-04]`
 - [ ] 장식은 경기장 바깥 배치, 카메라 가림 검사 `[GD-CAM-01]`
 - [ ] 경기장 선택 화면 `[PRD-UI-02]`
+- [ ] 트래킹: `arena_selected`, `gimmick_triggered`·`gimmick_ringout`, `stock_lost`의 경기장 구역·원인, 원시 이벤트 `gimmick_damage`·`platform_break`·`bounce`·`fog_start`·`fog_end` → `match_events` `[PRD-DATA-03]` `[PRD-DATA-04]`
 
 ### 🎨 DS 트랙
 
 - [ ] `SelectCard` (썸네일 · 이름 · 기믹 아이콘, 선택/포커스 상태) `[DS-CMP-08]`
-- [ ] `MenuButton`, `Panel` 메뉴용 확정 `[DS-CMP-06]` `[DS-CMP-07]`
 - [ ] 경기장별 테마 변형: 기본 토큰 위에 조명·안개·바닥 색 오버라이드 (`ArenaData.theme`) `[DS-THM-02]`
 - [ ] 기믹 위험 표시 규칙 (화상 영역, 부서질 발판 균열, 버섯 반발 표시) `[DS-VIS-04]`
 - [ ] 안개 연출 — 자기 캐릭터·상대 실루엣은 안개 위로 보이게 `[DS-VIS-03]`
@@ -257,12 +306,12 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 ### 완료 기준
 
 - [ ] 경기장 4종 각각에서 봇전 한 판 완주
-- [ ] 경기장별로 링아웃이 일어나는 주된 위치·방식이 다르다 (플레이 로그 비교)
+- [ ] 경기장별로 링아웃이 일어나는 주된 위치·방식이 다르다 (플레이 로그 비교 — Supabase `match_events`의 `ringout` 위치 집계)
 - [ ] 모든 기믹 위험 요소가 처음 보는 사람에게도 식별된다 (플레이테스트 3명)
 
 ---
 
-## Phase 5 — 스타일 + 로컬 2인
+## Phase 5 — 스타일 + 필살기 + 로컬 2인
 
 **목표**: 스타일마다 이기는 방법이 다르다.
 
@@ -271,9 +320,11 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] `StyleData`: 공격 목록(`AttackData` 참조), 이동 수치 오버라이드 `[PRD-ARCH-03]`
 - [ ] 권투형 `[PRD-STYLE-01]` · 무기형 `[PRD-STYLE-02]` · 원거리형 `[PRD-STYLE-03]`
 - [ ] 봇이 스타일별 사거리를 인식 `[PRD-BOT-02]`
-- [ ] 필살기 (2026-09-30 사용자 결정): 때리거나 맞으면 차는 게이지가 가득 차면 1회, 강공격+가드(X+C) 동시 입력, 캐릭터마다 다른 필살기와 모션, 발동 시 카메라가 그 캐릭터로 완전 확대되는 컷인 연출 (sim은 결정적으로, 컷인은 렌더 전용)
-- [ ] 로컬 2인 (데스크톱): 키보드 분할 + 게임패드 자동 할당 `[PRD-LOCAL-01]`
+- [ ] 필살기 (2026-09-30 사용자 결정): 때리거나 맞으면 차는 게이지가 가득 차면 1회, 강공격+가드(X+C) 동시 입력, 캐릭터마다 다른 필살기와 모션 (Barbarian 대지 강타 · Rogue 돌진 연타 · Knight 회전 베기 · Mage 거대 화염구) `[PRD-STYLE-04]`
+- [ ] 필살기 컷인: 발동 시 카메라가 그 캐릭터로 완전 확대 (sim은 결정적으로, 컷인은 렌더 전용) `[PRD-STYLE-04]` `[GD-CAM-01]`
+- [ ] 로컬 2인 (데스크톱): 키보드 분할(P2 WASD · Q · F · G · H · J) + 게임패드 자동 할당 `[PRD-LOCAL-01]` `[PRD-CTL-02]`
 - [ ] 캐릭터(스타일) 선택 화면 `[PRD-UI-02]`
+- [ ] 트래킹: `character_selected`, `gauge_full`·`special_used`·`special_hit`, `match_ended` 슬롯 요약에 스타일·필살기 수, 원시 이벤트 `special_start`·`special_hit`·`projectile_spawn` → `match_events` `[PRD-DATA-03]` `[PRD-DATA-04]`
 
 ### 🎨 DS 트랙
 
@@ -286,6 +337,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 ### 테스트
 
 - 단위: 스타일별 공격 데이터 로딩, 원거리 투사체 판정
+- 단위: 필살기 게이지 증가·가득 참·동시 입력 발동·캐릭터별 판정
 - 밸런스 시뮬레이션: 봇 대 봇 스타일 매치업 100판 자동 실행 → 승률 표
 
 ### 완료 기준
@@ -313,7 +365,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 **6b — 로비·배포**
 - [ ] 방 코드 생성·입장, 최대 4인, 빈 방 자동 종료, 로비 HTTP API `[PRD-NET-03]`
 - [ ] Supabase `rooms` 테이블(코드·서버 주소·인원·만료) + 만료 방 정리, 서버·클라이언트 연동 (프로젝트 자리 확보 선행) `[PRD-DATA-02]`
-- [ ] 서버 Docker 이미지, Fly.io/VPS 배포 · 웹 빌드 Cloudflare Pages 배포 `[PRD-PLT-03]` `[PRD-PLT-04]`
+- [ ] 서버 Docker 이미지, Fly.io/VPS 배포 `[PRD-PLT-04]` (웹 빌드 Vercel 배포는 Phase 4.0으로 이동)
 - [ ] 연결 끊김 처리 (재접속 유예, 봇 대체) `[PRD-NET-03]`
 
 ### 🎨 DS 트랙
@@ -347,7 +399,8 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] 새 수치가 모두 `GameConfig`에 있음
 - [ ] 하드코딩 색 검사 통과, 신규 UI는 모두 DS 컴포넌트 + 갤러리 등록
 - [ ] 데스크톱 + Android 빌드 실행 확인
-- [ ] 이 문서의 체크박스와 [`design.md`](./design.md) §11 추적표의 상태 갱신
+- [ ] 이 문서의 체크박스와 [`design.md`](./design.md) §12 추적표의 상태 갱신
+- [ ] 새 기능의 트래킹 이벤트가 [`tracking-plan.md`](./tracking-plan.md)와 `EventCatalog`에 있다 (Phase 4.0 이후)
 - [ ] 코드 리뷰 에이전트 통과, `ASSETS.md` 최신
 
 ---
@@ -361,17 +414,19 @@ PRD의 모든 요구사항 ID는 적어도 한 Phase에 배정되어야 한다. 
 | PRD-CORE-01 | 전 Phase (판단 기준) | PRD-ITEM-01~04 | 2 |
 | PRD-PLT-01 | 0 (Android), 3 (iOS) | PRD-CFG-01 | 0, 1, 6 |
 | PRD-PLT-02 | 0 | PRD-ARCH-01~02 | 0, 1 |
-| PRD-PLT-03 | 0, 6 | PRD-ARCH-03 | 4, 5 |
+| PRD-PLT-03 | 0, 4.0 (Vercel) | PRD-ARCH-03 | 4, 5 |
 | PRD-PLT-04 | 0, 6 | PRD-ARCH-04 | 0, 6 |
 | PRD-PLT-05 | 0, 3 | PRD-ARCH-05 | 1, 2 |
 | PRD-CTL-01 | 0 | PRD-NET-01~03 | 6 |
-| PRD-CTL-02 | 1, 2 | PRD-ARENA-01~04 | 4 |
-| PRD-CTL-03 | 1 (기본), 2 (4버튼) | PRD-STYLE-01~03 | 5 |
+| PRD-CTL-02 | 1, 2, 5 | PRD-ARENA-01~04 | 4 |
+| PRD-CTL-03 | 1 (기본), 2 (4버튼) | PRD-STYLE-01~04 | 5 |
 | PRD-CTL-04 | 1 | PRD-LOCAL-01 | 5 |
 | PRD-RULE-01~05 | 1 | PRD-FX-01~03 | 3 |
 | PRD-CMB-01~04 | 2 | PRD-BOT-01 / 02 | 1 / 2, 5 |
-| PRD-UI-01 | 1 | PRD-UI-02 | 4, 5 |
+| PRD-UI-01 | 1 | PRD-UI-02 | 4.0, 4, 5 |
 | PRD-NFR-01 | 3 | PRD-NFR-02 | 1, 6 |
 | PRD-NFR-03 | 1 | PRD-NFR-04 | 6 |
 | PRD-NFR-05 | 3 | PRD-NFR-06~07 | 0 (이후 상시) |
 | PRD-DATA-01 | 6 (설정 화면 로컬 저장) | PRD-DATA-02 | 6 |
+| PRD-DATA-03 | 4.0 (기반), 4, 5 (기능별 이벤트) | PRD-DATA-04 | 4.0 (기반), 4, 5 (원시 이벤트) |
+| PRD-AUTH-01 | 4.0 | | |

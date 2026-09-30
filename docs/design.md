@@ -1,6 +1,6 @@
 # TheBrawlGuys — 디자인 시스템
 
-> 버전 0.6 · 2026-09-30 (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
+> 버전 0.6 · 2026-09-30 (0.6+: Phase 4.0 계획 — LoginPanel 초안, 메뉴 디오라마 배경) (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떻게 보이고, 들리고, 느껴지는지**를 소유한다.
@@ -260,14 +260,25 @@
 ### DS-LAY-03 화면 흐름
 
 ```
-타이틀 ─▶ 모드 선택 ─┬─ 봇전 ──────┐
-                    ├─ 로컬 2인 ───┼─▶ 캐릭터 선택 ─▶ 경기장 선택 ─▶ 대전 ─▶ 결과
-                    └─ 온라인 ─▶ 로비(방 코드) ┘                     ▲        │
-                                                                 └─ 다시 ─┘
+로그인 ─▶ 타이틀/모드 선택 ─┬─ 봇전 ─────────────────┐
+  (세션 있으면 건너뜀)       ├─ 로컬 2인 ──────────────┼─▶ 캐릭터 선택 ─▶ 경기장 선택 ─▶ 대전 ─▶ 결과
+                           └─ 온라인 ─▶ 로비(방 코드) ┘                                ▲        │
+                                                                                     └─ 다시 ─┘
 설정 (어디서든 진입): 접근성 · 조작 편집 · 사운드
 ```
 
-- 메뉴 배경은 경기장 디오라마를 천천히 도는 카메라로 보여준다 (레퍼런스 A의 부감 그대로)
+**메뉴 배경 — 궤도 디오라마** (`MenuBackdrop`, Phase 4.0, 근거 PRD-AUTH-01 · PRD-UI-02)
+
+로그인부터 경기장 선택까지 모든 메뉴 화면 뒤에 같은 배경이 깔린다. 첫인상에서 "치고받고 날아가는 게임"이 바로 보이게 하는 것이 목적이다.
+
+| 요소 | 규칙 |
+|---|---|
+| 장면 | 실제 경기장(`ArenaView`·장식·`EnvironmentRig`) 위에서 봇 4명이 `BotController`로 난투한다. 링아웃·리스폰까지 실제 규칙 그대로 (sim 재사용) |
+| 카메라 | 레퍼런스 A의 높은 부감을 유지한 채 경기장 중심을 축으로 천천히 yaw 회전한다. 거리는 `GD-CAM-01`의 경기장 프레이밍 거리를 재사용, 회전 속도는 config 값 |
+| 전경 가독성 | 배경은 전경 UI보다 한 단계 가라앉힌다 (살짝 흐림 또는 `ui_surface` 반투명 비네트). 패널 뒤에서 텍스트 대비가 떨어지지 않아야 한다 |
+| 사운드 | 메뉴 BGM 변주(`DS-SFX-02`)만. 배경 난투의 타격 SFX는 줄이거나 끈다 |
+| 성능 | 현재 품질 설정을 그대로 따르고, 품질 LOW에서도 60fps |
+| 전환 | 메뉴 화면이 바뀌어도 배경은 끊기지 않는다. 대전 진입 시 배경을 멈추고 대전 씬으로 교체 |
 
 ---
 
@@ -280,14 +291,17 @@
 | DS-CMP-03 | `TouchStick` | 이동 입력 | 숨김 · 활성(중심·노브) · 데드존 | `ui_surface` 50%, `shadow_soft` | 1 | PRD-CTL-03 |
 | DS-CMP-04 | `TouchButton` | 액션 입력 | idle · pressed · highlight · disabled · charging | 아이콘, `petal_yellow`, `motion_fast` | 1 (v1), 2 (v2) | PRD-CTL-03, PRD-CTL-04 |
 | DS-CMP-05 | `ChargeGauge` | 강공격 차지량 (월드 공간) | 차지 중 · 최대(반짝) | `petal_yellow` → `fire`, `glow` | 2 | PRD-CMB-02 |
-| DS-CMP-06 | `MenuButton` | 메뉴 조작 | idle · focus · pressed · disabled | `ui_accent`, `radius_pill`, `stroke_focus` | 4 | PRD-UI-02 |
-| DS-CMP-07 | `Panel` | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4 | PRD-UI-02 |
+| DS-CMP-06 | `MenuButton` | 메뉴 조작 | idle · focus · pressed · disabled | `ui_accent`, `radius_pill`, `stroke_focus` | 4.0 | PRD-UI-02 |
+| DS-CMP-07 | `Panel` | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
 | DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일, 플레이어 색 링 | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
 | DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음 · 선택 중 · 준비 · 연결 끊김 | 플레이어 색+모양 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
 | DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 | 입력 · 오류 · 확인 중 | `display_l`, 글자별 둥근 칸 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
+| DS-CMP-14 | `LoginPanel` **(초안)** | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | `display_l` 로고, `MenuButton`(Google), `ui_surface`, `motion_squish` 등장 | 4.0 🖼 | PRD-AUTH-01 |
+
+`LoginPanel`은 궤도 디오라마(`DS-LAY-03`) 위에 뜬다. 등장 연출은 🖼 시안 3개(① 중앙 카드 스프링 팝 ② 좌측 세로 패널 슬라이드 + 우측 로고 ③ 로고 낙하 후 버튼 순차 등장) 중 승인안으로 확정한다. error 상태는 원인을 한 줄로 보여주고 재시도 버튼을 둔다. 모바일 debug 빌드에서만 "건너뛰기"가 보인다.
 
 **컴포넌트 공통 규약**
 - 루트는 `Control`, 크기는 `custom_minimum_size`를 토큰 간격으로 지정
@@ -435,12 +449,14 @@
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ⬜ |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
 | DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
-| DS-LAY-03 | 화면 흐름 | PRD-UI-02 | 4, 5, 6 | ⬜ |
+| DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | ⬜ |
 | DS-CMP-12 | 컴포넌트 — `DebugPanel` | §6 표 참조 | 0 | ✅ |
 | DS-CMP-01~03, 09 | 컴포넌트 — `DamageCounter`·`StockIcons`·`TouchStick`·`ResultBanner` | §6 표 참조 | 1 | ✅ |
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |
 | DS-CMP-05 | 컴포넌트 — `ChargeGauge` | PRD-CMB-02 | 2 | ✅ |
-| DS-CMP-06~08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ⬜ |
+| DS-CMP-08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-14 | 컴포넌트 — `LoginPanel` (초안) | PRD-AUTH-01 | 4.0 🖼 | 🖼 (시안 3개 비교 대기) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |
@@ -453,7 +469,7 @@
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
 | GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ✅ |
-| GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04 | 0, 4 | 🟨 (Phase 4에서 계속) |
+| GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04, PRD-STYLE-04 | 0, 4.0 (메뉴 궤도), 4, 5 (필살기 컷인) | 🟨 (Phase 4.0·4·5에서 계속) |
 | GD-ANIM-01 | 애니메이션 매핑 | PRD-FX-01, PRD-ARCH-01 | 3 | ✅ |
 | DS-A11Y-01 | 색각 대응 | PRD-UI-01 | 5, 6 | ⬜ |
 | DS-A11Y-02~03 | 흔들림·진동, 터치 커스텀 | PRD-CTL-03 | 6 | ⬜ |
