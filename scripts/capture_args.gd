@@ -13,12 +13,13 @@ static func parse(args: PackedStringArray) -> Dictionary:
 	return out
 
 
-static func save(root: Window, path: String) -> void:
+static func save(root: Window, path: String) -> Error:
 	var err := root.get_texture().get_image().save_png(path)
 	if err != OK:
 		push_error("capture: cannot save %s (%s)" % [path, error_string(err)])
-		return
+		return err
 	print("capture: saved %s" % path)
+	return OK
 
 
 ## Sun, sky and a flat grass floor under root (a neutral backdrop for close-ups).

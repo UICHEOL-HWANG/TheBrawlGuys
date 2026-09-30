@@ -95,4 +95,5 @@
 ## 웹 로딩 화면 (2026-10-01, 사용자 선택: 시안 B "깊은 숲")
 - Godot 로고 제거: `project.godot` `application/boot_splash/image` = `assets/branding/boot-splash.png`(크레스트 + 제목, `scripts/export_boot_splash.gd`로 생성), `bg_color` = canopy_deep
 - 웹은 커스텀 셸 `deploy/web_shell.html`(Godot 4.7 기본 셸 기반, export preset `html/custom_html_shell`): 같은 스플래시 이미지 + canopy 트랙·grass 진행 바 + "불러오는 중… N%", 한국어 오류 문구. 페이지 → 엔진 부트 스플래시가 같은 그림·색이라 끊김 없음
+- 링크 미리보기·아이콘 (2026-09-30): OG 카드 1200×630 `deploy/share/og-image.png`(`scripts/capture_share_card.gd`, 4캐릭터 인게임 + 방패·제목·태그라인, 시안 C) → `deploy_web.sh`가 빌드에 복사, 셸에 og/twitter 메타. 앱 아이콘 `assets/branding/app-icon.png`(`scripts/export_app_icon.gd`, canopy 둥근 사각+방패, 시안 2) = `config/icon` → 웹 파비콘·apple-touch-icon 자동 생성. 엔진이 탭 제목을 config/name으로 덮어써서 `App._ready`에서 제목을 deferred로 재설정(config/name은 데스크톱 user:// 폴더명이라 유지). 비교: `evidence/share-compare.html`
 - 시안 비교: `evidence/loading-compare.html`

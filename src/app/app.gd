@@ -27,6 +27,9 @@ var _restoring: bool = false
 
 
 func _ready() -> void:
+	# The display title, not config/name (which also names the desktop user:// folder). Deferred:
+	# the engine sets the title from config/name after the main scene is ready.
+	DisplayServer.window_set_title.call_deferred(LoginText.TITLE)
 	_backdrop = BACKDROP_SCENE.instantiate() as MenuBackdrop
 	add_child(_backdrop)
 	var ui := CanvasLayer.new()

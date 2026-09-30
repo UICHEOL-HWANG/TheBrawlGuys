@@ -15,12 +15,18 @@ if [ ! -f "$ROOT/config/secrets.local.cfg" ]; then
 	exit 1
 fi
 
+if [ ! -f "$ROOT/deploy/share/og-image.png" ]; then
+	echo "deploy/share/og-image.png 없음 — scripts/capture_share_card.gd 먼저 실행" >&2
+	exit 1
+fi
+
 mkdir -p "$OUT"
 touch "$ROOT/build/.gdignore"
 godot --headless --path "$ROOT" --export-release "Web" "$OUT/index.html"
 rm -f "$OUT"/*.import
 cp "$ROOT/deploy/vercel.json" "$OUT/vercel.json"
 cp "$ROOT/deploy/vercelignore" "$OUT/.vercelignore"
+cp "$ROOT/deploy/share/og-image.png" "$OUT/og-image.png"
 
 cd "$OUT"
 if [ ! -f .vercel/project.json ]; then
