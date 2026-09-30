@@ -12,3 +12,4 @@
 | T6 | 렌더: 경기장 뷰·테마 변형·위험 표시·안개 실루엣·장식 가림 검사 | DS-THM-02, DS-VIS-03/04, GD-CAM-01 | 캡처 4종 | ⬜ |
 | T7 | SelectCard + 경기장 선택 화면 + 트래킹 | DS-CMP-08, PRD-UI-02, PRD-DATA-03 | `test_select_card` | ⬜ |
 | T8 | 아이템 모델 정식화: 상자·방망이·폭탄·돌멩이 (소프트 툰 절차적 모델, 들고 있는 자세 오프셋, 폭탄 도화선 불꽃) — 🖼 캡처 비교 | DS-VIS-05, PRD-ITEM-02~04 | `test_item_view` + 캡처 | ⬜ |
+| T9 | `KeyHintBar` 대전 하단 키 안내 바 + `SettingsStore` + F2 토글 + `settings_changed` | DS-CMP-16, PRD-CTL-02, DS-LAY-02 | `test_key_hint_bar`, `test_settings_store` + `evidence/key-hint-*.png` | ✅ |
