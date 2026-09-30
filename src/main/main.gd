@@ -27,6 +27,7 @@ var _gauges: ChargeGaugeLayer
 var _hud: Hud
 var _feel: FeelDirector
 var _sfx: SfxDirector
+var _music: MusicDirector
 var _result_shown: bool = false
 ## Render interpolation contract: views lerp prev -> curr by _alpha.
 var _prev_state: Dictionary = {}
@@ -67,6 +68,9 @@ func _ready() -> void:
 	_sfx = SfxDirector.new()
 	add_child(_sfx)
 	_sfx.setup(_config)
+	_music = MusicDirector.new()
+	add_child(_music)
+	_music.setup(_config)
 	for i: int in PLAYER_COUNT:
 		var view := FighterView.new()
 		add_child(view)
@@ -130,6 +134,7 @@ func _start_match() -> void:
 	_result_shown = false
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
+	_music.play_battle()
 
 
 func _gather_inputs() -> Array[InputFrame]:
@@ -154,6 +159,7 @@ func _process(delta: float) -> void:
 	_draw_fighters(delta)
 	_item_layer.sync(_prev_state["items"], _curr_state["items"], _alpha, int(_curr_state["tick"]))
 	_hud.update_from(_curr_state)
+	_music.update_from(_curr_state)
 	_feel.on_events(events)
 	_feel.on_view_events(view_events)
 	_sfx.on_events(events)
