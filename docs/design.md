@@ -141,6 +141,11 @@
 | `ui_text_soft` | `#3F7470` | 보조 글자 (크림 바탕 대비 5.2:1, WCAG AA) |
 | `ui_shadow` | `canopy_deep` 25% | 패널 그림자 |
 | `ui_accent` | = `fire` | 주 버튼 |
+| `haze` | `#DAD9CB` | 메뉴 배경 안개·헤이즈 (따뜻한 연회색-세이지, DS-LAY-03) |
+| `glass_tint` | `#B9C9B0` | 로그인 유리 카드 틴트 (DS-CMP-14) |
+| `glass_edge` | `#F4F7EE` 70% | 유리 카드 가는 테두리 |
+| `text_shadow` | `canopy_deep` 35% | 장면 위 흰 제목·글자의 부드러운 그림자 |
+| `google_blue/red/yellow/green` | `#4285F4` / `#EA4335` / `#FBBC05` / `#34A853` | **Google "G" 마크 전용** (브랜드 규정). 다른 곳에 쓰지 않는다 |
 
 **플레이어 색** — 연두 바닥 위에서 잘 보이는 색으로 선정. 색만으로 구분하지 않는다 (DS-VIS-03 모양과 항상 짝)
 
@@ -176,11 +181,16 @@
 
 4 기반 스케일: `s1 4` · `s2 8` · `s3 12` · `s4 16` · `s5 24` · `s6 32` · `s7 48` · `s8 64`
 
+메뉴 크기 (1920×1080): `button_min_width 400` · `button_height 80` (MenuButton) · `login_card_width 560` (DS-CMP-14) · `tracking_wide 4` (자간 넓힌 태그라인)
+
+유리·헤이즈 강도 (0~1): `glass_tint_strength 0.5` (Compatibility·웹은 블러 대신 `0.82`) · `glass_blur_lod 3.5` · `haze_amount 0.34` · `haze_desaturate 0.4`
+
 ### DS-TOK-04 반경·선·그림자
 
 | 토큰 | 값 |
 |---|---|
 | `radius_s / m / l / pill` | 12 / 20 / 32 / 999 — 레퍼런스의 둥근 형태에 맞춰 크게 |
+| `radius_xl` | 40 — 로그인 유리 카드 (DS-CMP-14) |
 | `stroke_none` | UI 기본은 선 없음 |
 | `stroke_focus` | 4px `petal_yellow` (포커스·선택 표시에만) |
 | `shadow_soft` | 오프셋 (0, 8), 블러 16, `ui_shadow` — 떠 있는 말랑한 느낌 |
@@ -194,6 +204,7 @@
 | `motion_base` | 0.18s | out-quad | 패널 전환 |
 | `motion_squish` | 0.28s | out-elastic (약) | 숫자 튀어오름, 배너 등장 — 말랑한 스쿼시 |
 | `motion_slow` | 0.40s | in-out-cubic | 화면 전환 |
+| `motion_calm` | 0.70s | out-sine | 차분한 메뉴 등장 — 헤이즈 걷힘, 로그인 카드 떠오름 (튀지 않음) |
 
 - 버튼 눌림: 스케일 (1.04, 0.92) 스쿼시 → `shadow_pressed`로 전환 → 뗄 때 탄성 복귀 — 토큰 `PRESS_SQUISH`
 
@@ -274,8 +285,9 @@
 | 요소 | 규칙 |
 |---|---|
 | 장면 | 실제 경기장(`ArenaView`·장식·`EnvironmentRig`) 위에서 봇 4명이 `BotController`로 난투한다. 링아웃·리스폰까지 실제 규칙 그대로 (sim 재사용) |
-| 카메라 | 레퍼런스 A의 높은 부감을 유지한 채 경기장 중심을 축으로 천천히 yaw 회전한다. 거리는 `GD-CAM-01`의 경기장 프레이밍 거리를 재사용, 회전 속도는 config 값 |
-| 전경 가독성 | 배경은 전경 UI보다 한 단계 가라앉힌다 (살짝 흐림 또는 `ui_surface` 반투명 비네트). 패널 뒤에서 텍스트 대비가 떨어지지 않아야 한다 |
+| 카메라 | 대전 카메라보다 **낮은 3/4 시점**(pitch 24°)으로 장면 안에서 바라보며 천천히 yaw 회전한다. 거리는 `CameraFraming`으로 경기장 중심부(반경의 50%)를 맞추고, 회전축은 난투 중심을 천천히 따라간다. 화면마다 비워 둔 영역(NDC focus)으로 난투를 옮긴다 (로그인: 카드 오른쪽 아래). 값은 GameConfig Camera 그룹 `menu_orbit_*` |
+| 전경 가독성 | 배경은 전경 UI보다 한 단계 가라앉힌다: `haze` 색 거리 안개 + 전체 화면 헤이즈(채도 40% 낮춤, `haze` 34% 덮기). 첫 화면은 헤이즈에서 서서히 드러난다 (`motion_calm`) |
+| 식별 | 메뉴 배경에는 P1~P4 라벨·발밑 링을 숨긴다 (HUD 정체성 없음) |
 | 사운드 | 메뉴 BGM 변주(`DS-SFX-02`)만. 배경 난투의 타격 SFX는 줄이거나 끈다 |
 | 성능 | 현재 품질 설정을 그대로 따르고, 품질 LOW에서도 60fps |
 | 전환 | 메뉴 화면이 바뀌어도 배경은 끊기지 않는다. 대전 진입 시 배경을 멈추고 대전 씬으로 교체 |
@@ -291,17 +303,22 @@
 | DS-CMP-03 | `TouchStick` | 이동 입력 | 숨김 · 활성(중심·노브) · 데드존 | `ui_surface` 50%, `shadow_soft` | 1 | PRD-CTL-03 |
 | DS-CMP-04 | `TouchButton` | 액션 입력 | idle · pressed · highlight · disabled · charging | 아이콘, `petal_yellow`, `motion_fast` | 1 (v1), 2 (v2) | PRD-CTL-03, PRD-CTL-04 |
 | DS-CMP-05 | `ChargeGauge` | 강공격 차지량 (월드 공간) | 차지 중 · 최대(반짝) | `petal_yellow` → `fire`, `glow` | 2 | PRD-CMB-02 |
-| DS-CMP-06 | `MenuButton` | 메뉴 조작 | idle · focus · pressed · disabled | `ui_accent`, `radius_pill`, `stroke_focus` | 4.0 | PRD-UI-02 |
-| DS-CMP-07 | `Panel` | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
+| DS-CMP-06 | `MenuButton` (`UiMenuButton`) | 메뉴 조작 | idle · focus(호버 포함) · pressed · disabled | `ui_accent`(primary) / `ui_surface`(secondary), `radius_pill`, `stroke_focus`, `PRESS_SQUISH` | 4.0 | PRD-UI-02 |
+| DS-CMP-07 | `Panel` (`UiPanel`) | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
 | DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일, 플레이어 색 링 | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
 | DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음 · 선택 중 · 준비 · 연결 끊김 | 플레이어 색+모양 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
 | DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 | 입력 · 오류 · 확인 중 | `display_l`, 글자별 둥근 칸 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
-| DS-CMP-14 | `LoginPanel` **(초안)** | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | `display_l` 로고, `MenuButton`(Google), `ui_surface`, `motion_squish` 등장 | 4.0 🖼 | PRD-AUTH-01 |
+| DS-CMP-14 | `LoginPanel` | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `motion_calm` 등장 | 4.0 | PRD-AUTH-01 |
+| DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
 
-`LoginPanel`은 궤도 디오라마(`DS-LAY-03`) 위에 뜬다. 등장 연출은 🖼 시안 3개(① 중앙 카드 스프링 팝 ② 좌측 세로 패널 슬라이드 + 우측 로고 ③ 로고 낙하 후 버튼 순차 등장) 중 승인안으로 확정한다. error 상태는 원인을 한 줄로 보여주고 재시도 버튼을 둔다. 모바일 debug 빌드에서만 "건너뛰기"가 보인다.
+`LoginPanel` 확정 (2026-09-30, 레퍼런스 [`references/ref-login-calmforest.webp`](./references/ref-login-calmforest.webp) — 사용자의 이전 프로젝트 calm forest):
+- 헤이즈 낀 궤도 디오라마(`DS-LAY-03`) 위, 화면 **정중앙에 반투명 유리 카드** 하나. 카드는 뒤 장면을 흐리게 비추고(스크린 텍스처 밉맵 블러) 세이지 틴트를 덮는다. Compatibility 렌더러(웹)에서는 블러 대신 틴트를 진하게 한다
+- 카드 내용(위→아래, 가운데 정렬): 크레스트 로고(`CrestLogo` DS-CMP-15, 불꽃 깜빡임) · 흰 제목 "The Brawl Guys" · 자간 넓은 태그라인 · 흰 알약 버튼 "G + Google로 시작하기" · 상태 한 줄(loading/error) · 안내 "로그인하면 어느 기기에서든 기록이 이어집니다." · 🌐 언어 링크(한국어↔English 전환 스텁, `settings_changed` 트래킹) · debug 빌드만 "건너뛰기 (디버그)" 링크. 게스트 버튼은 없다 (Google 전용)
+- 등장: 배경이 헤이즈에서 드러나고, 카드가 살짝 아래에서 떠오르며 부드럽게 커지고(`motion_calm`), 내용이 순서대로 페이드·리프트된다(`motion_slow`, `motion_fast` 간격). 튀는 효과 없음
+- error 상태는 원인을 한 줄로 보여주고 버튼이 "다시 시도"가 된다. 로그인할 수 없는 환경(모바일·키 없음)은 버튼을 끄고 이유를 보여 준다
 
 **컴포넌트 공통 규약**
 - 루트는 `Control`, 크기는 `custom_minimum_size`를 토큰 간격으로 지정
@@ -449,14 +466,15 @@
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ⬜ |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
 | DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
-| DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | ⬜ |
+| DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | 🔨 (4.0 로그인·타이틀·배경 완료, 캐릭터·경기장 선택은 4·5) |
 | DS-CMP-12 | 컴포넌트 — `DebugPanel` | §6 표 참조 | 0 | ✅ |
 | DS-CMP-01~03, 09 | 컴포넌트 — `DamageCounter`·`StockIcons`·`TouchStick`·`ResultBanner` | §6 표 참조 | 1 | ✅ |
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |
 | DS-CMP-05 | 컴포넌트 — `ChargeGauge` | PRD-CMB-02 | 2 | ✅ |
-| DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ⬜ |
+| DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ✅ |
 | DS-CMP-08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
-| DS-CMP-14 | 컴포넌트 — `LoginPanel` (초안) | PRD-AUTH-01 | 4.0 🖼 | 🖼 (시안 3개 비교 대기) |
+| DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스) |
+| DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |
