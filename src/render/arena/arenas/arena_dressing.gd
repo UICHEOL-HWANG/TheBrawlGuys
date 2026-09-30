@@ -17,7 +17,7 @@ var _arena: ArenaData
 var _theme: ArenaTheme
 var _config: GameConfig
 var _rng := RandomNumberGenerator.new()
-## {node: Node3D, radius: float, height: float}
+## {node: Node3D, radius: float, height: float, drop: float (node origin above the base)}
 var _occluders: Array[Dictionary] = []
 
 
@@ -61,8 +61,10 @@ func occluders() -> Array[Dictionary]:
 	return _occluders
 
 
-func add_occluder(node: Node3D, radius: float, height: float) -> void:
-	_occluders.append({"node": node, "radius": radius, "height": height})
+## centered: the node's origin sits at half height (primitive meshes), not at its base.
+func add_occluder(node: Node3D, radius: float, height: float, centered: bool = false) -> void:
+	_occluders.append({"node": node, "radius": radius, "height": height,
+		"drop": height * 0.5 if centered else 0.0})
 
 
 func _build() -> void:

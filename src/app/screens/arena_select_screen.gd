@@ -1,10 +1,12 @@
 class_name ArenaSelectScreen
 extends Control
 ## Arena select (Phase 4 T7, PRD-UI-02, design.md DS-LAY-03 … → 경기장 선택 → 대전): a title, one
-## SelectCard per stage (ArenaCards) in a row and a 뒤로 button over the menu backdrop.
-## ←/→ (arrows, gamepad) move the focus, Z / Enter / Space confirm, X / Esc go back; hovering a
-## card focuses it and a click or tap picks it. Tracks arena_selected {arena, browse_count} and
-## select_cancelled {screen, dwell_ms}; screen_viewed comes from the ScreenRouter.
+## SelectCard per stage (ArenaCards) in a centered row and a 뒤로 button over the menu backdrop
+## (ArenaSelectLayout). ←/→ (arrows, d-pad, the stick once per push) move the focus, Z / Enter /
+## Space confirm, X / Esc go back; hovering a card focuses it and a click or tap picks it. Shown
+## again after a pick (a later step backed out), the pick is cleared. Tracks arena_selected
+## {arena, browse_count} and select_cancelled {screen, dwell_ms}; screen_viewed comes from the
+## ScreenRouter.
 
 signal arena_chosen(arena_id: String)
 signal cancelled
@@ -20,6 +22,8 @@ const BACK_KEYS: Array[Key] = [KEY_X, KEY_ESCAPE]
 
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 var clock_ms: Callable = Time.get_ticks_msec
+## The app's GameConfig (the arena previews are built from it); null loads the default config.
+var config: GameConfig = null
 
 var _cards: Array[SelectCard] = []
 var _ids: Array[String] = []
@@ -28,21 +32,22 @@ var _browse: int = 0
 var _shown_ms: int = 0
 var _done: bool = false
 var _back: UiMenuButton
+var _hint: Label
+var _footer: MarginContainer
+var _stick := StickNav.new()
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_shown_ms = int(clock_ms.call())
-	var col := VBoxContainer.new()
-	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(col)
-	var fill := Control.new()
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for c: Control in [_gap(DS.S6), LoginLayout.title_label(TITLE_TEXT), fill, _card_row(), _gap(DS.S5), _footer(), _gap(DS.S6)]:
-		col.add_child(c)
+	_back = ArenaSelectLayout.back_button(BACK_TEXT)
+	_back.pressed.connect(back)
+	_hint = ArenaSelectLayout.hint_label(HINT_TEXT)
+	_footer = ArenaSelectLayout.build(self, TITLE_TEXT, _card_row(), _back, _hint)
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
+	visibility_changed.connect(_on_visibility_changed)
 	if not _cards.is_empty():
 		_cards[0].grab_focus.call_deferred()
 
@@ -50,15 +55,14 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if _done or not is_visible_in_tree():
 		return
-	var key := event as InputEventKey
-	var echo := key != null and key.echo
-	if event.is_action_pressed("ui_left"):
-		move(-1)
-	elif event.is_action_pressed("ui_right"):
-		move(1)
-	elif not echo and (event.is_action_pressed("ui_accept") or _is_key(event, CONFIRM_KEYS)):
+	var step := _step(event)
+	if step != 0:
+		move(step)
+	elif _stick.owns(event):
+		pass  # a held or returning stick: consumed so GUI focus navigation cannot repeat it
+	elif _is_press(event, "ui_accept", CONFIRM_KEYS):
 		confirm()
-	elif not echo and (event.is_action_pressed("ui_cancel") or _is_key(event, BACK_KEYS)):
+	elif _is_press(event, "ui_cancel", BACK_KEYS):
 		back()
 	else:
 		return
@@ -102,7 +106,11 @@ func back_button() -> UiMenuButton:
 	return _back
 
 
-## Title on top, cards low: the backdrop fight plays in between.
+func hint_label() -> Label:
+	return _hint
+
+
+## Title on top, cards in the middle: the backdrop fight plays above them.
 func backdrop_focus() -> Vector2:
 	return BACKDROP_FOCUS
 
@@ -110,17 +118,40 @@ func backdrop_focus() -> Vector2:
 func _choose(i: int) -> void:
 	if _done or i < 0 or i >= _cards.size() or _cards[i].state() == SelectCard.State.LOCKED:
 		return
-	_done = true
 	_set_focus(i)
+	_done = true
+	_set_cards_live(false)
 	_cards[i].set_state(SelectCard.State.SELECTED)
 	track.call("arena_selected", {"arena": _ids[i], "browse_count": _browse})
 	arena_chosen.emit(_ids[i])
 
 
 func _set_focus(i: int) -> void:
+	if _done:
+		return  # hovering after a pick changes nothing
 	if i != _focus:
 		_browse += 1
 	_focus = i
+
+
+## Shown again after a pick (a later select step backed out to this one): a fresh visit.
+func _on_visibility_changed() -> void:
+	if not _done or not is_visible_in_tree():
+		return
+	_done = false
+	_browse = 0
+	_stick = StickNav.new()  # the stick may have been released while the screen was away
+	_shown_ms = int(clock_ms.call())
+	_set_cards_live(true)
+	for i: int in _cards.size():
+		if _cards[i].state() != SelectCard.State.LOCKED:
+			_cards[i].set_state(SelectCard.State.FOCUS if i == _focus else SelectCard.State.IDLE)
+	_cards[_focus].grab_focus()
+
+
+func _set_cards_live(on: bool) -> void:
+	for c: SelectCard in _cards:
+		c.mouse_filter = Control.MOUSE_FILTER_STOP if on else Control.MOUSE_FILTER_IGNORE
 
 
 func _card_row() -> Control:
@@ -128,7 +159,8 @@ func _card_row() -> Control:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", DS.S5)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var entries := ArenaCards.entries(GameConfig.new())
+	var cfg := config if config != null else load(MenuBackdrop.CONFIG_PATH) as GameConfig
+	var entries := ArenaCards.entries(cfg)
 	for i: int in entries.size():
 		var e := entries[i]
 		var card := CARD_SCENE.instantiate() as SelectCard
@@ -141,33 +173,25 @@ func _card_row() -> Control:
 	return row
 
 
-func _footer() -> Control:
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", DS.S6)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_back = UiMenuButton.new()
-	_back.text = BACK_TEXT
-	_back.kind = UiMenuButton.Kind.SECONDARY
-	_back.focus_mode = Control.FOCUS_NONE  # keys move between cards only; X / Esc goes back
-	_back.pressed.connect(back)
-	row.add_child(_back)
-	var hint := Label.new()
-	hint.text = HINT_TEXT
-	hint.add_theme_font_override("font", load(DS.FONT_CAPTION_PATH) as Font)
-	hint.add_theme_font_size_override("font_size", DS.SIZE_CAPTION)
-	hint.add_theme_color_override("font_color", DS.UI_TEXT)  # dark on the light menu haze
-	row.add_child(hint)
-	return row
+func _apply_safe_area() -> void:
+	ArenaSelectLayout.apply_safe_area(_footer, get_viewport())
 
 
-func _gap(height: int) -> Control:
-	var gap := Control.new()
-	gap.custom_minimum_size.y = height
-	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return gap
+## -1 / +1 for a left / right press: keys and d-pad by action, the stick once per push.
+func _step(event: InputEvent) -> int:
+	if event is InputEventJoypadMotion:
+		return _stick.step(event as InputEventJoypadMotion)
+	if event.is_action_pressed("ui_left"):
+		return -1
+	if event.is_action_pressed("ui_right"):
+		return 1
+	return 0
 
 
-static func _is_key(event: InputEvent, keys: Array[Key]) -> bool:
+static func _is_press(event: InputEvent, action: String, keys: Array[Key]) -> bool:
 	var key := event as InputEventKey
+	if key != null and key.echo:
+		return false
+	if event.is_action_pressed(action):
+		return true
 	return key != null and key.pressed and keys.has(key.keycode)

@@ -13,6 +13,8 @@ var _env: EnvironmentRig
 var _arena_view: ArenaView
 var _decor: DecorView
 var _decor_seed: int = 0
+## The id last asked for (an unknown id resolves to the default arena, so compare requests).
+var _requested_id: String = ""
 var _views: Array[FighterView] = []
 var _hazards: Array[FighterHazards] = []
 var _items: ItemLayer
@@ -42,9 +44,10 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 	config.changed.connect(apply_quality)
 
 
-## Swaps in another arena (menu backdrop cycling): arena view, decor and theme.
+## Swaps in another arena (menu backdrop cycling): arena view, decor and theme. A no-op while
+## the requested id stays the same (called every frame by the backdrop).
 func set_arena(arena_id: String) -> void:
-	if _arena_view != null and _arena_view.arena_id() == arena_id:
+	if arena_id == _requested_id:
 		return
 	for old: Node in [_arena_view, _decor]:
 		remove_child(old)
@@ -123,6 +126,7 @@ func decor() -> DecorView:
 
 
 func _build_arena(arena_id: String) -> void:
+	_requested_id = arena_id
 	_arena_view = ArenaView.new()
 	add_child(_arena_view)
 	_arena_view.setup(_config, arena_id)

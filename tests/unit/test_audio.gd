@@ -28,8 +28,8 @@ func test_hits_pick_light_or_heavy_and_bend_pitch() -> void:
 func test_ringout_splashes_over_the_lake() -> void:
 	var c := GameConfig.new()
 	var lake := Vector3(c.arena_radius + DecorView.LAKE_OFFSET, -9, 0)
-	assert_eq(SfxDirector.sound_for({"type": "ringout", "pos": lake, "id": 1}, c)["name"], "ringout_splash")
-	assert_eq(SfxDirector.sound_for({"type": "ringout", "pos": -lake, "id": 1}, c)["name"], "ringout_whistle")
+	assert_eq(SfxDirector.sound_for({"type": "ringout", "pos": lake, "id": 1}, c, true)["name"], "ringout_splash")
+	assert_eq(SfxDirector.sound_for({"type": "ringout", "pos": -lake, "id": 1}, c, true)["name"], "ringout_whistle")
 
 
 func test_view_events_and_items_have_sounds() -> void:

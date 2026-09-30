@@ -111,3 +111,15 @@ func test_rock_is_faceted() -> void:
 func test_every_kind_has_a_hand_offset() -> void:
 	for kind: int in [Item.Kind.BAT, Item.Kind.BOMB, Item.Kind.ROCK]:
 		assert_ne(ItemModels.hold_transform(kind), Transform3D.IDENTITY, "kind %d sits in the hand" % kind)
+
+
+func test_held_item_swaps_models_without_a_frame_of_both() -> void:
+	var h := HeldItem.new()
+	add_child_autofree(h)
+	h.setup(GameConfig.new())
+	h.show_item(Item.Kind.BAT, 3)
+	var bat := h.model()
+	h.show_item(Item.Kind.BOMB, 1)
+	assert_eq(h.get_child_count(), 1, "the old model leaves at once")
+	assert_null(bat.get_parent())
+	assert_true(h.model() is BombModel)

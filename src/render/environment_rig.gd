@@ -42,11 +42,13 @@ var _sun: DirectionalLight3D
 var _theme: ArenaTheme = ArenaTheme.new()
 var _glow_on: bool = true
 var _fog_boost: float = 0.0
+var _is_compat: bool = false
 ## A screen that owns the fog (the menu haze) pins its color and density over the theme's.
 var _held_fog: Dictionary = {}
 
 
 func setup() -> void:
+	_is_compat = RenderingServer.get_current_rendering_method() == "gl_compatibility"
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_COLOR
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -77,8 +79,12 @@ func theme() -> ArenaTheme:
 
 
 ## Fog gimmick strength 0..1 (FogView): thickens the distance fog over the theme's base fog.
+## Called every frame by MatchStage: writes the environment only when the boost moves.
 func set_fog_boost(amount: float) -> void:
-	_fog_boost = clampf(amount, 0.0, 1.0)
+	var boost := clampf(amount, 0.0, 1.0)
+	if is_equal_approx(boost, _fog_boost):
+		return
+	_fog_boost = boost
 	_update_fog()
 
 
@@ -95,8 +101,7 @@ func release_fog() -> void:
 
 func _update_fog() -> void:
 	var color: Color = _held_fog.get("color", _theme.fog_color)
-	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
-	var boost := FOG_BOOST_DENSITY_COMPAT if is_compat else FOG_BOOST_DENSITY
+	var boost := FOG_BOOST_DENSITY_COMPAT if _is_compat else FOG_BOOST_DENSITY
 	var density := float(_held_fog.get("density", _theme.fog_density)) + _fog_boost * boost
 	_env.fog_enabled = density > 0.0
 	_env.fog_light_color = color
@@ -105,8 +110,7 @@ func _update_fog() -> void:
 
 
 func _apply_energies() -> void:
-	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
-	var e := energies(is_compat, _glow_on)
+	var e := energies(_is_compat, _glow_on)
 	_sun.light_energy = float(e["sun"]) * _theme.sun_scale
 	_env.ambient_light_energy = float(e["ambient"]) * _theme.ambient_scale
 	_env.glow_intensity = float(e["glow"]) * _theme.glow_scale

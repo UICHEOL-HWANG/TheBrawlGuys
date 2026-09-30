@@ -21,11 +21,25 @@ func test_orbit_pose_rotates_around_the_arena() -> void:
 
 func test_orbit_frames_the_arena_core_closer_than_the_whole_arena() -> void:
 	var cfg := GameConfig.new()
-	var core := OrbitCamera.frame(cfg, 16.0 / 9.0)
+	var core := OrbitCamera.frame(cfg, 16.0 / 9.0, cfg.arena_radius)
 	cfg.menu_orbit_arena_share = 1.0
-	var whole := OrbitCamera.frame(cfg, 16.0 / 9.0)
+	var whole := OrbitCamera.frame(cfg, 16.0 / 9.0, cfg.arena_radius)
 	assert_gt(float(whole["distance"]), float(core["distance"]), "the core framing is closer")
 	assert_lt(cfg.menu_orbit_pitch, cfg.cam_pitch, "lower than the match camera so fighters read")
+
+
+func test_orbit_frames_each_arena_by_its_own_radius() -> void:
+	var cfg := GameConfig.new()
+	var cam := OrbitCamera.new()
+	add_child_autofree(cam)
+	cam.setup(cfg)
+	var small := cam.frame_distance()
+	var bridge := ArenaCatalog.build("log_bridge", cfg).view_radius()
+	assert_gt(bridge, cfg.arena_radius, "the long bridge is wider than the classic circle")
+	cam.set_arena_radius(bridge)
+	cam.advance(0.0)
+	assert_gt(cam.frame_distance(), small, "a wider arena pulls the orbit back")
+	assert_almost_eq(cam.frame_distance(), float(OrbitCamera.frame(cfg, cam.aspect(), bridge)["distance"]), 0.001)
 
 
 func test_lens_offset_moves_the_look_at_point_on_screen() -> void:

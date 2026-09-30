@@ -41,6 +41,7 @@ func _on_frame() -> void:
 		_add_screen()
 		_backdrop.set_focus(_screen.call("backdrop_focus") as Vector2, true)
 		Input.warp_mouse(Vector2.ZERO)
+		root.gui_disable_input = true  # the OS cursor over the window must not hover or click cards
 	elif _frame == WARMUP_FRAMES:
 		_screen.call("move", 1)
 	elif _frame == WARMUP_FRAMES + SETTLE_FRAMES:

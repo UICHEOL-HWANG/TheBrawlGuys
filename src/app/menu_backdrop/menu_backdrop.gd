@@ -60,13 +60,19 @@ func _process(delta: float) -> void:
 	_stage.set_arena(_match.arena_id())  # no-op until a restart moves to the next arena
 	_stage.draw(_match.prev_state, _match.curr_state, _match.alpha(), delta)
 	_stage.on_events(events)
-	_camera.follow(_match.fight_center(_config.arena_radius * _config.menu_orbit_arena_share))
+	var radius := float(_match.curr_state.get("arena_radius", _config.arena_radius))
+	_camera.set_arena_radius(radius)
+	_camera.follow(_match.fight_center(radius * _config.menu_orbit_arena_share))
 	_camera.advance(delta)
 
 
 ## The diorama fades in out of full haze (first screen).
 func reveal() -> Tween:
 	return _haze.reveal()
+
+
+func config() -> GameConfig:
+	return _config
 
 
 func world() -> World:

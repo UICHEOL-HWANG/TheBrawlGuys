@@ -4,7 +4,8 @@ extends PanelContainer
 ## card with a diorama thumbnail (ArenaThumb), a title, a one-line caption and gimmick icons
 ## (GimmickIcon). States: idle · focus (petal-yellow ring, slightly larger, also on hover) ·
 ## selected (ring in ring_color — the accent for arenas, the player color for characters — and
-## larger) · locked (dim surface, "준비 중", cannot be pressed). A click or tap emits pressed.
+## larger) · locked (dim surface, "준비 중", cannot be pressed). A click or tap — pressed and
+## released on this card — emits pressed.
 
 signal pressed
 
@@ -20,6 +21,8 @@ var _title: Label
 var _caption: Label
 var _icons: HBoxContainer
 var _lock: Label
+## A left press landed on this card and has not been released yet.
+var _down: bool = false
 
 
 func _init() -> void:
@@ -112,9 +115,15 @@ func set_preview() -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	var mb := event as InputEventMouseButton
-	if mb != null and mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
-		press()
-		accept_event()
+	if mb == null or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if mb.pressed:
+		_down = true
+	elif _down:
+		_down = false
+		if Rect2(Vector2.ZERO, size).has_point(mb.position):
+			press()
+	accept_event()
 
 
 ## Focus / hover changes never override selected or locked.

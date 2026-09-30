@@ -24,10 +24,16 @@ var _material: StandardMaterial3D
 var _banks: Array[MeshInstance3D] = []
 var _bank_phase: Array[float] = []
 var _alpha_scale: float = 1.0
+## Amount last written to the veil (-1 = never): the veil only changes while the fog fades.
+var _applied: float = -1.0
 
 
 func fog_amount() -> float:
 	return _amount
+
+
+func veil_material() -> StandardMaterial3D:
+	return _material
 
 
 func mist_visible() -> bool:
@@ -70,6 +76,9 @@ func _follow(view: Dictionary, delta: float) -> void:
 
 
 func _apply() -> void:
+	if _amount == _applied:
+		return
+	_applied = _amount
 	var c := DS.FOG_VEIL
 	c.a = DS.FOG_VEIL.a * _amount * _alpha_scale
 	_material.albedo_color = c

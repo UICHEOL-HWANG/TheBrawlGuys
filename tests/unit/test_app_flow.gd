@@ -82,6 +82,7 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
 	assert_eq(app.router().current_id(), App.ARENA, "bot match: pick an arena first")
 	var arenas := app.router().current() as ArenaSelectScreen
+	assert_same(arenas.config, app.backdrop().config(), "the previews use the app's config")
 	await wait_process_frames(1)
 	arenas.cards()[2].press()
 	assert_eq(_props("arena_selected")[0]["arena"], arenas.card_ids()[2])

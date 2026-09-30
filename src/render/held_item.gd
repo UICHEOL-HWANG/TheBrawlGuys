@@ -10,6 +10,8 @@ const HELD_SCALE := 0.8
 var _config: GameConfig
 var _model: ItemModel = null
 var _kind: int = Fighter.NONE
+## Reused every frame for the model's show_state (no per-frame allocation).
+var _state_view: Dictionary = {"uses": 0, "state": Item.State.GROUND}
 
 
 ## hand: the hand slot to ride on (null = stay where the caller put this node); hand_scale: the
@@ -31,7 +33,8 @@ func show_item(kind: int, uses: int) -> void:
 		return
 	if kind != _kind:
 		_swap(kind)
-	_model.show_state({"uses": uses, "state": Item.State.GROUND}, 0)
+	_state_view["uses"] = uses
+	_model.show_state(_state_view, 0)
 
 
 func model() -> ItemModel:
@@ -44,6 +47,7 @@ func kind() -> int:
 
 func _swap(kind: int) -> void:
 	if _model != null:
+		remove_child(_model)  # gone this frame, not after it: never two models in the hand
 		_model.queue_free()
 	_model = ItemModels.create(kind)
 	add_child(_model)

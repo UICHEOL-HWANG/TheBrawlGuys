@@ -122,7 +122,7 @@ func test_match_camera_frames_the_arena_in_the_view() -> void:
 
 
 func test_water_ring_outs_splash() -> void:
-	assert_true(DecorView.is_water_ringout({"zone": "lake", "pos": Vector3(-50, -1, 0)}, 10.0))
-	assert_true(DecorView.is_water_ringout({"zone": "water", "pos": Vector3(0, -1, 0)}, 10.0))
-	assert_false(DecorView.is_water_ringout({"zone": "kill_y", "pos": Vector3(-30, -9, 0)}, 10.0))
-	assert_true(DecorView.is_water_ringout({"zone": "blast", "pos": Vector3(24, -1, 0)}, 10.0), "over the meadow lake")
+	assert_true(DecorView.is_water_ringout({"zone": "lake", "pos": Vector3(-50, -1, 0)}, 10.0, true))
+	assert_true(DecorView.is_water_ringout({"zone": "water", "pos": Vector3(0, -1, 0)}, 10.0, true))
+	assert_false(DecorView.is_water_ringout({"zone": "kill_y", "pos": Vector3(-30, -9, 0)}, 10.0, true))
+	assert_true(DecorView.is_water_ringout({"zone": "blast", "pos": Vector3(24, -1, 0)}, 10.0, true), "over the meadow lake")
