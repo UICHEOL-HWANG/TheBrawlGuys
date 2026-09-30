@@ -313,12 +313,20 @@
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
 | DS-CMP-14 | `LoginPanel` | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `motion_calm` 등장 | 4.0 | PRD-AUTH-01 |
 | DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
+| DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
 
 `LoginPanel` 확정 (2026-09-30, 레퍼런스 [`references/ref-login-calmforest.webp`](./references/ref-login-calmforest.webp) — 사용자의 이전 프로젝트 calm forest):
 - 헤이즈 낀 궤도 디오라마(`DS-LAY-03`) 위, 화면 **정중앙에 반투명 유리 카드** 하나. 카드는 뒤 장면을 흐리게 비추고(스크린 텍스처 밉맵 블러) 세이지 틴트를 덮는다. Compatibility 렌더러(웹)에서는 블러 대신 틴트를 진하게 한다
 - 카드 내용(위→아래, 가운데 정렬): 크레스트 로고(`CrestLogo` DS-CMP-15, 불꽃 깜빡임) · 흰 제목 "The Brawl Guys" · 자간 넓은 태그라인 · 흰 알약 버튼 "G + Google로 시작하기" · 상태 한 줄(loading/error) · 안내 "로그인하면 어느 기기에서든 기록이 이어집니다." · 🌐 언어 링크(한국어↔English 전환 스텁, `settings_changed` 트래킹) · debug 빌드만 "건너뛰기 (디버그)" 링크. 게스트 버튼은 없다 (Google 전용)
 - 등장: 배경이 헤이즈에서 드러나고, 카드가 살짝 아래에서 떠오르며 부드럽게 커지고(`motion_calm`), 내용이 순서대로 페이드·리프트된다(`motion_slow`, `motion_fast` 간격). 튀는 효과 없음
 - error 상태는 원인을 한 줄로 보여주고 버튼이 "다시 시도"가 된다. 로그인할 수 없는 환경(모바일·키 없음)은 버튼을 끄고 이유를 보여 준다
+
+`KeyHintBar` 규칙 (DS-CMP-16, 2026-09-30):
+- 위치: 대전 HUD 하단 가운데, safe area 안쪽 `s5` 여백 (DS-LAY-02 "조작은 하단"). 칩은 바 오른쪽 끝
+- 키캡: 방향키는 역T자 묶음 + 캡션 "이동", 그다음 Space "점프" · Z "약공격" · X "강공격" · C "가드" · V "잡기". Phase 5 필살기(X+C)는 `KeyHintSource.HINTS`에 한 줄 추가 (여러 액션 = 동시 입력 키캡, 모두 눌렸을 때만 켜짐)
+- 키 글자와 눌림은 InputMap 액션(`p1_*`)에서 읽는다 — 재지정하면 키캡 글자도 바뀐다
+- 키보드 플레이어에게만: 터치 컨트롤이 보이면 바 전체가 숨는다 (터치와 겹치지 않음). 게임패드 글리프는 Phase 5. 메뉴 배경 난투에는 없다 (HUD 없음)
+- 숨기기/보이기: 칩 클릭 또는 F2 (F1은 디버그 패널, H는 P2 가드). 숨기면 칩만 남는다. 선택은 `user://settings.cfg` `[hud] key_hints`에 저장하고 `settings_changed {key: "hud.key_hints", old, new}` 트래킹
 
 **컴포넌트 공통 규약**
 - 루트는 `Control`, 크기는 `custom_minimum_size`를 토큰 간격으로 지정
@@ -475,6 +483,7 @@
 | DS-CMP-08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
 | DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스) |
 | DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
+| DS-CMP-16 | 컴포넌트 — `KeyHintBar` (키보드 조작 안내 바) | PRD-CTL-02, PRD-UI-01 | 4 | ✅ (2026-09-30, `evidence/key-hint-*.png`) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |

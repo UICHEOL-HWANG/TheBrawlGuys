@@ -139,7 +139,7 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `settings_changed` | 설정 값 저장 | `key: str`, `old_value: str`, `new_value: str` | — | A | 4.0 (설정 화면은 6) |
+| `settings_changed` | 설정 값 저장 (key 예: `language`, `hud.key_hints`) | `key: str`, `old_value: str`, `new_value: str` | — | A | 4.0 (설정 화면은 6) |
 | `quality_changed` | 품질 단계 변경 (수동·자동) | `from: enum(...)`, `to: enum(...)`, `auto: bool` | `fps_avg_before: float` | A | 4.0 |
 | `input_device_changed` | P1 입력 장치 전환 | `from: str`, `to: str`, `screen: str` | — | A | 4.0 |
 | `touch_layout_changed` | 터치 레이아웃·크기 변경 | `layout: int`, `button_scale: float` | — | A | 4.0 (편집은 6) |
