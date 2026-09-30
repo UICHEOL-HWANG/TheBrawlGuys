@@ -7,6 +7,8 @@ extends CanvasLayer
 ## firing a tap. Finger index >= 3 (four-finger tap) belongs to the debug panel. Debug builds
 ## without a touchscreen accept the left mouse button as finger 0 for desktop testing.
 
+signal button_pressed(name: String)
+
 const TOUCH_STICK_SCENE := preload("res://src/ui/components/touch_stick/touch_stick.tscn")
 const TOUCH_BUTTON_SCENE := preload("res://src/ui/components/touch_button/touch_button.tscn")
 const LAYER := 10
@@ -216,6 +218,7 @@ func _release_all() -> void:
 
 
 func _button_down(name: String) -> void:
+	button_pressed.emit(name)
 	match name:
 		"attack":
 			_attack_model.press(_now())

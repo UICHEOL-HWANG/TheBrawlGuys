@@ -26,6 +26,7 @@ var _grab_hint: GrabHint
 var _gauges: ChargeGaugeLayer
 var _hud: Hud
 var _feel: FeelDirector
+var _sfx: SfxDirector
 var _result_shown: bool = false
 ## Render interpolation contract: views lerp prev -> curr by _alpha.
 var _prev_state: Dictionary = {}
@@ -63,6 +64,9 @@ func _ready() -> void:
 	_feel = FeelDirector.new()
 	add_child(_feel)
 	_feel.setup(_config, _camera)
+	_sfx = SfxDirector.new()
+	add_child(_sfx)
+	_sfx.setup(_config)
 	for i: int in PLAYER_COUNT:
 		var view := FighterView.new()
 		add_child(view)
@@ -79,17 +83,20 @@ func _ready() -> void:
 	_touch = TouchInput.new()
 	add_child(_touch)
 	_touch.setup(_local_input, _config)
+	_touch.button_pressed.connect(func(_n: String) -> void: _sfx.play_ui("ui_click"))
 	_gauges = ChargeGaugeLayer.new()
 	add_child(_gauges)
 	_hud = Hud.new()
 	add_child(_hud)
 	_hud.restart_requested.connect(_start_match)
+	_hud.restart_requested.connect(func() -> void: _sfx.play_ui("ui_confirm"))
 	if OS.is_debug_build():
 		_panel = ConfigPanel.new()
 		add_child(_panel)
 		_panel.setup(_config)
 	_apply_quality()
 	_config.changed.connect(_apply_quality)
+	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
 	_start_match()
 
 
@@ -149,6 +156,8 @@ func _process(delta: float) -> void:
 	_hud.update_from(_curr_state)
 	_feel.on_events(events)
 	_feel.on_view_events(view_events)
+	_sfx.on_events(events)
+	_sfx.on_events(view_events)
 	_wobble_guards(events)
 	_update_local_hints()
 	_camera.follow(_camera_targets(), delta)

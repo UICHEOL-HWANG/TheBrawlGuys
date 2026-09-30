@@ -189,7 +189,17 @@ extends Resource
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 ]
-const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx"]
+
+@export_group("Audio")
+@export_range(-40.0, 6.0, 0.5) var sfx_volume_db: float = 0.0
+@export_range(-40.0, 6.0, 0.5) var music_volume_db: float = -6.0
+@export_range(-40.0, 6.0, 0.5) var ui_volume_db: float = -3.0
+## Hit pitch drops by this much per knockback unit (heavier = lower, design.md DS-SFX-01).
+@export_range(0.0, 0.1, 0.001) var sfx_pitch_per_knockback: float = 0.02
+## Seconds for the last-stock intensity layer to fade in or out (context F10).
+@export_range(0.1, 5.0, 0.1) var music_intense_fade: float = 1.2
+
+const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio"]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays

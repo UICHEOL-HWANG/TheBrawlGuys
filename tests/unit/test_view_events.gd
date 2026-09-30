@@ -53,3 +53,14 @@ func test_intensity_ramps() -> void:
 	assert_eq(ViewEvents.trail_intensity(c.trail_speed_full + 5.0, c), 1.0)
 	var mid := (c.trail_speed_threshold + c.trail_speed_full) * 0.5
 	assert_almost_eq(ViewEvents.trail_intensity(mid, c), 0.5, 0.001)
+
+
+func test_takeoff_is_a_jump() -> void:
+	var e := ViewEvents.detect([_f(0, Vector3.ZERO, true)], [_f(0, Vector3(0, 0.15, 0), false, Fighter.State.AIR)], GameConfig.new())
+	assert_eq(e.size(), 1)
+	assert_eq(e[0]["type"], "jumped")
+
+
+func test_walking_off_an_edge_is_not_a_jump() -> void:
+	var e := ViewEvents.detect([_f(0, Vector3.ZERO, true)], [_f(0, Vector3(0, -0.01, 0), false, Fighter.State.AIR)], GameConfig.new())
+	assert_eq(e.size(), 0)

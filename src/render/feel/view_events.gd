@@ -15,6 +15,8 @@ static func detect(prev: Array, curr: Array, config: GameConfig) -> Array[Dictio
 			out.append({"type": "respawned", "id": id, "pos": pos})
 			continue
 		var from: Vector3 = a["pos"]
+		if bool(a["on_ground"]) and not bool(b["on_ground"]) and pos.y > from.y:
+			out.append({"type": "jumped", "id": id, "pos": pos})
 		if not bool(a["on_ground"]) and bool(b["on_ground"]):
 			var dust := dust_intensity((from.y - pos.y) / SimTime.TICK_DT, config)
 			if dust > 0.0:
