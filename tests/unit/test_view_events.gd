@@ -64,3 +64,8 @@ func test_takeoff_is_a_jump() -> void:
 func test_walking_off_an_edge_is_not_a_jump() -> void:
 	var e := ViewEvents.detect([_f(0, Vector3.ZERO, true)], [_f(0, Vector3(0, -0.01, 0), false, Fighter.State.AIR)], GameConfig.new())
 	assert_eq(e.size(), 0)
+
+
+func test_launch_off_the_ground_is_not_a_jump() -> void:
+	var e := ViewEvents.detect([_f(0, Vector3.ZERO, true)], [_f(0, Vector3(0, 0.05, 0), false, Fighter.State.HITSTUN)], GameConfig.new())
+	assert_eq(e.size(), 0)
