@@ -63,3 +63,17 @@ func test_layer_interpolates_moving_items() -> void:
 	var after := _item(1, Item.Kind.ROCK, Item.State.THROWN, Vector3(2, 1, 0))
 	layer.sync([before], [after], 0.5, 1)
 	assert_eq(layer.view(1).position, Vector3(1, 1, 0))
+
+
+func test_dropped_item_is_not_a_box() -> void:
+	var c := GameConfig.new()
+	var layer := ItemLayer.new()
+	add_child_autofree(layer)
+	layer.setup(c)
+	var spawned := _item(5, Item.Kind.BAT, Item.State.FALLING, Vector3(0, c.item_drop_height, 0))
+	var dropped := _item(6, Item.Kind.ROCK, Item.State.FALLING, Vector3(2, 1.0, 0))
+	layer.sync([], [spawned, dropped], 1.0, 0)
+	assert_true(layer.view(5).box_visible(), "a box from the sky")
+	assert_false(layer.view(6).box_visible(), "a dropped rock keeps its shape")
+	assert_true(layer.view(6).shape_visible())
+	assert_true(layer.view(6).shadow_visible(), "still casts the landing shadow")

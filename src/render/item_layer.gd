@@ -3,6 +3,9 @@ extends Node3D
 ## One ItemView per item id, interpolated prev -> curr like fighters. A new id (a fresh box, or a
 ## thrown item that was picked up) gets a new view, so nothing slides across the map.
 
+## A falling item this far below the drop height is a dropped item, not a fresh box.
+const BOX_HEIGHT_TOLERANCE := 0.5
+
 var _config: GameConfig
 var _views: Dictionary = {}
 
@@ -22,7 +25,9 @@ func sync(prev_items: Array, curr_items: Array, alpha: float, tick: int) -> void
 		if not _views.has(id):
 			var v := ItemView.new()
 			add_child(v)
-			v.setup(int(it["kind"]), _config)
+			var p: Vector3 = it["pos"]
+			var boxed := int(it["state"]) == Item.State.FALLING and p.y >= _config.item_drop_height - BOX_HEIGHT_TOLERANCE
+			v.setup(int(it["kind"]), _config, boxed)
 			_views[id] = v
 		(_views[id] as ItemView).apply(prev_by_id.get(id, {}), it, alpha, tick)
 	for id: int in _views.keys():

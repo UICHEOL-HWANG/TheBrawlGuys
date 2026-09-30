@@ -87,3 +87,8 @@ func _add_rock() -> void:
 	mi.material_override = ToonMaterials.toon(DS.STONE_CREAM)
 	add_child(mi)
 	_items.append({"node": mi, "angle": PI * 0.75, "offset": 4.0, "y": GROUND_Y + 0.6})
+
+
+## True when a point is horizontally over the lake (ring-outs there splash, DS-VFX-05).
+static func is_over_lake(pos: Vector3, arena_radius: float) -> bool:
+	return Vector2(pos.x - (arena_radius + LAKE_OFFSET), pos.z).length() <= LAKE_RADIUS

@@ -36,6 +36,14 @@ func on_events(events: Array) -> void:
 				_shake.add(_full_shake_knockback() * EXPLOSION_SHAKE_RATIO, 0.0)
 			"ringout":
 				_shake.add(_full_shake_knockback(), 0.0)
+				var at: Vector3 = e["pos"]
+				at.y = maxf(at.y, DecorView.GROUND_Y)  # a fighter out at kill_y is far below the ground plane
+				var burst := RingoutBurst.new()
+				add_child(burst)
+				burst.play(at, DecorView.is_over_lake(at, _config.arena_radius), PlayerStyle.color(int(e["id"])),
+						Quality.particle_scale(_config))
+				if _camera != null:
+					_camera.punch(1.0)
 
 
 ## Render-side events from ViewEvents (context F8).
@@ -47,6 +55,10 @@ func on_view_events(events: Array) -> void:
 				var dust := DustPuff.new()
 				add_child(dust)
 				dust.play(e["pos"], float(e["intensity"]), scale)
+			"respawned":
+				var beam := RespawnBeam.new()
+				add_child(beam)
+				beam.play(e["pos"])
 			"trail":
 				_trail.add_sample(e["pos"], float(e["intensity"]), PlayerStyle.color(int(e["id"])), scale)
 

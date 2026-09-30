@@ -18,6 +18,7 @@ const SHADOW_MIN_SCALE := 0.4
 const FUSE_BLINK_HZ := 4.0
 
 var _config: GameConfig
+var _boxed: bool = true
 var _box: MeshInstance3D
 var _shape: MeshInstance3D
 var _fuse: MeshInstance3D
@@ -62,8 +63,9 @@ static func fuse_visible(fuse_ticks: int, tick: int) -> bool:
 	return floori(float(tick) * FUSE_BLINK_HZ * 2.0 / SimTime.TICK_RATE) % 2 == 0
 
 
-func setup(kind: int, config: GameConfig) -> void:
+func setup(kind: int, config: GameConfig, boxed: bool = true) -> void:
 	_config = config
+	_boxed = boxed
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = Vector3.ONE * BOX_SIZE
 	_box = _mesh(box_mesh, ToonMaterials.toon(DS.STONE_CREAM, RIM))
@@ -88,8 +90,9 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	var to: Vector3 = curr["pos"]
 	position = (prev["pos"] as Vector3).lerp(to, alpha) if not prev.is_empty() else to
 	var falling := int(curr["state"]) == Item.State.FALLING
-	_box.visible = falling
-	_shape.visible = not falling
+	var show_box := falling and _boxed
+	_box.visible = show_box
+	_shape.visible = not show_box
 	_shadow.visible = falling
 	if falling:
 		_shadow.position.y = SHADOW_LIFT - position.y

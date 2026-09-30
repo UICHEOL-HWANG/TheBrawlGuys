@@ -29,6 +29,7 @@ var _animator: CharacterAnimator = null
 var _ring: MeshInstance3D
 var _label: Label3D
 var _held: MeshInstance3D
+var _charge_glow: ChargeGlow
 var _held_kind: int = Fighter.NONE
 var _dots: Array[MeshInstance3D] = []
 var _bubble: MeshInstance3D
@@ -88,6 +89,9 @@ func setup(index: int, config: GameConfig) -> void:
 			config.fighter_height * ItemActions.HAND_HEIGHT_RATIO, config.fighter_radius * HAND_FORWARD)
 	_held.visible = false
 	add_child(_held)
+	_charge_glow = ChargeGlow.new()
+	_charge_glow.position = _held.position
+	add_child(_charge_glow)
 	var dot_mesh := SphereMesh.new()
 	dot_mesh.radius = DOT_RADIUS
 	dot_mesh.height = DOT_RADIUS * 2.0
@@ -126,6 +130,8 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	_blob.visible = _blob_wanted
 	var facing: Vector3 = curr["facing"]
 	rotation.y = Collision.yaw_of(facing)
+	var charging := int(curr["state"]) == Fighter.State.CHARGE
+	_charge_glow.set_charge(float(curr.get("charge_ticks", 0)) / maxf(SimTime.to_ticks(_config.heavy_charge_max_time), 1.0) if charging else 0.0)
 	var shown := blink_visible(int(curr["invuln_ticks"]), tick, _config)
 	if _model != null:
 		_model.visible = shown
