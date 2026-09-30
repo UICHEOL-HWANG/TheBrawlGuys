@@ -39,12 +39,23 @@ func test_source_lists_the_p1_caps_with_bound_key_labels() -> void:
 	var ids: Array[String] = []
 	for cap: Dictionary in KeyHintSource.caps():
 		ids.append(String(cap["id"]))
-	assert_eq(ids, ["up", "left", "down", "right", "jump", "light", "heavy", "guard", "grab"])
+	assert_eq(ids, ["up", "left", "down", "right", "jump", "light", "heavy", "guard", "grab", "special"])
 	var jump := KeyHintSource.cap("jump")
 	assert_eq(jump["label"], "점프")
 	assert_eq(jump["text"], "Space")
 	assert_eq(KeyHintSource.cap("light")["text"], "Z")
 	assert_eq(KeyHintSource.cap("left")["arrow"], Vector2.LEFT, "arrow keys are drawn as arrows")
+	assert_eq(KeyHintSource.cap("special")["text"], "X+C", "the special is the heavy+guard chord")
+	assert_eq(KeyHintSource.cap("special")["label"], "필살기")
+
+
+func test_source_builds_the_caps_of_any_player() -> void:
+	var special := KeyHintSource.cap("special", "p2")
+	assert_eq(special["actions"], ["p2_heavy", "p2_guard"])
+	assert_eq(special["text"], "G+H")
+	assert_eq(KeyHintSource.cap("jump", "p2")["text"], "Q")
+	assert_eq(KeyHintSource.cap("left", "p2")["arrow"], Vector2.ZERO, "letter keys stay letters")
+	assert_eq(KeyHintSource.cap("left", "p2")["text"], "A")
 
 
 func test_source_follows_rebinding() -> void:
@@ -182,3 +193,67 @@ func test_match_scene_shows_key_hints_for_the_local_player() -> void:
 	var hud: Hud = main.call("get_hud")
 	assert_not_null(hud.key_hints(), "keyboard player gets the key bar")
 	assert_eq(hud.key_hints().bar().accent(), DS.P1)
+
+
+func _gauge_view(special: String, gauge: float) -> Dictionary:
+	return {"fighters": [{"id": 0, "special": special, "gauge": gauge}]}
+
+
+func test_special_cap_shows_when_the_gauge_is_full() -> void:
+	var h := _hud()
+	h.update_gauges(_gauge_view("slam", 40.0))
+	assert_false(h.bar().cap_ready("special"))
+	h.update_gauges(_gauge_view("slam", SpecialGauge.MAX))
+	assert_true(h.bar().cap_ready("special"), "a full gauge rings the special cap")
+	assert_false(h.bar().cap_ready("heavy"), "only the special cap")
+	h.update_gauges(_gauge_view("", SpecialGauge.MAX))
+	assert_false(h.bar().cap_ready("special"), "no special (classic fighter): never ready")
+	h.update_gauges({"fighters": []})
+	assert_false(h.bar().cap_ready("special"), "a view without the slot is ignored")
+
+
+func test_keycap_ready_ring() -> void:
+	var cap := KeyCap.new()
+	add_child_autofree(cap)
+	assert_false(cap.is_ready())
+	cap.set_ready(true)
+	assert_true(cap.is_ready())
+	cap.set_state(KeyCap.State.PRESSED)
+	assert_true(cap.is_ready(), "pressing keeps the ready ring")
+
+
+func test_two_bars_go_compact_only_when_they_do_not_fit() -> void:
+	var h := KeyHintHud.new()
+	add_child_autofree(h)
+	var players: Array[Dictionary] = [
+		{"prefix": "p1", "slot": 0, "accent": DS.P1}, {"prefix": "p2", "slot": 1, "accent": DS.P2}]
+	h.setup_players(players, func() -> bool: return false, SettingsStore.new(PATH),
+			func(_n: String, _p: Dictionary) -> void: pass)
+	h.fit_to(4000.0)
+	var full := h.needed_width()
+	assert_false(h.bars()[0].is_compact(), "room enough: full size")
+	h.fit_to(full - 1.0)
+	assert_true(h.bars()[0].is_compact() and h.bars()[1].is_compact())
+	assert_lt(h.needed_width(), full - 100.0, "compact saves room (phone scale 1.6 needs ~90 px)")
+	assert_false(h.bars()[1].chip().visible and h.bars()[0].chip().visible, "one chip for both bars")
+
+
+func test_a_single_bar_never_goes_compact() -> void:
+	var h := _hud()
+	h.fit_to(100.0)
+	assert_false(h.bar().is_compact())
+
+
+func test_bars_hidden_at_start_fit_again_when_shown() -> void:
+	SettingsStore.new(PATH).set_value("hud", "key_hints", false)
+	var h := KeyHintHud.new()
+	add_child_autofree(h)
+	var players: Array[Dictionary] = [
+		{"prefix": "p1", "slot": 0, "accent": DS.P1}, {"prefix": "p2", "slot": 1, "accent": DS.P2}]
+	h.setup_players(players, func() -> bool: return false, SettingsStore.new(PATH),
+			func(_n: String, _p: Dictionary) -> void: pass)
+	assert_false(h.is_shown())
+	var vp_width := get_viewport().get_visible_rect().size.x
+	h.toggle()
+	assert_true(h.is_shown())
+	assert_lte(h.needed_width(), vp_width - DS.S5 * 2, "shown bars fit the screen (compact if needed)")

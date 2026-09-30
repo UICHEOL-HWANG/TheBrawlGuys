@@ -117,7 +117,7 @@
 | `slot` | int | 0부터 | 4.0 |
 | `is_bot` | bool | | 4.0 |
 | `character` / `style` | str | Phase 5 전에는 슬롯 고정 모델·기본 스타일 | 4.0 |
-| `input_device` | str | | 4.0 |
+| `input_device` | str | 로컬 슬롯은 경기 시작 때 그 플레이어의 장치: 패드를 받았으면 `gamepad`, 아니면 P1은 플랫폼 기본(`keyboard`\|`touch`), 로컬 2인 P2는 `keyboard`. 봇은 `bot` (스키마 변경 없음, 2026-09-30 로컬 2인) | 4.0 |
 | `result` | enum(win\|loss\|draw) | | 4.0 |
 | `stocks_left` | int | | 4.0 |
 | `damage_dealt` / `damage_taken` | float | % 합계 | 4.0 |

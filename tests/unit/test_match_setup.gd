@@ -70,3 +70,28 @@ func test_telemetry_setup_comes_from_the_match_setup() -> void:
 	assert_eq(slots[2]["input_device"], MatchSetup.INPUT_BOT)
 	assert_eq(slots[1]["character"], s.slots[1]["character"])
 	assert_false(String(t["match_id"]).is_empty())
+
+
+func test_local_versus_has_two_local_slots_then_bots() -> void:
+	var s := MatchSetup.local_versus(4, 5)
+	assert_eq(s.mode, MatchSetup.MODE_LOCAL_2P)
+	assert_eq(s.seed, 5)
+	assert_eq(s.local_slots(), [0, 1] as Array[int])
+	assert_eq(s.local_slot(), 0, "P1 is the primary local slot")
+	assert_eq(s.bot_slots(), [2, 3] as Array[int], "optional bots fill the remaining slots")
+	assert_eq(s.slots[1]["input_device"], MatchSetup.INPUT_KEYBOARD, "P2 starts on the keyboard")
+	assert_eq(s.slots[1]["character"], String(CharacterCatalog.for_player(1)["name"]), "default character per slot")
+	assert_eq(s.validate().size(), 0)
+	assert_eq(MatchSetup.local_versus().player_count(), 2, "1 vs 1 by default")
+
+
+func test_input_devices_update_local_slots_only() -> void:
+	var s := MatchSetup.local_versus(3)
+	var before: Dictionary = s.slots[1]
+	s.set_input_devices({0: "gamepad", 1: "gamepad", 2: "gamepad"})
+	assert_eq(s.slots[0]["input_device"], "gamepad")
+	assert_eq(s.slots[1]["input_device"], "gamepad")
+	assert_eq(s.slots[2]["input_device"], MatchSetup.INPUT_BOT, "bots keep 'bot'")
+	assert_eq(before["input_device"], MatchSetup.INPUT_KEYBOARD, "slot entries are replaced, not mutated")
+	var t := TelemetrySetup.from_match_setup(s)
+	assert_eq(t["slots"][1]["input_device"], "gamepad", "P2's device reaches the telemetry slots")

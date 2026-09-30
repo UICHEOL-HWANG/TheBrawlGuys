@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-09-30 23:50 KST
+**Last Updated:** 2026-10-01 00:00 KST (main 병합: phase5-sim · p5-cutin · p5-local2p)
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -39,3 +39,12 @@
 - 트래킹: `SpecialTelemetry`(CombatTelemetry 안) — `gauge_full`(match_time_s), `special_used`(ms_since_full, 없으면 -1 / target_damage = 가장 가까운 생존 상대 %), `special_hit`은 발동 1회당 1번(첫 적중으로 열고, 맞은 대상의 링아웃이 StockLoss 규칙으로 시전자에게 크레딧되면 즉시 caused_ringout=true, 아니면 180틱 창 경과·다음 필살기·경기 종료 때 false). 같은 틱은 sim이 타격 → 링아웃 순으로 내므로 사전 스캔 불필요(`test_sim_emits_a_tick_s_hits_before_its_ringouts`로 고정). ms_since_full은 KO로 보낸 틱을 뺀다. 이벤트 키가 빠지면 push_warning 후 무시. `target_slot` 필수 속성
 - 슬롯 요약: `specials`(발동), `special_hits`(맞힌 대상 수) → `match_players.special_hits`는 새 마이그레이션 `0003_special_hits.sql`(사용자가 SQL Editor에서 0002 다음 실행해야 업로드 성공). `press_special` = 강+가드 동시 성립 횟수. `EventCatalog.SCHEMA_VERSION` 3 → 4
 - 캐릭터 모델은 아직 슬롯 고정(`CharacterCatalog.for_player`)이라 캡처의 외형은 캐릭터와 다를 수 있다 — T9에서 해결
+
+## T7 로컬 2인 결정 (2026-09-30, `feat/p5-local2p`)
+- 액션 이름 `<prefix>_<name>`(p1/p2 × left·right·up·down·jump·light·heavy·guard·grab). P1처럼 `InputBindings`가 시작 때 코드로 등록한다(project.godot에는 넣지 않음 — 기존 P1 패턴, 키 재지정은 InputMap만 바꿈). `LocalInput.new("p2")`
+- 필살기 동시 입력 = 그 플레이어의 강공격+가드가 같은 틱 InputFrame에 함께(sim `SpecialRunner.can_start`). **P1 X+C, P2 G+H, 패드 Y+RB**. 한 틱 전에 G를 탭하고 H를 누르면 HoldLatch 덕에 같은 틱으로 들어간다(P1과 동일한 관대함)
+- 게임패드 규칙(`GamepadAssigner`): 패드는 연결 순서로 줄 선다(시작 때 이미 있는 패드는 장치 id 순). 패드 없는 플레이어 중 앞 순서(P1 먼저)가 아직 아무도 안 쓰는 가장 먼저 연결된 패드를 받는다. 끊기면 그 플레이어만 풀리고 기다리던 패드가 바로 넘겨받는다. 키보드 키는 항상 유지. 1인 봇 대전도 같은 규칙(첫 패드 → P1). 바인딩은 장치 id가 박힌 InputMap 이벤트(`PadBindings`)라 두 패드가 섞이지 않는다
+- 매치: `MatchSetup.local_versus(n)` = 슬롯 0·1 로컬(P1·P2), 나머지 봇, 기본 캐릭터(`CharacterCatalog.for_player`). 타이틀 "로컬 2인" → 경기장 선택 → 대전(캐릭터 선택은 T9에서 `SELECT_STEPS`에 추가). 터치 전용 모바일은 "로컬 2인 · 데스크톱 전용"으로 꺼둔다. 두 사람이 한 화면이면 결과 배너는 "P2 승리!"처럼 승자를 부른다
+- 트래킹: 스키마 변경 없음. 경기 시작 때 `main`이 `LocalPlayers.input_devices()`로 로컬 슬롯의 `input_device`를 채운다(패드 = `gamepad`, P1 기본 = 플랫폼, P2 = `keyboard`) → `match_ended.players[]`/`match_players.input_device`. `match_started.input_device`는 여전히 P1 슬롯
+- 키 바: `KeyHintSource.caps(prefix)`, 필살기 키캡(`special`, 동시 입력)이 마지막. 게이지 가득(view `special` ≠ "" 이고 `gauge` ≥ 100)이면 `fire` 링. 로컬 2인은 P1 왼쪽·P2 오른쪽 바 + "P1/P2" 태그, 칩은 P2 바에 하나. 두 바가 안 들어가면 compact(간격·여백만 줄임). 폰 배율 1.6(812×375, 논리 폭 1458)에서 compact로 들어감(`evidence/key-hint-2p-phone.png`)
+- 주의: `main.gd`는 아직 `World.new`에 캐릭터를 넘기지 않아 실제 경기에서는 모두 클래식 파이터(필살기 없음) → 게이지 링은 T9에서 캐릭터를 넘기면 보인다(증거 캡처는 파이터 게이지를 강제로 채움). 리플레이 검증기도 캐릭터를 모르므로 T9에서 함께 처리

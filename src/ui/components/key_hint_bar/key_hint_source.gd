@@ -2,39 +2,44 @@ class_name KeyHintSource
 extends RefCounted
 ## What the KeyHintBar (design.md DS-CMP-16) shows: one entry per keycap, each naming the
 ## InputMap actions behind it (never raw keys), so rebinding changes the cap text and what lights
-## it. A cap with several actions is a chord, pressed only while all of them are held.
+## it. A cap with several actions is a chord, pressed only while all of them are held — the
+## special (PRD-STYLE-04) is the heavy + guard chord. Caps are built for one player's action
+## prefix (PRD-LOCAL-01: "p1" X+C, "p2" G+H).
 
 ## The arrow cluster: these ids sit together under one "이동" caption.
 const MOVE_IDS: Array[String] = ["up", "left", "down", "right"]
 const MOVE_LABEL := "이동"
-## Order = on-screen order. Phase 5 special (PRD-STYLE-04) is one more line:
-## {"id": "special", "actions": ["p1_heavy", "p1_guard"], "label": "필살기"},
+## The special chord cap: it also rings while the player's gauge is full.
+const SPECIAL_ID := "special"
+const DEFAULT_PREFIX := "p1"
+## Order = on-screen order; "names" are action names without the player prefix.
 const HINTS: Array[Dictionary] = [
-	{"id": "up", "actions": ["p1_up"], "label": ""},
-	{"id": "left", "actions": ["p1_left"], "label": ""},
-	{"id": "down", "actions": ["p1_down"], "label": ""},
-	{"id": "right", "actions": ["p1_right"], "label": ""},
-	{"id": "jump", "actions": ["p1_jump"], "label": "점프"},
-	{"id": "light", "actions": ["p1_light"], "label": "약공격"},
-	{"id": "heavy", "actions": ["p1_heavy"], "label": "강공격"},
-	{"id": "guard", "actions": ["p1_guard"], "label": "가드"},
-	{"id": "grab", "actions": ["p1_grab"], "label": "잡기"},
+	{"id": "up", "names": ["up"], "label": ""},
+	{"id": "left", "names": ["left"], "label": ""},
+	{"id": "down", "names": ["down"], "label": ""},
+	{"id": "right", "names": ["right"], "label": ""},
+	{"id": "jump", "names": ["jump"], "label": "점프"},
+	{"id": "light", "names": ["light"], "label": "약공격"},
+	{"id": "heavy", "names": ["heavy"], "label": "강공격"},
+	{"id": "guard", "names": ["guard"], "label": "가드"},
+	{"id": "grab", "names": ["grab"], "label": "잡기"},
+	{"id": SPECIAL_ID, "names": ["heavy", "guard"], "label": "필살기"},
 ]
 const ARROWS := {KEY_LEFT: Vector2.LEFT, KEY_RIGHT: Vector2.RIGHT, KEY_UP: Vector2.UP, KEY_DOWN: Vector2.DOWN}
 
 
-## Every cap resolved against the current InputMap: id, actions, label, text, arrow.
-static func caps() -> Array[Dictionary]:
+## Every cap of one player resolved against the current InputMap: id, actions, label, text, arrow.
+static func caps(prefix: String = DEFAULT_PREFIX) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for hint: Dictionary in HINTS:
-		out.append(_resolve(hint))
+		out.append(_resolve(hint, prefix))
 	return out
 
 
-static func cap(id: String) -> Dictionary:
+static func cap(id: String, prefix: String = DEFAULT_PREFIX) -> Dictionary:
 	for hint: Dictionary in HINTS:
 		if hint["id"] == id:
-			return _resolve(hint)
+			return _resolve(hint, prefix)
 	return {}
 
 
@@ -66,12 +71,13 @@ static func bound_key(action: String) -> int:
 			if ev is InputEventKey:
 				var k := ev as InputEventKey
 				return k.physical_keycode if k.physical_keycode != KEY_NONE else k.keycode
-	var defaults: Array = InputBindings.P1.get(action, [KEY_NONE])
-	return int(defaults[0])
+	return int(InputBindings.default_keys(action)[0])
 
 
-static func _resolve(hint: Dictionary) -> Dictionary:
-	var actions: Array = hint["actions"]
+static func _resolve(hint: Dictionary, prefix: String) -> Dictionary:
+	var actions: Array = []
+	for n: String in hint["names"]:
+		actions.append(InputBindings.action(prefix, n))
 	var arrow := Vector2.ZERO
 	if actions.size() == 1:
 		arrow = ARROWS.get(bound_key(String(actions[0])), Vector2.ZERO)

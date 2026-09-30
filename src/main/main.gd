@@ -1,6 +1,7 @@
 extends Node
 ## Match scene: fixed 60 Hz sim loop + interpolated rendering (docs/PRD.md §5.4) for the
-## MatchSetup it is given (platform B1) — local keyboard/touch or a bot per slot, items, HUD,
+## MatchSetup it is given (platform B1) — local keyboard/touch/pad (up to two humans, PRD-LOCAL-01)
+## or a bot per slot, items, HUD,
 ## result, restart and telemetry; camera, feel and sound live in MatchPresentation. The app shell
 ## sets `setup` and `menu_available` before adding it; run alone (main.tscn) it plays 1 vs bot.
 
@@ -23,7 +24,7 @@ var _ticker: FixedTicker
 var _stage: MatchStage
 var _presentation: MatchPresentation
 var _panel: ConfigPanel
-var _local_input: LocalInput
+var _locals: LocalPlayers
 var _touch: TouchInput
 var _bots: Array[BotController] = []
 var _hud: Hud
@@ -64,10 +65,11 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
-	_local_input = LocalInput.new()
+	_locals = LocalPlayers.new(setup.local_slots())
+	_locals.attach()
 	_touch = TouchInput.new()
 	add_child(_touch)
-	_touch.setup(_local_input, _config)
+	_touch.setup(_locals.primary(), _config)
 	_touch.button_pressed.connect(func(_n: String) -> void: _presentation.play_ui("ui_click"))
 	_hud = Hud.new()
 	add_child(_hud)
@@ -76,8 +78,8 @@ func _build_ui() -> void:
 	_hud.menu_requested.connect(func() -> void:
 		_tracking.on_menu()
 		menu_requested.emit())
-	if setup.local_slot() >= 0:
-		_hud.show_key_hints(PlayerStyle.color(setup.local_slot()), func() -> bool: return _touch.visible)
+	if not _locals.slots().is_empty():
+		_hud.show_key_hints(_locals.hint_players(), func() -> bool: return _touch.visible)
 	if OS.is_debug_build():
 		_panel = ConfigPanel.new()
 		add_child(_panel)
@@ -107,7 +109,7 @@ func get_telemetry() -> MatchTelemetry:
 
 func _start_match() -> void:
 	_tracking.close_for_restart(_curr_state, _result_shown)
-	_local_input.reset()
+	_locals.reset()
 	_stage.clear_items()
 	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config))
 	_bots.clear()
@@ -119,6 +121,7 @@ func _start_match() -> void:
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 	_presentation.restart()
+	setup.set_input_devices(_locals.input_devices())
 	_tracking.begin(setup, _world)
 
 
@@ -128,7 +131,7 @@ func _gather_inputs() -> Array[InputFrame]:
 	var next_bot := 0
 	for s: Dictionary in setup.slots:
 		if s["controller"] == MatchSetup.CONTROLLER_LOCAL:
-			inputs.append(_local_input.sample())
+			inputs.append(_locals.sample(int(s["slot"])))
 		else:
 			inputs.append(_bots[next_bot].sample(_curr_state))
 			next_bot += 1
@@ -136,7 +139,7 @@ func _gather_inputs() -> Array[InputFrame]:
 
 
 func _process(delta: float) -> void:
-	_local_input.poll()
+	_locals.poll()
 	var ticks := _ticker.advance(delta)
 	var events: Array = []
 	var view_events: Array = []
@@ -158,7 +161,7 @@ func _process(delta: float) -> void:
 	_presentation.present(_curr_state, events, view_events, delta, setup.local_slot(), _touch)
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
-		_hud.show_result(int(_curr_state["winner"]), setup.local_slot())
+		_hud.show_result(int(_curr_state["winner"]), _result_viewer())
 		_tracking.finish(_curr_state)
 	_stats.add_frame(delta, ticks)
 	_tracking.on_frame_time(delta)
@@ -171,6 +174,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_start_match()
 
 
+## Whose win or loss the banner speaks for: the lone human, or nobody when two share the screen.
+func _result_viewer() -> int:
+	return setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
+
+
 func _exit_tree() -> void:
+	if _locals != null:
+		_locals.detach()
 	if _tracking != null:
 		_tracking.close_for_exit(_curr_state)
