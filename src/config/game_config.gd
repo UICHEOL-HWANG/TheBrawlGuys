@@ -187,6 +187,9 @@ extends Resource
 @export_range(10.0, 150.0, 0.5) var cam_zoom_max: float = 70.0
 @export_range(0.0, 20.0, 0.1) var cam_smooth: float = 6.0
 @export_range(10.0, 70.0, 0.5) var cam_fov: float = 40.0
+## Menu backdrop orbit (design.md DS-LAY-03): yaw speed and the arena share kept in frame.
+@export_range(0.0, 30.0, 0.5) var menu_orbit_deg_per_s: float = 6.0
+@export_range(0.5, 1.5, 0.05) var menu_orbit_arena_share: float = 1.0
 
 @export_group("Touch")
 @export_range(0.05, 0.5, 0.01) var touch_hold_threshold: float = 0.15

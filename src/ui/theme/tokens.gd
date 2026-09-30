@@ -40,6 +40,8 @@ const WHITE := Color("#FFFFFF")
 ## Translucent cream surfaces for touch controls over the 3D scene (design.md DS-LAY-01).
 const UI_SURFACE_50 := Color("#FFFDF680")
 const UI_SURFACE_70 := Color("#FFFDF6B3")
+## Menu backdrop veil (design.md DS-LAY-03): ui_surface at 20%, sinks the diorama under the UI.
+const BACKDROP_VEIL := Color("#FFFDF633")
 ## Soft ground shadows under falling boxes (design.md DS-VIS-05): deep teal at 40%.
 const GROUND_SHADOW := Color("#17525A66")
 
