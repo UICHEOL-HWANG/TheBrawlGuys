@@ -14,12 +14,10 @@ const CAPTION_SHADOW_OFFSET := Vector2(0, 1)
 
 
 static func build() -> Dictionary:
-	var root := CenterContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var root := FitCenter.new()  # scrolls instead of overflowing on short phone screens (DS-LAY-04)
 	var card := GlassCard.new()
 	card.custom_minimum_size.x = DS.LOGIN_CARD_WIDTH
-	root.add_child(card)
+	root.content().add_child(card)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", DS.S4)

@@ -161,6 +161,21 @@ const CARD_ICON := 48
 const CARD_FOCUS_SCALE := 1.04
 const CARD_SELECTED_SCALE := 1.07
 
+# --- Responsive scaling (DS-LAY-04), CSS px / points ---
+## Short window side below which the device is a phone; touch screens below the tablet limit are tablets.
+const PHONE_MAX_SHORT_CSS := 500.0
+const TABLET_MAX_SHORT_CSS := 1100.0
+## Smallest readable caption on screen (phone / tablet); desktop keeps the 1920x1080 look.
+const CAPTION_MIN_PHONE_CSS := 12.0
+const CAPTION_MIN_TABLET_CSS := 13.0
+## Smallest touch target on screen, and the smallest touch button diameter at 1920x1080
+## (lower bound of GameConfig touch_*_diameter).
+const TOUCH_TARGET_MIN_CSS := 44.0
+const TOUCH_TARGET_BASE_MIN := 96.0
+const UI_SCALE_MAX := 3.0
+## Rotate prompt (portrait on a touch device): icon size at 1920x1080.
+const ROTATE_ICON_SIZE := 160
+
 # --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
 ## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).
 const GLASS_TINT_STRENGTH := 0.5

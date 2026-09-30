@@ -298,6 +298,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [x] 기믹 위험 표시 규칙 (화상 영역, 부서질 발판 균열, 버섯 반발 표시) `[DS-VIS-04]`
 - [x] 안개 연출 — 자기 캐릭터·상대 실루엣은 안개 위로 보이게 `[DS-VIS-03]`
 - [x] `KeyHintBar` 대전 하단 키 안내 바 — 누른 키가 플레이어 색으로 켜짐, 칩·F2로 숨기기/보이기(설정 저장·`settings_changed`), 터치일 때 자동 숨김, 갤러리 등록 `[DS-CMP-16]` `[PRD-CTL-02]` `[DS-LAY-02]` — `evidence/key-hint-{lit,hidden}-{720,1080}.png`
+- [x] 모바일 반응형 UI 스케일: 창 크기·DPR로 `content_scale_factor` 계산(폰 캡션 ≥12 CSS px·터치 ≥44 CSS px, 태블릿 완만, 데스크톱 1.0), 넘치는 카드는 `FitCenter` 스크롤, 모바일 웹 세로 화면은 "가로로 돌려주세요" 오버레이(첫 탭에 전체 화면·가로 고정 시도), 웹 터치 감지 JS 폴백, 전역 속성 `viewport_class`·`orientation`·`ui_scale` `[DS-LAY-04]` `[PRD-UI-01]` `[PRD-PLT-01]` `[PRD-PLT-03]` `[PRD-DATA-03]` — `platform/evidence/mobile-*.png`
 
 ### 테스트
 

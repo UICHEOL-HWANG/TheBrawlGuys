@@ -55,7 +55,7 @@ func setup(local: LocalInput, config: GameConfig) -> void:
 		add_child(b)
 		_buttons[name] = b
 		_owner[name] = NO_FINGER
-	visible = DisplayServer.is_touchscreen_available()
+	visible = DisplayProbe.touch_available()
 	get_viewport().size_changed.connect(_layout)
 	config.changed.connect(_layout)
 	_layout()
@@ -265,4 +265,4 @@ func _now() -> float:
 
 
 func _mouse_as_finger() -> bool:
-	return OS.is_debug_build() and not DisplayServer.is_touchscreen_available()
+	return OS.is_debug_build() and not DisplayProbe.touch_available()
