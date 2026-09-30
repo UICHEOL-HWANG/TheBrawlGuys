@@ -22,5 +22,5 @@ func _gather_inputs() -> Array[InputFrame]:
 	var w := get_world()
 	if w.tick_count == DROP_TICK:
 		w.items.add(Item.Kind.BAT, DROP_OFFSET + Vector3.UP * _config.item_drop_height, Item.State.FALLING, _config)
-	var inputs: Array[InputFrame] = [_p1_bots[0].sample(_curr_state), _bots[0].sample(_curr_state)]
+	var inputs: Array[InputFrame] = [_p1_bot.sample(_curr_state), _bots[0].sample(_curr_state)]
 	return inputs
