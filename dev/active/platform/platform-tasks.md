@@ -17,6 +17,7 @@
 | B4 | MenuButton · Panel | DS-CMP-06/07 | 갤러리 | ✅ (feat/app-shell) |
 | B5 | 데스크톱 실로그인 확인 (nonce 포함 redirect_to 허용 여부) | PRD-AUTH-01 | 실로그인 | ⬜ 사용자 |
 | D1 | vercel.json + deploy_web.sh + 배포 | PRD-PLT-03 | Vercel URL 동작 | ⬜ |
-| A7 | 리플레이급 입력 로그 `match_inputs` + 재현 메타·`final_state_hash` + 재생 검증, 위치 샘플 행 → `match_timeline` 1Hz 압축 (마이그레이션 0002) | PRD-DATA-04 | `test_input_log`, 재생 일치 | ⬜ |
-| A8 | 식별·버전·맥락, 행동 피처 컬럼, 세션·좌절·성능 이벤트 (analytics-strategy §3) | PRD-DATA-03/04 | `test_event_catalog`, `test_match_telemetry` | ⬜ |
+| A7 | 리플레이급 입력 로그 `match_inputs` + 재현 메타·`final_state_hash` + 재생 검증 (마이그레이션 0002). `match_timeline` 1Hz 압축은 보류(사용자 결정, `pos` 행 유지) | PRD-DATA-04 | `test_input_log`, `test_replay_verifier`, `test_match_capture_size` | ✅ (feat/telemetry-v2, 미병합) |
+| A8 | 식별·버전·맥락, 행동 피처 컬럼, 세션·좌절·성능 이벤트 (analytics-strategy §3) | PRD-DATA-03/04 | `test_event_catalog`, `test_match_telemetry`, `test_match_features`, `test_match_tracking`, `test_session_tracker`, `test_supabase_schema` | ✅ (feat/telemetry-v2, 미병합) |
+| A7u | 👤 Supabase SQL Editor에서 `0002_replay_and_features.sql` 실행 | PRD-DATA-04 | 테이블·열 확인 | ⬜ 사용자 |
 | A9 | `analysis/` 워크스페이스: 재생 피처 추출 + 첫 분석 (라이브러리 선택 질문 선행) | PRD-DATA-04 | 스모크 테스트 | ⬜ |
