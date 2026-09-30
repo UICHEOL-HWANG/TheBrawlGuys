@@ -54,8 +54,8 @@ func on_frame(events: Array, view_events: Array, view: Dictionary) -> void:
 	_observe_attacks(fighters)
 	_dealer.clear()
 	for e: Dictionary in events:
-		_rows.append(RawRows.event_row(match_id(), tick, e))
-		_on_sim_event(e, tick, float(view["arena_radius"]))
+		var extra := _on_sim_event(e, tick, fighters, float(view["arena_radius"]))
+		_rows.append(RawRows.event_row(match_id(), tick, e.merged(extra)))
 	for e: Dictionary in view_events:
 		if VIEW_ROW_TYPES.has(String(e["type"])):
 			_rows.append(RawRows.event_row(match_id(), tick, e))
@@ -116,8 +116,10 @@ func player_rows() -> Array[Dictionary]:
 	return _player_rows
 
 
-func _on_sim_event(e: Dictionary, tick: int, arena_radius: float) -> void:
+## Handles one sim event; returns extra payload fields for its raw row (analysis.sql reads them).
+func _on_sim_event(e: Dictionary, tick: int, fighters: Array, arena_radius: float) -> Dictionary:
 	var type := String(e["type"])
+	var extra := {}
 	match type:
 		"hit", "guard_hit":
 			var attacker := int(e["attacker"])
@@ -126,20 +128,22 @@ func _on_sim_event(e: Dictionary, tick: int, arena_radius: float) -> void:
 			_loss.note_attack(target, attacker, tick)
 			_dealer[target] = attacker
 			_stat(target if type == "guard_hit" else attacker).add("guards" if type == "guard_hit" else "hits")
+			extra["attack_kind"] = MatchSummary.attack_kind_name(fighters, attacker)
 		"grab":
 			_stat(int(e["attacker"])).add("grabs")
 			_loss.note_attack(int(e["target"]), int(e["attacker"]), tick)
 		"ringout":
-			_on_ringout(e, tick, arena_radius)
+			extra = _on_ringout(e, tick, arena_radius)
 	if type.begins_with(GIMMICK_PREFIX) or GIMMICK_TYPES.has(type):
 		var victim := MatchSummary.fighter_of(e)
 		if victim >= 0:
 			_loss.note_gimmick(victim, String(e.get("kind", type)), tick)
 		_emit("gimmick_triggered", {"kind": String(e.get("kind", type)), "victim_slot": victim})
 	_items.on_event(e, _emit, _count)
+	return extra
 
 
-func _on_ringout(e: Dictionary, tick: int, arena_radius: float) -> void:
+func _on_ringout(e: Dictionary, tick: int, arena_radius: float) -> Dictionary:
 	var victim := int(e["id"])
 	var pos: Vector3 = e["pos"]
 	var why := _loss.classify(victim, tick)
@@ -153,6 +157,7 @@ func _on_ringout(e: Dictionary, tick: int, arena_radius: float) -> void:
 	if why["cause"] == "gimmick":
 		_stat(victim).add("falls_by_gimmick")
 		_emit("gimmick_ringout", {"kind": why["gimmick_kind"], "victim_slot": victim})
+	return {"cause": why["cause"], "attacker_slot": attacker}
 
 
 func _observe_attacks(fighters: Array) -> void:

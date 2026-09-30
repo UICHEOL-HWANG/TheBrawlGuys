@@ -112,12 +112,12 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `stock_lost` | sim `ringout` | `match_id: str`, `victim_slot: int`, `stocks_left: int`, `damage_at_death: float`, `cause: enum(knockback\|gimmick\|self)`, `killer_slot: int` (-1 = 없음), `exit_angle_deg: float` (경기장 중심 기준), `exit_zone: str` (경기장 데이터의 구역 이름), `match_time_s: float` | `last_hit_attack: str`, `last_hit_ms_ago: int`, `item: str` | A (+ S 원시 `ringout`) | 4.0 (구역은 4) |
+| `stock_lost` | sim `ringout` | `match_id: str`, `victim_slot: int`, `stocks_left: int`, `damage_at_death: float`, `cause: enum(knockback\|gimmick\|self)`, `attacker_slot: int` (-1 = 없음), `angle_deg: float` (경기장 중심 기준, 0° = +x 동, 90° = −z 북), `zone: str` (8방위 섹터 `n`·`ne`… 또는 경기장 안쪽으로 떨어지면 `below`) | `last_hit_attack: str`, `last_hit_ms_ago: int`, `item: str` | A (+ S 원시 `ringout`) | 4.0 (구역은 4) |
 | `gauge_full` | 필살기 게이지 100% 도달 | `match_id: str`, `slot: int`, `character: str`, `match_time_s: float` | — | A | 5 |
 | `special_used` | sim `special_start` | `match_id: str`, `slot: int`, `character: str`, `ms_since_full: int`, `target_damage: float` (가장 가까운 상대 %) | — | A (+ S) | 5 |
 | `special_hit` | sim `special_hit` (발동 1회당 첫 적중만) | `match_id: str`, `slot: int`, `character: str`, `targets_hit: int`, `caused_ringout: bool` | — | A (+ S 원시 전부) | 5 |
 
-`killer_slot`은 피해자에게 마지막으로 `hit`을 넣은 슬롯이다 (링아웃 전 `ringout_credit_s` 안, config). 없으면 `cause = self`.
+`attacker_slot`은 피해자에게 마지막으로 `hit`을 넣은 슬롯이다 (링아웃 전 `ringout_credit_s` 안, config). 없으면 `cause = self`.
 `caused_ringout`은 적중 후 같은 창 안에 대상이 링아웃되면 true — 판정 후 지연 발행한다.
 
 ### 3.6 아이템
@@ -173,16 +173,16 @@
 
 | 출처 | type | actor / target | 주요 payload | Phase |
 |---|---|---|---|---|
-| sim | `hit` | attacker / target | `pos`, `knockback`, `power`, `hitstop_ticks` | 4.0 |
-| sim | `guard_hit` | attacker / target | `pos`, `knockback` | 4.0 |
-| sim | `ringout` | id / — | `pos`, `stocks_left` | 4.0 |
+| sim | `hit` | attacker / target | `pos`, `knockback`, `power`, `hitstop_ticks`, `attack_kind` (공격자 view의 `AttackSet.Kind` 이름, 텔레메트리가 추가) | 4.0 |
+| sim | `guard_hit` | attacker / target | `pos`, `knockback`, `attack_kind` | 4.0 |
+| sim | `ringout` | id / — | `pos`, `stocks_left`, `cause`, `attacker_slot` (`stock_lost`와 같은 분류, 텔레메트리가 추가) | 4.0 |
 | sim | `grab` · `grab_release` | holder / target | `pos` (release는 던짐 방향 포함) | 4.0 |
 | sim | `item_spawn` · `item_pickup` · `item_drop` · `item_throw` · `item_land` · `item_break` | 파이터 / — | `item`, `pos` | 4.0 |
 | sim | `explosion` | 던진 파이터 / — | `pos`, 반경 | 4.0 |
 | sim (Phase 4) | `gimmick_damage` · `platform_break` · `bounce` · `fog_start` · `fog_end` | 피해자 / — | `kind`, `pos`, `damage` | 4 |
 | sim (Phase 5) | `special_start` · `special_hit` · `projectile_spawn` | 시전자 / 대상 | `character`, `pos`, `knockback` | 5 |
 | view | `jumped` · `landed` · `respawned` | id / — | `pos` (`landed`는 `intensity`) | 4.0 |
-| 샘플 | `pos_sample` | — / — | 전원의 `pos`·`damage`·`state`를 **30틱(0.5초)마다** 1행 | 4.0 |
+| 샘플 | `pos` | — / — | 전원의 `pos`·`damage`·`state`를 **30틱(0.5초)마다** 1행 | 4.0 |
 
 렌더 전용 `trail`은 저장하지 않는다 (속도에서 재구성할 수 있다).
 
@@ -206,7 +206,7 @@
 | # | 분석 질문 | 사용 이벤트 / 테이블 | 결정 |
 |---|---|---|---|
 | Q1 | **스타일·캐릭터별 승률**이 30~70% 안인가? | `match_ended.players[]` (`character`, `style`, `result`, `is_bot`), `match_players` | `StyleData`·공격 수치 조정 (PRD-STYLE-01~04) |
-| Q2 | **경기장별 링아웃 위치·원인**이 다른가? | `stock_lost` (`exit_zone`, `exit_angle_deg`, `cause`), `gimmick_triggered`, `gimmick_ringout`, `match_events` `ringout`·`pos_sample`·기믹 원시 | 기믹 강도·경기장 모양 조정 (Phase 4 완료 기준) |
+| Q2 | **경기장별 링아웃 위치·원인**이 다른가? | `stock_lost` (`zone`, `angle_deg`, `cause`), `gimmick_triggered`, `gimmick_ringout`, `match_events` `ringout`·`pos`·기믹 원시 | 기믹 강도·경기장 모양 조정 (Phase 4 완료 기준) |
 | Q3 | **로그인 퍼널**의 어디서 이탈하나? | `app_opened` → `login_viewed` → `login_started` → `login_completed` / `login_failed.reason` / `login_skipped` / `session_restored` → `screen_viewed` → `mode_selected` → `match_started` | 로그인 UI·흐름 수정, 건너뛰기 정책 |
 | Q4 | **첫 경기 완주율** ≥ 80%인가? (PRD §1.3) | `match_started` → `match_ended` vs `match_abandoned` (사용자 첫 경기) | 난이도·온보딩 조정 |
 | Q5 | **필살기 사용률·영향**은? | `gauge_full` → `special_used` (`ms_since_full`), `special_hit.caused_ringout`, `match_ended.players[].specials`, `match_events` `special_*`·`projectile_spawn` | 게이지 증가량·필살기 위력 조정 |

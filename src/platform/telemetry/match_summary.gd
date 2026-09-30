@@ -41,3 +41,14 @@ static func fighter_of(e: Dictionary) -> int:
 		if e.has(k):
 			return int(e[k])
 	return -1
+
+
+## Attack kind name (AttackSet.Kind key) a fighter is using in this view, or "" if none/unknown.
+## Items and projectiles report their thrower here too, so read it together with the event type.
+static func attack_kind_name(fighters: Array, slot: int) -> String:
+	for f: Dictionary in fighters:
+		if int(f["id"]) == slot:
+			var kind := int(f.get("attack_kind", -1))
+			var names := AttackSet.Kind.keys()
+			return String(names[kind]) if kind >= 0 and kind < names.size() else ""
+	return ""
