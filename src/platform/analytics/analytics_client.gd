@@ -61,9 +61,15 @@ func track(event_name: String, props: Dictionary = {}) -> bool:
 	return true
 
 
+## Later events carry this user id; user_props are merged into the install properties.
 func identify(user_id: String, user_props: Dictionary = {}) -> void:
 	_user_id = user_id
-	_user_props = user_props.duplicate(true)
+	set_user_properties(user_props)
+
+
+## Amplitude user properties sent with every later event (first_seen_at, input_device_primary...).
+func set_user_properties(props: Dictionary) -> void:
+	_user_props.merge(props.duplicate(true), true)
 
 
 ## A property added to every later event (quality, input_device, ...).

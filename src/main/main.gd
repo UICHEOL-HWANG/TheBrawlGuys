@@ -38,6 +38,7 @@ var _stats := TickStats.new()
 
 
 func _ready() -> void:
+	_tracking = MatchTracking.new(Analytics.track, MatchRecorder.create_default())  # load time starts here
 	_config = load(CONFIG_PATH) as GameConfig
 	if _config == null:
 		push_error("main: GameConfig missing at %s" % CONFIG_PATH)
@@ -59,7 +60,6 @@ func _ready() -> void:
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
-	_tracking = MatchTracking.new(Analytics.track, MatchRecorder.create_default())
 	_start_match()
 
 
@@ -73,7 +73,9 @@ func _build_ui() -> void:
 	add_child(_hud)
 	_hud.restart_requested.connect(_start_match)
 	_hud.restart_requested.connect(func() -> void: _presentation.play_ui("ui_confirm"))
-	_hud.menu_requested.connect(func() -> void: menu_requested.emit())
+	_hud.menu_requested.connect(func() -> void:
+		_tracking.on_menu()
+		menu_requested.emit())
 	if OS.is_debug_build():
 		_panel = ConfigPanel.new()
 		add_child(_panel)
@@ -157,6 +159,7 @@ func _process(delta: float) -> void:
 		_hud.show_result(int(_curr_state["winner"]), setup.local_slot())
 		_tracking.finish(_curr_state)
 	_stats.add_frame(delta, ticks)
+	_tracking.on_frame_time(delta)
 	if _panel != null:
 		_panel.set_info(_stats.info(_world.tick_count, _alpha))
 

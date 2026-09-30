@@ -3,6 +3,7 @@ extends GutTest
 
 const PLAN_EVENTS: Array[String] = [
 	"app_opened", "app_backgrounded", "app_closed", "perf_sampled",
+	"session_started", "session_ended", "load_timed", "result_viewed",
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
 	"logout",
 	"screen_viewed", "mode_selected", "character_selected", "arena_selected", "select_cancelled",
@@ -49,3 +50,17 @@ func test_values_must_be_json_safe() -> void:
 
 func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
+
+
+func test_schema_version_is_bumped_for_a8() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 3)
+
+
+func test_a8_events_require_their_context() -> void:
+	assert_eq(EventCatalog.validate("session_ended", {"duration_s": 1.0, "matches": 0, "last_screen": ""}).size(), 0)
+	assert_eq(EventCatalog.validate("load_timed", {"stage": "match_load"}).size(), 1, "ms missing")
+	assert_eq(EventCatalog.validate("result_viewed", {"match_id": "m", "dwell_ms": 5, "next": "menu"}).size(), 0)
+	var abandoned := {"match_id": "m", "mode": "bot", "arena": "a", "duration_s": 1.0}
+	assert_eq(EventCatalog.validate("match_abandoned", abandoned).size(), 2, "stock_diff, ms_since_last_ringout")
+	var perf := {"match_id": "m", "fps_p5": 50.0, "fps_p50": 60.0, "spike_count": 0, "frame_count": 10}
+	assert_eq(EventCatalog.validate("perf_sampled", perf).size(), 0)
