@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MB=$((1024 * 1024))
-apk=$(stat -f%z build/android/forest-brawl.apk)
+apk=$(stat -f%z build/android/the-brawl-guys.apk)
 web_raw=$(( $(stat -f%z build/web/index.pck) + $(stat -f%z build/web/index.wasm) ))
 web_gz=$(( $(gzip -9 -c build/web/index.pck | wc -c) + $(gzip -9 -c build/web/index.wasm | wc -c) ))
 printf "android apk: %d MB (budget 150)\nweb pck+wasm raw: %d MB (reference)\nweb pck+wasm gzip -9: %d MB (budget 40)\n" \
