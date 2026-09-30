@@ -51,7 +51,7 @@ func _ready() -> void:
 	_config.changed.connect(func() -> void: _ticker.max_ticks_per_frame = _config.max_ticks_per_frame)
 	_stage = MatchStage.new()
 	add_child(_stage)
-	_stage.setup(_config, setup.seed, setup.player_count())
+	_stage.setup(_config, setup.seed, setup.player_count(), setup.arena_id)
 	_presentation = MatchPresentation.new()
 	add_child(_presentation)
 	_presentation.setup(_config)
@@ -148,7 +148,7 @@ func _process(delta: float) -> void:
 		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state)
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
-	_stage.wobble_guards(events)
+	_stage.on_events(events)
 	_hud.update_from(_curr_state)
 	_presentation.present(_curr_state, events, view_events, delta, setup.local_slot(), _touch)
 	if bool(_curr_state["match_over"]) and not _result_shown:

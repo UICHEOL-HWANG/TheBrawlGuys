@@ -1,66 +1,129 @@
 class_name ArenaView
 extends Node3D
-## Round grass arena with a thick dirt edge (DS-VIS-04). Rebuilds when arena_radius changes.
+## Draws the arena a match is played on (PRD §6.1, design.md DS-VIS-04, DS-THM-02) from the sim's
+## own ArenaData for an ArenaCatalog id: the walkable floors (FloorMesh), water under the ring-out
+## zones (WaterView) and one view per gimmick (GimmickViews) in the arena's theme colors. sync()
+## follows the per-tick arena state (floors still standing, gimmick states); on_events() hands
+## this frame's sim events (bounces) to the gimmick views. A follow_config arena (the classic
+## circle) rebuilds when arena_radius changes so the debug slider keeps working.
 
-const TOP_THICKNESS := 0.2
-const RIM_HEIGHT := 0.8
-## >1 flares the rim outward below the grass edge so DS-VIS-04's dirt band
-## is not self-occluded by the top disc from the high default camera.
-const RIM_TAPER := 1.08
-const SEGMENTS := 64
-## Bright lip on the grass edge so the far side, where the dirt band is hidden, still reads (DS-VIS-04).
-const LIP_WIDTH := 0.3
-const LIP_FLATTEN := 0.06
-const LIP_LIFT := 0.005
+const WATER_SEED := 7
 
 var _config: GameConfig
-var _top: MeshInstance3D
-var _rim: MeshInstance3D
-var _lip: MeshInstance3D
+var _id: String = ArenaCatalog.DEFAULT_ID
+var _arena: ArenaData
+var _theme: ArenaTheme
+## One node per arena floor (null where a gimmick view draws the floor itself).
+var _floors: Array[Node3D] = []
+var _gimmicks: Dictionary = {}
 var _built_radius: float = -1.0
 
 
-func setup(config: GameConfig) -> void:
+func setup(config: GameConfig, arena_id: String = ArenaCatalog.DEFAULT_ID) -> void:
 	_config = config
-	_top = MeshInstance3D.new()
-	_rim = MeshInstance3D.new()
-	_lip = MeshInstance3D.new()
-	add_child(_top)
-	add_child(_rim)
-	add_child(_lip)
-	_config.changed.connect(_rebuild)
+	_id = arena_id
+	_config.changed.connect(_on_config_changed)
 	_rebuild()
 
 
+func arena() -> ArenaData:
+	return _arena
+
+
+func theme() -> ArenaTheme:
+	return _theme
+
+
+func arena_id() -> String:
+	return _arena.id
+
+
+## Per-tick arena state from World.state_view(): arena_floors and gimmicks.
+func sync(view: Dictionary, tick: int, delta: float) -> void:
+	var active: Array = view.get("arena_floors", [])
+	for i: int in mini(_floors.size(), active.size()):
+		if _floors[i] != null:
+			_floors[i].visible = bool(active[i])
+	for g: Dictionary in view.get("gimmicks", []):
+		var gv := gimmick_view(int(g["id"]))
+		if gv != null:
+			gv.sync(g, tick, delta)
+
+
+func on_events(events: Array) -> void:
+	for e: Dictionary in events:
+		for gv: GimmickView in _gimmicks.values():
+			gv.on_event(e)
+
+
+## Strongest fog among the gimmick views (0 when the arena has no fog).
+func fog_amount() -> float:
+	var out := 0.0
+	for gv: GimmickView in _gimmicks.values():
+		out = maxf(out, gv.fog_amount())
+	return out
+
+
+func gimmick_view(id: int) -> GimmickView:
+	return _gimmicks.get(id) as GimmickView
+
+
+func gimmick_views() -> Array[GimmickView]:
+	var out: Array[GimmickView] = []
+	for gv: GimmickView in _gimmicks.values():
+		out.append(gv)
+	return out
+
+
+## Floors this view draws itself (gimmick-owned floors are drawn by their views).
+func drawn_floor_count() -> int:
+	var n := 0
+	for f: Node3D in _floors:
+		if f != null:
+			n += 1
+	return n
+
+
+func _on_config_changed() -> void:
+	if _arena.follow_config and not is_equal_approx(_config.arena_radius, _built_radius):
+		_rebuild()
+
+
 func _rebuild() -> void:
-	var r := _config.arena_radius
-	if is_equal_approx(r, _built_radius):
-		return
-	_built_radius = r
+	for c: Node in get_children():
+		remove_child(c)
+		c.queue_free()
+	_floors.clear()
+	_gimmicks.clear()
+	_arena = ArenaCatalog.build(_id, _config) if ArenaCatalog.ids().has(_id) else ArenaCatalog.default(_config)
+	_theme = ArenaTheme.for_id(_arena.theme_id)
+	_built_radius = _config.arena_radius
+	var owned := _build_gimmicks()
+	for i: int in _arena.floors.size():
+		var node: Node3D = null
+		if not owned.has(i):
+			node = FloorMesh.build(_arena.floors[i].to_view(), _theme)
+			add_child(node)
+		_floors.append(node)
+	var zones: Array[Dictionary] = []
+	for z: ArenaShape in _arena.ringout_zones:
+		zones.append(z.to_view())
+	if not zones.is_empty():
+		var water := WaterView.new()
+		add_child(water)
+		water.setup(zones, _theme, WATER_SEED)
 
-	var top := CylinderMesh.new()
-	top.top_radius = r
-	top.bottom_radius = r
-	top.height = TOP_THICKNESS
-	top.radial_segments = SEGMENTS
-	_top.mesh = top
-	_top.material_override = ToonMaterials.toon(DS.GRASS)
-	_top.position.y = -TOP_THICKNESS * 0.5
 
-	var rim := CylinderMesh.new()
-	rim.top_radius = r
-	rim.bottom_radius = r * RIM_TAPER
-	rim.height = RIM_HEIGHT
-	rim.radial_segments = SEGMENTS
-	_rim.mesh = rim
-	_rim.material_override = ToonMaterials.toon(DS.DIRT)
-	_rim.position.y = -TOP_THICKNESS - RIM_HEIGHT * 0.5
-
-	var lip := TorusMesh.new()
-	lip.inner_radius = r - LIP_WIDTH
-	lip.outer_radius = r
-	lip.rings = SEGMENTS
-	_lip.mesh = lip
-	_lip.scale = Vector3(1.0, LIP_FLATTEN, 1.0)
-	_lip.position.y = LIP_LIFT
-	_lip.material_override = ToonMaterials.toon(DS.GRASS_SUN)
+## Builds the gimmick views; returns the floor indices they draw themselves.
+func _build_gimmicks() -> Array[int]:
+	var owned: Array[int] = []
+	for g: Dictionary in _arena.gimmick_views():
+		var gv := GimmickViews.create(String(g["kind"]))
+		if gv == null:
+			continue
+		add_child(gv)
+		gv.setup(g, _theme, _config)
+		_gimmicks[int(g["id"])] = gv
+		if gv.owned_floor() >= 0:
+			owned.append(gv.owned_floor())
+	return owned

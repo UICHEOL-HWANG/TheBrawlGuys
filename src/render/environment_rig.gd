@@ -1,6 +1,7 @@
 class_name EnvironmentRig
 extends Node3D
-## Warm midday sun, sky ambience and soft bloom (design.md §0 reference A, DS-VIS-01).
+## Warm midday sun, sky ambience and soft bloom (design.md §0 reference A, DS-VIS-01), recolored
+## per arena by an ArenaTheme (DS-THM-02) and thickened by the fog gimmick (set_fog_boost).
 
 const SUN_ROTATION_DEG := Vector3(-55.0, 35.0, 0.0)
 ## Retuned (Task 10 review fix round 1): soft_toon.gdshader's light() writes
@@ -29,36 +30,87 @@ const GLOW_INTENSITY_COMPAT := 0.20
 const SUN_ENERGY_COMPAT_NO_GLOW := 0.62
 const AMBIENT_ENERGY_COMPAT_NO_GLOW := 0.56
 
+## Extra fog density at full strength of the fog gimmick (DS-VIS-03 fog, on top of the theme's).
+const FOG_BOOST_DENSITY := 0.035
+## gl_compatibility (web) blends the fog much heavier at the same density: the whole arena
+## washed out in a compat capture of the foggy forest. Scaled down until the core read again
+## (Phase 4 T6 evidence arena-foggy_forest-compat.png).
+const FOG_BOOST_DENSITY_COMPAT := 0.012
+
 var _env: Environment
 var _sun: DirectionalLight3D
+var _theme: ArenaTheme = ArenaTheme.new()
+var _glow_on: bool = true
+var _fog_boost: float = 0.0
+## A screen that owns the fog (the menu haze) pins its color and density over the theme's.
+var _held_fog: Dictionary = {}
 
 
 func setup() -> void:
-	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
-	var e := energies(is_compat, true)
-	var sun_energy := float(e["sun"])
-	var ambient_energy := float(e["ambient"])
-	var glow_intensity := float(e["glow"])
-
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_COLOR
-	_env.background_color = DS.SKY
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_env.ambient_light_color = DS.SKY
-	_env.ambient_light_energy = ambient_energy
 	_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	_env.glow_enabled = true
-	_env.glow_intensity = glow_intensity
 	var world_env := WorldEnvironment.new()
 	world_env.environment = _env
 	add_child(world_env)
-
 	_sun = DirectionalLight3D.new()
-	_sun.rotation_degrees = SUN_ROTATION_DEG
-	_sun.light_color = DS.GLOW
-	_sun.light_energy = sun_energy
 	_sun.shadow_enabled = true
 	add_child(_sun)
+	apply_theme(_theme)
+
+
+## Arena look (DS-THM-02): sky, ambient and sun colors, sun angle, energy scales and base fog.
+func apply_theme(theme: ArenaTheme) -> void:
+	_theme = theme
+	_env.background_color = theme.sky
+	_env.ambient_light_color = theme.ambient
+	_sun.light_color = theme.sun_color
+	_sun.rotation_degrees = theme.sun_rotation_deg
+	_apply_energies()
+	_update_fog()
+
+
+func theme() -> ArenaTheme:
+	return _theme
+
+
+## Fog gimmick strength 0..1 (FogView): thickens the distance fog over the theme's base fog.
+func set_fog_boost(amount: float) -> void:
+	_fog_boost = clampf(amount, 0.0, 1.0)
+	_update_fog()
+
+
+## Pins the fog to a color and density (menu haze) until release_fog().
+func hold_fog(color: Color, density: float) -> void:
+	_held_fog = {"color": color, "density": density}
+	_update_fog()
+
+
+func release_fog() -> void:
+	_held_fog = {}
+	_update_fog()
+
+
+func _update_fog() -> void:
+	var color: Color = _held_fog.get("color", _theme.fog_color)
+	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
+	var boost := FOG_BOOST_DENSITY_COMPAT if is_compat else FOG_BOOST_DENSITY
+	var density := float(_held_fog.get("density", _theme.fog_density)) + _fog_boost * boost
+	_env.fog_enabled = density > 0.0
+	_env.fog_light_color = color
+	_env.fog_density = density
+	_env.fog_sky_affect = 1.0
+
+
+func _apply_energies() -> void:
+	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
+	var e := energies(is_compat, _glow_on)
+	_sun.light_energy = float(e["sun"]) * _theme.sun_scale
+	_env.ambient_light_energy = float(e["ambient"]) * _theme.ambient_scale
+	_env.glow_intensity = float(e["glow"]) * _theme.glow_scale
+	_env.glow_enabled = _glow_on
 
 
 ## Light energies for a renderer and bloom state ({sun, ambient, glow}). Pure so it can be tested
@@ -73,14 +125,9 @@ static func energies(is_compat: bool, glow_on: bool) -> Dictionary:
 
 func apply_quality(level: int) -> void:
 	var s := Quality.settings(level)
-	var glow_on := bool(s["glow"])
-	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
-	var e := energies(is_compat, glow_on)
+	_glow_on = bool(s["glow"])
 	_sun.shadow_enabled = bool(s["shadows"])
-	_sun.light_energy = float(e["sun"])
-	_env.ambient_light_energy = float(e["ambient"])
-	_env.glow_intensity = float(e["glow"])
-	_env.glow_enabled = glow_on
+	_apply_energies()
 	Engine.max_fps = int(s["max_fps"])
 
 

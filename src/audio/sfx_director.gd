@@ -40,7 +40,7 @@ static func sound_for(event: Dictionary, config: GameConfig) -> Dictionary:
 		"guard_hit":
 			return {"name": "guard", "pitch": 1.0, "volume_db": 0.0}
 		"ringout":
-			var lake := DecorView.is_over_lake(event["pos"], config.arena_radius)
+			var lake := DecorView.is_water_ringout(event, config.arena_radius)
 			return {"name": "ringout_splash" if lake else "ringout_whistle", "pitch": 1.0, "volume_db": 0.0}
 		"landed":
 			return {"name": "land", "pitch": 1.0, "volume_db": lerpf(LAND_QUIET_DB, 0.0, float(event["intensity"]))}
