@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-10-01 04:00 KST (main 병합: p5-charselect · p5-gear)
+**Last Updated:** 2026-10-01 00:20 KST (시스템 시각, `fix/p5-followups`: 경기별 시드 · 초상 장비 · -0.0 입력 수정)
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -71,3 +71,9 @@
 - 스타일·캐릭터가 바뀌면 벗기고 다시 입힘(메시 변환·재질·대기 클립 복원). 디버그 B/C·`StyleMockup`은 삭제
 - 증거: `evidence/silhouette-final{,-bw,-sil,-held}.png` (`scripts/capture_silhouette.gd`, 슬롯별 캐릭터 강제) · 경기 화면 `silhouette-final-match{,-zoom}.png` (`scripts/capture_gear_match.gd`, 밀집 4인 · Barbarian이 방망이를 들어 장갑 숨김)
 - 한계: 경기 카메라(위에서 내려봄)에선 Mage 구슬이 모자 챙에 일부 가려진다. 필살기·공격 모션 중에도 검·지팡이 기울기가 그대로라 스윙 궤적과 칼날 각도가 조금 어긋날 수 있음 — 실제 플레이 확인 후 조정
+
+## P5 후속 (2026-10-01, `fix/p5-followups`)
+- 경기별 시드: `MatchSeed.fresh()`(앱 층, randomize된 RNG, 1..0x7FFFFFFF — `matches.seed` bigint·JSON 숫자에 정확히 들어감)를 모드 선택 때 `App.new_setup(mode)`가 쓴다(`App.new_seed` Callable, 테스트가 고정 가능). 같은 캐릭터를 골라도 봇 캐릭터(`CharacterPicks.for_bots(seed, …)`)와 경기 난수가 경기마다 달라짐. sim은 시드를 받기만 함(순수성 유지). 메뉴 배경·perf 장면·main.tscn 단독 실행·테스트는 고정 시드 그대로. 기록: `TelemetrySetup` → `matches.seed`(리플레이 헤더), `match_started`/`match_ended`는 `match_id`로 이어짐(이벤트 스키마 변경 없음). 재대결(`_start_match` 재호출)은 같은 setup·시드를 다시 씀
+- 버그 수정(근본 원인): `InputFrame.quantize_axis`가 작은 음수 입력에 **-0.0**을 돌려줬는데 입력 로그(`InputCodec`)는 +0만 저장 → 라이브와 리플레이가 갈라짐(atan2 조준·방향, 해시). 시드가 다양해지며 Mage가 낀 봇 경기에서 드러남(고정 시드 36개 조합 중 7개 MISMATCH → 수정 후 0). 이제 0은 항상 +0.0. 골든 해시 갱신: `ARENA_HASHES`(log_bridge·mushroom_forest·foggy_forest)·`CHARACTER_HASHES`(4종) — 스크립트 입력에 -0.0이 섞여 있었음. 클래식·Phase 2 골든은 불변. 주의: 이미 올라간 경기 중 -0.0이 있던 것은 전과 같이 MISMATCH(로그에 부호가 없어 복구 불가)
+- 초상 장비: `CharacterPortrait`가 모델을 만든 뒤 `StyleGear.follow({character, style_of})`로 경기와 같은 장비·스타일 대기 자세(권투 `Unarmed_Pose`, 검·지팡이 `2H_Melee_Idle`)를 입히고 한 번 포즈(정지 초상도 자세 반영). `gear()`·`animator()` 접근자
+- 증거 재캡처: `evidence/char-select-{1p-browse,1p-ready,2p}{,-phone}.png`(데스크톱 1920×1080, 폰 1624×750 · 배율 1.6). 한계: 데스크톱 구도에서 Knight 검 끝이 초상 위로 살짝 잘림

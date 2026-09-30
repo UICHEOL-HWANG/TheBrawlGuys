@@ -24,6 +24,7 @@ var _vp: SubViewport
 var _cam: Camera3D = null
 var _model: CharacterModel = null
 var _animator: CharacterAnimator = null
+var _gear: StyleGear = null
 var _live: bool = false
 
 
@@ -73,6 +74,15 @@ func viewport() -> SubViewport:
 	return _vp
 
 
+func animator() -> CharacterAnimator:
+	return _animator
+
+
+## The worn style gear (null until the model is built).
+func gear() -> StyleGear:
+	return _gear
+
+
 func _process(delta: float) -> void:
 	if _live and _animator != null and is_visible_in_tree():
 		_animator.apply(IDLE_VIEW, delta)
@@ -113,3 +123,14 @@ func _build(entry: Dictionary, config: GameConfig) -> void:
 		_animator = CharacterAnimator.new()
 		model.add_child(_animator)
 		_animator.setup(model.animation_player(), config)
+	_dress(model)
+
+
+## The match look (StyleGear, T8): the character's style gear and style idle, posed at once so a
+## still portrait shows the stance too.
+func _dress(model: CharacterModel) -> void:
+	var id := model.character_id()
+	_gear = StyleGear.new(model, _animator)
+	_gear.follow({"character": id, "style": CharacterData.style_of(id)})
+	if _animator != null:
+		_animator.apply(IDLE_VIEW, 0.0)
