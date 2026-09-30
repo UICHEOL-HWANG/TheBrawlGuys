@@ -20,7 +20,7 @@ extends SpecialConfig
 @export_group("StyleWeapon")
 ## Weapon (Knight): slow, wide and long reach, big knockback, heavier body.
 @export_range(0.1, 3.0, 0.05) var weapon_damage_mul: float = 1.2
-@export_range(0.1, 3.0, 0.05) var weapon_knockback_mul: float = 1.25
+@export_range(0.1, 3.0, 0.05) var weapon_knockback_mul: float = 1.15
 @export_range(0.3, 3.0, 0.05) var weapon_reach_mul: float = 1.5
 @export_range(0.3, 3.0, 0.05) var weapon_width_mul: float = 1.35
 @export_range(-10, 20, 1) var weapon_startup_add: int = 3
@@ -28,7 +28,7 @@ extends SpecialConfig
 @export_range(1.0, 20.0, 0.1) var weapon_move_speed: float = 5.7
 @export_range(1.0, 25.0, 0.1) var weapon_jump_velocity: float = 8.6
 @export_range(0.0, 80.0, 0.5) var weapon_air_acceleration: float = 16.0
-@export_range(0.3, 2.0, 0.05) var weapon_knockback_taken: float = 0.9
+@export_range(0.3, 2.0, 0.05) var weapon_knockback_taken: float = 0.8
 
 @export_group("StyleRanged")
 ## Ranged (Mage): light fires bolts (hits 1-2 link like the light combo), heavy fires a charged

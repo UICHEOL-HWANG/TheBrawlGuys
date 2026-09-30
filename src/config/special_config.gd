@@ -16,7 +16,7 @@ extends Resource
 @export_group("SpecialSlam")
 ## Barbarian "ground slam": radial blast around the user on its active ticks.
 @export_range(0.0, 40.0, 0.5) var slam_damage: float = 15.0
-@export_range(0.0, 30.0, 0.1) var slam_base_knockback: float = 7.0
+@export_range(0.0, 30.0, 0.1) var slam_base_knockback: float = 6.0
 @export_range(0.0, 0.5, 0.005) var slam_knockback_scaling: float = 0.1
 @export_range(0.0, 3.0, 0.05) var slam_launch_angle_y: float = 1.0
 @export_range(0, 60, 1) var slam_startup_ticks: int = 11
