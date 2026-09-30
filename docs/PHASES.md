@@ -199,22 +199,22 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### ⚙️ 개발 트랙
 
-- [ ] glTF 치비 캐릭터 교체 (KayKit Adventurers 등 CC0), `ASSETS.md` 기록 `[PRD-FX-01]` `[PRD-NFR-07]`
-- [ ] AnimationTree 상태 머신: idle, run, jump, attack, heavy, hit, launched, guard, grab — sim 상태를 읽기만 함 `[PRD-FX-01]` `[GD-ANIM-01]`
-- [ ] 판정 캡슐은 그대로 유지 (모델 교체가 sim에 영향 없음) `[PRD-ARCH-01]`
-- [ ] 품질 설정: 저사양 30fps 모드, 파티클·블룸·그림자 단계 `[PRD-NFR-01]`
-- [ ] iOS export 추가 `[PRD-PLT-01]`
+- [x] glTF 치비 캐릭터 교체 (KayKit Adventurers 등 CC0), `ASSETS.md` 기록 `[PRD-FX-01]` `[PRD-NFR-07]`
+- [x] AnimationTree 상태 머신: idle, run, jump, attack, heavy, hit, launched, guard, grab — sim 상태를 읽기만 함 `[PRD-FX-01]` `[GD-ANIM-01]`
+- [x] 판정 캡슐은 그대로 유지 (모델 교체가 sim에 영향 없음) `[PRD-ARCH-01]`
+- [x] 품질 설정: 저사양 30fps 모드, 파티클·블룸·그림자 단계 `[PRD-NFR-01]`
+- [x] iOS export 추가 `[PRD-PLT-01]` — 서명 없는 Xcode 프로젝트 export까지 (팀 ID·아이콘은 자리표시)
 
 ### 🎨 DS 트랙
 
-- [ ] 🖼 캐릭터 룩 시안 비교 (림 강도 · 채도 · 캐릭터 전용 외곽선 유무) — 레퍼런스 A와 나란히 비교 → 확정 `[DS-VIS-01]` `[DS-VIS-02]`
-- [ ] 소프트 툰 셰이딩 최종화, 셰이더 파라미터를 글로벌 유니폼 토큰화 `[DS-VIS-01]` `[PRD-FX-03]`
-- [ ] VFX 라이브러리: 히트 퍼프, 착지 먼지, 넉백 궤적, 링아웃(물보라·별 폭발), 리스폰, 차지 광 `[DS-VFX-01~06]` `[PRD-FX-02]`
-- [ ] 넉백 궤적 강도 = 넉백 크기 연동 `[GD-FEEL-04]`
-- [ ] SFX 세트: 타격(약·강), 점프, 착지, 링아웃, 아이템, UI 클릭 `[DS-SFX-01]` `[PRD-FX-02]`
-- [ ] BGM: 대전 루프 + 마지막 스톡 인텐스 레이어 + 메뉴 변주 (오리지널, 라이선스 `ASSETS.md`) `[DS-SFX-02]` `[PRD-FX-02]`
-- [ ] 모션 토큰을 모든 UI 전환에 적용 `[DS-TOK-05]`
-- [ ] VFX·SFX 프리뷰를 DS 갤러리에 추가 `[DS-GOV-02]`
+- [ ] 🖼 캐릭터 룩 시안 비교 (림 강도 · 채도 · 캐릭터 전용 외곽선 유무) — 레퍼런스 A와 나란히 비교 → 확정 `[DS-VIS-01]` `[DS-VIS-02]` — 🖼 대기 (T7): 룩 프리셋 A 유지, 근접 캡처 `evidence/look-closeup-{0,1,2}.png`
+- [x] 소프트 툰 셰이딩 최종화, 셰이더 파라미터를 글로벌 유니폼 토큰화 `[DS-VIS-01]` `[PRD-FX-03]`
+- [x] VFX 라이브러리: 히트 퍼프, 착지 먼지, 넉백 궤적, 링아웃(물보라·별 폭발), 리스폰, 차지 광 `[DS-VFX-01~06]` `[PRD-FX-02]`
+- [x] 넉백 궤적 강도 = 넉백 크기 연동 `[GD-FEEL-04]`
+- [x] SFX 세트: 타격(약·강), 점프, 착지, 링아웃, 아이템, UI 클릭 `[DS-SFX-01]` `[PRD-FX-02]`
+- [x] BGM: 대전 루프 + 마지막 스톡 인텐스 레이어 + 메뉴 변주 (오리지널, 라이선스 `ASSETS.md`) `[DS-SFX-02]` `[PRD-FX-02]`
+- [x] 모션 토큰을 모든 UI 전환에 적용 `[DS-TOK-05]`
+- [x] VFX·SFX 프리뷰를 DS 갤러리에 추가 `[DS-GOV-02]`
 
 ### 테스트
 
@@ -222,10 +222,10 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### 완료 기준
 
-- [ ] 캡슐 버전과 같은 리플레이 해시 → 조작감 동일
-- [ ] 중급 모바일 기기 4인 봇전 60fps 유지 (프로파일러 캡처) `[PRD-NFR-01]`
-- [ ] 모바일 빌드 ≤ 150MB, 웹 초기 로딩 ≤ 40MB `[PRD-NFR-05]`
-- [ ] 웹(Compatibility)에서도 툰 룩이 유지된다 (스크린샷 비교)
+- [x] 캡슐 버전과 같은 리플레이 해시 → 조작감 동일 — `BEHAVIOR_HASH` 1822125224 (커밋 61bd3ba에서 고정) Phase 3 내내 불변. `GOLDEN_HASH`는 cf80ce7(지문을 sim 그룹으로 한정)에서 한 번만 변경 (2953754395)
+- [ ] 중급 모바일 기기 4인 봇전 60fps 유지 (프로파일러 캡처) `[PRD-NFR-01]` — 실기기 확인 대기 (데스크톱 품질별 4인 봇전: `dev/active/phase-3/evidence/performance.md`, LOW 30 / MEDIUM 60 / HIGH 60fps는 fps 제한에 걸린 값)
+- [x] 모바일 빌드 ≤ 150MB, 웹 초기 로딩 ≤ 40MB `[PRD-NFR-05]` — `check_build_size.sh`: android apk 36 MB (≤150), web pck+wasm gzip -9 18 MB (≤40, 원본 47 MB). 웹 예산은 압축 전송 크기로 측정 (컨트롤러 판정)
+- [ ] 웹(Compatibility)에서도 툰 룩이 유지된다 (스크린샷 비교) — 최종 수정 단계에서 조정 중 (현재 웹 캡처가 데스크톱보다 어둡고 올리브 톤: `evidence/web-toon.png` vs `evidence/desktop-toon.png`)
 
 ---
 

@@ -1,7 +1,7 @@
 # Phase 3 — Context
 
-**Last Updated:** 2026-09-29
-**상태:** 계획 작성 완료, 구현 전 (사용자 확인 대기 결정 있음)
+**Last Updated:** 2026-09-30
+**상태:** 구현 완료, 최종 리뷰 대기 (🖼 T7 대기, 웹 툰 룩 최종 수정 단계에서 조정 중)
 **계획:** [`phase-3-plan.md`](./phase-3-plan.md) · **체크리스트:** [`phase-3-tasks.md`](./phase-3-tasks.md)
 **이전 Phase:** [`dev/done/phase-2/phase-2-context.md`](../../done/phase-2/phase-2-context.md)
 
@@ -82,3 +82,45 @@
 | 애니 타이밍이 sim과 어긋나 보임 | 공격 클립을 sim 길이로 늘이기(F5), 히트스톱 정지 |
 | 웹에서 툰 룩이 달라짐 | Compatibility 분기(Phase 0 방식) + 캡처 비교 |
 | 합성 효과음이 싸구려처럼 들림 | 레시피를 수치로 조절, 갤러리에서 바로 들어보기(T15) |
+
+---
+
+## 최종 상태 (T18, 2026-09-30)
+
+### F1~F11 결과
+
+| # | 결과 |
+|---|---|
+| F1 | ✅ `BEHAVIOR_HASH` 1822125224 (61bd3ba에서 고정, Phase 3 내내 불변). `GOLDEN_HASH` 2953754395 (cf80ce7에서 한 번만 변경) |
+| F2 | ✅ sim 무변경. 3개 항목은 Phase 4로 이월 |
+| F3 | ✅ KayKit Knight·Barbarian·Mage·Rogue, 캐릭터당 클립 76개 |
+| F4 | ✅ 후보 이름 해석 (`AnimClips`) |
+| F5 | ✅ AnimationTree 상태 머신, sim 길이에 맞춘 늘이기, 히트스톱 정지 |
+| F6 | 🟨 툰 v2·글로벌 유니폼·외곽선·프리셋 3안 구현. 🖼 게이트(T7) 미수행, `look_preset` 0 (A) 유지 |
+| F7 | ✅ 품질 3단계 |
+| F8 | ✅ 렌더 쪽 뷰 이벤트 감지 (sim 이벤트 추가 없음) |
+| F9 | ✅ SFX 합성·굽기 |
+| F10 | 🟨 BGM 재생 시스템 완료, 임시곡 (본곡 대기) |
+| F11 | ✅ 서명 없는 Xcode 프로젝트 export, Android APK, 빌드 크기 검사 |
+
+### 측정값
+
+- 테스트: 388개 (387 통과, 1 보류: `test_apply_sets_global_uniforms`, 헤드리스 렌더러는 글로벌 셰이더 파라미터를 읽지 못함). `check-all.sh` ALL CHECKS PASSED
+- 성능 (데스크톱 Mac14,7, 4인 봇전, vsync 끔, `evidence/performance.md`): LOW 30.0fps (max_fps 30 제한, p95 34.9ms), MEDIUM 60.0fps (p95 18.3ms), HIGH 60.0fps (p95 17.8ms). MEDIUM·HIGH는 fps 제한에 걸린 값이라 여유폭은 드러나지 않음
+- 빌드 크기 (`check_build_size.sh`): Android APK 36MB (예산 150). 웹 pck+wasm 원본 47MB, gzip -9 18MB (예산 40). 웹 예산은 압축 전송 크기로 측정한다 (컨트롤러 판정)
+- 웹 비교: `evidence/web-toon.png` vs `evidence/desktop-toon.png`. 웹이 데스크톱보다 어둡고 올리브 톤이라 "웹 툰 룩 유지"는 미체크. 최종 수정 단계에서 재캡처 후 갱신
+
+### 알려진 차이
+
+- iOS: 서명 없는 Xcode 프로젝트만 export. 팀 ID는 자리표시 `0000000000`, 앱 아이콘은 자리표시 `assets/app_icon.svg`
+- BGM은 임시곡
+- 데스크톱 60fps 측정은 fps 제한 때문에 여유폭 미확인
+- 🖼 캐릭터 룩 T7 미수행: 근접 캡처 `evidence/look-closeup-{0,1,2}.png`
+
+### Phase 4로 넘기는 항목
+
+- sim (F2): 히트스톱이 누름을 삼킴, 방망이 밸런스, 같은 틱 상호 타격 편향
+- 실기기: Android·iOS 60fps, 터치 확인
+- 본곡 BGM (같은 파일명으로 교체)
+- 🖼 대기: 캐릭터 룩(T7), 4버튼 배치, HUD, 캐릭터 크기·`cam_margin`
+- 웹: 원본 크기가 문제면 커스텀 템플릿으로 줄이기

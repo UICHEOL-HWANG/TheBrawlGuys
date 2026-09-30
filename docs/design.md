@@ -1,6 +1,6 @@
 # 숲속 난투 — 디자인 시스템
 
-> 버전 0.5 · 2026-09-29 (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
+> 버전 0.6 · 2026-09-30 (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떻게 보이고, 들리고, 느껴지는지**를 소유한다.
@@ -308,7 +308,10 @@
 | `ds_band_softness` | 0.12 | 경계가 부드럽게 번짐 |
 | `ds_shadow_tint` | `grass_shade` 쪽 청록 이동 | 그림자는 절대 회색·검정이 아님 |
 | `ds_shadow_strength` | 0.45 | 바닥에 드리운 그림자의 반투명도 |
-| `ds_rim_strength` | 0.35 | 캐릭터·아이템만. 외곽선 대신 형태를 떼어냄 |
+| `ds_rim_strength` | 0.35 | 캐릭터·아이템만. 외곽선 대신 형태를 떼어냄. Phase 3: 글로벌 유니폼(룩 프리셋이 설정) |
+| `ds_char_saturation` | 1.0 | Phase 3 글로벌 유니폼. 캐릭터 채도 배율 (룩 프리셋 B는 +15%) |
+| `ds_outline_width` | 0.0 | Phase 3 글로벌 유니폼. 캐릭터 전용 외곽선(inverted hull) 두께, 0이면 없음 |
+| `ds_outline_color` | `canopy_deep` | Phase 3 글로벌 유니폼. 외곽선 색 (룩 프리셋 C에서 사용) |
 | `ds_ao_strength` | 0.3 | 구 클러스터 사이 접촉부만 살짝 어둡게 (버텍스 AO로 베이크) |
 | `ds_bloom` | 약하게 | 캠프파이어·햇빛 반사·차지 광만 번짐 |
 
@@ -438,20 +441,20 @@
 | DS-CMP-04 | 컴포넌트 — `TouchButton` | PRD-CTL-03, PRD-CTL-04 | 1 (v1), 2 (v2) | ✅ (v2) |
 | DS-CMP-05 | 컴포넌트 — `ChargeGauge` | PRD-CMB-02 | 2 | ✅ |
 | DS-CMP-06~08, 10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
-| DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (Phase 3에서 계속) |
-| DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (Phase 3·5에서 계속) |
+| DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
+| DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (P1·P2만, Phase 4·5에서 계속) |
 | DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | 🟨 (Phase 4에서 계속) |
 | DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2 | ✅ |
 | DS-VFX-01 | 히트 퍼프 | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3 | 🟨 (v1, Phase 3에서 계속) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
-| DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ⬜ |
-| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | ⬜ |
-| DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | ⬜ |
+| DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
+| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | ✅ |
+| DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
-| GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ⬜ |
+| GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ✅ |
 | GD-CAM-01 | 카메라 | PRD-UI-01, PRD-ARENA-01~04 | 0, 4 | 🟨 (Phase 4에서 계속) |
-| GD-ANIM-01 | 애니메이션 매핑 | PRD-FX-01, PRD-ARCH-01 | 3 | ⬜ |
+| GD-ANIM-01 | 애니메이션 매핑 | PRD-FX-01, PRD-ARCH-01 | 3 | ✅ |
 | DS-A11Y-01 | 색각 대응 | PRD-UI-01 | 5, 6 | ⬜ |
 | DS-A11Y-02~03 | 흔들림·진동, 터치 커스텀 | PRD-CTL-03 | 6 | ⬜ |
 | DS-GOV-01~02 | 거버넌스 | PRD-CFG-01 (하드코딩 금지 원칙) | 0 ~ 6 | 🟨 (Phase 3·4에서 계속) |
