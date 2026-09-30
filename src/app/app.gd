@@ -21,6 +21,8 @@ const SELECT_STEPS: Array[String] = [CHARACTER, ARENA]
 var animate: bool = true
 var gate: LoginGate = null
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
+## Seed for each new match (tests pin it); the sim never draws its own.
+var new_seed: Callable = MatchSeed.fresh
 
 var _backdrop: MenuBackdrop
 var _router: ScreenRouter
@@ -116,15 +118,19 @@ func _on_restore_failed(session_dropped: bool) -> void:
 
 func _on_mode_chosen(mode: String) -> void:
 	track.call("mode_selected", {"mode": mode})
-	var setup: MatchSetup
+	var setup := new_setup(mode)
+	if setup != null:
+		_select_step(setup, 0)
+
+
+## A new match setup for mode with its own seed, or null (온라인: shown disabled until Phase 6).
+func new_setup(mode: String) -> MatchSetup:
 	match mode:
 		MatchSetup.MODE_BOT:
-			setup = MatchSetup.vs_bots()
-		MatchSetup.MODE_LOCAL_2P:
-			setup = MatchSetup.local_versus()  # P1 vs P2; both pick on the character screen
-		_:
-			return  # 온라인: shown disabled until Phase 6
-	_select_step(setup, 0)
+			return MatchSetup.vs_bots(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
+		MatchSetup.MODE_LOCAL_2P:  # both humans pick characters
+			return MatchSetup.local_versus(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
+	return null
 
 
 ## Runs the select screens (SELECT_STEPS) in order, each filling setup, then starts the match.
