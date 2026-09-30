@@ -154,16 +154,17 @@
 
 ## 4. Supabase 원시 테이블 (`PRD-DATA-04`)
 
-마이그레이션: `supabase/migrations/0001_match_telemetry.sql`. 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
+마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` (순서대로). 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
 
 ### 4.1 테이블
 
 | 테이블 | 열 | 설명 |
 |---|---|---|
 | `profiles` | `id uuid pk = auth.uid`, `display_name text`, `created_at timestamptz` | 첫 로그인 시 생성 |
-| `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `build_version text`, `platform text` | 경기 1행. `match_started` 때 insert, `match_ended`/`match_abandoned` 때 update |
-| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `ringouts_scored int`, `specials int`, `items_used int`, `falls_by_gimmick int` · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
+| `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
+| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
 | `match_events` | `id bigserial pk`, `match_id uuid fk`, `tick int`, `type text`, `actor_slot int`, `target_slot int`, `payload jsonb` · 인덱스(`match_id`, `type`) | 원시 행동 로그. 경기 종료 시 500행 청크로 insert |
+| `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다 |
 
 `payload`에는 이벤트의 나머지 필드(`pos`, `knockback`, `power`, `stocks_left` …)를 그대로 넣는다. `Vector3`는 `[x, y, z]` 배열(소수 2자리).
 
