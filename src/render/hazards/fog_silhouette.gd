@@ -15,7 +15,8 @@ const RENDER_PRIORITY := 10
 var _color: Color
 var _body_mat: StandardMaterial3D
 var _ring_mat: StandardMaterial3D
-var _amount: float = 0.0
+## -1 until setup's first write, so the materials always start hidden.
+var _amount: float = -1.0
 
 
 func setup(index: int, config: GameConfig) -> void:
@@ -42,9 +43,12 @@ func setup(index: int, config: GameConfig) -> void:
 	set_amount(0.0)
 
 
-## Fog strength 0..1: 0 hides the silhouette.
+## Fog strength 0..1: 0 hides the silhouette. Called every frame: writes only on a change.
 func set_amount(amount: float) -> void:
-	_amount = clampf(amount, 0.0, 1.0)
+	var a := clampf(amount, 0.0, 1.0)
+	if a == _amount:
+		return
+	_amount = a
 	visible = _amount > 0.001
 	var body := _color
 	body.a = BODY_ALPHA * _amount
@@ -56,6 +60,10 @@ func set_amount(amount: float) -> void:
 
 func amount() -> float:
 	return _amount
+
+
+func body_material() -> StandardMaterial3D:
+	return _body_mat
 
 
 func draws_over_fog() -> bool:
