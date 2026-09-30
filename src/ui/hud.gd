@@ -1,7 +1,8 @@
 class_name Hud
 extends CanvasLayer
 ## In-match HUD (design.md DS-LAY-02): damage counter + stocks per player along the top edge
-## (1v1 at the far left and right, N players spread evenly), result banner in the center.
+## (1v1 at the far left and right, N players spread evenly), result banner in the center, the
+## local player's key hints along the bottom (DS-CMP-16).
 
 signal restart_requested
 signal menu_requested
@@ -16,6 +17,7 @@ var _row: HBoxContainer
 var _banner: ResultBanner
 var _counters: Array[DamageCounter] = []
 var _stocks: Array[StockIcons] = []
+var _key_hints: KeyHintHud = null
 
 
 func setup(player_count: int, max_stocks: int) -> void:
@@ -70,6 +72,20 @@ func set_menu_available(on: bool) -> void:
 
 func menu_button() -> UiMenuButton:
 	return _banner.menu_button()
+
+
+## Keyboard key bar at the bottom (DS-CMP-16) for the local player; hidden while touch is active.
+func show_key_hints(accent: Color, touch_active: Callable) -> void:
+	if _key_hints != null:
+		return
+	_key_hints = KeyHintHud.new()
+	add_child(_key_hints)
+	_key_hints.setup(accent, touch_active, SettingsStore.new(),
+			func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props))
+
+
+func key_hints() -> KeyHintHud:
+	return _key_hints
 
 
 func counter_text(i: int) -> String:

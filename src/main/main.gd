@@ -74,6 +74,8 @@ func _build_ui() -> void:
 	_hud.restart_requested.connect(_start_match)
 	_hud.restart_requested.connect(func() -> void: _presentation.play_ui("ui_confirm"))
 	_hud.menu_requested.connect(func() -> void: menu_requested.emit())
+	if setup.local_slot() >= 0:
+		_hud.show_key_hints(PlayerStyle.color(setup.local_slot()), func() -> bool: return _touch.visible)
 	if OS.is_debug_build():
 		_panel = ConfigPanel.new()
 		add_child(_panel)
