@@ -199,3 +199,42 @@ func test_guard_tracking_survives_edge_and_recovery_ticks() -> void:
 	var center := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
 	_foe(center)["state"] = Fighter.State.ATTACK
 	assert_false(bot.sample(center).guard, "threat #2 is the un-guarded one")
+
+
+func _bridge_view(me_pos: Vector3, foe_pos: Vector3) -> Dictionary:
+	var v := _view(me_pos, foe_pos)
+	v["arena"] = "log_bridge"
+	return v
+
+
+func test_bridge_edge_steps_back_toward_the_middle() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var f := bot.sample(_bridge_view(Vector3(3, 0, 2.05), Vector3(3, 0, -8)))
+	assert_lt(f.move_z, 0.0, "the outer plank edge is an edge, not the arena radius")
+	assert_false(f.light)
+
+
+func test_bridge_does_not_walk_off_the_end_toward_a_foe() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var f := bot.sample(_bridge_view(Vector3(11.6, 0, 0), Vector3(15, 0, 0)))
+	assert_true(f.move_x <= 0.0, "no floor ahead: stay")
+
+
+func test_bridge_avoids_a_broken_plank() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _bridge_view(Vector3(-9, 0, -0.5), Vector3(-9, 0, -3.0))
+	var floors: Array[bool] = []
+	floors.resize(9)
+	floors.fill(true)
+	floors[1] = false  # the -z plank under x = -9
+	v["arena_floors"] = floors
+	assert_true(bot.sample(v).move_z >= 0.0, "does not step onto the gap")
+
+
+func test_recovers_toward_the_bridge_when_falling_beside_it() -> void:
+	var bot := BotController.new(1, GameConfig.new())
+	var v := _bridge_view(Vector3(0, -0.3, 3.0), Vector3(-5, 0, 0))
+	_me(v)["on_ground"] = false
+	var f := bot.sample(v)
+	assert_lt(f.move_z, 0.0)
+	assert_true(f.jump)
