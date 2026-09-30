@@ -69,6 +69,10 @@ func reveal() -> Tween:
 	return _haze.reveal()
 
 
+func config() -> GameConfig:
+	return _config
+
+
 func world() -> World:
 	return _match.world
 

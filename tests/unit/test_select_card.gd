@@ -129,10 +129,14 @@ func test_click_or_tap_picks_a_card() -> void:
 	var s := _screen()
 	await wait_process_frames(1)
 	watch_signals(s)
-	var up := InputEventMouseButton.new()
-	up.button_index = MOUSE_BUTTON_LEFT
+	var down := InputEventMouseButton.new()
+	down.button_index = MOUSE_BUTTON_LEFT
+	down.pressed = true
+	down.position = s.cards()[3].size * 0.5
+	var up := down.duplicate() as InputEventMouseButton
 	up.pressed = false
 	s.cards()[3].mouse_entered.emit()
+	s.cards()[3]._gui_input(down)
 	s.cards()[3]._gui_input(up)
 	assert_signal_emitted_with_parameters(s, "arena_chosen", [s.card_ids()[3]])
 	assert_eq(_tracked[0][1]["browse_count"], 1, "hovering counts as browsing")

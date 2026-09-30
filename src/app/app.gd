@@ -133,6 +133,7 @@ func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Contr
 	assert(step_id == ARENA, "App: no select screen for step '%s'" % step_id)
 	var screen := ArenaSelectScreen.new()
 	screen.track = track
+	screen.config = _backdrop.config()
 	screen.arena_chosen.connect(func(arena_id: String) -> void:
 		setup.arena_id = arena_id
 		next.call())
