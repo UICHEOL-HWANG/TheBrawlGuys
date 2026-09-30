@@ -7,3 +7,26 @@ build/*
 # OS
 .DS_Store
 *.avi
+
+# --- Secrets: never commit keys ---
+# Local client keys (written by scripts/set_secrets.sh)
+config/secrets.local.cfg
+config/*.local.cfg
+*.local.cfg
+# Env files (keep only the example template)
+.env
+.env.*
+!.env.example
+# Keys / certificates / keystores
+*.pem
+*.key
+*.p12
+*.keystore
+*.jks
+!debug.keystore
+# Vercel / Supabase CLI local state (project ids, tokens)
+.vercel/
+supabase/.temp/
+supabase/.branches/
+# Claude Code local worktrees
+.claude/

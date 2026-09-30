@@ -31,5 +31,5 @@
 - [ ] secrets.local.cfg 입력
 - [ ] Supabase Google provider 활성화 + Redirect URL 등록
 - [ ] 마이그레이션 SQL 실행
-- [ ] `npx vercel login`
+- [x] `npx vercel login` — uicheol-hwang / team cheorish (Hobby), 2026-09-30
 - [ ] Amplitude MCP 커넥터 인증 (검증용, 선택)
