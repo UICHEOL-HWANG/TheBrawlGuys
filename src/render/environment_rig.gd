@@ -22,6 +22,9 @@ const SUN_ENERGY_COMPAT := 0.30
 const AMBIENT_ENERGY_COMPAT := 0.27
 const GLOW_INTENSITY_COMPAT := 0.20
 
+var _env: Environment
+var _sun: DirectionalLight3D
+
 
 func setup() -> void:
 	var is_compat := RenderingServer.get_current_rendering_method() == "gl_compatibility"
@@ -29,22 +32,37 @@ func setup() -> void:
 	var ambient_energy := AMBIENT_ENERGY_COMPAT if is_compat else AMBIENT_ENERGY
 	var glow_intensity := GLOW_INTENSITY_COMPAT if is_compat else GLOW_INTENSITY
 
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = DS.SKY
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = DS.SKY
-	env.ambient_light_energy = ambient_energy
-	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	env.glow_enabled = true
-	env.glow_intensity = glow_intensity
+	_env = Environment.new()
+	_env.background_mode = Environment.BG_COLOR
+	_env.background_color = DS.SKY
+	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	_env.ambient_light_color = DS.SKY
+	_env.ambient_light_energy = ambient_energy
+	_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	_env.glow_enabled = true
+	_env.glow_intensity = glow_intensity
 	var world_env := WorldEnvironment.new()
-	world_env.environment = env
+	world_env.environment = _env
 	add_child(world_env)
 
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = SUN_ROTATION_DEG
-	sun.light_color = DS.GLOW
-	sun.light_energy = sun_energy
-	sun.shadow_enabled = true
-	add_child(sun)
+	_sun = DirectionalLight3D.new()
+	_sun.rotation_degrees = SUN_ROTATION_DEG
+	_sun.light_color = DS.GLOW
+	_sun.light_energy = sun_energy
+	_sun.shadow_enabled = true
+	add_child(_sun)
+
+
+func apply_quality(level: int) -> void:
+	var s := Quality.settings(level)
+	_sun.shadow_enabled = bool(s["shadows"])
+	_env.glow_enabled = bool(s["glow"])
+	Engine.max_fps = int(s["max_fps"])
+
+
+func environment() -> Environment:
+	return _env
+
+
+func sun() -> DirectionalLight3D:
+	return _sun

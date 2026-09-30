@@ -32,6 +32,8 @@ var _held: MeshInstance3D
 var _held_kind: int = Fighter.NONE
 var _dots: Array[MeshInstance3D] = []
 var _bubble: MeshInstance3D
+var _blob: BlobShadow
+var _blob_wanted: bool = false
 
 
 func setup(index: int, config: GameConfig) -> void:
@@ -108,13 +110,20 @@ func setup(index: int, config: GameConfig) -> void:
 	_bubble.visible = false
 	add_child(_bubble)
 
+	_blob = BlobShadow.new()
+	add_child(_blob)
+	_blob.setup(config)
+
 
 func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 	if int(curr["state"]) == Fighter.State.KO:
 		visible = false
+		_blob.visible = false
 		return
 	visible = true
 	position = interpolate(prev, curr, alpha)
+	_blob.follow(position)
+	_blob.visible = _blob_wanted
 	var facing: Vector3 = curr["facing"]
 	rotation.y = Collision.yaw_of(facing)
 	var shown := blink_visible(int(curr["invuln_ticks"]), tick, _config)
@@ -145,6 +154,19 @@ func wobble() -> void:
 	_bubble.scale = WOBBLE_SQUASH
 	var tw := create_tween()
 	tw.tween_property(_bubble, "scale", Vector3.ONE, DS.MOTION_SQUISH).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+
+func set_blob_shadow(on: bool) -> void:
+	_blob_wanted = on
+	_blob.visible = on
+
+
+func blob_visible() -> bool:
+	return _blob.visible
+
+
+func blob() -> BlobShadow:
+	return _blob
 
 
 func bubble_visible() -> bool:

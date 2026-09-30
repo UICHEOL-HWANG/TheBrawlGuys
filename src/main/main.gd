@@ -20,6 +20,7 @@ var _local_input: LocalInput
 var _touch: TouchInput
 var _bot: BotController
 var _views: Array[FighterView] = []
+var _env: EnvironmentRig
 var _item_layer: ItemLayer
 var _grab_hint: GrabHint
 var _gauges: ChargeGaugeLayer
@@ -47,9 +48,9 @@ func _ready() -> void:
 	_ticker = FixedTicker.new(_config.max_ticks_per_frame)
 	_config.changed.connect(func() -> void: _ticker.max_ticks_per_frame = _config.max_ticks_per_frame)
 
-	var env := EnvironmentRig.new()
-	add_child(env)
-	env.setup()
+	_env = EnvironmentRig.new()
+	add_child(_env)
+	_env.setup()
 	var arena := ArenaView.new()
 	add_child(arena)
 	arena.setup(_config)
@@ -87,7 +88,17 @@ func _ready() -> void:
 		_panel = ConfigPanel.new()
 		add_child(_panel)
 		_panel.setup(_config)
+	_apply_quality()
+	_config.changed.connect(_apply_quality)
 	_start_match()
+
+
+func _apply_quality() -> void:
+	var level := Quality.resolve(_config.quality_level, Quality.platform())
+	_env.apply_quality(level)
+	var blobs := bool(Quality.settings(level)["blob_shadows"])
+	for v: FighterView in _views:
+		v.set_blob_shadow(blobs)
 
 
 func get_world() -> World:

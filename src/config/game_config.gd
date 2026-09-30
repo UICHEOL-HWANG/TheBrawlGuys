@@ -170,6 +170,10 @@ extends Resource
 ## Character look preset for the gate: 0 = A, 1 = B, 2 = C (context F6).
 @export_range(0, 2, 1) var look_preset: int = 0
 
+@export_group("Quality")
+## -1 = platform default (mobile MEDIUM, web LOW, desktop HIGH); 0 LOW, 1 MEDIUM, 2 HIGH (context F7).
+@export_range(-1, 2, 1) var quality_level: int = -1
+
 
 ## Groups whose values change the simulation. Only these enter the fingerprint (context F1):
 ## camera, touch, feel, bot, loop and later presentation groups never alter a replay, so they
@@ -177,7 +181,7 @@ extends Resource
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 ]
-const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look"]
+const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality"]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays
