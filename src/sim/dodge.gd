@@ -1,7 +1,8 @@
 class_name Dodge
 extends RefCounted
 ## Rolls and air dodges (combat-depth A, PRD §4.3). No button of their own: the tick guard is
-## newly pressed (GuardMeter.track_presses sets guard_press_age = 0) decides. On the ground with a
+## newly pressed (GuardMeter.track_presses sets guard_press_age = 0) decides, or the first
+## actionable tick after a press made while the fighter could not act (roll_buffer_ticks). On the ground with a
 ## move input it rolls along it; in the air it air-dodges along it (in place when neutral), once
 ## per airtime. The heavy+guard chord never dodges (special, else guard). A dodge is state DODGE:
 ## it moves at a fixed speed for its move ticks, is intangible (Fighter.untouchable) inside its
@@ -14,12 +15,16 @@ enum Kind { NONE, ROLL, AIR }
 const KIND_NAMES := {Kind.ROLL: "roll", Kind.AIR: "air"}
 
 
-## From Actions.try_start (fighter can act): true when a dodge started this tick.
+## From Actions.try_start (fighter can act): true when a dodge started this tick. A press up to
+## roll_buffer_ticks old (made while the fighter could not act) still dodges when guard and a
+## direction are held now.
 static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool:
-	if f.guard_press_age != 0 or not input.guard or input.heavy:
+	if f.guard_press_age > config.roll_buffer_ticks or not input.guard or input.heavy:
 		return false
 	var dir := Vector3(input.move_x, 0.0, input.move_z)
 	dir = dir.normalized() if dir.length_squared() > 0.0 else Vector3.ZERO
+	if f.guard_press_age > 0 and dir == Vector3.ZERO:
+		return false  # a buffered press needs its direction still held
 	if f.on_ground:
 		if dir == Vector3.ZERO:
 			return false  # neutral: a plain guard
@@ -65,10 +70,15 @@ static func started_events(advanced: Array[Fighter]) -> Array[Dictionary]:
 
 ## Clears a dodge (hit, grab, respawn); the air dodge comes back.
 static func clear(f: Fighter) -> void:
+	cancel(f)
+	f.air_dodge_used = false
+
+
+## Ends a dodge early (a special cancels it); a spent air dodge stays spent.
+static func cancel(f: Fighter) -> void:
 	f.dodge_kind = Kind.NONE
 	f.dodge_ticks = 0
 	f.intangible = false
-	f.air_dodge_used = false
 
 
 static func _start(f: Fighter, kind: int, dir: Vector3, config: GameConfig) -> void:

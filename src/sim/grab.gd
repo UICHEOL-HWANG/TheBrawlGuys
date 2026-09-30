@@ -86,6 +86,7 @@ static func _start_hold(holder: Fighter, target: Fighter, config: GameConfig) ->
 	target.partner_id = holder.id
 	target.vel = Vector3.ZERO
 	target.hitstun_ticks = 0
+	target.guard_break_left = 0
 	target.attack_ticks = 0
 	target.charge_ticks = 0
 	target.combo_queued = false

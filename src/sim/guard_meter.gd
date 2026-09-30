@@ -5,7 +5,8 @@ extends RefCounted
 ## of their unscaled damage (Combat.apply_hit calls block); after guard_regen_delay_ticks without
 ## guarding it refills. At 0 while guarding the guard breaks: the fighter pops up and is stunned
 ## (HITSTUN, guard_break_left counts down for the view), hits on it land in full.
-## A hit within perfect_guard_ticks of the guard press (guard_press_age) is a perfect guard: no
+## A hit within perfect_guard_ticks of the guard press (guard_press_age) is a perfect guard when
+## guard had been let go for perfect_guard_rearm_ticks before that press (no mashing): no
 ## chip damage, no guard points lost, and a melee attacker freezes perfect_guard_stagger_ticks
 ## longer. Events: guard_break {fighter, pos}, perfect_guard {fighter, attacker, pos}.
 
@@ -14,16 +15,20 @@ const MAX := 100.0
 const AGE_CAP := 255
 
 
-## Before any step, on the raw input copies: marks the tick guard is newly pressed (age 0).
+## Before any step, on the raw input copies: marks the tick guard is newly pressed (age 0) and
+## counts the ticks guard is let go (guard_rest_ticks, kept while held for is_perfect).
 static func track_presses(fighters: Array[Fighter], frame: Array[InputFrame]) -> void:
 	for f: Fighter in fighters:
 		var held := frame[f.id].guard
 		f.guard_press_age = 0 if held and not f.guard_prev else mini(f.guard_press_age + 1, AGE_CAP)
+		if not held:
+			f.guard_rest_ticks = 1 if f.guard_prev else mini(f.guard_rest_ticks + 1, AGE_CAP)
 		f.guard_prev = held
 
 
 static func is_perfect(target: Fighter, config: GameConfig) -> bool:
-	return target.state == Fighter.State.GUARD and target.guard_press_age <= config.perfect_guard_ticks
+	return target.state == Fighter.State.GUARD and target.guard_press_age <= config.perfect_guard_ticks \
+			and target.guard_rest_ticks >= config.perfect_guard_rearm_ticks
 
 
 ## A hit of `damage` (before guard scaling) was blocked by target.

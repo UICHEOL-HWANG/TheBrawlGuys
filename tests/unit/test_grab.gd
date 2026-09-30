@@ -131,3 +131,20 @@ func test_invulnerable_fighter_cannot_be_grabbed() -> void:
 	for i: int in w.config.grab_startup_ticks + 1:
 		w.tick(_inputs(InputFrame.neutral()))
 	assert_ne(w.fighters[1].state, Fighter.State.HELD)
+
+
+func test_grabbing_a_guard_broken_fighter_clears_its_break_stun() -> void:
+	var w := World.new(GameConfig.new(), 1)
+	var c := w.config
+	var book := StyleBook.build(w.fighters, c)
+	var target := w.fighters[1]
+	target.pos = w.fighters[0].pos + Vector3(1.0, 0, 0)
+	target.set_state(Fighter.State.HITSTUN)
+	target.hitstun_ticks = 50
+	target.guard_break_left = 50
+	w.fighters[0].facing = Vector3(1, 0, 0)
+	Actions.start_attack(w.fighters[0], AttackSet.Kind.GRAB)
+	w.fighters[0].attack_ticks = c.grab_startup_ticks + 1
+	assert_eq(Grab.resolve(w.fighters, book, c).size(), 1)
+	assert_eq(target.state, Fighter.State.HELD)
+	assert_eq(target.guard_break_left, 0, "no dizzy stars while held")

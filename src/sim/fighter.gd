@@ -21,7 +21,7 @@ const DATA_TYPES := {
 	"charge_mul": TYPE_FLOAT, "grab_ticks": TYPE_INT, "partner_id": TYPE_INT,
 	"item_kind": TYPE_INT, "item_uses": TYPE_INT, "burn_ticks": TYPE_INT, "burn_clock": TYPE_INT,
 	"held_presses": TYPE_INT, "character": TYPE_STRING, "gauge": TYPE_FLOAT,
-	"guard_prev": TYPE_BOOL, "guard_press_age": TYPE_INT, "guard_hp": TYPE_FLOAT, "guard_idle_ticks": TYPE_INT,
+	"guard_prev": TYPE_BOOL, "guard_press_age": TYPE_INT, "guard_rest_ticks": TYPE_INT, "guard_hp": TYPE_FLOAT, "guard_idle_ticks": TYPE_INT,
 	"guard_break_left": TYPE_INT, "perfect_by": TYPE_INT, "dodge_kind": TYPE_INT, "dodge_ticks": TYPE_INT,
 	"dodge_total": TYPE_INT, "dodge_dir": TYPE_VECTOR3, "intangible": TYPE_BOOL, "air_dodge_used": TYPE_BOOL,
 	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT,
@@ -68,10 +68,11 @@ var held_presses: int = 0
 var character: String = CharacterData.DEFAULT
 var gauge: float = 0.0
 ## Guard (combat-depth A, GuardMeter): last tick's guard level, ticks since the last guard press,
-## meter points, ticks since the last guard, ticks of guard-break stun left, and the attacker
+## ticks guard was let go before it (frozen while held; perfect-guard rearm), meter points, ticks since the last guard, ticks of guard-break stun left, and the attacker
 ## whose hit this fighter perfect-guarded this tick (NONE otherwise).
 var guard_prev: bool = false
 var guard_press_age: int = GuardMeter.AGE_CAP
+var guard_rest_ticks: int = GuardMeter.AGE_CAP
 var guard_hp: float = GuardMeter.MAX
 var guard_idle_ticks: int = 0
 var guard_break_left: int = 0

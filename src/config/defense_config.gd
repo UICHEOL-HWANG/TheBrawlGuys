@@ -27,6 +27,12 @@ extends Resource
 @export_range(0, 30, 1) var air_dodge_intangible_start: int = 1
 @export_range(0, 60, 1) var air_dodge_intangible_ticks: int = 10
 @export_range(0, 60, 1) var air_dodge_recovery_ticks: int = 12
+## A guard press made while unable to act (hitstun, hitstop, an attack) within roll_buffer_ticks
+## still dodges on the first actionable tick if guard and a direction are still held.
+@export_range(0, 30, 1) var roll_buffer_ticks: int = 6
+## The special chord (heavy + guard) may land guard first: a dodge at most special_cancel_window
+## ticks old is cancelled into the special.
+@export_range(0, 10, 1) var special_cancel_window: int = 2
 
 @export_group("GuardMeter")
 ## Guard points lost per tick while guard is held, and per point of blocked (unscaled) damage.
@@ -44,6 +50,9 @@ extends Resource
 ## costs no guard points; a melee attacker is frozen perfect_guard_stagger_ticks longer.
 @export_range(0, 30, 1) var perfect_guard_ticks: int = 5
 @export_range(0, 60, 1) var perfect_guard_stagger_ticks: int = 8
+## A guard press only earns a perfect guard after guard was let go for perfect_guard_rearm_ticks
+## (mashing guard does not keep the perfect window open).
+@export_range(0, 60, 1) var perfect_guard_rearm_ticks: int = 8
 
 @export_group("BotDefense")
 ## Bots react to a new threat this many ticks late (not frame-perfect, so few perfect guards) and stop
