@@ -61,14 +61,19 @@
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
 | `login_viewed` | 로그인 화면 표시 (세션 복원 실패 포함) | `reason: enum(first_run\|no_session\|refresh_failed\|logged_out)` | — | A | 4.0 |
-| `login_started` | Google 버튼 클릭 | `provider: enum(google)`, `flow: enum(web_redirect\|desktop_loopback)` | — | A | 4.0 |
-| `login_completed` | 토큰 교환 성공 | `provider: enum(google)`, `flow: enum(...)`, `duration_ms: int` (started → completed), `is_new_user: bool` | — | A | 4.0 |
-| `login_failed` | 교환 실패·취소·타임아웃 | `provider: enum(google)`, `flow: enum(...)`, `reason: enum(cancelled\|timeout\|exchange_error\|network\|port_in_use\|config_missing)` | `http_status: int` | A | 4.0 |
+| `login_started` | Google 버튼 클릭 / 이메일은 새 주소로 첫 코드 요청이 서버로 나갈 때 (재전송은 `email_code_resent`) | `provider: enum(google\|email)`, `flow: enum(web_redirect\|desktop_loopback)` | — | A | 4.0 |
+| `login_completed` | 토큰 교환 성공 / 이메일 코드 확인 성공 | `provider: enum(google\|email)`, `flow: enum(...)`, `duration_ms: int` (started → completed), `is_new_user: bool` | — | A | 4.0 |
+| `login_failed` | 교환 실패·취소·타임아웃 / 이메일 요청이 서버에서 실패 | `provider: enum(google\|email)`, `flow: enum(...)`, `reason: enum(cancelled\|timeout\|exchange_error\|network\|port_in_use\|config_missing` · 이메일: `send_rate_limited\|send_invalid_email\|send_error\|verify_wrong_code\|verify_rate_limited\|verify_error)` | `http_status: int` | A | 4.0 |
 | `login_skipped` | 모바일 debug 빌드 "건너뛰기" | — | — | A | 4.0 |
+| `email_code_requested` | "인증코드 받기"·"코드 다시 받기" 결과 (요청 전 거절 포함) | `result: enum(ok\|rate_limited\|invalid_email\|error)` | — | A | 4.0 |
+| `email_code_resent` | 같은 주소로 코드 재전송 요청이 서버로 나감 (쿨다운 뒤) | — | — | A | 4.0 |
+| `email_code_verified` | 코드 확인 성공 (`login_completed` 직전) | `attempts: int` (이번 코드로 확인 요청한 횟수) | — | A | 4.0 |
 | `session_restored` | 저장된 refresh token으로 갱신 성공 → 로그인 화면 생략 | `session_age_days: float` | — | A | 4.0 |
 | `logout` | 설정에서 로그아웃 | — | — | A | 4.0 |
 
 로그인 완료 순간 `Analytics`는 `user_id`를 설정하고, 그 이전 이벤트는 같은 `device_id`로 Amplitude가 병합한다.
+
+이메일 로그인 (T4): 이메일 주소와 인증코드는 **어떤 속성에도 넣지 않는다** — 결과 enum과 횟수만 보낸다. `test_email_otp`가 모든 이메일 흐름 이벤트 속성에 `@`·코드·주소 일부가 없는지 검사한다. 요청 전 거절(형식 오류·쿨다운)은 `email_code_requested`에만 남고 `login_failed`는 서버 응답 실패만 센다.
 
 ### 3.3 메뉴 퍼널 (`PRD-UI-02`)
 

@@ -190,7 +190,7 @@ hitstun   = knockback * config.hitstun_factor   (초)
 | 온라인 | Godot 헤드리스 전용 서버 + `WebSocketPeer` 커스텀 바이너리 프로토콜 |
 | 배포 | 웹: **Vercel** (`npx vercel`) / 서버: Fly.io 또는 VPS (Docker) / 모바일: 스토어 |
 | 데이터 저장 | 로컬 설정·기록: 기기 `user://` (ConfigFile) / 서버 데이터(방 코드·로비, 경기 기록·원시 행동 로그, 향후 랭킹): **Supabase** (Postgres + Auth) |
-| 로그인 | Supabase Auth — Google OAuth (PKCE) (§5.7) |
+| 로그인 | Supabase Auth — Google OAuth (PKCE) + 이메일 6자리 인증코드 (OTP) (§5.7) |
 | 제품 분석 | **Amplitude** (HTTP API v2 배치 전송) — 핵심 순간·경기 요약 이벤트 (§5.8, [`tracking-plan.md`](./tracking-plan.md)) |
 
 ### 5.2 아키텍처 원칙
@@ -282,7 +282,7 @@ _process(delta):
 - **전송**: 웹 클라이언트와 공통으로 쓰기 위해 WebSocket을 쓴다 (ENet은 웹 미지원).
 - **방**: 방 코드로 입장, 최대 4인. 서버 프로세스 하나가 여러 방을 호스팅한다.
 - **로비/매칭**: Supabase `rooms` 테이블(방 코드 · 게임 서버 주소 · 인원 · 만료 시각)로 방 코드를 서버 주소에 매핑한다. 만료된 방은 주기적으로 정리한다. 게임 서버 자체는 DB가 아니므로 Fly.io/VPS에서 실행한다.
-- **계정**: 로그인은 Phase 4.0에서 Supabase Auth(Google OAuth)로 먼저 들어온다 (§5.7). 랭킹은 같은 Supabase 프로젝트에 추가하되 현재 범위 밖이다 (§8).
+- **계정**: 로그인은 Phase 4.0에서 Supabase Auth(Google OAuth + 이메일 인증코드)로 먼저 들어온다 (§5.7). 랭킹은 같은 Supabase 프로젝트에 추가하되 현재 범위 밖이다 (§8).
 - 롤백 넷코드는 하지 않는다.
 
 ### 5.6 GDExtension 도입 기준
@@ -297,10 +297,11 @@ _process(delta):
 
 ### 5.7 로그인 (Phase 4.0)
 
-- **Google OAuth만** 지원한다. Supabase Auth의 PKCE 흐름을 쓴다 (클라이언트에 secret 없음).
+- **Google OAuth**와 **이메일 인증코드**(비밀번호 없음)를 지원한다. Google은 Supabase Auth의 PKCE 흐름을 쓴다 (클라이언트에 secret 없음).
+- **이메일 인증코드 (2026-09-30 추가)**: 로그인 카드의 "이메일로 계속하기" → 이메일 입력 → `POST /auth/v1/otp {email, create_user: true}`로 6자리 코드를 메일로 받는다 → 게임에 코드를 입력 → `POST /auth/v1/verify {type: "email", email, token}`이 세션을 돌려준다 (PKCE 교환과 같은 세션 저장·자동 갱신). 처음 인증하는 주소는 계정이 새로 만들어진다. 리다이렉트가 없어 **웹·데스크톱·모바일 모두** 된다. 이메일 형식·6자리 숫자는 요청 전에 검사하고, 같은 주소 재전송은 60초 쿨다운. 오류는 한 줄 한국어(잘못된 이메일 · 코드가 틀렸거나 만료됐어요 · 잠시 후 다시 시도해 주세요). 이메일 주소와 코드는 트래킹에 넣지 않는다 (§5.8). 실제 발송에는 Supabase 커스텀 SMTP가 필요하다 (기본 SMTP는 프로젝트 팀원에게만, 시간당 소량)
 - **웹**: `/auth/v1/authorize?provider=google&redirect_to=<Vercel URL>`로 리다이렉트 → 복귀 URL의 `?code=`를 `JavaScriptBridge`로 읽어 토큰 교환 → URL에서 code를 지운다.
 - **데스크톱**: `TCPServer` 루프백(127.0.0.1 고정 포트) + `OS.shell_open`으로 브라우저를 연다 → 콜백에서 code를 받아 교환한다.
-- **모바일**: 딥링크 플러그인이 필요해 **나중에** 한다. 그 전까지 모바일은 debug 빌드에서만 "건너뛰기"를 허용하고, 트래킹은 `device_id`로만 묶는다.
+- **모바일**: Google 로그인은 딥링크 플러그인이 필요해 **나중에** 한다. 그 전까지 모바일은 이메일 인증코드로 로그인하고, debug 빌드에서는 "건너뛰기"도 허용한다.
 - 세션(refresh token)은 `user://session.cfg`에 저장하고 앱 시작 시 자동 갱신한다. 갱신에 성공하면 로그인 화면을 건너뛴다.
 - **첫 화면은 로그인 창**이다. 배경에서는 카메라가 원형 경기장을 천천히 돌고 봇들이 싸우는 디오라마가 보이고, 로그인 패널이 그 위에 등장한다 (`DS-LAY-03`, `DS-CMP-14`).
 - 클라이언트에는 공개 키(Supabase anon key, Amplitude API key)만 넣는다. `service_role` 키는 절대 포함하지 않는다 (검사 스크립트로 차단).
@@ -401,7 +402,7 @@ _process(delta):
 ## 8. 범위 밖 (당분간 하지 않음)
 
 - 상점, 커스터마이징, 랭크 (계정 로그인은 2026-09-30부터 범위 안, §5.7)
-- 모바일 Google 로그인(딥링크) — 나중에 (§5.7)
+- 모바일 Google 로그인(딥링크) — 나중에 (§5.7). 모바일은 그동안 이메일 인증코드로 로그인한다
 - 롤백 넷코드
 - 세로 화면 모드
 - 기존 게임의 이름·캐릭터·에셋·UI 사용
@@ -502,7 +503,7 @@ PHASES.md 태스크와 design.md 항목은 아래 ID로 이 문서를 참조한�
 | PRD-DATA-02 | 서버 데이터(방 코드·로비, 향후 랭킹)는 Supabase | §5.1, §5.5 |
 | PRD-DATA-03 | Amplitude 이벤트 트래킹 — 핵심 순간 + 경기 요약, 분석 목적(밸런스·퍼널·리텐션), Supabase uid 외 개인정보 없음 | §5.8 |
 | PRD-DATA-04 | Supabase 경기 기록 + 원시 행동 로그 (`matches`·`match_players`·`match_events`, RLS 본인 행만) | §5.8 |
-| PRD-AUTH-01 | Google OAuth 로그인 (Supabase Auth PKCE; 웹 리다이렉트 · 데스크톱 루프백 · 모바일 딥링크는 나중). 첫 화면은 궤도 디오라마 배경의 로그인 창 | §5.7, §6.5 |
+| PRD-AUTH-01 | Google OAuth 로그인 (Supabase Auth PKCE; 웹 리다이렉트 · 데스크톱 루프백 · 모바일 딥링크는 나중) + 이메일 6자리 인증코드 로그인 (모든 플랫폼). 첫 화면은 궤도 디오라마 배경의 로그인 창 | §5.7, §6.5 |
 | PRD-ARENA-01 | 호숫가 캠프장 | §6.1 |
 | PRD-ARENA-02 | 통나무 다리 | §6.1 |
 | PRD-ARENA-03 | 버섯 숲 | §6.1 |
