@@ -4,12 +4,12 @@ extends RefCounted
 ## kill_y are removed. Thrown rocks and bats hit the first fighter they touch (never their thrower) and break on the ground; thrown bombs stop on bodies and land (context E7).
 ## Lit bombs count down every tick and explode at zero, hitting every fighter in bomb_radius, thrower included (context E7).
 
-## Same landing rule as fighters (Motion.LAND_TOLERANCE): never snap up from under the floor.
-const LAND_TOLERANCE := 0.05
+## Floors and the landing rule come from the arena (ArenaFloor), the same as for fighters; an
+## item lying on a floor that breaks away falls again.
 
 
 static func step(field: ItemField, fighters: Array[Fighter], attacks: AttackSet,
-		config: GameConfig) -> Array[Dictionary]:
+		config: GameConfig, arena: ArenaData) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	var keep: Array[Item] = []
 	for it: Item in field.items:
@@ -18,7 +18,7 @@ static func step(field: ItemField, fighters: Array[Fighter], attacks: AttackSet,
 			if it.fuse_ticks == 0:
 				events.append_array(_explode(it, fighters, attacks.get_attack(AttackSet.Kind.BOMB), config))
 				continue
-		if _advance(it, fighters, attacks, config, events):
+		if _advance(it, fighters, attacks, config, arena, events):
 			keep.append(it)
 	field.items = keep
 	return events
@@ -43,9 +43,11 @@ static func _explode(it: Item, fighters: Array[Fighter], attack: AttackData, con
 
 ## Moves one item; returns false when it is gone.
 static func _advance(it: Item, fighters: Array[Fighter], attacks: AttackSet, config: GameConfig,
-		events: Array[Dictionary]) -> bool:
+		arena: ArenaData, events: Array[Dictionary]) -> bool:
 	if it.state == Item.State.GROUND:
-		return true
+		if ArenaFloor.supports(arena, it.pos):
+			return true
+		it.state = Item.State.FALLING
 	var prev_y := it.pos.y
 	it.vel.y += config.gravity * SimTime.TICK_DT
 	it.pos += it.vel * SimTime.TICK_DT
@@ -58,16 +60,17 @@ static func _advance(it: Item, fighters: Array[Fighter], attacks: AttackSet, con
 			else:
 				events.append(_projectile_hit(it, target, attacks.get_attack(AttackSet.Kind.ROCK), config))
 				return false
-	if _landed(it, prev_y, config):
+	var top := _landing_top(it, prev_y, arena)
+	if top != ArenaFloor.NO_GROUND:
 		if it.state == Item.State.THROWN and it.kind != Item.Kind.BOMB:
 			events.append({"type": "item_break", "id": it.id, "kind": it.kind, "pos": it.pos})
 			return false
-		it.pos.y = 0.0
+		it.pos.y = top
 		it.vel = Vector3.ZERO
 		it.state = Item.State.GROUND
 		events.append({"type": "item_land", "id": it.id, "kind": it.kind, "pos": it.pos})
 		return true
-	return it.pos.y >= config.kill_y
+	return it.pos.y >= arena.kill_y
 
 
 static func _first_hit(it: Item, fighters: Array[Fighter], config: GameConfig) -> Fighter:
@@ -87,6 +90,9 @@ static func _projectile_hit(it: Item, target: Fighter, attack: AttackData, confi
 	return e
 
 
-static func _landed(it: Item, prev_y: float, config: GameConfig) -> bool:
-	return Collision.on_arena_floor(it.pos, config.arena_radius) and it.pos.y <= 0.0 \
-			and prev_y >= -LAND_TOLERANCE and it.vel.y <= 0.0
+## The floor top the item lands on this tick, or ArenaFloor.NO_GROUND.
+static func _landing_top(it: Item, prev_y: float, arena: ArenaData) -> float:
+	var top := ArenaFloor.ground_top(arena, it.pos, prev_y)
+	if top == ArenaFloor.NO_GROUND or it.pos.y > top or it.vel.y > 0.0:
+		return ArenaFloor.NO_GROUND
+	return top
