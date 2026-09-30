@@ -3,10 +3,12 @@ extends Control
 ## Title / mode select (platform B1, design.md DS-LAY-03): the logo on top and, in the lower
 ## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 and 로컬 2인
 ## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) are live, 온라인 is shown
-## disabled ("준비 중") until Phase 6 — plus a small 로그아웃 in the top-right corner.
+## disabled ("준비 중") until Phase 6 — plus a small 로그아웃 in the top-right corner and, under the
+## modes, a secondary 튜토리얼 다시 보기 (Phase 5 T11).
 
 signal mode_chosen(mode: String)
 signal logout_requested
+signal tutorial_requested
 
 ## [mode, label, enabled]
 const MODES: Array[Array] = [
@@ -18,11 +20,13 @@ const MODES: Array[Array] = [
 const LOCAL_2P_MOBILE_TEXT := "로컬 2인 · 데스크톱 전용"
 const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
+const TUTORIAL_TEXT := "튜토리얼 다시 보기"
 const PANEL_POP_FROM := 0.9
 const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
 var _buttons: Dictionary = {}
 var _logout: UiMenuButton
+var _tutorial: UiMenuButton
 var _panel: UiPanel
 
 
@@ -50,6 +54,11 @@ func _ready() -> void:
 		var mobile_2p := mode == MatchSetup.MODE_LOCAL_2P and PlatformEnv.kind() == "mobile"
 		list.add_child(_mode_button(mode, LOCAL_2P_MOBILE_TEXT if mobile_2p else String(m[1]),
 				bool(m[2]) and not mobile_2p))
+	_tutorial = UiMenuButton.new()
+	_tutorial.text = TUTORIAL_TEXT
+	_tutorial.kind = UiMenuButton.Kind.SECONDARY
+	_tutorial.pressed.connect(func() -> void: tutorial_requested.emit())
+	list.add_child(_tutorial)
 	_add_logout()
 	(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred()
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)
@@ -57,6 +66,10 @@ func _ready() -> void:
 
 func mode_button(mode: String) -> UiMenuButton:
 	return _buttons.get(mode) as UiMenuButton
+
+
+func tutorial_button() -> UiMenuButton:
+	return _tutorial
 
 
 func logout_button() -> UiMenuButton:

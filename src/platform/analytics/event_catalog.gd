@@ -9,8 +9,9 @@ extends RefCounted
 ## 2 = A7 replay header, 3 = A8 features and session / load / result / perf events,
 ## 4 = Phase 5 special events and the match_players.special_hits column, 5 = Phase 5 character
 ## select (character_selected is_bot/input_device, characters reach the sim, character ids and
-## styles on match_players and match_ended.players[]).
-const SCHEMA_VERSION := 5
+## styles on match_players and match_ended.players[]), 6 = Phase 5 onboarding tutorial funnel
+## (tutorial_started / tutorial_step_completed / tutorial_skipped / tutorial_completed).
+const SCHEMA_VERSION := 6
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -39,6 +40,11 @@ const EVENTS: Dictionary = {
 	"character_selected": ["slot", "character", "style", "is_bot", "input_device"],
 	"arena_selected": ["arena"],
 	"select_cancelled": ["screen"],
+	# Onboarding tutorial (step = TutorialSteps id, index = 1-based position)
+	"tutorial_started": ["source"],
+	"tutorial_step_completed": ["step", "index", "ms_in_step", "attempts"],
+	"tutorial_skipped": ["step", "index"],
+	"tutorial_completed": ["total_ms"],
 	# Match
 	"match_started": ["match_id", "mode", "arena", "player_count", "bot_count", "characters", "input_device",
 		"loss_streak"],
