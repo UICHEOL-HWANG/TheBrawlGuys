@@ -58,7 +58,7 @@ static func _side(parts: Dictionary) -> Dictionary:
 	right.offset_left = DS.S7 * 2 + DS.SIDE_PANEL_WIDTH
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(right)
-	_style_light(parts["logo"], DS.SIZE_DISPLAY_XL)
+	style_world_text(parts["logo"], DS.SIZE_DISPLAY_XL)
 	right.add_child(parts["logo"])
 	return {"root": root, "mover": side, "logo": parts["logo"], "items": [] as Array[Control]}
 
@@ -68,7 +68,7 @@ static func _logo_drop(parts: Dictionary) -> Dictionary:
 	var root := _center()
 	var col := _column()
 	root.add_child(col)
-	_style_light(parts["logo"], DS.SIZE_DISPLAY_XL)
+	style_world_text(parts["logo"], DS.SIZE_DISPLAY_XL)
 	_style_caption(parts["tagline"], true)
 	_style_caption(parts["message"], true)
 	for key: String in ["google", "skip"]:
@@ -110,7 +110,7 @@ static func _style_dark(l: Label, font_size: int) -> void:
 
 
 ## World-overlay text (DS-TOK-02): cream fill, deep-teal outline, readable over the diorama.
-static func _style_light(l: Label, font_size: int) -> void:
+static func style_world_text(l: Label, font_size: int) -> void:
 	_style_dark(l, font_size)
 	l.add_theme_color_override("font_color", DS.UI_SURFACE)
 	l.add_theme_color_override("font_outline_color", DS.CANOPY_DEEP)

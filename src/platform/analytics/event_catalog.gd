@@ -15,6 +15,7 @@ const EVENTS: Dictionary = {
 	"login_started": ["provider", "platform"],
 	"login_completed": ["provider", "platform"],
 	"login_failed": ["provider", "reason"],
+	"login_skipped": [],
 	"session_restored": [],
 	"logout": [],
 	# Menu funnel
