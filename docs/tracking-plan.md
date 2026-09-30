@@ -127,7 +127,7 @@
 | `ringouts_scored` / `self_destructs` | int | 마지막 가격자로서의 링아웃 / 가격자 없는 낙사 | 4.0 |
 | `items_used` | int | 줍기 후 휘두름·투척 | 4.0 |
 | `falls_by_gimmick` | int | 기믹이 원인인 스톡 소모 | 4 |
-| `specials` / `special_hits` | int | 필살기 발동 수 (`special_start`) / 필살기에 맞은 대상 수 (`special_hit` 원시 이벤트 수, 한 발동이 여럿을 맞히면 여럿) | 5 |
+| `specials` / `special_hits` | int | 필살기 발동 수 (`special_start`) / 필살기 적중 수 (`special_hit` 원시 이벤트 수 = 대상 × 타수, 돌진 연타의 다단 히트는 한 타마다 센다) | 5 |
 | `controller` / `bot_difficulty` / `bot_params_hash` | str / str? / int? | `local`\|`bot`\|`remote` · 봇 난이도(기본 `normal`) · Bot 설정 그룹 해시 (Supabase 행만, A7) | 4.0 |
 
 **행동 피처 (A8, `MatchFeatures.COLUMNS`, analytics-strategy §3.2)** — `match_ended.players[]`와 `match_players` 열에 같은 이름으로 들어간다. 비율은 0~1, "생존 틱"은 KO가 아닌 틱.
@@ -160,11 +160,11 @@
 |---|---|---|---|---|---|
 | `stock_lost` | sim `ringout` | `match_id: str`, `victim_slot: int`, `stocks_left: int`, `damage_at_death: float`, `cause: enum(knockback\|gimmick\|self)`, `attacker_slot: int` (-1 = 없음), `angle_deg: float` (경기장 중심 기준, 0° = +x 동, 90° = −z 북), `zone: str` (8방위 섹터 `n`·`ne`… 또는 경기장 안쪽으로 떨어지면 `below`) | `last_hit_attack: str`, `last_hit_ms_ago: int`, `item: str` | A (+ S 원시 `ringout`) | 4.0 (구역은 4) |
 | `gauge_full` | sim `gauge_full` (필살기 게이지 100% 도달) | `match_id: str`, `slot: int`, `character: str` (캐릭터 id, 클래식 `""`), `match_time_s: float` | — | A (+ S 원시) | 5 |
-| `special_used` | sim `special_start` | `match_id: str`, `slot: int`, `character: str`, `special: str` (필살기 id), `ms_since_full: int` (게이지가 찬 뒤 경과, 모르면 -1), `target_damage: float` (가장 가까운 살아 있는 상대 %) | — | A (+ S) | 5 |
-| `special_hit` | sim `special_hit` (발동 1회당 1번 — 첫 적중으로 열고 판정 뒤 발행) | `match_id: str`, `slot: int`, `character: str`, `special: str`, `targets_hit: int` (이 발동이 맞힌 서로 다른 대상 수), `caused_ringout: bool` | `target_slot: int` (첫 대상) | A (+ S 원시 전부) | 5 |
+| `special_used` | sim `special_start` | `match_id: str`, `slot: int`, `character: str`, `special: str` (필살기 id), `ms_since_full: int` (게이지가 찬 뒤 살아 있던 시간 — KO 상태로 보낸 시간은 뺀다, 모르면 -1), `target_damage: float` (가장 가까운 살아 있는 상대 %) | — | A (+ S) | 5 |
+| `special_hit` | sim `special_hit` (발동 1회당 1번 — 첫 적중으로 열고 판정 뒤 발행) | `match_id: str`, `slot: int`, `character: str`, `special: str`, `targets_hit: int` (이 발동이 맞힌 서로 다른 대상 수), `target_slot: int` (첫 대상), `caused_ringout: bool` | — | A (+ S 원시 전부) | 5 |
 
 `attacker_slot`은 피해자에게 마지막으로 `hit`을 넣은 슬롯이다 (링아웃 전 `ringout_credit_s` 안, config). 없으면 `cause = self`.
-`caused_ringout`은 적중 후 같은 창(`StockLoss.WINDOW_TICKS`, 180틱) 안에 맞은 대상이 링아웃되면 true — 판정 후 지연 발행한다: 대상이 링아웃되면 즉시(true), 아니면 창이 지나거나 같은 슬롯의 다음 필살기가 시작되거나 경기가 끝날 때(false). 구현 `SpecialTelemetry`.
+`caused_ringout`은 적중 후 같은 창(`StockLoss.WINDOW_TICKS`, 180틱) 안에 맞은 대상이 링아웃되고 그 링아웃이 시전자에게 크레딧될 때(`stock_lost.attacker_slot`과 같은 마지막 가격자 규칙 — 기믹이나 다른 플레이어의 나중 타격이면 false) true — 판정 후 지연 발행한다: 대상이 링아웃되면 즉시(true), 아니면 창이 지나거나 같은 슬롯의 다음 필살기가 시작되거나 경기가 끝날 때(false). sim은 한 틱의 타격을 모두 낸 뒤 링아웃을 낸다(`Rules.apply`가 마지막)라 같은 틱 링아웃도 맞게 잡힌다(`test_special_ringout`). 구현 `SpecialTelemetry`.
 
 ### 3.6 아이템
 

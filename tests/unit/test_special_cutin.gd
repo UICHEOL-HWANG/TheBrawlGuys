@@ -1,9 +1,11 @@
 extends GutTest
 ## Special-move cut-in (Phase 5 T4, design.md GD-CAM-01): render-only timing on motion tokens, a
 ## close shot blended over the match framing, reduce motion keeps the camera still, and the
-## director never touches the sim.
+## banner (director tests: test_special_cutin_director).
 
 const DT := 1.0 / 60.0
+## Layout height the 2D canvas is designed at (stretch canvas_items).
+const DS_BASE_HEIGHT := 1080.0
 
 
 func _start_event(slot: int, special: String = SpecialCatalog.GROUND_SLAM) -> Dictionary:
@@ -116,24 +118,42 @@ func test_banner_names_the_special_in_the_caster_color() -> void:
 		assert_true(SpecialCutInBanner.NAMES.has(id), "%s has a display name" % id)
 
 
-func test_director_focuses_the_camera_on_the_caster_and_leaves_the_sim_alone() -> void:
+func test_banner_is_safe_before_it_enters_the_tree() -> void:
+	var banner := SpecialCutInBanner.new()
+	banner.show_cut(0, SpecialCatalog.DASH_RUSH, 0.5, false)
+	assert_eq(banner.title(), "P1 · 돌진 연타")
+	assert_true(banner.is_showing())
+	banner.free()
+
+
+func test_banner_never_covers_the_zoomed_caster() -> void:
 	var config := GameConfig.new()
-	var chars: Array[String] = ["barbarian", "mage"]
-	var world := World.new(config, 3, 2, null, chars)
-	var hash_before := world.state_hash()
 	var rig := CameraRig.new()
 	add_child_autofree(rig)
 	rig.setup(config)
-	var director := SpecialCutInDirector.new()
-	add_child_autofree(director)
-	director.setup(rig, false)
-	var view := world.state_view()
-	director.present(view, [_start_event(1)], DT)
-	for i: int in 20:
-		director.present(view, [], DT)
-	assert_gt(rig.focus_weight(), 0.9)
-	var caster: Vector3 = view["fighters"][1]["pos"]
-	assert_almost_eq(rig.focus_point().x, caster.x, 0.001)
-	assert_eq(world.state_hash(), hash_before, "render-only: the sim is untouched")
-	director.reset()
-	assert_eq(rig.focus_weight(), 0.0, "a restart drops the cut-in")
+	var caster := Vector3(2, 0, -1)
+	rig.set_focus(caster, 1.0)
+	rig.follow(CameraFraming.match_targets({"fighters": [], "arena_radius": config.arena_radius}, config), 10.0)
+	var h := rig.get_viewport().get_visible_rect().size.y
+	var band_top := SpecialCutInBanner.BAND_Y_SHARE - SpecialCutInBanner.BAND_HEIGHT * 0.5 / DS_BASE_HEIGHT
+	var band_bottom := SpecialCutInBanner.BAND_Y_SHARE + SpecialCutInBanner.BAND_HEIGHT * 0.5 / DS_BASE_HEIGHT
+	var ring := rig.unproject(caster + Vector3(0, 0, config.fighter_radius * 2.0)).y / h
+	var label := rig.unproject(caster + Vector3.UP * (config.fighter_height + 0.8)).y / h
+	assert_true(ring < band_top or label > band_bottom, "band %.2f..%.2f clears the caster %.2f..%.2f" % [
+		band_top, band_bottom, label, ring])
+	assert_gt(label, 0.0, "the caster's label stays on screen")
+
+
+func test_hold_follows_the_special_s_sim_length_within_bounds() -> void:
+	var config := GameConfig.new()
+	for id: String in SpecialCatalog.IDS:
+		var sim_s := float(SpecialCatalog.attack(id, config).total_ticks()) / SimTime.TICK_RATE
+		var hold := SpecialCutIn.hold_for(id, config)
+		assert_between(hold, SpecialCutIn.HOLD_MIN_S, SpecialCutIn.HOLD_MAX_S, id)
+		assert_almost_eq(hold, clampf(sim_s - SpecialCutIn.IN_S, SpecialCutIn.HOLD_MIN_S, SpecialCutIn.HOLD_MAX_S),
+				0.0001, id)
+	assert_eq(SpecialCutIn.hold_for("", config), SpecialCutIn.HOLD_S, "unknown special: the default hold")
+	var cut := SpecialCutIn.new(false, config)
+	cut.on_events([_start_event(0, SpecialCatalog.SPIN_SLASH)])
+	assert_almost_eq(cut.duration(), SpecialCutIn.IN_S + SpecialCutIn.hold_for(SpecialCatalog.SPIN_SLASH, config)
+			+ SpecialCutIn.OUT_S, 0.0001)

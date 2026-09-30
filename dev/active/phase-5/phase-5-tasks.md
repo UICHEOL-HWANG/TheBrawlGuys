@@ -1,6 +1,6 @@
 # Phase 5 — Tasks
 
-**Last Updated:** 2026-09-30 23:10 KST (feat/p5-cutin: T4 컷인 + T10 필살기 트래킹, test 882/882, check-all 통과)
+**Last Updated:** 2026-09-30 23:50 KST (feat/p5-cutin 리뷰 반영: 컷인 띠 하단 이동·초점 팬·hold=sim 길이, caused_ringout 크레딧 규칙)
 
 | # | 태스크 | 근거 ID | 검증 | 상태 |
 |---|---|---|---|---|
@@ -15,3 +15,7 @@
 | T9 | 캐릭터 선택 + PlayerSlot + P1~P4 식별 + 버튼 프롬프트 | DS-CMP-08/10, DS-VIS-03, DS-TOK-06 | 흑백 캡처 | ⬜ |
 | T10 | 트래킹: character_selected · special_* · gauge_full · 스타일별 요약 | PRD-DATA-03/04 | `test_match_telemetry` · `test_special_telemetry` | 🟨 필살기 부분 ✅ (feat/p5-cutin: special_used·special_hit·gauge_full, 슬롯 요약 specials·special_hits, press_special, 스키마 4, 마이그레이션 0003). character_selected·스타일별 요약은 T9 이후 |
 | T11 | 온보딩 튜토리얼: 첫 로그인 후 연습장에서 이동→점프→약·강공격→가드→잡기·던지기→아이템→(필살기) 단계별 미션, 건너뛰기·다시보기, 단계별 퍼널 트래킹(tutorial_step_*) | PRD-UI-02, PRD-DATA-03 | `test_tutorial_flow` + 캡처 | ⬜ |
+
+### 후속 · 주의 (feat/p5-cutin)
+- ⚠️ **배포 전 Supabase `0003_special_hits.sql` 적용 필수** — 이벤트 스키마 4 빌드는 `match_players.special_hits`를 보내므로, 열이 없으면 `match_players` insert 전체가 실패해 경기 기록이 빠진다(0002도 아직 미적용)
+- ⬜ 설정 화면에 "모션 줄이기" 토글(`[accessibility] reduce_motion`) + `settings_changed` 트래킹 — 지금은 설정/옵션 화면이 없어 키만 읽는다(경기 시작마다 다시 읽음). Phase 6 DS-A11Y-02와 함께

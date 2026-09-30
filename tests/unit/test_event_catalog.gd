@@ -64,7 +64,7 @@ func test_special_events_require_their_context() -> void:
 		"target_damage": 40.0}
 	assert_eq(EventCatalog.validate("special_used", used).size(), 0)
 	var hit := {"match_id": "m", "slot": 0, "character": "mage", "special": "big_fireball", "targets_hit": 2,
-		"caused_ringout": false}
+		"target_slot": 1, "caused_ringout": false}
 	assert_eq(EventCatalog.validate("special_hit", hit).size(), 0)
 	hit.erase("caused_ringout")
 	assert_eq(EventCatalog.validate("special_hit", hit).size(), 1)

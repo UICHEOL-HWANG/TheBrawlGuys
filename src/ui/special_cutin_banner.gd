@@ -2,13 +2,16 @@ class_name SpecialCutInBanner
 extends CanvasLayer
 ## Special cut-in band (Phase 5 T4, design.md GD-CAM-01): a full-width band in the caster's
 ## player color with "P2 · 회전 베기" (display_l, cream text, deep outline) between two glow
-## stripes. It fades and slides in by the cut-in weight (no slide with reduce motion). Anchored to
-## the viewport, so the UI scale (DS-LAY-04) sizes it on phones; it never takes input.
+## stripes, in the lower part of the screen below the zoomed caster (who is framed at the center).
+## It fades and slides in by the cut-in weight (no slide with reduce motion). Anchored to the
+## viewport, so the UI scale (DS-LAY-04) sizes it on phones; it never takes input. Safe to drive
+## before it enters the tree (the nodes are built on first use).
 
 const LAYER := 3
-## Band center as a share of the screen height (clear of the HUD row and the touch controls).
-const BAND_Y_SHARE := 0.3
-const BAND_HEIGHT := DS.S8 * 2 + DS.S5
+## Band center as a share of the screen height: below the zoomed caster's feet, above the key
+## hint bar; the touch buttons (a higher layer) stay on top of it.
+const BAND_Y_SHARE := 0.84
+const BAND_HEIGHT := DS.S8 + DS.S5
 const BAND_ALPHA := 0.88
 ## How far (px at 1920x1080) the band travels while it slides in.
 const SLIDE_PX := DS.S8 * 6
@@ -25,6 +28,12 @@ var _label: Label
 
 
 func _ready() -> void:
+	_build()
+
+
+func _build() -> void:
+	if _root != null:
+		return
 	layer = LAYER
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -37,6 +46,7 @@ func _ready() -> void:
 	_band.add_child(_strip(DS.GLOW, 0.0, DS.S1))
 	_band.add_child(_strip(DS.GLOW, BAND_HEIGHT - DS.S1, DS.S1))
 	_label = Label.new()
+	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -51,6 +61,7 @@ func _ready() -> void:
 
 ## slot < 0 or weight 0 hides it. reduced: fade only, no slide.
 func show_cut(slot: int, special: String, weight: float, reduced: bool) -> void:
+	_build()
 	if slot < 0 or weight <= 0.0:
 		_root.visible = false
 		return
@@ -66,14 +77,15 @@ func show_cut(slot: int, special: String, weight: float, reduced: bool) -> void:
 
 
 func is_showing() -> bool:
-	return _root.visible
+	return _root != null and _root.visible
 
 
 func title() -> String:
-	return _label.text
+	return "" if _label == null else _label.text
 
 
 func band_color() -> Color:
+	_build()
 	return _band.color
 
 

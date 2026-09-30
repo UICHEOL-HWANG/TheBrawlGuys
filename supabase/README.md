@@ -9,6 +9,7 @@ Supabase CLI를 쓰지 않으므로 대시보드에서 직접 실행한다.
 1. Supabase 대시보드 → 프로젝트 → **SQL Editor** → **New query**
 2. `migrations/0001_match_telemetry.sql` 내용을 전부 붙여넣고 **Run**
 3. 같은 방법으로 `migrations/0002_replay_and_features.sql`, `migrations/0003_special_hits.sql`을 **Run** (0001 다음에, 순서대로)
+   - ⚠️ **0003은 이벤트 스키마 4 빌드(필살기 트래킹)를 배포하기 전에 적용**한다 — 없으면 `special_hits` 열 때문에 `match_players` insert 전체가 실패해 경기 기록이 통째로 빠진다
 4. **Table Editor**에서 다섯 테이블(`profiles`·`matches`·`match_players`·`match_events`·`match_inputs`)이 보이고, 각 테이블에 `RLS enabled` 표시가 있는지 확인
 5. **Authentication → Policies**에서 테이블마다 정책이 보이는지 확인
 

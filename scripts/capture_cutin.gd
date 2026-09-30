@@ -41,14 +41,18 @@ func _init() -> void:
 	process_frame.connect(_on_frame)
 
 
-## Mid-hold of the cut-in (frames after the press).
-static func _hold_frame() -> int:
-	return SETTLE_FRAMES + roundi((SpecialCutIn.IN_S + SpecialCutIn.HOLD_S * 0.4) / DT)
+## Mid-hold of this character's cut-in (frames after the press).
+func _hold_frame() -> int:
+	return SETTLE_FRAMES + roundi((SpecialCutIn.IN_S + _hold() * 0.4) / DT)
 
 
 ## The camera is back on the match framing.
-static func _after_frame() -> int:
-	return SETTLE_FRAMES + roundi((SpecialCutIn.total_seconds() + 0.6) / DT)
+func _after_frame() -> int:
+	return SETTLE_FRAMES + roundi((SpecialCutIn.IN_S + _hold() + SpecialCutIn.OUT_S + 0.6) / DT)
+
+
+func _hold() -> float:
+	return SpecialCutIn.hold_for(CharacterData.special_of(CharacterData.IDS[_index]), _config)
 
 
 func _on_frame() -> void:
@@ -88,7 +92,7 @@ func _next() -> void:
 	_camera.setup(_config)
 	_director = SpecialCutInDirector.new()
 	root.add_child(_director)
-	_director.setup(_camera, _reduce)
+	_director.setup(_camera, _reduce, _config)
 	_curr = _world.state_view()
 	_prev = _curr
 	_frame = 0

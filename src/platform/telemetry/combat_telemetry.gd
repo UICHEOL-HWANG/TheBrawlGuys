@@ -31,7 +31,7 @@ func previous() -> Array:
 
 ## Start of a tick: swings opened or closed since the last view, special hits whose window passed.
 func begin_tick(fighters: Array, tick: int) -> void:
-	_specials.flush_due(tick)
+	_specials.begin_tick(fighters, tick)
 	var seen := _attacks.observe(_prev, fighters)
 	for slot: int in seen["whiffs"]:
 		_count(slot, "whiffs")
@@ -64,7 +64,7 @@ func on_event(e: Dictionary, tick: int, fighters: Array, arena_radius: float) ->
 			_loss.note_gimmick(victim, String(e.get("kind", type)), tick)
 		_emit.call("gimmick_triggered", {"kind": String(e.get("kind", type)), "victim_slot": victim})
 	_items.on_event(e, _emit, _count)
-	_specials.on_event(e, tick, fighters)
+	_specials.on_event(e.merged(extra), tick, fighters)
 	return extra
 
 

@@ -48,7 +48,7 @@ const EVENTS: Dictionary = {
 	"stock_lost": ["match_id", "victim_slot", "attacker_slot", "cause", "damage_at_death", "angle_deg", "zone",
 		"stocks_left"],
 	"special_used": ["match_id", "slot", "character", "special", "ms_since_full", "target_damage"],
-	"special_hit": ["match_id", "slot", "character", "special", "targets_hit", "caused_ringout"],
+	"special_hit": ["match_id", "slot", "character", "special", "targets_hit", "target_slot", "caused_ringout"],
 	"gauge_full": ["match_id", "slot", "character", "match_time_s"],
 	# Items
 	"item_picked_up": ["match_id", "slot", "item"],

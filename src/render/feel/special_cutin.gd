@@ -2,12 +2,15 @@ class_name SpecialCutIn
 extends RefCounted
 ## Special-move cut-in timing (Phase 5 T4, design.md GD-CAM-01): a sim special_start zooms the
 ## camera onto the caster (motion_base, out-quad), holds the close shot while the special plays
-## (motion_calm), then eases back to the match framing (motion_slow, in-out-cubic). Render time
+## (its sim length minus the zoom-in, kept between motion_slow and 2 x motion_calm; motion_calm
+## without a config), then eases back to the match framing (motion_slow, in-out-cubic). Render time
 ## only: nothing here slows or touches the sim, so tick rate and replay hashes never change.
 ## weight() drives the banner; camera_weight() the close shot (0 with reduce motion).
 
 const IN_S := DS.MOTION_BASE
 const HOLD_S := DS.MOTION_CALM
+const HOLD_MIN_S := DS.MOTION_SLOW
+const HOLD_MAX_S := DS.MOTION_CALM * 2.0
 const OUT_S := DS.MOTION_SLOW
 ## Close shot: camera distance (m), pitch (deg, lower than cam_pitch so the pose reads) and the
 ## look-at height above the caster's feet (about its chest).
@@ -17,23 +20,41 @@ const FOCUS_HEIGHT := 0.9
 const NONE := -1
 
 var _reduce_motion: bool
+var _config: GameConfig
 var _slot: int = NONE
 var _special: String = ""
+var _hold: float = HOLD_S
 var _t: float = 0.0
 
 
-func _init(reduce_motion: bool = false) -> void:
+## config: the sim tuning the hold is read from (null: the default hold for every special).
+func _init(reduce_motion: bool = false, config: GameConfig = null) -> void:
 	_reduce_motion = reduce_motion
+	_config = config
 
 
+## Length of a cut-in with the default hold.
 static func total_seconds() -> float:
 	return IN_S + HOLD_S + OUT_S
+
+
+## Hold for a special: its sim length after the zoom-in, within HOLD_MIN_S..HOLD_MAX_S.
+static func hold_for(special: String, config: GameConfig) -> float:
+	if config == null or not SpecialCatalog.IDS.has(special):
+		return HOLD_S
+	var sim_s := float(SpecialCatalog.attack(special, config).total_ticks()) / SimTime.TICK_RATE
+	return clampf(sim_s - IN_S, HOLD_MIN_S, HOLD_MAX_S)
+
+
+## Length of the current (or next) cut-in.
+func duration() -> float:
+	return IN_S + _hold + OUT_S
 
 
 ## Starts (or retargets) the cut-in on this frame's special_start events; the last one wins.
 func on_events(events: Array) -> void:
 	for e: Dictionary in events:
-		if String(e.get("type", "")) == "special_start":
+		if String(e.get("type", "")) == "special_start" and e.has("fighter"):
 			start(int(e["fighter"]), String(e.get("special", "")))
 
 
@@ -42,6 +63,7 @@ func start(slot: int, special: String) -> void:
 	var w := weight()
 	_slot = slot
 	_special = special
+	_hold = hold_for(special, _config)
 	_t = IN_S * (1.0 - sqrt(1.0 - clampf(w, 0.0, 1.0)))  # inverse of the out-quad zoom-in
 
 
@@ -49,21 +71,27 @@ func update(delta: float) -> void:
 	if not is_active():
 		return
 	_t += maxf(delta, 0.0)
-	if _t >= total_seconds():
+	if _t >= duration():
 		reset()
 
 
 ## Eases out from the current zoom (the caster was knocked out or left the view).
 func cancel() -> void:
-	if not is_active() or _t >= IN_S + HOLD_S:
+	if not is_active() or _t >= IN_S + _hold:
 		return
-	_t = IN_S + HOLD_S + OUT_S * _inverse_out(weight())
+	_t = IN_S + _hold + OUT_S * _inverse_out(weight())
 
 
 func reset() -> void:
 	_slot = NONE
 	_special = ""
+	_hold = HOLD_S
 	_t = 0.0
+
+
+## The player's reduce-motion setting (read again at every match start).
+func set_reduce_motion(on: bool) -> void:
+	_reduce_motion = on
 
 
 func is_active() -> bool:
@@ -89,9 +117,9 @@ func weight() -> float:
 	if _t < IN_S:
 		var x := _t / IN_S
 		return 1.0 - (1.0 - x) * (1.0 - x)
-	if _t < IN_S + HOLD_S:
+	if _t < IN_S + _hold:
 		return 1.0
-	var y := clampf((_t - IN_S - HOLD_S) / OUT_S, 0.0, 1.0)
+	var y := clampf((_t - IN_S - _hold) / OUT_S, 0.0, 1.0)
 	return 1.0 - _in_out_cubic(y)
 
 

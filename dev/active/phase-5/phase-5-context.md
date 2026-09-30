@@ -1,6 +1,6 @@
 # Phase 5 — Context
 
-**Last Updated:** 2026-09-30 23:10 KST
+**Last Updated:** 2026-09-30 23:50 KST
 **상태:** 대기 (Phase 4 · 앱 셸 이후)
 **계획:** [`phase-5-plan.md`](./phase-5-plan.md) (통합 계획의 "Phase 5" 절) · **체크리스트:** [`phase-5-tasks.md`](./phase-5-tasks.md)
 
@@ -30,11 +30,12 @@
 
 ## T4 컷인 · T10 필살기 트래킹 결정 (2026-09-30, `feat/p5-cutin`)
 - 컷인은 렌더 전용: `SpecialCutIn`(타이밍 모델, `src/render/feel/`) → `SpecialCutInDirector`(MatchPresentation 소유) → `CameraRig.set_focus(점, 가중치)` + `SpecialCutInBanner`(`src/ui/`, CanvasLayer 3). sim·틱 속도·리플레이 해시 불변(`test_director_..._leaves_the_sim_alone`)
-- 타이밍은 DS 모션 토큰: 들어가기 `motion_base` · 유지 `motion_calm` · 복귀 `motion_slow` (총 1.28초). 근접 샷 거리 7 m·피치 38°·가슴 높이 0.9 m는 `SpecialCutIn` 상수(GameConfig은 이미 200줄 초과라 늘리지 않음, Camera 그룹은 fingerprint 밖이라 나중에 옮겨도 해시 무관)
+- 타이밍은 DS 모션 토큰: 들어가기 `motion_base` · 유지 = 필살기 sim 길이 − 들어가기(`motion_slow`~`motion_calm`×2로 제한) · 복귀 `motion_slow`. 근접 샷 거리 7 m·피치 38°·가슴 높이 0.9 m는 `SpecialCutIn` 상수(GameConfig은 이미 200줄 초과라 늘리지 않음, Camera 그룹은 fingerprint 밖이라 나중에 옮겨도 해시 무관)
 - 슬로우모션은 넣지 않았다: 렌더만 느리게 하면 sim 위치와 어긋나고, 틱을 늦추면 규칙 위반
-- 두 번째 필살기는 현재 확대 가중치에서 이어 새 시전자로(팝 없음), 시전자 KO면 즉시 복귀, 경기 재시작은 즉시 해제
-- reduce motion: 설정 UI가 아직 없어 `SettingsStore` `[accessibility] reduce_motion` 키만 읽는다(카메라 고정, 띠 페이드만). 설정 화면은 Phase 6 DS-A11Y-02에서
+- 두 번째 필살기는 현재 확대 가중치에서 이어 새 시전자로, 초점은 지수 추적(`FOCUS_FOLLOW` 10/s)으로 팬(팝 없음). 시전자 KO면 마지막 위치에서 즉시 복귀, 경기 재시작은 즉시 해제
+- 띠는 화면 84% 높이(확대된 시전자 발밑 아래): 첫 캡처에서 30% 높이 띠가 시전자 머리·P 라벨을 가려 옮김(`test_banner_never_covers_the_zoomed_caster`). 확대 중 화면 밖 전투원의 충전 게이지는 `CameraRig.sees`로 숨김
+- reduce motion: 설정 UI가 아직 없어 `SettingsStore` `[accessibility] reduce_motion` 키만 읽는다(카메라 고정, 띠 페이드만). `MatchPresentation.restart()`마다 다시 읽는다. 설정 화면 토글은 후속(tasks)
 - 캐릭터 모션: `AnimMap.Anim`에 SLAM·RUSH·SPIN·CAST 추가(기존 인덱스 뒤에), SPECIAL 상태 → view `special` id별 클립. RUSH·SPIN은 반복
-- 트래킹: `SpecialTelemetry`(CombatTelemetry 안) — `gauge_full`(match_time_s), `special_used`(ms_since_full, 없으면 -1 / target_damage = 가장 가까운 생존 상대 %), `special_hit`은 발동 1회당 1번(첫 적중으로 열고 대상 링아웃 시 즉시 caused_ringout=true, 아니면 180틱 창 경과·다음 필살기·경기 종료 때 false)
+- 트래킹: `SpecialTelemetry`(CombatTelemetry 안) — `gauge_full`(match_time_s), `special_used`(ms_since_full, 없으면 -1 / target_damage = 가장 가까운 생존 상대 %), `special_hit`은 발동 1회당 1번(첫 적중으로 열고, 맞은 대상의 링아웃이 StockLoss 규칙으로 시전자에게 크레딧되면 즉시 caused_ringout=true, 아니면 180틱 창 경과·다음 필살기·경기 종료 때 false). 같은 틱은 sim이 타격 → 링아웃 순으로 내므로 사전 스캔 불필요(`test_sim_emits_a_tick_s_hits_before_its_ringouts`로 고정). ms_since_full은 KO로 보낸 틱을 뺀다. 이벤트 키가 빠지면 push_warning 후 무시. `target_slot` 필수 속성
 - 슬롯 요약: `specials`(발동), `special_hits`(맞힌 대상 수) → `match_players.special_hits`는 새 마이그레이션 `0003_special_hits.sql`(사용자가 SQL Editor에서 0002 다음 실행해야 업로드 성공). `press_special` = 강+가드 동시 성립 횟수. `EventCatalog.SCHEMA_VERSION` 3 → 4
 - 캐릭터 모델은 아직 슬롯 고정(`CharacterCatalog.for_player`)이라 캡처의 외형은 캐릭터와 다를 수 있다 — T9에서 해결

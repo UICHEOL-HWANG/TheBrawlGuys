@@ -26,7 +26,7 @@ func setup(config: GameConfig) -> void:
 	_feel.setup(config, _camera)
 	_cutin = SpecialCutInDirector.new()
 	add_child(_cutin)
-	_cutin.setup(_camera, SpecialCutInDirector.reduce_motion_setting(SettingsStore.new()))
+	_cutin.setup(_camera, false, config)
 	_sfx = SfxDirector.new()
 	add_child(_sfx)
 	_sfx.setup(config)
@@ -43,7 +43,7 @@ func setup(config: GameConfig) -> void:
 ## A new match: calm feel, battle BGM from the top.
 func restart() -> void:
 	_feel.reset()
-	_cutin.reset()
+	_cutin.reset(SpecialCutInDirector.reduce_motion_setting(SettingsStore.new()))
 	_music.play_battle()
 
 
@@ -62,7 +62,7 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 	LocalHints.update(view, local_slot, _config, touch, _grab_hint)
 	_cutin.present(view, events, delta)
 	_camera.follow(CameraFraming.match_targets(view, _config), delta)
-	_gauges.update_from(view, _config, _camera.unproject)
+	_gauges.update_from(view, _config, _camera.unproject, _camera.sees)
 
 
 ## Ring-out splashes follow the arena being played (only real water splashes).

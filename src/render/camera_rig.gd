@@ -72,6 +72,14 @@ func set_shake_offset(offset: Vector3) -> void:
 	_shake_offset = offset
 
 
+## Whether a world point is in front of the camera and inside the viewport (a special cut-in
+## close shot leaves most of the arena out of frame).
+func sees(world: Vector3) -> bool:
+	if _camera.is_position_behind(world):
+		return false
+	return get_viewport().get_visible_rect().has_point(_camera.unproject_position(world))
+
+
 ## Screen position of a world point (HUD elements that follow fighters, context E10).
 func unproject(world: Vector3) -> Vector2:
 	return _camera.unproject_position(world)
