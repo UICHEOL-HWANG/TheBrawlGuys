@@ -44,14 +44,14 @@ func restore() -> bool:
 	if platform_kind == "web":
 		var query := web.read_query()
 		# Only our own redirect: a sign-in left a verifier before leaving the page.
-		var pending := not _store.peek_verifier().is_empty()
+		var pending := not web.peek_verifier().is_empty()
 		if pending and (query.has("code") or query.has("error")):
 			web.clean_url()
 			if query.has("error"):
-				_store.take_verifier()
+				web.take_verifier()
 				_fail(String(query["error"]))
 			else:
-				_exchange(String(query["code"]), _store.take_verifier())
+				_exchange(String(query["code"]), web.take_verifier())
 			return true
 	var stored := _store.load_session()
 	if stored == null:
@@ -80,8 +80,10 @@ func sign_in() -> void:
 		return
 	var verifier := Pkce.new_verifier()
 	if platform_kind == "web":
-		var target := _redirect_web if not _redirect_web.is_empty() else web.current_url()
-		_store.save_verifier(verifier)
+		# Come back to the page the player is on: the verifier lives in that origin's storage.
+		var here := web.current_url()
+		var target := here if not here.is_empty() else _redirect_web
+		web.save_verifier(verifier)
 		web.redirect(AuthUrls.authorize(_client.url(), PROVIDER, target, Pkce.challenge(verifier)))
 		return
 	var nonce := AuthUrls.new_state()

@@ -27,6 +27,18 @@ class FakeWeb extends WebCallback:
 	var query: Dictionary = {}
 	var redirected: String = ""
 	var cleaned: bool = false
+	var stored_verifier: String = ""
+
+	func save_verifier(verifier: String) -> void:
+		stored_verifier = verifier
+
+	func peek_verifier() -> String:
+		return stored_verifier
+
+	func take_verifier() -> String:
+		var v := stored_verifier
+		stored_verifier = ""
+		return v
 
 	func read_query() -> Dictionary:
 		return query
@@ -200,8 +212,10 @@ func test_mobile_is_not_supported() -> void:
 func test_web_sign_in_redirects_and_resumes() -> void:
 	platform("web")
 	_auth.sign_in()
-	assert_string_contains(_web.redirected, "redirect_to=https%3A%2F%2Fgame.example%2Fplay")
-	assert_ne(_store.peek_verifier(), "", "verifier survives the page reload")
+	# Back to the page the player is on (vercel.app or the custom domain), not a fixed origin:
+	# the verifier lives in that origin's browser storage.
+	assert_string_contains(_web.redirected, "redirect_to=https%3A%2F%2Fgame.example%2F&")
+	assert_ne(_web.peek_verifier(), "", "verifier survives the page reload in browser storage")
 	_web.query = {"code": "web-code"}
 	assert_true(_auth.restore())
 	assert_true(_web.cleaned, "the code is removed from the address bar")
@@ -212,12 +226,12 @@ func test_web_sign_in_redirects_and_resumes() -> void:
 
 func test_web_callback_error_is_reported() -> void:
 	platform("web")
-	_store.save_verifier("v")
+	_web.save_verifier("v")
 	_web.query = {"error": "access_denied"}
 	assert_true(_auth.restore())
 	assert_eq(_signals, [["failed", "access_denied"]])
 	assert_true(_web.cleaned)
-	assert_eq(_store.peek_verifier(), "", "the attempt is over")
+	assert_eq(_web.peek_verifier(), "", "the attempt is over")
 
 
 func test_web_query_without_our_sign_in_is_ignored() -> void:
