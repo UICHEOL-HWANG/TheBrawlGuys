@@ -63,3 +63,41 @@ func test_in_memory_counter_writes_nothing() -> void:
 	var counter := MatchCounter.new("")
 	assert_eq(counter.next("u"), 1)
 	assert_eq(counter.next("u"), 2)
+
+
+static func _base_setup() -> Dictionary:
+	return {"match_id": "m-1", "mode": "bot", "arena": "classic", "seed": 7, "local_slot": 0,
+		"started_at": "2026-09-30T12:00:00Z", "slots": [
+			{"slot": 0, "is_bot": false, "character": "Knight", "style": "default", "input_device": "keyboard"},
+			{"slot": 1, "is_bot": true, "character": "Barbarian", "style": "default", "input_device": "bot"}]}
+
+
+static func _end_view() -> Dictionary:
+	var fighters: Array = []
+	for id: int in 2:
+		fighters.append({"id": id, "spawn_id": 0, "pos": Vector3.ZERO, "state": 0, "on_ground": true,
+			"damage": 0.0, "stocks": 3, "attack_kind": 0, "attack_ticks": 0})
+	return {"tick": 60, "arena_radius": 10.0, "match_over": false, "winner": -1, "fighters": fighters}
+
+
+func test_match_row_carries_the_reproducibility_header() -> void:
+	var t := MatchTelemetry.new(func(_n: String, _p: Dictionary) -> void: pass)
+	var setup := _base_setup()
+	setup.merge({"config_fingerprint": 123, "sim_version": World.SNAPSHOT_VERSION, "event_schema_version": 2,
+		"session_id": 1_700_000_000_000, "user_match_seq": 3, "config_variant": "control"})
+	setup["slots"][1].merge({"controller": "bot", "bot_difficulty": "normal", "bot_params_hash": 77})
+	t.begin(setup)
+	t.end(_end_view(), false, 987654321)
+	var m := t.match_row()
+	assert_eq(m["config_fingerprint"], 123)
+	assert_eq(m["sim_version"], World.SNAPSHOT_VERSION)
+	assert_eq(m["event_schema_version"], 2)
+	assert_eq(m["final_state_hash"], 987654321)
+	assert_eq(m["session_id"], 1_700_000_000_000)
+	assert_eq(m["user_match_seq"], 3)
+	assert_eq(m["config_variant"], "control")
+	var bot: Dictionary = t.player_rows()[1]
+	assert_eq(bot["controller"], "bot")
+	assert_eq(bot["bot_difficulty"], "normal")
+	assert_eq(bot["bot_params_hash"], 77)
+	assert_eq(t.player_rows()[0]["controller"], "local", "derived from is_bot when the setup has none")

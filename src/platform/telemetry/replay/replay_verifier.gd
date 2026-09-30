@@ -26,7 +26,8 @@ static func verify(export: Dictionary, config: GameConfig) -> Dictionary:
 	if export.get("format") != MatchExport.FORMAT or not _has_header(header):
 		return result
 	var log := InputLog.from_rows(export.get("inputs", []) if export.get("inputs") is Array else [])
-	if log == null or log.slot_count() != int(header["player_count"]) or log.frame_count() == 0:
+	if log == null or log.slot_count() != int(header["player_count"]) or log.frame_count() == 0 \
+			or (header.get("duration_ticks") != null and int(header["duration_ticks"]) != log.frame_count()):
 		result["reason"] = REASON_INPUTS
 	elif int(header["sim_version"]) != World.SNAPSHOT_VERSION:
 		result["reason"] = REASON_SIM_VERSION

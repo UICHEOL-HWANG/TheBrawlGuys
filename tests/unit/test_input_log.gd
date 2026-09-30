@@ -29,6 +29,17 @@ func test_codec_is_exact_for_every_quantized_axis_value() -> void:
 		assert_eq(InputCodec.unpack(InputCodec.pack(f)).move_x, f.move_x, "axis step %d" % k)
 
 
+func test_varint_round_trips_small_and_large_values() -> void:
+	var buf := StreamPeerBuffer.new()
+	for v: int in [0, 1, 127, 128, 300, 65_535, 4_294_967_295]:
+		VarInt.put(buf, v)
+	assert_eq(buf.get_size(), 1 + 1 + 1 + 2 + 2 + 3 + 5, "7 bits per byte")
+	buf.seek(0)
+	for v: int in [0, 1, 127, 128, 300, 65_535, 4_294_967_295]:
+		assert_eq(VarInt.take(buf), v)
+	assert_eq(VarInt.take(buf), -1, "reading past the end fails")
+
+
 func test_track_stores_only_changes() -> void:
 	var track := InputTrack.new()
 	for t: int in 100:
@@ -56,6 +67,17 @@ func test_corrupt_bytes_are_rejected() -> void:
 	bytes[0] = 0
 	assert_null(InputTrack.from_bytes(bytes), "bad magic")
 	assert_null(InputTrack.from_bytes(PackedByteArray([1, 2, 3])), "too short")
+	var huge := StreamPeerBuffer.new()
+	huge.put_data(InputTrack.MAGIC.to_ascii_buffer())
+	huge.put_u8(InputTrack.FORMAT_VERSION)
+	VarInt.put(huge, InputTrack.MAX_FRAMES + 1)
+	VarInt.put(huge, 1)
+	VarInt.put(huge, 0)
+	huge.put_data(PackedByteArray([127, 127, 0]))
+	assert_null(InputTrack.from_bytes(huge.data_array), "frame count beyond the guard")
+	var bad_axis := track.to_bytes()
+	bad_axis[bad_axis.size() - 3] = 255
+	assert_null(InputTrack.from_bytes(bad_axis), "axis byte outside -127..127")
 	assert_eq(InputBlob.decode("not base64 at all!").size(), 0, "not a blob")
 
 
@@ -110,3 +132,26 @@ func _recorded_log() -> InputLog:
 		var inputs: Array[InputFrame] = [_frame(t, 0), _frame(t, 1)]
 		log.record(inputs)
 	return log
+
+
+func test_inputs_fed_per_tick_become_match_inputs_rows() -> void:
+	var t := MatchTelemetry.new(func(_n: String, _p: Dictionary) -> void: pass)
+	var slots: Array = []
+	var fighters: Array = []
+	for id: int in 2:
+		slots.append({"slot": id, "is_bot": id == 1, "character": "Knight", "style": "", "input_device": "bot"})
+		fighters.append({"id": id, "spawn_id": 0, "pos": Vector3.ZERO, "state": 0, "on_ground": true,
+			"damage": 0.0, "stocks": 3, "attack_kind": 0, "attack_ticks": 0})
+	t.begin({"match_id": "m-1", "mode": "bot", "arena": "classic", "seed": 1, "started_at": "x", "slots": slots})
+	var view := {"tick": 0, "arena_radius": 10.0, "match_over": false, "winner": -1, "fighters": fighters}
+	for tick: int in range(1, 11):
+		var inputs: Array[InputFrame] = [InputFrame.make(1.0 if tick > 5 else 0.0, 0.0), InputFrame.neutral()]
+		t.on_frame([], [], view.merged({"tick": tick}, true), inputs)
+	t.end(view, true)
+	var rows := t.input_rows()
+	assert_eq(rows.size(), 2)
+	assert_eq(rows[0]["frame_count"], 10)
+	assert_eq(rows[0]["match_id"], "m-1")
+	var log := InputLog.from_rows(rows)
+	assert_eq(log.track(0).run_count(), 2)
+	assert_eq(log.track(1).run_count(), 1)

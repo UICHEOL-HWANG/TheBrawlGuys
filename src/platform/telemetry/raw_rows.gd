@@ -9,8 +9,10 @@ const ACTOR_KEYS: Array[String] = ["attacker", "fighter"]
 const TARGET_KEYS: Array[String] = ["target", "victim"]
 ## Reproducibility header copied from the setup onto the matches row (null when absent).
 const HEADER_KEYS: Array[String] = [
-	"config_fingerprint", "sim_version", "event_schema_version", "session_id", "user_match_seq", "config_variant",
+	"config_fingerprint", "sim_version", "event_schema_version", "session_id", "user_match_seq",
 ]
+## matches.config_variant is NOT NULL: setups without an experiment are the control group.
+const VARIANT_DEFAULT := "control"
 
 
 static func event_row(match_id: String, tick: int, e: Dictionary) -> Dictionary:
@@ -42,6 +44,7 @@ static func match_row(setup: Dictionary, duration_ticks: int, winner_slot: Varia
 	}
 	for key: String in HEADER_KEYS:
 		row[key] = setup.get(key)
+	row["config_variant"] = setup.get("config_variant", VARIANT_DEFAULT)
 	return row
 
 

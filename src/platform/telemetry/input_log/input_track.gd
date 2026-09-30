@@ -1,14 +1,19 @@
 class_name InputTrack
 extends RefCounted
 ## One slot's per-tick inputs, run-length encoded (platform A7): only the ticks where the packed
-## frame changes are kept. Binary form (little endian): "BGIL", u8 FORMAT_VERSION, u32 frame count,
-## u32 run count, then per run u32 start tick + 3 code bytes (InputCodec).
+## frame changes are kept. Binary form: "BGIL", u8 FORMAT_VERSION, varint frame count, varint run
+## count, one varint start-tick delta per run, then the runs' code bytes plane by plane (all move_x
+## bytes, all move_z bytes, all button bytes; InputCodec). Planes and small deltas gzip well.
 
 const MAGIC := "BGIL"
 const FORMAT_VERSION := 1
-const HEADER_BYTES := 13
-const RUN_BYTES := 7
+## Magic, version and two one-byte varints: the shortest (empty) track.
+const HEADER_BYTES := 7
 const CODE_BYTES := 3
+## Decoder guard: about 77 hours at 60 Hz, far beyond any match.
+const MAX_FRAMES := 1 << 24
+const MAX_AXIS_BYTE := 2 * InputCodec.AXIS_OFFSET
+const MAX_BUTTONS := (InputCodec.GRAB << 1) - 1
 
 var _frame_count: int = 0
 var _starts := PackedInt32Array()
@@ -56,12 +61,13 @@ func to_bytes() -> PackedByteArray:
 	var buf := StreamPeerBuffer.new()
 	buf.put_data(MAGIC.to_ascii_buffer())
 	buf.put_u8(FORMAT_VERSION)
-	buf.put_u32(_frame_count)
-	buf.put_u32(_codes.size())
+	VarInt.put(buf, _frame_count)
+	VarInt.put(buf, _codes.size())
 	for r: int in _codes.size():
-		buf.put_u32(_starts[r])
-		for i: int in CODE_BYTES:
-			buf.put_u8((_codes[r] >> (8 * i)) & InputCodec.BYTE_MASK)
+		VarInt.put(buf, _starts[r] - (_starts[r - 1] if r > 0 else 0))
+	for plane: int in CODE_BYTES:
+		for code: int in _codes:
+			buf.put_u8((code >> (8 * plane)) & InputCodec.BYTE_MASK)
 	return buf.data_array
 
 
@@ -74,18 +80,42 @@ static func from_bytes(bytes: PackedByteArray) -> InputTrack:
 	buf.seek(MAGIC.length())
 	if buf.get_u8() != FORMAT_VERSION:
 		return null
-	var frames := buf.get_u32()
-	var runs := buf.get_u32()
-	if bytes.size() != HEADER_BYTES + runs * RUN_BYTES or (runs == 0) != (frames == 0):
+	var frames := VarInt.take(buf)
+	var runs := VarInt.take(buf)
+	if frames < 0 or runs < 0 or frames > MAX_FRAMES or (runs == 0) != (frames == 0) or runs > frames:
 		return null
 	var track := InputTrack.new()
-	for r: int in runs:
-		var start := buf.get_u32()
-		var code := buf.get_u8() | (buf.get_u8() << 8) | (buf.get_u8() << 16)
-		var expected_first := r > 0 or start == 0
-		if not expected_first or start >= frames or (r > 0 and start <= track._starts[r - 1]):
-			return null
-		track._starts.append(start)
-		track._codes.append(code)
+	if not track._read_starts(buf, runs, frames) or buf.get_available_bytes() != runs * CODE_BYTES:
+		return null
+	track._codes.resize(runs)
+	for plane: int in CODE_BYTES:
+		var limit := MAX_BUTTONS if plane == CODE_BYTES - 1 else MAX_AXIS_BYTE
+		for r: int in runs:
+			var b := buf.get_u8()
+			if b > limit:
+				return null
+			track._codes[r] |= b << (8 * plane)
 	track._frame_count = frames
-	return track
+	return track if track._is_canonical() else null
+
+
+## Adjacent runs must differ (the encoder never writes a run that repeats the previous code).
+func _is_canonical() -> bool:
+	for r: int in range(1, _codes.size()):
+		if _codes[r] == _codes[r - 1]:
+			return false
+	return true
+
+
+## Run starts from varint deltas: the first run starts at tick 0, later ones strictly after.
+func _read_starts(buf: StreamPeerBuffer, runs: int, frames: int) -> bool:
+	var tick := 0
+	for r: int in runs:
+		var delta := VarInt.take(buf)
+		if delta < 0 or (r == 0) != (delta == 0):
+			return false
+		tick += delta
+		if tick >= frames:
+			return false
+		_starts.append(tick)
+	return true

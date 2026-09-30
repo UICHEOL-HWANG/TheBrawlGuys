@@ -4,8 +4,10 @@ extends RefCounted
 ## World's final state hash. Returns {"world": World, "telemetry": MatchTelemetry, "sent": Array}.
 
 
-static func play(arena_id: String, players: int, seed: int, max_ticks: int) -> Dictionary:
-	var config := GameConfig.new()
+## config: the sim tuning (default GameConfig.new()).
+static func play(arena_id: String, players: int, seed: int, max_ticks: int, config: GameConfig = null) -> Dictionary:
+	if config == null:
+		config = GameConfig.new()
 	var setup := MatchSetup.all_bots(players, seed)
 	setup.arena_id = arena_id
 	var world := World.new(config, seed, players, setup.build_arena(config))
