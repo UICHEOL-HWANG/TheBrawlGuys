@@ -10,6 +10,7 @@ run/main_scene="res://src/app/app.tscn"
 [autoload]
 
 Analytics="*res://src/platform/analytics/analytics.gd"
+UiScaler="*res://src/app/ui_scaler.gd"
 
 [debug]
 

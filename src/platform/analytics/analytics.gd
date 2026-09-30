@@ -17,6 +17,9 @@ func _ready() -> void:
 	_client = AnalyticsClient.new(secrets.amplitude_api_key, DeviceId.load_or_create(),
 			GodotHttpTransport.new(self), BatchQueue.new())
 	_client.context = PlatformEnv.amplitude_context()
+	var screen := UiScale.tracking(DisplayProbe.profile())  # UiScaler keeps these current later
+	for key: String in screen:
+		_client.set_super_property(key, screen[key])
 	track("app_opened")
 	_client.flush()
 
