@@ -68,6 +68,27 @@ func test_held_bat_shows_with_use_dots() -> void:
 	assert_false(v.held_visible())
 
 
+func test_carried_item_rides_on_the_hand_slot() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	var c := GameConfig.new()
+	v.setup(0, c)
+	assert_not_null(v.model(), "the KayKit model loads in tests")
+	var held := v.held_item()
+	assert_true(held.get_parent() is BoneAttachment3D, "parented to the hand bone")
+	assert_eq((held.get_parent() as BoneAttachment3D).bone_name, CharacterModel.HAND_BONE)
+	var world_scale := held.global_transform.basis.get_scale().x
+	assert_almost_eq(world_scale, HeldItem.HELD_SCALE, 0.05, "the model's fit scale is undone")
+	var bat := _fighter_view_data(Item.Kind.BAT, 1)
+	v.apply(bat, bat, 1.0, 0)
+	assert_true(held.model() is BatModel)
+	assert_eq((held.model() as BatModel).cracks_shown(), BatModel.MAX_CRACKS, "last swing: fully cracked")
+	assert_eq(held.model().transform, BatModel.HOLD, "gripped at the tape")
+	var bomb := _fighter_view_data(Item.Kind.BOMB, 1)
+	v.apply(bomb, bomb, 1.0, 1)
+	assert_true(held.model() is BombModel, "a new kind swaps the model")
+
+
 func test_guard_bubble_follows_the_guard_state() -> void:
 	var v := FighterView.new()
 	add_child_autofree(v)

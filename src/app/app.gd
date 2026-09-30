@@ -2,9 +2,9 @@ class_name App
 extends Node
 ## App shell and main scene (platform B1, PRD §6.5, design.md DS-LAY-03): the menu backdrop keeps
 ## brawling behind a screen stack — login (skipped when a stored session is restored) → title →
-## match — and the app owns the login gate. Entering a match swaps the backdrop out under the
-## curtain; 메뉴로 on the result banner brings it back. Character and arena select come later:
-## they will fill the MatchSetup that mode select starts today.
+## select screens (SELECT_STEPS: arena, Phase 5 adds character) → match — and the app owns the
+## login gate. Each select screen fills the MatchSetup that mode select starts. Entering a match
+## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
 const MATCH_SCENE := preload("res://src/main/main.tscn")
@@ -12,6 +12,9 @@ const UI_LAYER := 10
 const LOGIN := "login"
 const TITLE := "title"
 const MATCH := "match"
+const ARENA := "arena"
+## Select screens between mode select and the match, in order (Phase 5 adds "character" first).
+const SELECT_STEPS: Array[String] = [ARENA]
 
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
@@ -113,6 +116,31 @@ func _on_mode_chosen(mode: String) -> void:
 		return  # 로컬 2인 · 온라인: shown disabled until Phase 5/6
 	var setup := MatchSetup.vs_bots()
 	setup.mode = mode
+	_select_step(setup, 0)
+
+
+## Runs the select screens (SELECT_STEPS) in order, each filling setup, then starts the match.
+func _select_step(setup: MatchSetup, step: int) -> void:
+	if step >= SELECT_STEPS.size():
+		_start_match(setup)
+		return
+	var id := SELECT_STEPS[step]
+	_router.push(id, _select_screen(id, setup, _select_step.bind(setup, step + 1)))
+
+
+## The select screen for a step; `next` continues the flow once it has filled setup.
+func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Control:
+	assert(step_id == ARENA, "App: no select screen for step '%s'" % step_id)
+	var screen := ArenaSelectScreen.new()
+	screen.track = track
+	screen.arena_chosen.connect(func(arena_id: String) -> void:
+		setup.arena_id = arena_id
+		next.call())
+	screen.cancelled.connect(func() -> void: _router.pop())
+	return screen
+
+
+func _start_match(setup: MatchSetup) -> void:
 	var match_scene := MATCH_SCENE.instantiate()
 	match_scene.set("setup", setup)
 	match_scene.set("menu_available", true)
@@ -121,7 +149,7 @@ func _on_mode_chosen(mode: String) -> void:
 
 
 func _back_to_title() -> void:
-	_router.pop(true, _attach_backdrop)
+	_router.pop_to(TITLE, true, _attach_backdrop)
 
 
 func _on_logout() -> void:

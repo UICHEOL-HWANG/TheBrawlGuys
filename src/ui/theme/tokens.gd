@@ -18,6 +18,30 @@ const BARK := Color("#6C5A66")
 const DIRT := Color("#8A6B55")
 const SKY := Color("#C4E8F6")
 
+# --- Arena theme variants (DS-THM-02): 3D environment only, the UI never uses them ---
+## Log bridge: bright noon, pale sky.
+const SKY_PALE := Color("#DDF1F8")
+## Mushroom forest: late-afternoon gold (DS-TOK-01 B-plan values), desaturated floor.
+const GRASS_DUSK := Color("#98B25C")
+const GRASS_GOLD := Color("#BFD35A")
+const CANOPY_GOLD := Color("#3E8A6A")
+const SUN_GOLD := Color("#FFD89A")
+const SKY_GOLD := Color("#F4E3B5")
+## Foggy forest: cold early morning, gray-green floor, mist.
+const GRASS_MIST := Color("#9CB79A")
+const GRASS_MIST_DEEP := Color("#7E9C80")
+const CANOPY_MIST := Color("#4E7F78")
+const SUN_COOL := Color("#E6F2F7")
+const FOG_MIST := Color("#DCEBEF")
+## Fog veil sheets over the arena while the fog is in (fog_mist 55%).
+const FOG_VEIL := Color("#DCEBEF8C")
+
+# --- Hazard marking (DS-VIS-04) ---
+## Campfire burn radius glowing on the ground (fire 40%).
+const FIRE_RING := Color("#FF9A2E66")
+## Mushroom rebound hint ring (petal_yellow 50%).
+const BOUNCE_RING := Color("#F5D53D80")
+
 # --- Accents ---
 const PETAL_PINK := Color("#F27DB6")
 const PETAL_BLUE := Color("#3E6FE3")
@@ -129,6 +153,13 @@ const LOGIN_CARD_WIDTH := 560
 const RADIUS_XL := 40
 ## Letter spacing of spaced-out taglines.
 const TRACKING_WIDE := 4
+## SelectCard (DS-CMP-08): card width, diorama thumbnail height, gimmick icon badge size.
+const CARD_WIDTH := 320
+const CARD_THUMB_HEIGHT := 200
+const CARD_ICON := 48
+## Focused / selected cards grow slightly (with the focus / selection ring).
+const CARD_FOCUS_SCALE := 1.04
+const CARD_SELECTED_SCALE := 1.07
 
 # --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
 ## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).

@@ -3,7 +3,9 @@ extends Node3D
 ## Orbit diorama behind every menu screen (platform B2, design.md DS-LAY-03): the match's
 ## MatchStage (sun, arena, decor, fighters, items) drawn from a BackdropMatch of four bots, a low
 ## 3/4 OrbitCamera and the menu BGM, softened by sage-gray depth fog and the MenuHaze overlay so
-## it reads as a calm background. No HUD, no player rings or labels, no hit SFX, no telemetry.
+## it reads as a calm background (the haze fog is held over each arena theme). Every restart moves
+## to the next arena (BackdropMatch.ARENA_CYCLE). No HUD, no player rings or labels, no hit SFX,
+## no telemetry.
 ## Leaving the tree (entering a match) pauses it; re-entering resumes it.
 
 const CONFIG_PATH := "res://src/config/default_config.tres"
@@ -29,7 +31,7 @@ func _ready() -> void:
 	add_child(_stage)
 	_stage.setup(_config, SEED, BackdropMatch.PLAYERS)
 	_stage.set_identity_visible(false)
-	_add_fog(_stage.environment_rig().environment())
+	_stage.environment_rig().hold_fog(DS.HAZE, _config.menu_fog_density)
 	_match = BackdropMatch.new(_config, SEED)
 	_camera = OrbitCamera.new()
 	add_child(_camera)
@@ -55,8 +57,9 @@ func _exit_tree() -> void:
 
 func _process(delta: float) -> void:
 	var events := _match.advance(delta)
+	_stage.set_arena(_match.arena_id())  # no-op until a restart moves to the next arena
 	_stage.draw(_match.prev_state, _match.curr_state, _match.alpha(), delta)
-	_stage.wobble_guards(events)
+	_stage.on_events(events)
 	_camera.follow(_match.fight_center(_config.arena_radius * _config.menu_orbit_arena_share))
 	_camera.advance(delta)
 
@@ -97,11 +100,3 @@ func _resume() -> void:
 	_camera.make_current()
 	_music.play_menu()
 	_menu_music = true
-
-
-## Depth fog in the haze color: far decor melts into the sky, the close fight stays crisp.
-func _add_fog(env: Environment) -> void:
-	env.fog_enabled = true
-	env.fog_light_color = DS.HAZE
-	env.fog_density = _config.menu_fog_density
-	env.fog_sky_affect = 1.0

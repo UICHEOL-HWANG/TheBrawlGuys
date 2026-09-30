@@ -1,36 +1,56 @@
 class_name MatchStage
 extends Node3D
-## The world a match is drawn in (platform B1/B2): sun and sky, arena, decor, one FighterView per
-## slot and the item layer, drawn from interpolated sim views. Shared by the match scene and the
-## menu backdrop so both look the same; cameras, HUD, feel and sound stay with their owners.
+## The world a match is drawn in (platform B1/B2, Phase 4 T6): the sun and sky in the arena's
+## theme (DS-THM-02), the arena with its gimmick views, the decor around it, one FighterView plus
+## its FighterHazards (burning, fog silhouette) per slot and the item layer, drawn from
+## interpolated sim views. Shared by the match scene and the menu backdrop so both look the same;
+## cameras, HUD, feel and sound stay with their owners.
+
+signal arena_changed(arena_id: String)
 
 var _config: GameConfig
 var _env: EnvironmentRig
+var _arena_view: ArenaView
+var _decor: DecorView
+var _decor_seed: int = 0
 var _views: Array[FighterView] = []
+var _hazards: Array[FighterHazards] = []
 var _items: ItemLayer
 
 
-func setup(config: GameConfig, decor_seed: int, player_count: int) -> void:
+func setup(config: GameConfig, decor_seed: int, player_count: int,
+		arena_id: String = ArenaCatalog.DEFAULT_ID) -> void:
 	_config = config
+	_decor_seed = decor_seed
 	_env = EnvironmentRig.new()
 	add_child(_env)
 	_env.setup()
-	var arena := ArenaView.new()
-	add_child(arena)
-	arena.setup(config)
-	var decor := DecorView.new()
-	add_child(decor)
-	decor.setup(config, decor_seed)
+	_build_arena(arena_id)
 	for i: int in player_count:
 		var view := FighterView.new()
 		add_child(view)
 		view.setup(i, config)
 		_views.append(view)
+		var hazards := FighterHazards.new()
+		add_child(hazards)
+		hazards.setup(i, config)
+		_hazards.append(hazards)
 	_items = ItemLayer.new()
 	add_child(_items)
 	_items.setup(config)
 	apply_quality()
 	config.changed.connect(apply_quality)
+
+
+## Swaps in another arena (menu backdrop cycling): arena view, decor and theme.
+func set_arena(arena_id: String) -> void:
+	if _arena_view != null and _arena_view.arena_id() == arena_id:
+		return
+	for old: Node in [_arena_view, _decor]:
+		remove_child(old)
+		old.queue_free()
+	_build_arena(arena_id)
+	arena_changed.emit(arena_id)
 
 
 func apply_quality() -> void:
@@ -41,33 +61,45 @@ func apply_quality() -> void:
 		v.set_blob_shadow(blobs)
 
 
-## Fighters and items between the previous and current tick (render interpolation contract).
+## Fighters, items and the arena between the previous and current tick (render interpolation).
 func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> void:
 	var before_all: Array = prev["fighters"]
 	var now_all: Array = curr["fighters"]
 	var tick := int(curr["tick"])
+	_arena_view.sync(curr, tick, delta)
+	var fog := _arena_view.fog_amount()
+	_env.set_fog_boost(fog)
 	for i: int in mini(_views.size(), now_all.size()):
 		var before: Dictionary = before_all[i] if i < before_all.size() else {}
 		_views[i].apply(before, now_all[i], alpha, tick)
 		_views[i].animate(now_all[i], delta)
+		_hazards[i].apply(now_all[i], _views[i].position, fog)
 	_items.sync(prev["items"], curr["items"], alpha, tick)
 
 
-func wobble_guards(events: Array) -> void:
+## This frame's sim events: guard wobbles and arena reactions (mushroom squash).
+func on_events(events: Array) -> void:
 	for e: Dictionary in events:
 		if String(e["type"]) == "guard_hit":
 			var id := int(e["target"])
 			if id < _views.size():
 				_views[id].wobble()
+	_arena_view.on_events(events)
 
 
 func set_identity_visible(on: bool) -> void:
 	for v: FighterView in _views:
 		v.set_identity_visible(on)
+	for h: FighterHazards in _hazards:
+		h.set_identity_visible(on)
 
 
 func views() -> Array[FighterView]:
 	return _views
+
+
+func hazards() -> Array[FighterHazards]:
+	return _hazards
 
 
 func clear_items() -> void:
@@ -80,3 +112,21 @@ func item_layer() -> ItemLayer:
 
 func environment_rig() -> EnvironmentRig:
 	return _env
+
+
+func arena_view() -> ArenaView:
+	return _arena_view
+
+
+func decor() -> DecorView:
+	return _decor
+
+
+func _build_arena(arena_id: String) -> void:
+	_arena_view = ArenaView.new()
+	add_child(_arena_view)
+	_arena_view.setup(_config, arena_id)
+	_env.apply_theme(_arena_view.theme())
+	_decor = DecorView.new()
+	add_child(_decor)
+	_decor.setup(_config, _decor_seed, _arena_view.arena().copy(), _arena_view.theme())

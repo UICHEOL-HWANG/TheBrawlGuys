@@ -6,6 +6,9 @@ extends RefCounted
 
 const PLAYERS := 4
 const RESTART_DELAY_S := 2.0
+## Each restart moves to the next arena (Phase 4): the menus show every stage over time.
+const ARENA_CYCLE: Array[String] = [ArenaCatalog.DEFAULT_ID, "lakeside_camp", "mushroom_forest",
+		"log_bridge", "foggy_forest"]
 
 var world: World
 var prev_state: Dictionary = {}
@@ -68,8 +71,18 @@ func matches_started() -> int:
 	return _matches
 
 
+## Arena of the match_index-th backdrop match (0-based).
+static func arena_for(match_index: int) -> String:
+	return ARENA_CYCLE[posmod(match_index, ARENA_CYCLE.size())]
+
+
+func arena_id() -> String:
+	return _setup.arena_id
+
+
 func _start() -> void:
 	_setup = MatchSetup.all_bots(PLAYERS, _seed)
+	_setup.arena_id = arena_for(_matches)
 	world = World.new(_config, _setup.seed, PLAYERS, _setup.build_arena(_config))
 	_bots.clear()
 	for slot: int in _setup.bot_slots():

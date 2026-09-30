@@ -80,10 +80,16 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_true(title.mode_button(MatchSetup.MODE_ONLINE).disabled)
 	title.mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
+	assert_eq(app.router().current_id(), App.ARENA, "bot match: pick an arena first")
+	var arenas := app.router().current() as ArenaSelectScreen
+	await wait_process_frames(1)
+	arenas.cards()[2].press()
+	assert_eq(_props("arena_selected")[0]["arena"], arenas.card_ids()[2])
 	assert_eq(app.router().current_id(), App.MATCH)
 	assert_false(app.backdrop().is_inside_tree(), "the backdrop stops during a match")
 	var match_scene := app.router().current()
 	assert_eq((match_scene.get("setup") as MatchSetup).mode, MatchSetup.MODE_BOT)
+	assert_eq((match_scene.get("setup") as MatchSetup).arena_id, arenas.card_ids()[2], "the match is on the chosen arena")
 	await wait_seconds(0.2)
 	var w: World = match_scene.call("get_world")
 	w.fighters[1].stocks = 1
@@ -101,6 +107,20 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_eq(app.router().current_id(), App.LOGIN)
 	assert_true(_names().has("logout"))
 	assert_eq(_props("login_viewed").back()["reason"], "logged_out")
+
+
+func test_backing_out_of_arena_select_returns_to_the_title() -> void:
+	var app := _app(false)
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
+	assert_eq(app.router().current_id(), App.ARENA)
+	var viewed := _props("screen_viewed").back() as Dictionary
+	assert_eq([viewed["screen"], viewed["from_screen"]], [App.ARENA, App.TITLE])
+	(app.router().current() as ArenaSelectScreen).back()
+	assert_eq(app.router().current_id(), App.TITLE)
+	assert_eq(_props("select_cancelled")[0]["screen"], App.ARENA)
+	assert_true(app.backdrop().is_inside_tree(), "the backdrop never left")
 
 
 func test_restored_session_skips_the_login_screen() -> void:

@@ -287,16 +287,16 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] `ArenaData` Resource: 판정 도형 목록, 링아웃 영역, 기믹 목록, 장식 씬 경로 `[PRD-ARCH-03]`
 - [ ] 기믹 시스템 (sim): 지속 대미지 영역, 파괴 가능 발판, 튕김 발판, 주기 이벤트
 - [ ] 호숫가 캠프장 `[PRD-ARENA-01]` · 통나무 다리 `[PRD-ARENA-02]` · 버섯 숲 `[PRD-ARENA-03]` · 안개 낀 숲 `[PRD-ARENA-04]`
-- [ ] 장식은 경기장 바깥 배치, 카메라 가림 검사 `[GD-CAM-01]`
-- [ ] 경기장 선택 화면 `[PRD-UI-02]`
+- [x] 장식은 경기장 바깥 배치, 카메라 가림 검사 `[GD-CAM-01]`
+- [x] 경기장 선택 화면 `[PRD-UI-02]`
 - [ ] 트래킹: `arena_selected`, `gimmick_triggered`·`gimmick_ringout`, `stock_lost`의 경기장 구역·원인, 원시 이벤트 `gimmick_damage`·`platform_break`·`bounce`·`fog_start`·`fog_end` → `match_events` `[PRD-DATA-03]` `[PRD-DATA-04]`
 
 ### 🎨 DS 트랙
 
-- [ ] `SelectCard` (썸네일 · 이름 · 기믹 아이콘, 선택/포커스 상태) `[DS-CMP-08]`
-- [ ] 경기장별 테마 변형: 기본 토큰 위에 조명·안개·바닥 색 오버라이드 (`ArenaData.theme`) `[DS-THM-02]`
-- [ ] 기믹 위험 표시 규칙 (화상 영역, 부서질 발판 균열, 버섯 반발 표시) `[DS-VIS-04]`
-- [ ] 안개 연출 — 자기 캐릭터·상대 실루엣은 안개 위로 보이게 `[DS-VIS-03]`
+- [x] `SelectCard` (썸네일 · 이름 · 기믹 아이콘, 선택/포커스 상태) `[DS-CMP-08]`
+- [x] 경기장별 테마 변형: 기본 토큰 위에 조명·안개·바닥 색 오버라이드 (`ArenaData.theme`) `[DS-THM-02]`
+- [x] 기믹 위험 표시 규칙 (화상 영역, 부서질 발판 균열, 버섯 반발 표시) `[DS-VIS-04]`
+- [x] 안개 연출 — 자기 캐릭터·상대 실루엣은 안개 위로 보이게 `[DS-VIS-03]`
 - [x] `KeyHintBar` 대전 하단 키 안내 바 — 누른 키가 플레이어 색으로 켜짐, 칩·F2로 숨기기/보이기(설정 저장·`settings_changed`), 터치일 때 자동 숨김, 갤러리 등록 `[DS-CMP-16]` `[PRD-CTL-02]` `[DS-LAY-02]` — `evidence/key-hint-{lit,hidden}-{720,1080}.png`
 
 ### 테스트

@@ -40,7 +40,7 @@ func on_events(events: Array) -> void:
 				at.y = maxf(at.y, DecorView.GROUND_Y)  # a fighter out at kill_y is far below the ground plane
 				var burst := RingoutBurst.new()
 				add_child(burst)
-				burst.play(at, DecorView.is_over_lake(at, _config.arena_radius), PlayerStyle.color(int(e["id"])),
+				burst.play(at, DecorView.is_water_ringout(e, _config.arena_radius), PlayerStyle.color(int(e["id"])),
 						Quality.particle_scale(_config))
 				if _camera != null:
 					_camera.punch(1.0)
