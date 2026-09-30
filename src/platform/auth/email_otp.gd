@@ -1,0 +1,176 @@
+class_name EmailOtp
+extends RefCounted
+## Passwordless email sign-in (platform B6, PRD-AUTH-01): Supabase mails a 6-digit code, the
+## player types it in the game and gets a session; the account is created on first use. No
+## redirect, so it works on desktop, web and mobile alike. Checks the address and the code before
+## any request, keeps a resend cooldown for the last address, and maps HTTP outcomes to RESULT_*
+## the login card explains. Analytics never carry the address or the code (tracking-plan T4).
+## Callbacks: done(result: String). Supabase's "Magic Link" and "Confirm signup" mail templates
+## must contain {{ .Token }}, or the mail holds only a link and no code (platform-context B6).
+
+const PROVIDER := "email"
+const CODE_LENGTH := 6
+const RESEND_COOLDOWN_S := 60
+const MAX_EMAIL_LENGTH := 254
+const RESULT_OK := "ok"
+const RESULT_RATE_LIMITED := "rate_limited"
+const RESULT_INVALID_EMAIL := "invalid_email"
+const RESULT_INVALID_CODE := "invalid_code"
+const RESULT_WRONG_CODE := "wrong_code"
+const RESULT_ERROR := "error"
+## A request is already out: nothing sent, nothing tracked.
+const RESULT_BUSY := "busy"
+const HTTP_TOO_MANY := 429
+## Statuses GoTrue answers for a bad address (send) or a wrong / expired code (verify).
+const SEND_REFUSED: Array[int] = [400, 422]
+const VERIFY_REFUSED: Array[int] = [400, 403, 422]
+## error_code values that really mean "this address is not valid" ("" = none given).
+const BAD_ADDRESS_ERRORS: Array[String] = ["", "validation_failed", "email_address_invalid"]
+## Refusals caused by project settings or built-in SMTP limits, not by what the player typed.
+const SETUP_ERRORS: Array[String] = [
+	"email_provider_disabled", "otp_disabled", "signup_disabled", "email_address_not_authorized",
+]
+const EMAIL_PATTERN := "\\A[^\\s@]+@[^\\s@.]+(\\.[^\\s@.]+)+\\z"
+const CODE_PATTERN := "\\A[0-9]{6}\\z"
+
+var clock_ms: Callable = Time.get_ticks_msec
+var platform_kind: String = ""
+
+var _client: SupabaseClient
+var _track: Callable
+## Last address asked for a code (cooldown) and the last one a code was really mailed to.
+var _sent_to: String = ""
+var _delivered_to: String = ""
+var _sent_ms: int = -1
+var _attempts: int = 0
+var _busy: bool = false
+
+
+func _init(client: SupabaseClient, track: Callable) -> void:
+	_client = client
+	_track = track
+
+
+static func normalize(email: String) -> String:
+	return email.strip_edges().to_lower()
+
+
+static func is_valid_email(email: String) -> bool:
+	var address := normalize(email)
+	return address.length() <= MAX_EMAIL_LENGTH and _matches(EMAIL_PATTERN, address)
+
+
+static func is_valid_code(code: String) -> bool:
+	return _matches(CODE_PATTERN, code)
+
+
+## Seconds before the last address may get another code (0 = now).
+func cooldown_left_s() -> int:
+	if _sent_ms < 0:
+		return 0
+	var left_ms := RESEND_COOLDOWN_S * 1000 - (int(clock_ms.call()) - _sent_ms)
+	return maxi(0, ceili(left_ms / 1000.0))
+
+
+## True when the last mailed code went to this address (it may still be waiting in the mailbox).
+func has_pending_code(email: String) -> bool:
+	return not _delivered_to.is_empty() and normalize(email) == _delivered_to
+
+
+func send(email: String, done: Callable) -> void:
+	if _busy:
+		done.call(RESULT_BUSY)
+		return
+	var address := normalize(email)
+	if not is_valid_email(address):
+		_requested(RESULT_INVALID_EMAIL, done)
+		return
+	var resend := address == _sent_to
+	if resend and cooldown_left_s() > 0:
+		_requested(RESULT_RATE_LIMITED, done)
+		return
+	if resend:
+		_track.call("email_code_resent", {})
+	else:
+		_track.call("login_started", {"provider": PROVIDER, "platform": platform_kind})
+	_busy = true
+	_client.send_email_otp(address, func(ok: bool, status: int, body: String) -> void:
+		_busy = false
+		var result := RESULT_OK if ok else _send_failure(status, body)
+		if ok or result == RESULT_RATE_LIMITED:
+			_sent_to = address
+			_sent_ms = int(clock_ms.call())
+		if ok:
+			_delivered_to = address
+			_attempts = 0
+		else:
+			_failed("send_" + result)
+		_requested(result, done))
+
+
+## RESULT_OK means the client now holds the session.
+func verify(email: String, code: String, done: Callable) -> void:
+	if _busy:
+		done.call(RESULT_BUSY)
+		return
+	var token := code.strip_edges()
+	if not is_valid_code(token):
+		done.call(RESULT_INVALID_CODE)
+		return
+	_busy = true
+	_attempts += 1
+	_client.verify_email_otp(normalize(email), token, func(ok: bool, status: int, body: String) -> void:
+		_busy = false
+		if ok:
+			_track.call("email_code_verified", {"attempts": _attempts})
+			done.call(RESULT_OK)
+			return
+		var result := _verify_failure(status, body)
+		_failed("verify_" + result)
+		done.call(result))
+
+
+func _requested(result: String, done: Callable) -> void:
+	_track.call("email_code_requested", {"result": result})
+	done.call(result)
+
+
+func _failed(reason: String) -> void:
+	_track.call("login_failed", {"provider": PROVIDER, "reason": reason})
+
+
+static func _send_failure(status: int, body: String) -> String:
+	if status == HTTP_TOO_MANY:
+		return RESULT_RATE_LIMITED
+	var error_code := _error_code(body)
+	if SEND_REFUSED.has(status) and BAD_ADDRESS_ERRORS.has(error_code):
+		return RESULT_INVALID_EMAIL
+	_warn_setup("send", status, error_code)
+	return RESULT_ERROR
+
+
+static func _verify_failure(status: int, body: String) -> String:
+	if status == HTTP_TOO_MANY:
+		return RESULT_RATE_LIMITED
+	var error_code := _error_code(body)
+	if VERIFY_REFUSED.has(status) and not SETUP_ERRORS.has(error_code):
+		return RESULT_WRONG_CODE
+	_warn_setup("verify", status, error_code)
+	return RESULT_ERROR
+
+
+static func _error_code(body: String) -> String:
+	var parsed: Variant = JsonSafe.parse(body)
+	return String((parsed as Dictionary).get("error_code", "")) if parsed is Dictionary else ""
+
+
+## 4xx that is not about the player's input: keys, provider, SMTP or captcha settings.
+static func _warn_setup(step: String, status: int, error_code: String) -> void:
+	if status >= 400 and status < 500:
+		push_warning("EmailOtp: %s refused (%d %s) - check the Supabase Email provider, keys and SMTP"
+				% [step, status, error_code])
+
+
+static func _matches(pattern: String, text: String) -> bool:
+	var re := RegEx.create_from_string(pattern)
+	return re.search(text) != null

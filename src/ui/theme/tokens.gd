@@ -175,6 +175,10 @@ const TOUCH_TARGET_BASE_MIN := 96.0
 const UI_SCALE_MAX := 3.0
 ## Rotate prompt (portrait on a touch device): icon size at 1920x1080.
 const ROTATE_ICON_SIZE := 160
+## Text field height (DS-CMP-17) and one digit box of the 6-digit code input (DS-CMP-18).
+const FIELD_HEIGHT := 72
+const CODE_BOX_WIDTH := 56
+const CODE_BOX_HEIGHT := 72
 
 # --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
 ## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).

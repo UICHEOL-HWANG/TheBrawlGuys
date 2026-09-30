@@ -1,9 +1,10 @@
 class_name LoginGate
 extends Node
-## The app shell's view of sign-in (platform B1, PRD-AUTH-01): wraps the AuthService when keys
-## are present, otherwise explains why sign-in is unavailable (mobile deep links not built yet,
-## missing secrets). Owns the login analytics AuthService cannot emit: failures of an unavailable
-## sign-in, login_skipped and logout without an account.
+## The app shell's view of sign-in (platform B1/B6, PRD-AUTH-01): wraps the AuthService when keys
+## are present, otherwise explains why sign-in is unavailable (Google: mobile deep links not built
+## yet; both: missing secrets). Email codes work wherever the keys are. Owns the login analytics
+## AuthService cannot emit: failures of an unavailable sign-in, login_skipped and logout without
+## an account.
 
 signal signed_in
 signal failed(reason: String)
@@ -71,9 +72,40 @@ func sign_in() -> void:
 	if reason.is_empty():
 		auth.sign_in()
 		return
-	track.call("login_started", {"provider": PROVIDER, "platform": platform_kind})
-	track.call("login_failed", {"provider": PROVIDER, "reason": reason})
+	_track_unavailable(PROVIDER, reason)
 	failed.emit(reason)
+
+
+## "" when email codes can be sent here (any platform with keys); otherwise why not.
+func email_availability() -> String:
+	return REASON_NOT_CONFIGURED if auth == null else ""
+
+
+## Seconds before the last address may get another code.
+func email_cooldown_s() -> int:
+	return auth.email.cooldown_left_s() if auth != null else 0
+
+
+## The last code went to this address (it may still be in the mailbox).
+func email_code_pending(address: String) -> bool:
+	return auth != null and auth.email.has_pending_code(address)
+
+
+## done(result: String): EmailOtp.RESULT_* or REASON_NOT_CONFIGURED. Never emits failed.
+func send_email_code(address: String, done: Callable) -> void:
+	if auth == null:
+		_track_unavailable(EmailOtp.PROVIDER, REASON_NOT_CONFIGURED)
+		done.call(REASON_NOT_CONFIGURED)
+		return
+	auth.send_email_code(address, done)
+
+
+## On RESULT_OK signed_in fires (before done), exactly as after Google.
+func verify_email_code(address: String, code: String, done: Callable) -> void:
+	if auth == null:
+		done.call(REASON_NOT_CONFIGURED)
+		return
+	auth.verify_email_code(address, code, done)
 
 
 func skip() -> void:
@@ -88,3 +120,8 @@ func sign_out() -> void:
 		track.call("logout", {})
 	_signing_out = false
 	signed_out.emit()
+
+
+func _track_unavailable(provider: String, reason: String) -> void:
+	track.call("login_started", {"provider": provider, "platform": platform_kind})
+	track.call("login_failed", {"provider": provider, "reason": reason})

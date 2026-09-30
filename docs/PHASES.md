@@ -246,6 +246,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] `EventCatalog`(이벤트 이름·필수 속성 스키마) + `Analytics` autoload (Amplitude HTTP API v2 배치, 오프라인 큐, 지수 백오프 재시도, 공통 속성) `[PRD-DATA-03]`
 - [ ] `SupabaseClient`: Auth·REST insert·토큰 자동 갱신 `[PRD-DATA-04]`
 - [ ] Google OAuth PKCE: 웹 리다이렉트 · 데스크톱 루프백, 세션 `user://session.cfg` 저장·자동 갱신 `[PRD-AUTH-01]`
+- [x] 이메일 6자리 인증코드 로그인 (Supabase OTP `/auth/v1/otp`·`/auth/v1/verify`, 모든 플랫폼, 60초 재전송 쿨다운, `email_code_*` 트래킹 — 이메일·코드는 보내지 않음). Supabase Email provider·Magic Link 템플릿 `{{ .Token }}`·커스텀 SMTP 설정은 사용자 대기 `[PRD-AUTH-01]` `[PRD-DATA-03]`
 - [ ] 마이그레이션 SQL `supabase/migrations/0001_match_telemetry.sql` (`profiles`·`matches`·`match_players`·`match_events`) + RLS 본인 행만 `[PRD-DATA-04]`
 - [ ] `MatchTelemetry` + `MatchRecorder`: 매 프레임 sim `events`·view 이벤트를 소비 → Amplitude 경기 요약·핵심 순간, Supabase 원시 로그 청크 insert `[PRD-DATA-03]` `[PRD-DATA-04]`
 
@@ -262,10 +263,12 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] 🖼 로그인 시안 3개 비교 (① 중앙 카드 스프링 팝 ② 좌측 세로 패널 슬라이드 + 우측 로고 ③ 로고가 먼저 떨어진 뒤 버튼 순차 등장) → `LoginPanel` 확정 `[DS-CMP-14]`
 - [ ] `MenuButton`, `Panel` 메뉴용 확정 `[DS-CMP-06]` `[DS-CMP-07]`
 - [ ] 신규 컴포넌트 DS 갤러리 등록 `[DS-GOV-02]`
+- [x] 로그인 카드 이메일 모드 ("이메일로 계속하기" ghost 버튼 → 이메일 단계 → 코드 단계) + `TextField` · `CodeInput` `[DS-CMP-14]` `[DS-CMP-17]` `[DS-CMP-18]`
 
 ### 테스트
 
 - 단위: `EventCatalog` 스키마(카탈로그 밖 이벤트·필수 속성 누락 → 실패), `Analytics` 배치·오프라인 큐(HTTP 모킹), PKCE 생성·콜백 파싱, 비밀키 로더
+- 단위: 이메일 코드 로그인 — 주소·코드 검사, 쿨다운, 결과 매핑, 세션 저장, 트래킹 속성에 이메일(`@`)·코드 없음 (HTTP 모킹)
 - 단위: `MatchTelemetry` — 고정 이벤트 시퀀스 → 기대 이벤트·요약값
 - 리플레이: GOLDEN/BEHAVIOR 해시 불변 (트래킹이 sim을 건드리지 않음)
 

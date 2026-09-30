@@ -16,6 +16,7 @@
 | B3 | 🖼 로그인 → LoginPanel 확정 (calm forest 유리 카드) + CrestLogo | DS-CMP-14/15 | 사용자 결정 + `evidence/login-final*.png` | ✅ (feat/app-shell) |
 | B4 | MenuButton · Panel | DS-CMP-06/07 | 갤러리 | ✅ (feat/app-shell) |
 | B5 | 데스크톱 실로그인 확인 (nonce 포함 redirect_to 허용 여부) | PRD-AUTH-01 | 실로그인 | ⬜ 사용자 |
+| B6 | 이메일 6자리 인증코드 로그인 (Supabase OTP, 모든 플랫폼) + 카드 이메일 모드 + TextField·CodeInput | PRD-AUTH-01, DS-CMP-14/17/18, PRD-DATA-03 | `test_email_otp`, `test_supabase_otp`, `test_login_email`, `test_form_inputs` + `evidence/login-email-*.png` | ✅ 코드 (feat/email-otp, 미병합) · ⬜ 사용자: Supabase Email·템플릿·SMTP 설정 후 실메일 확인 |
 | D1 | vercel.json + deploy_web.sh + 배포 | PRD-PLT-03 | Vercel URL 동작 | ⬜ |
 | A7 | 리플레이급 입력 로그 `match_inputs` + 재현 메타·`final_state_hash` + 재생 검증 (마이그레이션 0002). `match_timeline` 1Hz 압축은 보류(사용자 결정, `pos` 행 유지) | PRD-DATA-04 | `test_input_log`, `test_replay_verifier`, `test_match_capture_size` | ✅ (feat/telemetry-v2, 미병합) |
 | A8 | 식별·버전·맥락, 행동 피처 컬럼, 세션·좌절·성능 이벤트 (analytics-strategy §3) | PRD-DATA-03/04 | `test_event_catalog`, `test_match_telemetry`, `test_match_features`, `test_match_tracking`, `test_session_tracker`, `test_supabase_schema` | ✅ (feat/telemetry-v2, 미병합) |

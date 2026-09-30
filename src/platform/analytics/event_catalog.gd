@@ -26,6 +26,10 @@ const EVENTS: Dictionary = {
 	"login_skipped": [],
 	"session_restored": [],
 	"logout": [],
+	# Email code sign-in (never the address or the code)
+	"email_code_requested": ["result"],
+	"email_code_resent": [],
+	"email_code_verified": ["attempts"],
 	# Menu funnel
 	"screen_viewed": ["screen"],
 	"mode_selected": ["mode"],

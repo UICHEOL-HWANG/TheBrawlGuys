@@ -1,8 +1,9 @@
 class_name SupabaseClient
 extends RefCounted
-## Supabase HTTP client (platform A3, PRD-DATA-04): Auth token grants (/auth/v1/token) and REST
-## inserts (/rest/v1) with the anon key plus the user's bearer token. Row-level security on the
-## server limits writes to the signed-in user. Callbacks: done(ok: bool, status: int, message: String).
+## Supabase HTTP client (platform A3, PRD-DATA-04): Auth token grants (/auth/v1/token), email
+## one-time codes (/auth/v1/otp, /auth/v1/verify, platform B6) and REST inserts (/rest/v1) with the
+## anon key plus the user's bearer token. Row-level security on the server limits writes to the
+## signed-in user. Callbacks: done(ok: bool, status: int, message: String).
 
 signal session_changed(session: SupabaseSession)
 
@@ -13,6 +14,9 @@ const REFRESH_MARGIN_S := 60
 const STATUS_NO_SESSION := -1
 const HTTP_UNAUTHORIZED := 401
 const HTTP_BAD_REQUEST := 400
+## Player-side refusals (bad address, wrong code, rate limit) are not network errors.
+const HTTP_CLIENT_ERRORS_FROM := 400
+const HTTP_SERVER_ERRORS_FROM := 500
 
 var session: SupabaseSession = null
 var now_s: Callable = func() -> int: return int(Time.get_unix_time_from_system())
@@ -42,6 +46,28 @@ func url() -> String:
 
 func exchange_pkce(auth_code: String, code_verifier: String, done: Callable) -> void:
 	_token_grant("pkce", {"auth_code": auth_code, "code_verifier": code_verifier}, done)
+
+
+## Emails a 6-digit sign-in code; the account is created on first use. Signs nobody in.
+func send_email_otp(email: String, done: Callable) -> void:
+	_transport.request("%s/auth/v1/otp" % _url, _auth_headers(), HTTPClient.METHOD_POST,
+			JSON.stringify({"email": email, "create_user": true}), func(code: int, body: String) -> void:
+				var ok := code >= 200 and code < 300
+				if not ok:
+					_net_error_unless_player_side("auth/otp", code)
+				done.call(ok, code, "" if ok else body))
+
+
+## Trades an emailed code for a session, stored exactly like a PKCE exchange.
+func verify_email_otp(email: String, token: String, done: Callable) -> void:
+	_transport.request("%s/auth/v1/verify" % _url, _auth_headers(), HTTPClient.METHOD_POST,
+			JSON.stringify({"type": "email", "email": email, "token": token}),
+			func(code: int, body: String) -> void:
+				if code < 200 or code >= 300:
+					_net_error_unless_player_side("auth/verify", code)
+					done.call(false, code, body)
+					return
+				_accept_session(code, body, done))
 
 
 ## Concurrent callers share one request: Supabase rotates the refresh token on use.
@@ -110,8 +136,7 @@ func _with_fresh_token(then: Callable) -> void:
 
 
 func _token_grant(grant: String, payload: Dictionary, done: Callable) -> void:
-	var headers := PackedStringArray(["apikey: " + _anon_key, "Content-Type: application/json"])
-	_transport.request("%s/auth/v1/token?grant_type=%s" % [_url, grant], headers, HTTPClient.METHOD_POST,
+	_transport.request("%s/auth/v1/token?grant_type=%s" % [_url, grant], _auth_headers(), HTTPClient.METHOD_POST,
 			JSON.stringify(payload), func(code: int, body: String) -> void:
 				_on_token(grant, code, body, done))
 
@@ -124,6 +149,10 @@ func _on_token(grant: String, code: int, body: String, done: Callable) -> void:
 			sign_out()  # the refresh token is no longer valid
 		done.call(false, code, body)
 		return
+	_accept_session(code, body, done)
+
+
+func _accept_session(code: int, body: String, done: Callable) -> void:
 	var fresh := SupabaseSession.from_token_response(JsonSafe.parse(body), int(now_s.call()))
 	if fresh == null:
 		push_warning("SupabaseClient: token response without session fields")
@@ -134,11 +163,20 @@ func _on_token(grant: String, code: int, body: String, done: Callable) -> void:
 	done.call(true, code, "")
 
 
+func _auth_headers() -> PackedStringArray:
+	return PackedStringArray(["apikey: " + _anon_key, "Content-Type: application/json"])
+
+
 func _rest_headers() -> PackedStringArray:
 	return PackedStringArray([
 		"apikey: " + _anon_key, "Authorization: Bearer " + session.access_token,
 		"Content-Type: application/json", "Prefer: return=minimal",
 	])
+
+
+func _net_error_unless_player_side(endpoint: String, status: int) -> void:
+	if status < HTTP_CLIENT_ERRORS_FROM or status >= HTTP_SERVER_ERRORS_FROM:
+		_net_error(endpoint, status)
 
 
 func _net_error(endpoint: String, status: int) -> void:

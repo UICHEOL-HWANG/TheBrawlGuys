@@ -181,7 +181,7 @@
 
 4 기반 스케일: `s1 4` · `s2 8` · `s3 12` · `s4 16` · `s5 24` · `s6 32` · `s7 48` · `s8 64`
 
-메뉴 크기 (1920×1080): `button_min_width 400` · `button_height 80` (MenuButton) · `login_card_width 560` (DS-CMP-14) · `tracking_wide 4` (자간 넓힌 태그라인)
+메뉴 크기 (1920×1080): `button_min_width 400` · `button_height 80` (MenuButton) · `login_card_width 560` (DS-CMP-14) · `tracking_wide 4` (자간 넓힌 태그라인) · `field_height 72` (TextField, DS-CMP-17) · `code_box 56×72` (CodeInput 한 칸, DS-CMP-18)
 
 유리·헤이즈 강도 (0~1): `glass_tint_strength 0.5` (Compatibility·웹은 블러 대신 `0.82`) · `glass_blur_lod 3.5` · `haze_amount 0.34` · `haze_desaturate 0.4`
 
@@ -329,7 +329,7 @@
 | DS-CMP-03 | `TouchStick` | 이동 입력 | 숨김 · 활성(중심·노브) · 데드존 | `ui_surface` 50%, `shadow_soft` | 1 | PRD-CTL-03 |
 | DS-CMP-04 | `TouchButton` | 액션 입력 | idle · pressed · highlight · disabled · charging | 아이콘, `petal_yellow`, `motion_fast` | 1 (v1), 2 (v2) | PRD-CTL-03, PRD-CTL-04 |
 | DS-CMP-05 | `ChargeGauge` | 강공격 차지량 (월드 공간) | 차지 중 · 최대(반짝) | `petal_yellow` → `fire`, `glow` | 2 | PRD-CMB-02 |
-| DS-CMP-06 | `MenuButton` (`UiMenuButton`) | 메뉴 조작 | idle · focus(호버 포함) · pressed · disabled | `ui_accent`(primary) / `ui_surface`(secondary), `radius_pill`, `stroke_focus`, `PRESS_SQUISH` | 4.0 | PRD-UI-02 |
+| DS-CMP-06 | `MenuButton` (`UiMenuButton`) | 메뉴 조작 | idle · focus(호버 포함) · pressed · disabled | `ui_accent`(primary) / `ui_surface`(secondary) / 투명 + `ui_surface` 70% 테두리 + 흰 글자(ghost, 유리 카드 위 보조 동작), `radius_pill`, `stroke_focus`, `PRESS_SQUISH` | 4.0 | PRD-UI-02 |
 | DS-CMP-07 | `Panel` (`UiPanel`) | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
 | DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일, 플레이어 색 링 | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
@@ -337,15 +337,19 @@
 | DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 | 입력 · 오류 · 확인 중 | `display_l`, 글자별 둥근 칸 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
-| DS-CMP-14 | `LoginPanel` | 첫 화면 Google 로그인 | idle · loading(브라우저 대기) · error(재시도) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `motion_calm` 등장 | 4.0 | PRD-AUTH-01 |
+| DS-CMP-14 | `LoginPanel` | 첫 화면 로그인 (Google · 이메일 코드) | idle · loading(브라우저 대기) · error(재시도) / 모드: methods · email(이메일 단계 → 코드 단계) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `MenuButton`(이메일, ghost), `TextField`·`CodeInput`, `motion_calm` 등장, 모드 전환 `motion_base` 페이드 | 4.0 | PRD-AUTH-01 |
 | DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
 | DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
+| DS-CMP-17 | `TextField` (`UiTextField`) | 짧은 텍스트 입력 (로그인 이메일) | idle · focus(호버 포함) · error(다시 입력하면 해제) · disabled | `ui_surface` 바탕, `radius_m`, `body` `ui_text`, placeholder `ui_text_soft`, 포커스 `stroke_focus` `petal_yellow`, 오류 `stroke_focus` `danger`, `shadow_pressed`, 높이 `field_height`. 모바일 키보드 힌트는 호출자가 지정(이메일) | 4.0 | PRD-AUTH-01 |
+| DS-CMP-18 | `CodeInput` | 6자리 인증코드 입력 | idle · focus(다음 칸 링) · error(모든 칸 `danger` 링) · disabled | 숫자 칸 6개 `code_box`(`ui_surface`, `radius_s`, 간격 `s3`), 숫자 `title` 크기 `ui_text`. 숨은 LineEdit가 입력·붙여넣기·숫자 키보드(모바일)를 받고 숫자만 최대 6자리 남긴다 | 4.0 | PRD-AUTH-01 |
 
 `SelectCard` 구현 (Phase 4 T7, 2026-09-30): `ui_surface` 카드(`radius_l`, `shadow_soft`, 너비 `card_width` 320) 안에 코드로 그린 위에서 본 디오라마 썸네일(`ArenaThumb`, 높이 `card_thumb_height` 200: 바깥 초원·링아웃 물·흙 띠 위 바닥·나무 고리·기믹 표시, 경기장 테마 색) · `title` 이름 · `caption` 한 줄 설명(`ui_text_soft`) · 기믹 아이콘(`GimmickIcon` `card_icon` 48: 물·불·균열·튕김·안개). focus = `petal_yellow` 링 + ×1.04, selected = `ring_color` 링(경기장은 `ui_accent`, Phase 5 캐릭터는 플레이어 색) + ×1.07, locked = `ui_surface_dim` + "준비 중". 경기장 선택 화면: 제목 위, 카드 4장 아래 한 줄, "뒤로" + 조작 안내(←/→ · Z/Enter · X/Esc), 호버 = 포커스, 클릭·탭 = 확정
 
 `LoginPanel` 확정 (2026-09-30, 레퍼런스 [`references/ref-login-calmforest.webp`](./references/ref-login-calmforest.webp) — 사용자의 이전 프로젝트 calm forest):
 - 헤이즈 낀 궤도 디오라마(`DS-LAY-03`) 위, 화면 **정중앙에 반투명 유리 카드** 하나. 카드는 뒤 장면을 흐리게 비추고(스크린 텍스처 밉맵 블러) 세이지 틴트를 덮는다. Compatibility 렌더러(웹)에서는 블러 대신 틴트를 진하게 한다
-- 카드 내용(위→아래, 가운데 정렬): 크레스트 로고(`CrestLogo` DS-CMP-15, 불꽃 깜빡임) · 흰 제목 "The Brawl Guys" · 자간 넓은 태그라인 · 흰 알약 버튼 "G + Google로 시작하기" · 상태 한 줄(loading/error) · 안내 "로그인하면 어느 기기에서든 기록이 이어집니다." · 🌐 언어 링크(한국어↔English 전환 스텁, `settings_changed` 트래킹) · debug 빌드만 "건너뛰기 (디버그)" 링크. 게스트 버튼은 없다 (Google 전용)
+- 카드 내용(위→아래, 가운데 정렬): 크레스트 로고(`CrestLogo` DS-CMP-15, 불꽃 깜빡임) · 흰 제목 "The Brawl Guys" · 자간 넓은 태그라인 · 흰 알약 버튼 "G + Google로 시작하기" · 상태 한 줄(loading/error) · 안내 "로그인하면 어느 기기에서든 기록이 이어집니다." · 🌐 언어 링크(한국어↔English 전환 스텁, `settings_changed` 트래킹) · debug 빌드만 "건너뛰기 (디버그)" 링크. 게스트 버튼은 없다 (계정 로그인 전용)
+- 이메일 로그인 (2026-09-30 추가, 비밀번호 없는 6자리 코드): Google 버튼 바로 아래 ghost 알약 "이메일로 계속하기". 누르면 **같은 유리 카드**의 크레스트·제목·태그라인은 그대로 두고 아래 내용만 바뀐다(`motion_base` 페이드). 이메일 단계: 제목 "이메일로 로그인" · 안내 한 줄 · `TextField`(이메일 키보드) · 흰 알약 "인증코드 받기" · 상태 한 줄 · "← 다른 방법으로". 코드 단계: 안내(보낸 주소 + "메일로 받은 6자리 코드를 입력해 주세요") · `CodeInput`(숫자 키보드, 붙여넣기) · "로그인" · 상태 한 줄 · "코드 다시 받기 (N초)"(60초 쿨다운 동안 흐림) · "← 다른 방법으로"
+- 키보드: Enter = 현재 단계 제출, Esc = 한 단계 뒤로(코드 → 이메일 → 방법 선택). 요청 중에는 알약이 "보내는 중…/확인 중…"으로 꺼진다. 오류는 한 줄 문구 + 입력칸 `danger` 링(잘못된 이메일 · 코드가 틀렸거나 만료됐어요 · 잠시 후 다시 시도해 주세요). 이메일 로그인은 모바일에서도 된다 — 모바일 안내 문구는 Google에만 해당. 요청 중에는 Esc가 듣지 않는다. 코드를 받은 주소로 쿨다운 안에 다시 요청하면 새 메일 없이 코드 단계로 돌아간다("이미 보낸 코드를 입력해 주세요"). 실패 뒤 포커스는 해당 입력칸으로
 - 등장: 배경이 헤이즈에서 드러나고, 카드가 살짝 아래에서 떠오르며 부드럽게 커지고(`motion_calm`), 내용이 순서대로 페이드·리프트된다(`motion_slow`, `motion_fast` 간격). 튀는 효과 없음
 - error 상태는 원인을 한 줄로 보여주고 버튼이 "다시 시도"가 된다. 로그인할 수 없는 환경(모바일·키 없음)은 버튼을 끄고 이유를 보여 준다
 
@@ -519,9 +523,11 @@
 | DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ✅ |
 | DS-CMP-08 | SelectCard | PRD-UI-02 | 4, 5 | 🟨 (경기장 선택 Phase 4 T7 완료, 캐릭터 선택은 Phase 5) |
 | DS-CMP-10, 11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
-| DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스) |
+| DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스 · 이메일 모드 추가 `evidence/login-email-*.png`) |
 | DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
 | DS-CMP-16 | 컴포넌트 — `KeyHintBar` (키보드 조작 안내 바) | PRD-CTL-02, PRD-UI-01 | 4 | ✅ (2026-09-30, `evidence/key-hint-*.png`) |
+| DS-CMP-17 | 컴포넌트 — `TextField` (로그인 이메일 입력) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-step.png`) |
+| DS-CMP-18 | 컴포넌트 — `CodeInput` (6자리 인증코드) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-code.png`·`-error.png`) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용, 🖼 T7 대기, Phase 5에서 계속) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | 🟨 (안개 실루엣 Phase 4 완료, P3·P4 모양은 Phase 5) |

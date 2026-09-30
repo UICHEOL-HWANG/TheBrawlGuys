@@ -34,6 +34,21 @@ func test_menu_button_secondary_uses_the_surface() -> void:
 	assert_eq((b.get_theme_stylebox("normal") as StyleBoxFlat).bg_color, DS.UI_SURFACE)
 
 
+func test_menu_button_ghost_is_an_outline_on_glass() -> void:
+	var b := _button()
+	b.set_kind(UiMenuButton.Kind.GHOST)
+	var box := b.get_theme_stylebox("normal") as StyleBoxFlat
+	assert_eq(box.bg_color, DS.TRANSPARENT)
+	assert_eq(box.border_color, DS.UI_SURFACE_70)
+	assert_gt(box.border_width_top, 0)
+	assert_eq(b.get_theme_color("font_color"), DS.UI_SURFACE, "white text over the glass")
+	b.set_state(UiMenuButton.State.FOCUS)
+	assert_eq((b.get_theme_stylebox("normal") as StyleBoxFlat).border_color, DS.PETAL_YELLOW)
+	b.set_state(UiMenuButton.State.DISABLED)
+	assert_eq((b.get_theme_stylebox("disabled") as StyleBoxFlat).bg_color, DS.TRANSPARENT)
+	assert_eq(b.get_theme_color("font_disabled_color"), DS.UI_SURFACE_50)
+
+
 func test_focus_never_overrides_disabled() -> void:
 	var b := _button()
 	b.set_state(UiMenuButton.State.DISABLED)

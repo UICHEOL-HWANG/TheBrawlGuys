@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/ui/components/text_field/text_field.gd" id="1"]
+
+[node name="TextField" type="LineEdit"]
+script = ExtResource("1")
