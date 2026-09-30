@@ -1,15 +1,16 @@
 # 인수인계 — 다음 세션 시작점
 
-**Last Updated:** 2026-09-30 21:00
-**main:** `0c7a470` 뒤 인수인계 커밋 (Phase 4 render 병합까지). GitHub push는 이 파일 커밋까지 반영.
-**배포:** https://thebrawlguys.cloud (Vercel `cheorish/thebrawlguys`, 네임서버 vercel-dns). 배포된 빌드는 `c88d9a4` 시점(경기장 선택 이전)
+**Last Updated:** 2026-10-01
+**main:** `e96320a` (Phase 5 T1~T11 전부 병합, 1116 테스트·check-all 통과). GitHub push 반영.
+**배포:** https://thebrawlguys.cloud — main `e96320a` 빌드(Vercel `cheorish/thebrawlguys`). 배포는 `scripts/deploy_web.sh`만. 루트 `vercel.json`이 Git 자동 배포를 끔(지우면 push마다 404 — 메모리 `vercel-git-push-overwrites-prod`)
 
-새 세션은 이 파일 → `dev/active/{platform,phase-4,phase-5}/*-context.md` → `*-tasks.md` 순으로 읽고 시작한다.
+새 세션은 이 파일 → `dev/active/{platform,phase-5,combat-depth}/*-context.md` → `*-tasks.md` 순으로 읽고 시작한다.
+주의: 같은 main 폴더에서 다른 세션(combat-depth 등)이 동시에 작업할 수 있다 — 병합 전 `git status`와 `.git/MERGE_HEAD`를 확인하고, 남의 미커밋 변경은 사용자 확인 후 처리. 훅이 커밋 메시지를 오인하면 `git commit -F <고유 파일명>`.
 사용자 규칙: 한국어 대화, .gd ≤200줄·함수 <40줄 모듈화(메모리 `modular-short-files`), 커밋 트레일러 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, `--no-verify` 금지(pre-commit 훅이 키 문자열 차단).
 
 ---
 
-## 1. 병합 대기 브랜치 — ✅ 2026-09-30 21:00 세 개 모두 main 병합(812 테스트·check-all 통과), 재배포(Ready), push `749b3ec`
+## 1. (기록) 병합 대기 브랜치 — ✅ 2026-09-30 21:00 세 개 모두 main 병합(812 테스트·check-all 통과), 재배포(Ready), push `749b3ec`
 
 | 순서 | 브랜치 | 내용 | 테스트 | 예상 충돌 |
 |---|---|---|---|---|
@@ -20,21 +21,20 @@
 병합 절차: 순서대로 `git merge --no-ff <branch>` → 충돌은 양쪽 유지 → 매번 `scripts/test.sh` + `scripts/check-all.sh` → 전부 끝나면 `scripts/deploy_web.sh` → `git push origin main`.
 주의: 테스트 중 다른 Godot 프로세스가 54321 포트를 쓰면 `test_login_gate::test_desktop_with_keys_is_available`가 간헐 실패(재실행 시 통과).
 
-## 2. 중단된 작업
-
-- `feat/phase5-sim` (worktree `.claude/worktrees/agent-af80a4d79377a2705`, WIP 커밋 `19338d6`): Phase 5 sim T1/T2/T3/T5/T6 진행 중 사용량 한도로 중단. **미완성·미검증**. 마지막 작업: 필살기 타격을 2-pass(접촉 수집 → 적용)로 바꾸는 중. 이어서: `scripts/test.sh` 먼저 돌려 상태 확인 → 아래 결정대로 마무리.
-  - 캐릭터 4 = 모델+스타일+필살기: Barbarian 권투 "대지 강타" / Rogue 권투 "돌진 연타" / Knight 무기 "회전 베기" / Mage 원거리 "거대 화염구"
-  - 게이지: 때리거나 맞으면 참, 가득 차면 X+C 같은 틱 입력으로 1회. sim 결정적, 이벤트 special_start / special_hit / gauge_full / projectile_*
-  - 봇 스타일 사거리·필살기 사용, `scripts/balance_sim.gd` 매치업 100판 승률 30~70%, 리플레이 해시 의도적 갱신(커밋 사유)
+## 2. 2026-10-01까지 끝난 것 (Phase 5 완료)
+- 병합: phase5-sim · p5-cutin · p5-local2p · p5-charselect · p5-gear · p5-followups · p5-tutorial (+ 다른 세션의 링크 썸네일·앱 아이콘, defense review)
+- Phase 5 T1~T11: 스타일·필살기 sim, 컷인, 로컬 2인(P2 필살기 G+H / 패드 Y+RB), 스타일 룩 A 장비(사용자 승인), 캐릭터 선택·P1~P4 모양 링, 트래킹(이벤트 스키마 6), 온보딩 튜토리얼
+- 웹 로딩 화면 B(깊은 숲: `deploy/web_shell.html` + `assets/branding/boot-splash.png`), 경기마다 새 시드, 리플레이 -0.0 입력 버그 수정(해시 의도적 갱신)
 
 ## 3. 남은 작업 (우선순위)
 
-1. 위 1번 병합 3개 + 재배포 + push
-2. Phase 5 sim 마무리(2번) → 병합
-3. Phase 5 나머지: 필살기 컷인 연출(렌더 전용, 완전 확대), 캐릭터 선택 화면(`App.SELECT_STEPS`에 추가) + PlayerSlot, P1~P4 식별(색+번호+링 모양), 로컬 2인(P2 = WASD/Q/F/G/H/J + 게임패드), 키 표시 바에 필살기(X+C) 키캡, 🖼 스타일 실루엣 시안, 온보딩 튜토리얼(T11)
-4. 트래킹: 필살기·캐릭터 이벤트(special_used 등) 연결, `press_special` 피처
-5. 🖼 사용자 확인 대기: Phase 4 경기장·아이템 룩(`dev/active/phase-4/evidence/`)
-6. 알려진 부채: `fighter_view.gd` 235줄(setup 78줄), `capture_evidence.gd`는 `-s` 모드에서 Analytics autoload 때문에 main/app 씬을 못 엶, 웹 빌드는 `session_ended` 안 보냄, 30분 백그라운드 세션 분리 미구현
+1. 🧪 사용자 실기 확인: 게임패드 2개/한 키보드 2인 한 판, 폰 터치(캐릭터 선택·튜토리얼·필살기 = 공격 길게+가드), PS 패드 글리프
+2. 설정 화면 + "모션 줄이기" 토글(`[accessibility] reduce_motion`, 지금은 키만 읽음) + settings_changed
+3. 시각 다듬기: 경기 카메라에서 Knight 대검·Mage 구슬 가독성, 공격 중 검·지팡이 기울기, 튜토리얼 연습 상대 목숨 표시(99인데 3개로 보임), 봇 PlayerSlot 빈 공간, 데스크톱 초상이 조금 작아짐
+4. 터치 튜토리얼 버튼 강조 링 — `touch_input.gd`(270줄) 먼저 분리
+5. 튜토리얼 진행 상태가 기기(`user://`) 저장 → 계정 단위로 옮길지 결정
+6. 🖼 사용자 확인 대기: Phase 4 경기장·아이템 룩(`dev/active/phase-4/evidence/`)
+7. 부채: `game_config.gd` 278줄, `touch_input.gd` 270줄, `ds_gallery.gd` 388줄, `capture_evidence.gd`는 `-s` 모드에서 main/app 씬 못 엶, 웹 빌드 `session_ended` 없음, 30분 백그라운드 세션 분리 미구현, Amplitude 퍼널 대시보드 없음
 
 ## 4. 사용자가 해야 할 일 (Supabase / 외부)
 
