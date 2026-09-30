@@ -82,10 +82,10 @@ func test_loopback_ignores_other_requests() -> void:
 
 
 func test_loopback_reply_is_small_utf8_html() -> void:
-	var reply := LoopbackServer.http_response(200, LoopbackServer.DONE_MESSAGE)
+	var reply := LoopbackServer.http_response(200, CallbackPage.html(true))
 	assert_true(reply.begins_with("HTTP/1.1 200 OK\r\n"))
 	assert_string_contains(reply, "charset=utf-8")
-	assert_string_contains(reply, "로그인 완료, 게임으로 돌아가세요")
+	assert_string_contains(reply, CallbackPage.DONE_TITLE)
 	var body := reply.get_slice("\r\n\r\n", 1)
 	assert_string_contains(reply, "Content-Length: %d" % body.to_utf8_buffer().size())
 

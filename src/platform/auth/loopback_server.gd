@@ -5,8 +5,6 @@ extends RefCounted
 ## poll() returns {} while waiting, {"code": ...} on success or {"error": reason}.
 
 const TIMEOUT_MS := 180_000
-const DONE_MESSAGE := "로그인 완료, 게임으로 돌아가세요"
-const FAIL_MESSAGE := "로그인 실패 — 게임에서 다시 시도해 주세요"
 const MAX_REQUEST_BYTES := 8192
 ## A connection must deliver its request line within this time.
 const PEER_TIMEOUT_MS := 2000
@@ -89,8 +87,7 @@ func _answer(result: Dictionary) -> Dictionary:
 		_peer.put_data(http_response(404, "").to_utf8_buffer())
 		_drop_peer()
 		return {}
-	var message := DONE_MESSAGE if result.has("code") else FAIL_MESSAGE
-	_peer.put_data(http_response(200, message).to_utf8_buffer())
+	_peer.put_data(http_response(200, CallbackPage.html(result.has("code"))).to_utf8_buffer())
 	stop()
 	return result
 
@@ -115,10 +112,8 @@ static func parse_request_line(line: String, expected_state: String = "") -> Dic
 	return {"code": String(query["code"])}
 
 
-static func http_response(status: int, message: String) -> String:
-	var body := "" if message.is_empty() else \
-			"<!doctype html><html><head><meta charset=\"utf-8\"><title>TheBrawlGuys</title></head>" \
-			+ "<body><h1>%s</h1></body></html>" % message
+## body is a full HTML document (CallbackPage) or "" for the 404 answer.
+static func http_response(status: int, body: String) -> String:
 	var reason := "OK" if status == 200 else "Not Found"
 	return "HTTP/1.1 %d %s\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s" % [
 		status, reason, body.to_utf8_buffer().size(), body]
