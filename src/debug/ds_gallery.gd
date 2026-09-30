@@ -18,6 +18,8 @@ const COMPONENTS: Array[Array] = [
 	["CrestLogo · DS-CMP-15", "res://src/ui/components/crest_logo/crest_logo.tscn"],
 	["LoginPanel · DS-CMP-14", "res://src/ui/components/login_panel/login_panel.tscn"],
 	["KeyHintBar · DS-CMP-16", "res://src/ui/components/key_hint_bar/key_hint_bar.tscn"],
+	["TextField · DS-CMP-17", "res://src/ui/components/text_field/text_field.tscn"],
+	["CodeInput · DS-CMP-18", "res://src/ui/components/code_input/code_input.tscn"],
 ]
 ## Pass `--components-only` after `--` to render just the components section (evidence capture).
 const COMPONENTS_ONLY_ARG := "--components-only"

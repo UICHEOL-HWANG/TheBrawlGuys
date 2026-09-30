@@ -129,6 +129,10 @@ const LOGIN_CARD_WIDTH := 560
 const RADIUS_XL := 40
 ## Letter spacing of spaced-out taglines.
 const TRACKING_WIDE := 4
+## Text field height (DS-CMP-17) and one digit box of the 6-digit code input (DS-CMP-18).
+const FIELD_HEIGHT := 72
+const CODE_BOX_WIDTH := 56
+const CODE_BOX_HEIGHT := 72
 
 # --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
 ## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).

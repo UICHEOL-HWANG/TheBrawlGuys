@@ -1,12 +1,15 @@
 class_name UiMenuButton
 extends Button
-## Menu button (design.md DS-CMP-06): a pill in the campfire accent (primary) or cream surface
-## (secondary). States idle · focus (petal-yellow ring, also on hover) · pressed (squish +
-## pressed shadow) · disabled (dim surface, soft text). Named UiMenuButton because Godot already
-## has a MenuButton class.
+## Menu button (design.md DS-CMP-06): a pill in the campfire accent (primary), cream surface
+## (secondary) or a light outline with white text for glass cards (ghost). States idle · focus
+## (petal-yellow ring, also on hover) · pressed (squish + pressed shadow) · disabled (dim surface,
+## soft text). Named UiMenuButton because Godot already has a MenuButton class.
 
 enum State { IDLE, FOCUS, PRESSED, DISABLED }
-enum Kind { PRIMARY, SECONDARY }
+enum Kind { PRIMARY, SECONDARY, GHOST }
+
+## Outline width of the ghost kind.
+const GHOST_EDGE := 2
 
 @export var kind: Kind = Kind.PRIMARY
 
@@ -70,10 +73,11 @@ func _apply() -> void:
 	for style: String in ["normal", "hover", "pressed", "hover_pressed"]:
 		add_theme_stylebox_override(style, box)
 	add_theme_stylebox_override("disabled", _box(State.DISABLED))
+	var ghost := kind == Kind.GHOST
 	for color: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color",
 			"font_hover_pressed_color"]:
-		add_theme_color_override(color, DS.UI_TEXT)
-	add_theme_color_override("font_disabled_color", DS.UI_TEXT_SOFT)
+		add_theme_color_override(color, DS.UI_SURFACE if ghost else DS.UI_TEXT)
+	add_theme_color_override("font_disabled_color", DS.UI_SURFACE_50 if ghost else DS.UI_TEXT_SOFT)
 
 
 func _box(s: int) -> StyleBoxFlat:
@@ -84,6 +88,8 @@ func _box(s: int) -> StyleBoxFlat:
 	sb.content_margin_top = DS.S3
 	sb.content_margin_bottom = DS.S3
 	sb.bg_color = DS.UI_ACCENT if kind == Kind.PRIMARY else DS.UI_SURFACE
+	if kind == Kind.GHOST:
+		return _ghost(sb, s)
 	if s == State.DISABLED:
 		sb.bg_color = DS.UI_SURFACE_DIM
 		return sb
@@ -94,4 +100,13 @@ func _box(s: int) -> StyleBoxFlat:
 	if s == State.FOCUS:
 		sb.border_color = DS.PETAL_YELLOW
 		sb.set_border_width_all(DS.STROKE_FOCUS)
+	return sb
+
+
+## No fill and no shadow: a light edge (a focus ring when focused) over the glass.
+func _ghost(sb: StyleBoxFlat, s: int) -> StyleBoxFlat:
+	sb.bg_color = DS.TRANSPARENT
+	var focused := s == State.FOCUS or s == State.PRESSED
+	sb.border_color = DS.PETAL_YELLOW if focused else (DS.UI_SURFACE_50 if s == State.DISABLED else DS.UI_SURFACE_70)
+	sb.set_border_width_all(DS.STROKE_FOCUS if focused else GHOST_EDGE)
 	return sb
