@@ -1,4 +1,4 @@
-# Google Stitch 프롬프트 — 숲속 난투 UI 시안
+# Google Stitch 프롬프트 — TheBrawlGuys UI 시안
 
 > 2026-09-28 · 원천: [`design.md`](./design.md) (DS-TOK-01~06, DS-LAY-01~03, DS-CMP-01~13)
 > 용도: PHASES.md의 🖼 시각 비교 게이트 후보를 Stitch로 생성 (aside CLI). 결과는 참고 시안이며, Godot 구현은 `tokens.gd` + DS 컴포넌트로 다시 만든다.
@@ -9,7 +9,7 @@
 ## 공통 컨텍스트 (모든 프롬프트 앞에 붙이기)
 
 ```
-Design system for "Forest Brawl", a cozy 3D arena brawler game for mobile (landscape only, 1920x1080 reference) and desktop.
+Design system for "TheBrawlGuys", a cozy 3D arena brawler game for mobile (landscape only, 1920x1080 reference) and desktop.
 Mood: sunny midday forest diorama — soft, round, toy-like, warm light. Think a hand-held diorama with lime grass, teal tree canopies made of clustered spheres, a bright blue lake, cream egg-shaped rocks, and tiny scattered pink/blue/yellow flower dots.
 
 Rules:
@@ -56,7 +56,7 @@ Generate 3 variants of the button layout: A) arc around attack, B) diamond, C) 2
 
 ```
 Screen: title and mode select, mobile landscape. Background: the forest arena diorama seen from high above, softly desaturated so the UI pops.
-Center-left: game logo "숲속 난투" in Jua, cream letters with a deep-teal stroke and a playful slight tilt.
+Center-left: game logo "TheBrawlGuys" in Jua, cream letters with a deep-teal stroke and a playful slight tilt.
 Right side: a cream rounded panel (radius 32) with three large pill buttons stacked: "봇전" (primary, campfire orange), "로컬 2인", "온라인". A small settings gear button in the corner.
 Tiny floating leaves and flower dots as decoration, only at the edges.
 Generate 3 variants.

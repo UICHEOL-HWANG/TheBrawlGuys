@@ -8,6 +8,6 @@ mkdir -p build/android build/ios build/web
 touch build/.gdignore
 "$GODOT" --headless --path . --import >/dev/null
 "$GODOT" --headless --path . --export-debug "Android" build/android/forest-brawl.apk
-"$GODOT" --headless --path . --export-debug "iOS" build/ios/ForestBrawl.xcodeproj
+"$GODOT" --headless --path . --export-debug "iOS" build/ios/TheBrawlGuys.xcodeproj
 "$GODOT" --headless --path . --export-release "Web" build/web/index.html
 echo "build_all: android, ios, web exported"

@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 
-config/name="Forest Brawl"
+config/name="TheBrawlGuys"
 config/features=PackedStringArray("4.7", "Mobile")
 run/main_scene="res://src/main/main.tscn"
 

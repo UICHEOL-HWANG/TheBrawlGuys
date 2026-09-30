@@ -13,5 +13,5 @@ printf "android apk: %d MB (budget 150)\nweb pck+wasm raw: %d MB (reference)\nwe
 fail=0
 [ "$apk" -le $((150 * MB)) ] || { echo "FAIL: apk over budget"; fail=1; }
 [ "$web_gz" -le $((40 * MB)) ] || { echo "FAIL: web compressed size over budget"; fail=1; }
-[ -d build/ios/ForestBrawl.xcodeproj ] || [ -e build/ios/ForestBrawl.xcodeproj ] || { echo "FAIL: iOS project missing"; fail=1; }
+[ -d build/ios/TheBrawlGuys.xcodeproj ] || [ -e build/ios/TheBrawlGuys.xcodeproj ] || { echo "FAIL: iOS project missing"; fail=1; }
 exit $fail

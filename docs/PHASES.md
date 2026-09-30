@@ -1,4 +1,4 @@
-# 숲속 난투 — 개발 Phase
+# TheBrawlGuys — 개발 Phase
 
 > 버전 1.0 · 2026-09-28
 > 상위: [`PRD.md`](./PRD.md) (무엇·왜) · 병행: [`design.md`](./design.md) (디자인 시스템) · 문서 규칙: [`README.md`](./README.md)

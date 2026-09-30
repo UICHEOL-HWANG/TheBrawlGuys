@@ -1,4 +1,4 @@
-# 숲속 난투 — 디자인 시스템
+# TheBrawlGuys — 디자인 시스템
 
 > 버전 0.6 · 2026-09-30 (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
