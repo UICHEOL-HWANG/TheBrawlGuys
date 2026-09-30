@@ -107,8 +107,8 @@
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
 | `tutorial_started` | 튜토리얼 화면이 첫 미션을 연 순간 | `source: enum(first_login\|replay)` | `step_count: int` (미션 수, 지금 8), `input_device: enum(keyboard\|gamepad\|touch)` (시작 때 안내한 장치) | A | 5 (스키마 6) |
-| `tutorial_step_completed` | 한 미션의 마지막 목표를 성공한 순간 (잡기·던지기, 줍기·쓰기처럼 목표가 둘이면 둘 다) | `step: str` (위 순서의 id), `index: int` (1..8), `ms_in_step: int` (미션을 연 뒤 성공까지 ms, 건너뛰기 확인창이 떠 있던 시간 포함), `attempts: int` (그 미션의 버튼을 새로 누른 횟수 ≥ 1 — 이동은 중립에서 벗어난 횟수, 필살기는 강+가드가 함께 눌린 횟수) | — | A | 5 (스키마 6) |
-| `tutorial_skipped` | 건너뛰기 확인창에서 "건너뛰기"를 누른 순간 (버튼·Esc·패드 Start로 연 확인창) | `step: str` (그때 진행 중이던 미션), `index: int` | `ms_in_step: int`, `total_ms: int` | A | 5 (스키마 6) |
+| `tutorial_step_completed` | 한 미션의 마지막 목표를 성공한 순간 (잡기·던지기, 줍기·쓰기처럼 목표가 둘이면 둘 다) | `step: str` (위 순서의 id), `index: int` (1..8), `ms_in_step: int` (미션을 연 뒤 성공까지 ms, 건너뛰기 확인창이 떠 있던 시간 포함), `attempts: int` (그 미션의 버튼을 새로 누른 횟수, 최소 1로 보고 — 이동은 중립에서 벗어난 횟수라 스틱 떨림도 센다, 필살기는 강+가드가 함께 눌린 횟수) | — | A | 5 (스키마 6) |
+| `tutorial_skipped` | 건너뛰기 확인창에서 "건너뛰기"를 누른 순간 (버튼·Esc·패드 Start로 연 확인창) | `step: str` (그때 진행 중이던 미션 — 성공 피드백 "좋아요!" 1.2초 동안이면 다음 미션, 이때 `ms_in_step` 0), `index: int` | `ms_in_step: int`, `total_ms: int` | A | 5 (스키마 6) |
 | `tutorial_completed` | 마지막 미션(`special`)을 성공한 순간 | `total_ms: int` (시작부터) | `step_count: int` | A | 5 (스키마 6) |
 
 퍼널: `tutorial_started` → `tutorial_step_completed` (`index` 1..8) → `tutorial_completed`, 이탈 지점 = `tutorial_skipped.step` 또는 마지막 `tutorial_step_completed` 뒤 `session_ended`. 완료·건너뛰기는 기기에 저장되어 첫 로그인 튜토리얼은 한 번만 열린다(다시 보기에서 건너뛰어도 이전 완료는 유지).

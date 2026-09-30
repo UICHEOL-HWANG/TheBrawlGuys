@@ -7,6 +7,8 @@ extends CanvasLayer
 
 signal skip_confirmed
 signal exit_requested
+## The dialog closed and play goes on.
+signal resumed
 
 const LAYER := TouchInput.LAYER + 1
 
@@ -33,7 +35,7 @@ func _ready() -> void:
 	add_child(_dialog)
 	_dialog.resumed.connect(close_dialog)
 	_dialog.confirmed.connect(func() -> void:
-		close_dialog()
+		_dialog.close()
 		skip_confirmed.emit())
 	get_viewport().size_changed.connect(_apply_safe_area)
 	_apply_safe_area()
@@ -57,7 +59,9 @@ func open_dialog() -> void:
 
 
 func close_dialog() -> void:
-	_dialog.close()
+	if _dialog.is_open():
+		_dialog.close()
+		resumed.emit()
 
 
 ## Esc / Start: open the dialog, close it again, or leave once the tutorial is complete.

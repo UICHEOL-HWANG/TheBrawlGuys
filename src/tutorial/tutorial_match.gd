@@ -10,6 +10,8 @@ extends "res://src/main/main.gd"
 const PLAYER_CHARACTER := "barbarian"
 const FEEDBACK_S := 1.2
 const PREFIX := "p1"
+## Stick travel that counts as using the pad (resting sticks drift a little).
+const STICK_THRESHOLD := 0.5
 
 ## tutorial_started.source: TutorialFlow.SOURCE_FIRST_LOGIN or SOURCE_REPLAY.
 var source: String = TutorialFlow.SOURCE_REPLAY
@@ -22,6 +24,8 @@ var _celebrate_left: float = -1.0
 ## Last device the player touched: keyboard | gamepad | touch ("" = none yet).
 var _last_device: String = ""
 var _shown_device: String = ""
+## Set once the player leaves (skip or 타이틀로): later presses during the curtain do nothing.
+var _leaving: bool = false
 
 
 func _ready() -> void:
@@ -55,9 +59,14 @@ func _build_ui() -> void:
 	add_child(_overlay)
 	_overlay.skip_confirmed.connect(func() -> void: _director.flow.skip())
 	_overlay.exit_requested.connect(_leave)
+	_overlay.resumed.connect(func() -> void: _locals.reset())  # the button that resumed is not a jump
 
 
+## Once: the tutorial never ends in a result, so nothing restarts it (a second run would track a
+## second tutorial_started).
 func _start_match() -> void:
+	if _director != null:
+		return
 	super._start_match()
 	var flow := TutorialFlow.new(track, progress, source)
 	_director = TutorialDirector.new(_config, flow)
@@ -91,13 +100,16 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		_last_device = TutorialText.DEVICE_KEYBOARD
-	elif event is InputEventJoypadButton:
+	elif event is InputEventJoypadButton or (event is InputEventJoypadMotion \
+			and absf((event as InputEventJoypadMotion).axis_value) > STICK_THRESHOLD):
 		_last_device = TutorialText.DEVICE_GAMEPAD
 	elif event is InputEventScreenTouch:
 		_last_device = TutorialText.DEVICE_TOUCH
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _leaving:
+		return
 	if TutorialOverlay.is_back_event(event):
 		_overlay.on_back()
 		get_viewport().set_input_as_handled()
@@ -157,4 +169,6 @@ func _on_finished(completed: bool) -> void:
 
 
 func _leave() -> void:
-	menu_requested.emit()
+	if not _leaving:
+		_leaving = true
+		menu_requested.emit()

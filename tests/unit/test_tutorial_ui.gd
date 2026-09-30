@@ -46,7 +46,7 @@ func _esc() -> InputEventKey:
 func _meet(scene: Node) -> void:
 	var d: TutorialDirector = scene.call("director")
 	var c := Cases.met(d.flow.goal())
-	d.flow.on_tick(c["prev"], c["curr"], c["events"], InputFrame.neutral(), 0, d.world().config)
+	d.flow.on_tick(c["prev"], c["curr"], c["events"], c["input"], 0, d.world().config)
 
 
 func test_the_card_opens_on_the_first_mission_and_rings_its_keys() -> void:
@@ -122,6 +122,9 @@ func test_finishing_shows_the_complete_card_and_its_button_leaves() -> void:
 	assert_false(card.skip_button().visible)
 	scene.call("_unhandled_input", _esc())
 	assert_eq(_left, 1, "Esc leaves once it is complete")
+	card.exit_button().pressed.emit()
+	scene.call("_unhandled_input", _esc())
+	assert_eq(_left, 1, "leaving happens once, whatever is pressed during the curtain")
 
 
 func test_the_line_follows_the_device_in_hand() -> void:

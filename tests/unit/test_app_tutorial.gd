@@ -106,7 +106,10 @@ func test_the_title_replays_the_tutorial() -> void:
 	var title := app.router().current() as TitleScreen
 	assert_eq(title.tutorial_button().text, TitleScreen.TUTORIAL_TEXT)
 	title.tutorial_button().pressed.emit()
+	title.tutorial_button().pressed.emit()
 	assert_eq(app.router().current_id(), App.TUTORIAL)
+	assert_eq(app.router().depth(), 2, "a double press opens one tutorial")
+	assert_eq(_props("tutorial_started").size(), 1)
 	assert_eq(_props("tutorial_started")[0]["source"], TutorialFlow.SOURCE_REPLAY)
 	var overlay: TutorialOverlay = app.router().current().call("overlay")
 	overlay.card().skip_button().pressed.emit()

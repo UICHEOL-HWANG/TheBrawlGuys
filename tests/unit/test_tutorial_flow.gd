@@ -1,7 +1,8 @@
 extends GutTest
 ## Onboarding tutorial flow (Phase 5 T11, tracking-plan §3.3): missions run in order, each goal is
 ## detected from sim views/events, skip and completion are tracked with funnel payloads and
-## persisted so a first-login tutorial is offered once. Detection per goal: test_tutorial_detector.
+## persisted so a first-login tutorial is offered once. Detection per goal: test_tutorial_detector,
+## mission data and device lines: test_tutorial_steps.
 
 const Cases := preload("res://tests/unit/support/tutorial_cases.gd")
 const PATH := "user://test_tutorial_flow.cfg"
@@ -50,16 +51,7 @@ func _events(event_name: String) -> Array[Dictionary]:
 ## Meets the flow's current goal with a synthetic tick (Cases shapes).
 func _meet(flow: TutorialFlow, press: InputFrame = null) -> void:
 	var c := Cases.met(flow.goal())
-	flow.on_tick(c["prev"], c["curr"], c["events"], press if press != null else InputFrame.neutral(), 0, _config)
-
-
-func test_missions_run_in_the_planned_order() -> void:
-	assert_eq(TutorialSteps.ORDER, ["move", "jump", "light_attack", "heavy_attack", "guard", "grab_throw",
-		"item", "special"] as Array[String])
-	for step: String in TutorialSteps.ORDER:
-		assert_false(TutorialSteps.title(step).is_empty(), "%s has a card title" % step)
-		for goal: String in TutorialSteps.goals(step):
-			assert_false(TutorialSteps.keys(goal).is_empty(), "%s rings keys" % goal)
+	flow.on_tick(c["prev"], c["curr"], c["events"], press if press != null else c["input"], 0, _config)
 
 
 func test_start_tracks_the_source_and_opens_the_first_goal() -> void:
@@ -119,8 +111,8 @@ func test_attempts_count_new_presses_of_the_goal_buttons() -> void:
 	var idle := Cases.idle()
 	for press: bool in [true, false, true, false, true]:
 		flow.on_tick(idle, idle, [], InputFrame.make(0, 0, press), 0, _config)
-	_meet(flow, InputFrame.make(0, 0, false))
-	assert_eq(_events("tutorial_step_completed")[1]["attempts"], 3, "three jump presses")
+	_meet(flow)
+	assert_eq(_events("tutorial_step_completed")[1]["attempts"], 3, "three jump presses (still held on the jump)")
 	assert_eq(TutorialAttempts.presses(["special"], InputFrame.make(0, 0, false, false, true),
 			InputFrame.make(0, 0, false, false, true, true)), 1, "the chord closes on guard")
 	assert_eq(TutorialAttempts.presses(["move"], InputFrame.make(1, 0), InputFrame.make(0.5, 0)), 0, "still moving")
@@ -153,6 +145,37 @@ func test_skip_tracks_where_the_player_left_and_marks_it() -> void:
 	assert_eq(_events("tutorial_skipped").size(), 1, "skipping twice counts once")
 
 
+func test_a_skip_during_the_success_feedback_counts_against_the_next_mission() -> void:
+	var flow := _flow()
+	flow.start()
+	_now_ms += 300
+	_meet(flow)
+	_now_ms += 400
+	flow.skip()
+	assert_eq(_events("tutorial_skipped"), [{"step": "jump", "index": 2, "ms_in_step": 0, "total_ms": 700}],
+			"the move mission was completed, not abandoned")
+
+
+func test_a_grab_that_times_out_goes_back_to_the_grab() -> void:
+	var flow := _flow()
+	var goals: Array = []
+	flow.start()
+	for i: int in 5:
+		_meet(flow)
+		flow.advance()
+	_meet(flow)
+	flow.goal_changed.connect(func(_s: String, g: String) -> void: goals.append(g))
+	var idle := Cases.idle()
+	var released := [{"type": "grab_release", "attacker": Cases.PLAYER, "target": Cases.DUMMY}]
+	flow.on_tick(idle, idle, released, InputFrame.neutral(), 0, _config)
+	assert_eq(flow.goal(), TutorialSteps.G_GRAB, "the card asks for the grab again")
+	assert_eq(goals, [TutorialSteps.G_GRAB])
+	var dummy_let_go := [{"type": "grab_release", "attacker": Cases.DUMMY, "target": Cases.PLAYER}]
+	_meet(flow)
+	flow.on_tick(idle, idle, dummy_let_go, InputFrame.neutral(), 0, _config)
+	assert_eq(flow.goal(), TutorialSteps.G_THROW, "only the player's own hold counts")
+
+
 func test_skip_after_completion_does_nothing() -> void:
 	var flow := _flow()
 	flow.start()
@@ -175,21 +198,3 @@ func test_progress_is_pending_until_completed_or_skipped_and_survives_reloads() 
 	assert_eq(_progress().status(), TutorialProgress.COMPLETED, "a skipped replay keeps the completion")
 	SettingsStore.new(PATH).set_value(TutorialProgress.SECTION, TutorialProgress.KEY, 3)
 	assert_true(_progress().is_pending(), "junk values read as pending")
-
-
-func test_instruction_lines_follow_the_device() -> void:
-	InputBindings.apply()
-	var kb := TutorialText.line(TutorialSteps.G_JUMP, TutorialText.DEVICE_KEYBOARD)
-	assert_string_contains(kb, KeyHintSource.cap("jump").text)
-	assert_string_contains(kb, "키로")
-	assert_string_contains(TutorialText.line(TutorialSteps.G_MOVE, TutorialText.DEVICE_KEYBOARD), "방향키로")
-	var pad := TutorialText.line(TutorialSteps.G_SPECIAL, TutorialText.DEVICE_GAMEPAD)
-	assert_string_contains(pad, "Y+RB 버튼을")
-	var ps := TutorialText.line(TutorialSteps.G_JUMP, TutorialText.DEVICE_GAMEPAD, SelectPrompts.FAMILY_PS)
-	assert_string_contains(ps, "× 버튼으로")
-	var touch := TutorialText.line(TutorialSteps.G_GRAB, TutorialText.DEVICE_TOUCH)
-	assert_string_contains(touch, "잡기 버튼")
-	for goal: String in TutorialSteps.KEYS:
-		for device: String in [TutorialText.DEVICE_KEYBOARD, TutorialText.DEVICE_GAMEPAD, TutorialText.DEVICE_TOUCH]:
-			var line := TutorialText.line(goal, device)
-			assert_false(line.is_empty() or line.contains("{"), "%s/%s is a finished line" % [goal, device])

@@ -1,6 +1,6 @@
 extends RefCounted
 ## Synthetic sim ticks for tutorial tests: minimal state_view() shapes (player slot 0, dummy slot 1)
-## and, per goal, a tick {prev, curr, events} that meets it.
+## and, per goal, a tick {prev, curr, events, input} that meets it.
 
 const PLAYER := 0
 const DUMMY := 1
@@ -29,17 +29,21 @@ static func met(goal: String) -> Dictionary:
 	var prev := idle()
 	var curr := idle()
 	var events: Array = []
+	var input := InputFrame.neutral()
 	match goal:
 		TutorialSteps.G_MOVE:
 			curr = view({"pos": Vector3(TutorialDetector.MOVE_DISTANCE + 1.0, 0.0, 0.0)})
 		TutorialSteps.G_JUMP:
 			curr = view({"jumps_left": 1, "state": Fighter.State.AIR})
+			input = InputFrame.make(0.0, 0.0, true)
 		TutorialSteps.G_LIGHT_HIT:
 			curr = attacking(AttackSet.Kind.LIGHT_1)
-			events = [{"type": "hit", "attacker": PLAYER, "target": DUMMY, "power": 1.0}]
+			events = [{"type": "hit", "attacker": PLAYER, "target": DUMMY, "power": 1.0,
+				"attack_kind": AttackSet.Kind.LIGHT_1}]
 		TutorialSteps.G_CHARGED_HIT:
 			curr = attacking(AttackSet.Kind.HEAVY)
-			events = [{"type": "hit", "attacker": PLAYER, "target": DUMMY, "power": CHARGED_POWER}]
+			events = [{"type": "hit", "attacker": PLAYER, "target": DUMMY, "power": CHARGED_POWER,
+				"attack_kind": AttackSet.Kind.HEAVY}]
 		TutorialSteps.G_GUARD:
 			events = [{"type": "guard_hit", "attacker": DUMMY, "target": PLAYER}]
 		TutorialSteps.G_GRAB:
@@ -53,4 +57,4 @@ static func met(goal: String) -> Dictionary:
 		TutorialSteps.G_SPECIAL:
 			events = [{"type": "special_start", "fighter": PLAYER}]
 	curr["events"] = events
-	return {"prev": prev, "curr": curr, "events": events}
+	return {"prev": prev, "curr": curr, "events": events, "input": input}

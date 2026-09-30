@@ -5,8 +5,7 @@ extends Node
 ## select screens (SELECT_STEPS: character, arena) → match — and the app owns the
 ## login gate. Each select screen fills the MatchSetup that mode select starts. Entering a match
 ## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
-## The first sign-in on a device (TutorialProgress pending) goes on into the onboarding tutorial
-## (Phase 5 T11); the title's 튜토리얼 다시 보기 replays it. Both return to the title.
+## First sign-in on a device → onboarding tutorial (Phase 5 T11, also 튜토리얼 다시 보기) → title.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
 const MATCH_SCENE := preload("res://src/main/main.tscn")
@@ -24,7 +23,7 @@ const SELECT_STEPS: Array[String] = [CHARACTER, ARENA]
 var animate: bool = true
 var gate: LoginGate = null
 ## Tests point it at their own settings file.
-var tutorial: TutorialProgress = null
+var tutorial: TutorialProgress = TutorialProgress.new()
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 
 var _backdrop: MenuBackdrop
@@ -49,8 +48,6 @@ func _ready() -> void:
 	_router.screen_shown.connect(_on_screen_shown)
 	if gate == null:
 		gate = LoginGate.create_default()
-	if tutorial == null:
-		tutorial = TutorialProgress.new()
 	add_child(gate)
 	gate.signed_in.connect(_on_signed_in)
 	gate.session_lost.connect(_on_restore_failed.bind(true))
@@ -125,6 +122,8 @@ func _on_restore_failed(session_dropped: bool) -> void:
 
 
 func _on_mode_chosen(mode: String) -> void:
+	if _router.is_busy():
+		return  # a key press on the title while a curtain (e.g. the first-login tutorial) comes down
 	track.call("mode_selected", {"mode": mode})
 	var setup: MatchSetup
 	match mode:
@@ -176,6 +175,8 @@ func _start_match(setup: MatchSetup) -> void:
 
 
 func _start_tutorial(source: String) -> void:
+	if _router.is_busy() or _router.current_id() == TUTORIAL:
+		return
 	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title), true, _detach_backdrop)
 
 

@@ -3,7 +3,8 @@ extends RefCounted
 ## The tutorial's mission order and funnel tracking (Phase 5 T11, tracking-plan §3.3): steps in
 ## TutorialSteps order, each a run of goals checked every tick by TutorialDetector. A finished
 ## step pauses in CELEBRATING until advance() (the scene shows its success feedback first); the
-## last one finishes the tutorial at once. skip() ends it from any step. Both mark
+## last one finishes the tutorial at once. skip() ends it from any step (during the success
+## feedback it counts against the next mission, which the player never saw start). Both mark
 ## TutorialProgress so a first-login tutorial is not offered again. Event index is 1-based (the
 ## card's "n/8").
 
@@ -81,8 +82,12 @@ func on_tick(prev: Dictionary, curr: Dictionary, events: Array, input: InputFram
 		config: GameConfig) -> void:
 	if _phase == Phase.RUNNING:
 		_attempts += TutorialAttempts.presses(TutorialSteps.tries(goal()), _last_input, input)
-		if TutorialDetector.met(goal(), prev, curr, events, slot, config, _memo):
+		if TutorialDetector.met(goal(), prev, curr, events, slot, config, _memo, input):
 			_goal_met()
+		elif goal() == TutorialSteps.G_THROW and TutorialDetector.grab_lost(events, slot):
+			_goal = 0  # the hold timed out: grab again
+			_memo = {}
+			goal_changed.emit(step(), goal())
 	_last_input = input
 
 
@@ -95,9 +100,11 @@ func advance() -> void:
 func skip() -> void:
 	if _phase == Phase.DONE or _phase == Phase.IDLE:
 		return
+	var between := _phase == Phase.CELEBRATING
+	var at := _index + 1 if between else _index
 	_phase = Phase.DONE
-	_track.call("tutorial_skipped", {"step": step(), "index": _index + 1,
-		"ms_in_step": _now() - _step_ms, "total_ms": _now() - _started_ms})
+	_track.call("tutorial_skipped", {"step": TutorialSteps.id_at(at), "index": at + 1,
+		"ms_in_step": 0 if between else _now() - _step_ms, "total_ms": _now() - _started_ms})
 	_progress.mark(TutorialProgress.SKIPPED)
 	finished.emit(false)
 
