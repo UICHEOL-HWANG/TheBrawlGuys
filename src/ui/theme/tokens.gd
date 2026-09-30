@@ -35,6 +35,8 @@ const UI_TEXT_SOFT := Color("#3F7470")
 const UI_SHADOW := Color("#17525A40")
 const UI_ACCENT := FIRE
 const TRANSPARENT := Color("#FFFFFF00")
+## Multiplier identity for textured materials (soft toon albedo), not a UI color.
+const WHITE := Color("#FFFFFF")
 ## Translucent cream surfaces for touch controls over the 3D scene (design.md DS-LAY-01).
 const UI_SURFACE_50 := Color("#FFFDF680")
 const UI_SURFACE_70 := Color("#FFFDF6B3")

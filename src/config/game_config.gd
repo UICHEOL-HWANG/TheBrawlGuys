@@ -166,6 +166,10 @@ extends Resource
 @export_range(0, 2, 1) var touch_layout: int = 0
 @export_range(96.0, 300.0, 2.0) var touch_side_diameter: float = 116.0
 
+@export_group("Look")
+## Character look preset for the gate: 0 = A, 1 = B, 2 = C (context F6).
+@export_range(0, 2, 1) var look_preset: int = 0
+
 
 ## Groups whose values change the simulation. Only these enter the fingerprint (context F1):
 ## camera, touch, feel, bot, loop and later presentation groups never alter a replay, so they
@@ -173,7 +177,7 @@ extends Resource
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 ]
-const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch"]
+const NON_SIM_GROUPS: Array[String] = ["Bot", "Feel", "Loop", "Camera", "Touch", "Look"]
 
 
 ## Hash of every sim-group variable (Phase 1 D1, scoped in Phase 3 F1). Snapshots and replays

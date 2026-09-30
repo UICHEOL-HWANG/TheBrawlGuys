@@ -52,3 +52,19 @@ ds_band_softness={
 "type": "float",
 "value": 0.12
 }
+ds_rim_strength={
+"type": "float",
+"value": 0.35
+}
+ds_char_saturation={
+"type": "float",
+"value": 1.0
+}
+ds_outline_width={
+"type": "float",
+"value": 0.0
+}
+ds_outline_color={
+"type": "color",
+"value": Color(0.0902, 0.3216, 0.3529, 1)
+}
