@@ -18,6 +18,18 @@ func test_render_is_deterministic_and_audible() -> void:
 	assert_lte(SfxSynth.peak(a), 1.0)
 
 
+func test_battle_layers_never_clip_when_summed() -> void:
+	var pair := MusicSequencer.render_pair(MusicSequencer.SONGS["battle_base"], MusicSequencer.SONGS["battle_intense"])
+	assert_eq(pair.size(), 2)
+	assert_eq(pair[0].size(), pair[1].size())
+	var sum := PackedFloat32Array()
+	sum.resize(pair[0].size())
+	for i: int in sum.size():
+		sum[i] = pair[0][i] + pair[1][i]
+	assert_lte(SfxSynth.peak(sum), MusicSequencer.MASTER_PEAK + 1e-4, "base + intense stays under the master peak")
+	assert_gt(SfxSynth.peak(pair[1]), 0.05, "the intense layer is still audible")
+
+
 func test_midi_to_hz() -> void:
 	assert_almost_eq(MusicSequencer.midi_to_hz(69), 440.0, 0.001)
 	assert_almost_eq(MusicSequencer.midi_to_hz(81), 880.0, 0.001)

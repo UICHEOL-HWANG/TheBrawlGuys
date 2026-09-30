@@ -39,7 +39,38 @@ static func midi_to_hz(midi: int) -> float:
 	return 440.0 * pow(2.0, float(midi - 69) / 12.0)
 
 
+## One song normalized to MASTER_PEAK on its own.
 static func render(song: Dictionary) -> PackedFloat32Array:
+	var mix := _mix(song)
+	_scale(mix, _gain_for(SfxSynth.peak(mix)))
+	return mix
+
+
+## Two layers that play together (battle base + intense) share ONE gain so their sum peaks at
+## MASTER_PEAK instead of up to 2x that; the relative balance between the layers is kept.
+static func render_pair(a: Dictionary, b: Dictionary) -> Array[PackedFloat32Array]:
+	var mix_a := _mix(a)
+	var mix_b := _mix(b)
+	var summed := mix_a.duplicate()
+	for i: int in mini(summed.size(), mix_b.size()):
+		summed[i] += mix_b[i]
+	var gain := _gain_for(SfxSynth.peak(summed))
+	_scale(mix_a, gain)
+	_scale(mix_b, gain)
+	var out: Array[PackedFloat32Array] = [mix_a, mix_b]
+	return out
+
+
+static func _gain_for(peak: float) -> float:
+	return MASTER_PEAK / peak if peak > 0.0 else 1.0
+
+
+static func _scale(mix: PackedFloat32Array, gain: float) -> void:
+	for i: int in mix.size():
+		mix[i] *= gain
+
+
+static func _mix(song: Dictionary) -> PackedFloat32Array:
 	var total := length_samples(song)
 	var mix := PackedFloat32Array()
 	mix.resize(total)
@@ -55,10 +86,6 @@ static func render(song: Dictionary) -> PackedFloat32Array:
 					var j := (start + i) % total  # wrap tails so the loop seam stays seamless
 					mix[j] += voice[i]
 				repeat += PHRASE_BEATS if String(track["instrument"]) in ["bass", "marimba", "whistle"] else song_beats
-	var pk := SfxSynth.peak(mix)
-	if pk > 0.0:
-		for i: int in total:
-			mix[i] *= MASTER_PEAK / pk
 	return mix
 
 
