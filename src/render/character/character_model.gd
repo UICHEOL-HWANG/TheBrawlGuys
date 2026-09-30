@@ -11,6 +11,7 @@ const HAND_BONE := "handslot.r"
 
 var _root: Node3D
 var _player: AnimationPlayer
+var _character_id: String = ""
 
 
 func setup(entry: Dictionary, config: GameConfig) -> bool:
@@ -20,6 +21,7 @@ func setup(entry: Dictionary, config: GameConfig) -> bool:
 		push_error("CharacterModel: cannot load %s" % entry["path"])
 		return false
 	_root = scene.instantiate() as Node3D
+	_character_id = String(entry.get("name", "")).to_lower()
 	add_child(_root)
 	_root.rotation.y = FACING_OFFSET
 	var players := _root.find_children("*", "AnimationPlayer", true, false)
@@ -30,7 +32,7 @@ func setup(entry: Dictionary, config: GameConfig) -> bool:
 		if hidden.has(String(mesh.name)):
 			mesh.visible = false
 		else:
-			_apply_toon(mesh)
+			apply_toon(mesh)
 	_fit(config.fighter_height)
 	return true
 
@@ -39,12 +41,22 @@ func animation_player() -> AnimationPlayer:
 	return _player
 
 
+## Lowercase character id of the loaded glb ("knight"), matching CharacterData ids.
+func character_id() -> String:
+	return _character_id
+
+
 ## The right-hand weapon slot of the KayKit rig (BoneAttachment3D on handslot.r), or null.
 func hand_slot() -> Node3D:
+	return bone_slot(HAND_BONE)
+
+
+## The KayKit BoneAttachment3D riding a bone (e.g. "handslot.l", "head"), or null.
+func bone_slot(bone: String) -> Node3D:
 	if _root == null:
 		return null
 	for node: Node in _root.find_children("*", "BoneAttachment3D", true, false):
-		if (node as BoneAttachment3D).bone_name == HAND_BONE:
+		if (node as BoneAttachment3D).bone_name == bone:
 			return node as Node3D
 	return null
 
@@ -62,7 +74,8 @@ func foot_y() -> float:
 	return _bounds().position.y
 
 
-static func _apply_toon(mesh: MeshInstance3D) -> void:
+## Switches every surface of a KayKit mesh to the soft toon character material.
+static func apply_toon(mesh: MeshInstance3D) -> void:
 	for i: int in mesh.get_surface_override_material_count():
 		var src := mesh.get_active_material(i)
 		var tex: Texture2D = (src as BaseMaterial3D).albedo_texture if src is BaseMaterial3D else null
