@@ -48,3 +48,8 @@
 - 트래킹: 스키마 변경 없음. 경기 시작 때 `main`이 `LocalPlayers.input_devices()`로 로컬 슬롯의 `input_device`를 채운다(패드 = `gamepad`, P1 기본 = 플랫폼, P2 = `keyboard`) → `match_ended.players[]`/`match_players.input_device`. `match_started.input_device`는 여전히 P1 슬롯
 - 키 바: `KeyHintSource.caps(prefix)`, 필살기 키캡(`special`, 동시 입력)이 마지막. 게이지 가득(view `special` ≠ "" 이고 `gauge` ≥ 100)이면 `fire` 링. 로컬 2인은 P1 왼쪽·P2 오른쪽 바 + "P1/P2" 태그, 칩은 P2 바에 하나. 두 바가 안 들어가면 compact(간격·여백만 줄임). 폰 배율 1.6(812×375, 논리 폭 1458)에서 compact로 들어감(`evidence/key-hint-2p-phone.png`)
 - 주의: `main.gd`는 아직 `World.new`에 캐릭터를 넘기지 않아 실제 경기에서는 모두 클래식 파이터(필살기 없음) → 게이지 링은 T9에서 캐릭터를 넘기면 보인다(증거 캡처는 파이터 게이지를 강제로 채움). 리플레이 검증기도 캐릭터를 모르므로 T9에서 함께 처리
+
+## T8 스타일 실루엣 시안 (2026-09-30, `feat/p5-silhouette`) — 🖼 승인 대기
+- 디버그 전용 `src/debug/silhouette/` (`StyleMockup` + A `MockupGear` · B `MockupTrim` · C `MockupStance`/`StyleIcon`). 기본 룩(`CharacterCatalog`·`FighterView`)은 건드리지 않음 (`test_style_mockup` 확인)
+- 캡처 `scripts/capture_silhouette.gd` → `evidence/silhouette-{base,A,B,C}{,-bw,-sil}.png`, 비교 `evidence/silhouette-compare.html`
+- A 장비(장갑·대검·지팡이+구슬, 모자) 실루엣 3/3 · B 악센트 트림 흑백에서 0/3 · C 자세+아이콘 아이콘으로만 3/3. 추천 A (아이템 들 때 장비 숨김 규칙 필요)
