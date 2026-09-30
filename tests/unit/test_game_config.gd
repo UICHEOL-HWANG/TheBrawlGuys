@@ -20,7 +20,7 @@ func test_defaults_match_prd_section_4_5() -> void:
 
 func test_camera_defaults_match_gd_cam_01() -> void:
 	var c := GameConfig.new()
-	assert_eq(c.cam_pitch, 60.0)
+	assert_eq(c.cam_pitch, 42.0)
 
 
 func test_default_resource_loads_as_game_config() -> void:

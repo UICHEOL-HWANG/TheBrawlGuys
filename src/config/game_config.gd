@@ -181,11 +181,11 @@ extends StyleConfig
 @export_range(1, 10, 1) var max_ticks_per_frame: int = 5
 
 @export_group("Camera")
-@export_range(30.0, 85.0, 0.5) var cam_pitch: float = 60.0
-@export_range(0.0, 10.0, 0.1) var cam_margin: float = 3.0
+@export_range(30.0, 85.0, 0.5) var cam_pitch: float = 42.0
+@export_range(0.0, 10.0, 0.1) var cam_margin: float = 1.5
 ## Fraction of the arena radius the camera always keeps in frame (1 = whole arena).
-@export_range(0.2, 1.0, 0.05) var cam_arena_share: float = 0.6
-@export_range(5.0, 40.0, 0.5) var cam_zoom_min: float = 14.0
+@export_range(0.2, 1.0, 0.05) var cam_arena_share: float = 0.2
+@export_range(5.0, 40.0, 0.5) var cam_zoom_min: float = 7.0
 @export_range(10.0, 150.0, 0.5) var cam_zoom_max: float = 70.0
 @export_range(0.0, 20.0, 0.1) var cam_smooth: float = 6.0
 @export_range(10.0, 70.0, 0.5) var cam_fov: float = 40.0
