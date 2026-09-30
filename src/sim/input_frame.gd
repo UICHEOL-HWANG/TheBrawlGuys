@@ -31,8 +31,11 @@ func copy() -> InputFrame:
 	return f
 
 
+## Never -0.0: a tiny negative intent is plain zero, as the input log stores it (InputCodec);
+## -0.0 would flip an atan2 facing or aim and the replay would drift.
 static func quantize_axis(v: float) -> float:
-	return roundf(clampf(v, -1.0, 1.0) * MOVE_STEPS) / MOVE_STEPS
+	var q := roundf(clampf(v, -1.0, 1.0) * MOVE_STEPS) / MOVE_STEPS
+	return 0.0 if q == 0.0 else q
 
 
 static func make(mx: float, mz: float, p_jump: bool = false, p_light: bool = false,
