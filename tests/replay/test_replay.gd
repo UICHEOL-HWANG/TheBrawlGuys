@@ -7,7 +7,7 @@ extends GutTest
 const SEED := 7
 const TICKS := 1200
 const HALF := 600
-const GOLDEN_HASH := 484447706
+const GOLDEN_HASH := 2865946993
 ## Sim behavior without the config fingerprint (context F1). Changes only with deliberate sim
 ## changes, each explained in its commit message (Phase 4: snapshot v5 arena/burn fields, then
 ## the carried-over combat fixes). Presentation work must never move it.

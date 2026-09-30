@@ -110,9 +110,11 @@ extends Resource
 @export_range(0.0, 30.0, 0.1) var bat_base_knockback: float = 8.0
 @export_range(0.0, 0.5, 0.005) var bat_knockback_scaling: float = 0.1
 @export_range(0.0, 2.0, 0.05) var bat_launch_angle_y: float = 0.5
-@export_range(0, 40, 1) var bat_startup_ticks: int = 6
+## Startup equals the light attack so a bat swung into a light attack trades instead of being
+## interrupted (Phase 3 carry-over); the longer recovery keeps a whiffed swing punishable.
+@export_range(0, 40, 1) var bat_startup_ticks: int = 3
 @export_range(1, 30, 1) var bat_active_ticks: int = 4
-@export_range(0, 60, 1) var bat_recovery_ticks: int = 14
+@export_range(0, 60, 1) var bat_recovery_ticks: int = 18
 @export_range(0.0, 3.0, 0.05) var bat_hitbox_forward: float = 1.2
 @export_range(0.1, 2.0, 0.05) var bat_hitbox_half_width: float = 0.6
 ## Lit on throw; explodes this long after (the throw tick counts as the first tick, E7).
