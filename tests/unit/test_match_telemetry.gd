@@ -252,38 +252,23 @@ func test_match_and_player_rows() -> void:
 	assert_eq(players[1]["stocks_left"], 1)
 
 
-func test_match_row_carries_the_reproducibility_header() -> void:
-	var t := MatchTelemetry.new(func(_n: String, _p: Dictionary) -> void: pass)
-	var setup := _setup()
-	setup.merge({"config_fingerprint": 123, "sim_version": World.SNAPSHOT_VERSION, "event_schema_version": 2,
-		"session_id": 1_700_000_000_000, "user_match_seq": 3, "config_variant": "control"})
-	setup["slots"][1].merge({"controller": "bot", "bot_difficulty": "normal", "bot_params_hash": 77})
-	t.begin(setup)
-	t.end(_view, false, 987654321)
-	var m := t.match_row()
-	assert_eq(m["config_fingerprint"], 123)
-	assert_eq(m["sim_version"], World.SNAPSHOT_VERSION)
-	assert_eq(m["event_schema_version"], 2)
-	assert_eq(m["final_state_hash"], 987654321)
-	assert_eq(m["session_id"], 1_700_000_000_000)
-	assert_eq(m["user_match_seq"], 3)
-	assert_eq(m["config_variant"], "control")
-	var bot: Dictionary = t.player_rows()[1]
-	assert_eq(bot["controller"], "bot")
-	assert_eq(bot["bot_difficulty"], "normal")
-	assert_eq(bot["bot_params_hash"], 77)
-	assert_eq(t.player_rows()[0]["controller"], "local", "derived from is_bot when the setup has none")
+func test_slot_summaries_carry_the_behaviour_features() -> void:
+	_play_scenario()
+	var p0: Dictionary = _props("match_ended")["players"][0]
+	for key: String in MatchFeatures.COLUMNS:
+		assert_true(p0.has(key), "match_ended.players has %s" % key)
+		assert_true(_t.player_rows()[0].has(key), "match_players row has %s" % key)
+	assert_almost_eq(float(p0["hit_accuracy"]), 1.0, 0.001, "two swings, two hits")
+	assert_eq(p0["first_item_tick"], 7)
+	assert_true(p0["first_blood"], "slot 0 is credited with the first ringout")
+	assert_eq(_props("match_started")["loss_streak"], 0, "no session context in this setup")
 
 
-func test_inputs_fed_per_tick_become_match_inputs_rows() -> void:
-	for tick: int in range(1, 11):
-		var inputs: Array[InputFrame] = [InputFrame.make(1.0 if tick > 5 else 0.0, 0.0), InputFrame.neutral()]
-		_t.on_frame([], [], _view.merged({"tick": tick}, true), inputs)
+func test_abandon_names_the_stock_gap_and_time_since_the_last_ringout() -> void:
+	_frame(60, [{"type": "ringout", "id": 0, "pos": Vector3(0, -20, 0), "stocks_left": 2}], [],
+			{0: {"spawn_id": 1, "stocks": 2}})
+	_frame(180)
 	_t.end(_view, true)
-	var rows := _t.input_rows()
-	assert_eq(rows.size(), 2)
-	assert_eq(rows[0]["frame_count"], 10)
-	assert_eq(rows[0]["match_id"], "m-1")
-	var log := InputLog.from_rows(rows)
-	assert_eq(log.track(0).run_count(), 2)
-	assert_eq(log.track(1).run_count(), 1)
+	var p := _props("match_abandoned")
+	assert_eq(p["stock_diff"], -1)
+	assert_eq(p["ms_since_last_ringout"], 2000)

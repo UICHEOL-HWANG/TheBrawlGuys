@@ -23,7 +23,7 @@ CLI를 쓸 경우: `npx supabase link --project-ref <ref>` 후 `npx supabase db 
 - `matches`는 `user_id = auth.uid()`인 행만 insert/select. `match_players`·`match_events`·`match_inputs`는 자기 `matches` 행에 딸린 것만 가능.
 - 자식 테이블 insert 정책은 `matches`를 조회하므로 `matches_select_own` 정책을 지우면 안 된다.
 - 삭제 정책이 없다. 사용자 데이터는 계정 삭제 시 cascade로만 지워진다.
-- 텍스트 길이·`payload` 크기(4 KB)·`match_inputs.frames` 크기(256 KB)·슬롯 범위에 check 제약이 있다. 계정당 insert 양 제한(쿼터)은 아직 없다.
+- 텍스트 길이·`payload` 크기(4 KB)·`match_inputs.frames` 크기(1 MB)·슬롯 범위에 check 제약이 있다. 계정당 insert 양 제한(쿼터)은 아직 없다.
 - `auth.users`에 사용자가 생기면 `handle_new_user` 트리거(security definer, `search_path = ''`)가 `profiles` 행을 만든다.
 
 ## 기존 사용자 프로필 채우기 (선택)
