@@ -31,6 +31,16 @@ func test_slots_name_their_controller_and_bot_tuning() -> void:
 	assert_eq(slots[1]["bot_params_hash"], TelemetrySetup.bot_params_hash(GameConfig.new()))
 
 
+func test_slots_name_the_style_of_their_character() -> void:
+	var setup := MatchSetup.vs_bots(3, 9)
+	setup.set_characters({0: CharacterData.KNIGHT, 1: CharacterData.MAGE})
+	var slots: Array = TelemetrySetup.from_match_setup(setup)["slots"]
+	assert_eq([slots[0]["character"], slots[0]["style"]], [CharacterData.KNIGHT, StyleCatalog.WEAPON])
+	assert_eq([slots[1]["character"], slots[1]["style"]], [CharacterData.MAGE, StyleCatalog.RANGED])
+	assert_eq([slots[2]["character"], slots[2]["style"]], [CharacterData.DEFAULT, StyleCatalog.CLASSIC],
+			"a slot without a character is the classic fighter")
+
+
 func test_bot_params_hash_follows_the_bot_group_only() -> void:
 	var base := GameConfig.new()
 	var tuned := GameConfig.new()

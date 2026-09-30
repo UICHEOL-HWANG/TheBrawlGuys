@@ -52,8 +52,15 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_phase5_specials() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 4)
+func test_schema_version_is_bumped_for_phase5_character_select() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 5)
+
+
+func test_character_selected_names_the_slot_style_and_device() -> void:
+	var full := {"slot": 1, "character": "knight", "style": "weapon", "is_bot": false, "input_device": "gamepad"}
+	assert_eq(EventCatalog.validate("character_selected", full).size(), 0)
+	assert_eq(EventCatalog.validate("character_selected", {"slot": 1, "character": "knight"}).size(), 3,
+			"style, is_bot, input_device")
 
 
 func test_special_events_require_their_context() -> void:

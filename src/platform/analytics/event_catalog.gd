@@ -7,8 +7,10 @@ extends RefCounted
 ## Bumped with every change to event names, properties or Supabase row shapes (tracking-plan §7).
 ## Stamped on matches rows and sent as an Amplitude super property. 1 = platform A6,
 ## 2 = A7 replay header, 3 = A8 features and session / load / result / perf events,
-## 4 = Phase 5 special events and the match_players.special_hits column.
-const SCHEMA_VERSION := 4
+## 4 = Phase 5 special events and the match_players.special_hits column, 5 = Phase 5 character
+## select (character_selected is_bot/input_device, characters reach the sim, character ids and
+## styles on match_players and match_ended.players[]).
+const SCHEMA_VERSION := 5
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -34,7 +36,7 @@ const EVENTS: Dictionary = {
 	# Menu funnel
 	"screen_viewed": ["screen"],
 	"mode_selected": ["mode"],
-	"character_selected": ["slot", "character", "style"],
+	"character_selected": ["slot", "character", "style", "is_bot", "input_device"],
 	"arena_selected": ["arena"],
 	"select_cancelled": ["screen"],
 	# Match

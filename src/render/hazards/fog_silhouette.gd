@@ -1,6 +1,6 @@
 class_name FogSilhouette
 extends Node3D
-## A fighter seen through the fog (design.md DS-VIS-03: foot ring and silhouette stay visible
+## A fighter seen through the fog (design.md DS-VIS-03: shaped foot ring and silhouette stay visible
 ## over fog and shadows): a soft body silhouette and the foot ring in the player color, drawn on
 ## top of everything (no depth test, no fog) and faded in with the fog amount. Origin at the feet.
 
@@ -8,7 +8,6 @@ const BODY_ALPHA := 0.5
 const RING_ALPHA := 0.9
 const RING_INNER_RATIO := 1.15
 const RING_OUTER_RATIO := 1.5
-const RING_FLATTEN := 0.08
 const RING_LIFT := 0.03
 const RENDER_PRIORITY := 10
 
@@ -31,13 +30,10 @@ func setup(index: int, config: GameConfig) -> void:
 	body.material_override = _body_mat
 	body.position.y = config.fighter_height * 0.5
 	add_child(body)
-	var torus := TorusMesh.new()
-	torus.inner_radius = config.fighter_radius * RING_INNER_RATIO
-	torus.outer_radius = config.fighter_radius * RING_OUTER_RATIO
 	var ring := MeshInstance3D.new()
-	ring.mesh = torus
+	ring.mesh = PlayerRingMesh.build(PlayerStyle.shape(index), config.fighter_radius * RING_INNER_RATIO,
+			config.fighter_radius * RING_OUTER_RATIO)
 	ring.material_override = _ring_mat
-	ring.scale = Vector3(1.0, RING_FLATTEN, 1.0)
 	ring.position.y = RING_LIFT
 	add_child(ring)
 	set_amount(0.0)

@@ -19,6 +19,7 @@ const COMPONENTS: Array[Array] = [
 	["LoginPanel · DS-CMP-14", "res://src/ui/components/login_panel/login_panel.tscn"],
 	["KeyHintBar · DS-CMP-16", "res://src/ui/components/key_hint_bar/key_hint_bar.tscn"],
 	["SelectCard · DS-CMP-08", "res://src/ui/components/select_card/select_card.tscn"],
+	["PlayerSlot · DS-CMP-10", "res://src/ui/components/player_slot/player_slot.tscn"],
 	["TextField · DS-CMP-17", "res://src/ui/components/text_field/text_field.tscn"],
 	["CodeInput · DS-CMP-18", "res://src/ui/components/code_input/code_input.tscn"],
 ]

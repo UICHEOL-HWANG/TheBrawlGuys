@@ -89,11 +89,14 @@ func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = 
 	var players: Array = []
 	for s: SlotStats in _stats:
 		var summary := s.to_summary()
+		var slot_setup: Dictionary = _setup["slots"][s.slot]
+		summary["character"] = slot_setup["character"]
+		summary["style"] = slot_setup["style"]
 		summary["result"] = MatchSummary.result(s.slot, over, winner)
 		summary["stocks_left"] = MatchSummary.stocks_left(view, s.slot)
 		summary.merge(_features.summary(s.slot, summary, ticks))
 		players.append(summary)
-		_player_rows.append(RawRows.player_row(match_id(), _setup["slots"][s.slot], summary))
+		_player_rows.append(RawRows.player_row(match_id(), slot_setup, summary))
 	var local_slot := int(_setup.get("local_slot", 0))
 	var local_result := MatchSummary.result(local_slot, over, winner)
 	_match_row = RawRows.match_row(_setup, ticks, winner, local_result, final_state_hash)

@@ -4,13 +4,16 @@ extends RefCounted
 ## World's final state hash. Returns {"world": World, "telemetry": MatchTelemetry, "sent": Array}.
 
 
-## config: the sim tuning (default GameConfig.new()).
-static func play(arena_id: String, players: int, seed: int, max_ticks: int, config: GameConfig = null) -> Dictionary:
+## config: the sim tuning (default GameConfig.new()). characters: slot -> CharacterData id (none =
+## classic fighters).
+static func play(arena_id: String, players: int, seed: int, max_ticks: int, config: GameConfig = null,
+		characters: Dictionary = {}) -> Dictionary:
 	if config == null:
 		config = GameConfig.new()
 	var setup := MatchSetup.all_bots(players, seed)
 	setup.arena_id = arena_id
-	var world := World.new(config, seed, players, setup.build_arena(config))
+	setup.set_characters(characters)
+	var world := World.new(config, seed, players, setup.build_arena(config), setup.characters())
 	var sent: Array = []
 	var telemetry := MatchTelemetry.new(func(n: String, p: Dictionary) -> void: sent.append([n, p]))
 	telemetry.begin(TelemetrySetup.from_match_setup(setup, config, {"session_id": 1, "user_match_seq": 1}))

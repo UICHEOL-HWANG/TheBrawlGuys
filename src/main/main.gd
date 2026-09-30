@@ -53,7 +53,7 @@ func _ready() -> void:
 	_config.changed.connect(func() -> void: _ticker.max_ticks_per_frame = _config.max_ticks_per_frame)
 	_stage = MatchStage.new()
 	add_child(_stage)
-	_stage.setup(_config, setup.seed, setup.player_count(), setup.arena_id)
+	_stage.setup(_config, setup.seed, setup.player_count(), setup.arena_id, setup.characters())
 	_presentation = MatchPresentation.new()
 	add_child(_presentation)
 	_presentation.setup(_config)
@@ -111,7 +111,7 @@ func _start_match() -> void:
 	_tracking.close_for_restart(_curr_state, _result_shown)
 	_locals.reset()
 	_stage.clear_items()
-	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config))
+	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config), setup.characters())
 	_bots.clear()
 	for slot: int in setup.bot_slots():
 		_bots.append(BotController.new(slot, _config))

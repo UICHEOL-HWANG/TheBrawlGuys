@@ -29,3 +29,12 @@ const CHARACTERS: Array[Dictionary] = [
 
 static func for_player(index: int) -> Dictionary:
 	return CHARACTERS[posmod(index, CHARACTERS.size())]
+
+
+## The model of a CharacterData id (Phase 5 T9: the chosen character, whatever the slot); the
+## classic fighter ("" or unknown) keeps the slot's model.
+static func for_character(character_id: String, index: int) -> Dictionary:
+	for c: Dictionary in CHARACTERS:
+		if String(c["name"]).to_lower() == character_id:
+			return c
+	return for_player(index)

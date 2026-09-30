@@ -68,3 +68,26 @@ func test_broken_exports_are_errors_not_crashes() -> void:
 
 func test_verify_file_reads_the_fixture() -> void:
 	assert_true(ReplayVerifier.verify_file(FIXTURE, GameConfig.new())["ok"])
+
+
+func test_character_matches_replay_with_their_characters() -> void:
+	var picks := {0: CharacterData.MAGE, 1: CharacterData.BARBARIAN}
+	var run := BotMatchRun.play(ARENA, 2, 5, TICKS, null, picks)
+	var export := MatchExport.build(run["telemetry"])
+	assert_eq(export["players"][0]["character"], CharacterData.MAGE, "match_players carries the character")
+	var result := ReplayVerifier.verify(export, GameConfig.new())
+	assert_true(result["ok"], ReplayVerifier.line(result))
+	var stripped := export.duplicate(true)
+	for p: Dictionary in stripped["players"]:
+		p["character"] = CharacterData.DEFAULT
+	assert_eq(ReplayVerifier.verify(stripped, GameConfig.new())["reason"], ReplayVerifier.REASON_HASH,
+			"the characters change the match, so the verifier must use them")
+
+
+func test_exports_before_characters_reached_the_sim_replay_as_classic() -> void:
+	var old := _export.duplicate(true)
+	old["match"]["event_schema_version"] = ReplayVerifier.CHARACTERS_SINCE_SCHEMA - 1
+	for p: Dictionary in old["players"]:
+		p["character"] = "Knight"  # schema 4 stored the slot model name; the sim ran classic
+	var result := ReplayVerifier.verify(old, GameConfig.new())
+	assert_true(result["ok"], ReplayVerifier.line(result))

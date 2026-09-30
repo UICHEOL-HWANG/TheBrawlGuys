@@ -2,7 +2,8 @@ class_name MatchSetup
 extends RefCounted
 ## Everything a match needs to start (platform B1, docs/design.md DS-LAY-03): mode, arena, seed
 ## and one entry per slot {slot, character, controller: "local"|"bot", input_device}. Menu screens
-## fill it (mode today, character and arena select later); MatchScene and telemetry only read it.
+## fill it (mode, then the SELECT_STEPS: characters and arena); MatchScene and telemetry only read
+## it. character is a CharacterData id ("" = the classic fighter).
 
 const MODE_BOT := "bot"
 const MODE_LOCAL_2P := "local_2p"
@@ -24,7 +25,8 @@ var seed: int = DEFAULT_SEED
 var slots: Array[Dictionary] = []
 
 
-## One local player in local_slot_index, bots everywhere else (-1 = bots only).
+## One local player in local_slot_index, bots everywhere else (-1 = bots only). Every slot starts
+## as the classic fighter (CharacterData.DEFAULT) until the character select assigns characters.
 static func vs_bots(player_count: int = DEFAULT_PLAYERS, p_seed: int = DEFAULT_SEED,
 		local_slot_index: int = 0) -> MatchSetup:
 	var s := MatchSetup.new()
@@ -37,7 +39,7 @@ static func vs_bots(player_count: int = DEFAULT_PLAYERS, p_seed: int = DEFAULT_S
 
 
 ## Local 2-player (PRD-LOCAL-01): P1 and P2 on slots 0 and 1 (P2 on the keyboard until a pad is
-## assigned at match start), bots fill any slot after them. Default characters per slot.
+## assigned at match start), bots fill any slot after them.
 static func local_versus(player_count: int = DEFAULT_PLAYERS, p_seed: int = DEFAULT_SEED) -> MatchSetup:
 	var s := vs_bots(player_count, p_seed)
 	s.mode = MODE_LOCAL_2P
@@ -52,8 +54,8 @@ static func all_bots(player_count: int, p_seed: int = DEFAULT_SEED) -> MatchSetu
 
 
 static func slot_entry(slot: int, controller: String, input_device: String) -> Dictionary:
-	return {"slot": slot, "character": String(CharacterCatalog.for_player(slot)["name"]),
-		"controller": controller, "input_device": input_device}
+	return {"slot": slot, "character": CharacterData.DEFAULT, "controller": controller,
+		"input_device": input_device}
 
 
 ## A fresh sim arena for arena_id (Phase 4 ArenaCatalog; unknown ids fall back to classic).
@@ -94,6 +96,37 @@ func set_input_devices(devices: Dictionary) -> void:
 			slots[i] = updated
 
 
+## Each slot's CharacterData id in slot order (what World.new and the fighter views take).
+func characters() -> Array[String]:
+	var out: Array[String] = []
+	for s: Dictionary in slots:
+		out.append(String(s["character"]))
+	return out
+
+
+## slot -> CharacterData id for the listed slots; others keep theirs. Entries are replaced.
+func set_characters(picks: Dictionary) -> void:
+	for i: int in slots.size():
+		var slot := int(slots[i]["slot"])
+		if picks.has(slot):
+			slots[i] = slots[i].merged({"character": String(picks[slot])}, true)
+
+
+## The humans' picks (slot -> id), then every bot slot gets a character the humans did not take,
+## all different, drawn from the match seed (CharacterPicks): same seed and picks, same bots.
+func assign_characters(human_picks: Dictionary) -> void:
+	set_characters(human_picks)
+	var taken: Array[String] = []
+	for slot: Variant in human_picks:
+		taken.append(String(human_picks[slot]))
+	var bots := bot_slots()
+	var drawn := CharacterPicks.for_bots(seed, taken, bots.size())
+	var picks := {}
+	for i: int in bots.size():
+		picks[bots[i]] = drawn[i]
+	set_characters(picks)
+
+
 func bot_slots() -> Array[int]:
 	var out: Array[int] = []
 	for s: Dictionary in slots:
@@ -125,4 +158,7 @@ func validate() -> PackedStringArray:
 			errors.append("slot %d: slot index must be %d" % [i, i])
 		if not CONTROLLERS.has(String(s.get("controller", ""))):
 			errors.append("slot %d: unknown controller '%s'" % [i, s.get("controller", "")])
+		var character := String(s.get("character", CharacterData.DEFAULT))
+		if character != CharacterData.DEFAULT and not CharacterData.IDS.has(character):
+			errors.append("slot %d: unknown character '%s'" % [i, character])
 	return errors

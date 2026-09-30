@@ -1,23 +1,15 @@
 class_name FighterView
 extends Node3D
-## Draws one fighter (design.md DS-VIS-03, GD-FEEL-03): the KayKit character for its slot (capsule fallback if the model fails to load),
-## with a flat foot ring and a P-label. Interpolates prev -> curr by alpha, snaps when
+## Draws one fighter (design.md DS-VIS-03, GD-FEEL-03): the KayKit model of its character (the
+## slot's model for the classic fighter; capsule fallback if the model fails to load), with its
+## FighterIdentity (shaped foot ring + P-label). Interpolates prev -> curr by alpha, snaps when
 ## spawn_id changes (respawn), blinks while invulnerable, hides when KO. Reads view values only.
 ## Shows the carried item in hand, with use dots for bats (DS-VIS-05).
 
 const RIM := 0.35
-const RING_INNER_RATIO := 1.15
-const RING_OUTER_RATIO := 1.45
-const RING_FLATTEN := 0.08
-const RING_LIFT := 0.02
-const LABEL_GAP := 0.6
-const LABEL_PIXEL_SIZE := 0.01
 const BLINK_END_SECONDS := 0.5
 const HAND_SIDE := 0.9
 const HAND_FORWARD := 0.4
-const DOT_RADIUS := 0.06
-const DOT_SPACING := 0.16
-const DOT_GAP := 0.25
 const BUBBLE_RADIUS_RATIO := 0.62
 const WOBBLE_SQUASH := Vector3(1.12, 0.88, 1.12)
 
@@ -25,79 +17,31 @@ var _config: GameConfig
 var _body: MeshInstance3D
 var _model: CharacterModel = null
 var _animator: CharacterAnimator = null
-var _ring: MeshInstance3D
-var _label: Label3D
+var _identity: FighterIdentity
 var _held: HeldItem
 var _charge_glow: ChargeGlow
-var _dots: Array[MeshInstance3D] = []
+var _dots: BatUseDots
 var _bubble: MeshInstance3D
 var _blob: BlobShadow
 var _blob_wanted: bool = false
 
 
-func setup(index: int, config: GameConfig) -> void:
+## character: the slot's CharacterData id — its model (Phase 5 T9); "" keeps the slot's model.
+func setup(index: int, config: GameConfig, character: String = CharacterData.DEFAULT) -> void:
 	_config = config
-	var color := PlayerStyle.color(index)
-
-	var capsule := CapsuleMesh.new()
-	capsule.radius = config.fighter_radius
-	capsule.height = config.fighter_height
-	_body = MeshInstance3D.new()
-	_body.mesh = capsule
-	_body.material_override = ToonMaterials.toon(color, RIM)
-	_body.position.y = config.fighter_height * 0.5
-	add_child(_body)
-	_model = CharacterModel.new()
-	add_child(_model)
-	if _model.setup(CharacterCatalog.for_player(index), config):
-		_body.visible = false
-		if _model.animation_player() != null:
-			_animator = CharacterAnimator.new()
-			add_child(_animator)
-			_animator.setup(_model.animation_player(), config)
-	else:
-		_model.queue_free()
-		_model = null
-
-	var torus := TorusMesh.new()
-	torus.inner_radius = config.fighter_radius * RING_INNER_RATIO
-	torus.outer_radius = config.fighter_radius * RING_OUTER_RATIO
-	_ring = MeshInstance3D.new()
-	_ring.mesh = torus
-	_ring.scale = Vector3(1.0, RING_FLATTEN, 1.0)
-	_ring.position.y = RING_LIFT
-	_ring.material_override = ToonMaterials.toon(color)
-	add_child(_ring)
-
-	_label = Label3D.new()
-	_label.text = PlayerStyle.label(index)
-	_label.font = load(DS.FONT_DISPLAY_PATH) as Font
-	_label.font_size = DS.SIZE_TITLE
-	_label.pixel_size = LABEL_PIXEL_SIZE
-	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_label.modulate = DS.UI_SURFACE
-	_label.outline_modulate = DS.CANOPY_DEEP
-	_label.outline_size = DS.TEXT_OUTLINE * 2
-	_label.position.y = config.fighter_height + LABEL_GAP
-	add_child(_label)
-
+	_build_body(index, config, CharacterCatalog.for_character(character, index))
+	_identity = FighterIdentity.new()
+	add_child(_identity)
+	_identity.setup(index, config)
 	var hand_spot := Vector3(config.fighter_radius * HAND_SIDE,
 			config.fighter_height * ItemActions.HAND_HEIGHT_RATIO, config.fighter_radius * HAND_FORWARD)
 	_attach_held(config, hand_spot)
 	_charge_glow = ChargeGlow.new()
 	_charge_glow.position = hand_spot
 	add_child(_charge_glow)
-	var dot_mesh := SphereMesh.new()
-	dot_mesh.radius = DOT_RADIUS
-	dot_mesh.height = DOT_RADIUS * 2.0
-	for i: int in config.bat_uses:
-		var dot := MeshInstance3D.new()
-		dot.mesh = dot_mesh
-		dot.material_override = ToonMaterials.toon(DS.GLOW)
-		dot.position = Vector3((i - (config.bat_uses - 1) * 0.5) * DOT_SPACING, config.fighter_height + DOT_GAP, 0.0)
-		dot.visible = false
-		add_child(dot)
-		_dots.append(dot)
+	_dots = BatUseDots.new()
+	add_child(_dots)
+	_dots.setup(config)
 
 	var sphere := SphereMesh.new()
 	sphere.radius = config.fighter_height * BUBBLE_RADIUS_RATIO
@@ -159,12 +103,38 @@ func wobble() -> void:
 
 ## Foot ring and P-label (DS-VIS-03). The menu backdrop hides them: no player identity in menus.
 func set_identity_visible(on: bool) -> void:
-	_ring.visible = on
-	_label.visible = on
+	_identity.set_shown(on)
 
 
 func identity_visible() -> bool:
-	return _label.visible
+	return _identity.is_shown()
+
+
+func identity() -> FighterIdentity:
+	return _identity
+
+
+## The character model (or the capsule in the player color when it cannot load) and its animator.
+func _build_body(index: int, config: GameConfig, entry: Dictionary) -> void:
+	var capsule := CapsuleMesh.new()
+	capsule.radius = config.fighter_radius
+	capsule.height = config.fighter_height
+	_body = MeshInstance3D.new()
+	_body.mesh = capsule
+	_body.material_override = ToonMaterials.toon(PlayerStyle.color(index), RIM)
+	_body.position.y = config.fighter_height * 0.5
+	add_child(_body)
+	_model = CharacterModel.new()
+	add_child(_model)
+	if not _model.setup(entry, config):
+		_model.queue_free()
+		_model = null
+		return
+	_body.visible = false
+	if _model.animation_player() != null:
+		_animator = CharacterAnimator.new()
+		add_child(_animator)
+		_animator.setup(_model.animation_player(), config)
 
 
 func set_blob_shadow(on: bool) -> void:
@@ -203,8 +173,7 @@ func held_item() -> HeldItem:
 
 func _show_item(kind: int, uses: int) -> void:
 	_held.show_item(kind, uses)
-	for i: int in _dots.size():
-		_dots[i].visible = kind == Item.Kind.BAT and i < uses
+	_dots.show_uses(kind, uses)
 
 
 func held_visible() -> bool:
@@ -212,11 +181,7 @@ func held_visible() -> bool:
 
 
 func dots_shown() -> int:
-	var n := 0
-	for dot: MeshInstance3D in _dots:
-		if dot.visible:
-			n += 1
-	return n
+	return _dots.shown()
 
 
 static func interpolate(prev: Dictionary, curr: Dictionary, alpha: float) -> Vector3:

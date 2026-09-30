@@ -5,7 +5,6 @@ extends RefCounted
 ## reproducibility header (analytics-strategy §1): config fingerprint, sim and event schema
 ## versions, per-slot controller and bot tuning, and the session context the caller passes in.
 
-const STYLE_DEFAULT := "default"
 const VARIANT_CONTROL := "control"
 const BOT_DIFFICULTY_DEFAULT := "normal"
 const BOT_GROUP := "Bot"
@@ -49,7 +48,7 @@ static func _slots(setup: MatchSetup, config: GameConfig) -> Array:
 		var is_bot: bool = s["controller"] == MatchSetup.CONTROLLER_BOT
 		slots.append({
 			"slot": int(s["slot"]), "is_bot": is_bot, "controller": String(s["controller"]),
-			"character": String(s["character"]), "style": STYLE_DEFAULT,
+			"character": String(s["character"]), "style": CharacterData.style_of(String(s["character"])),
 			"input_device": String(s["input_device"]),
 			"bot_difficulty": String(s.get("bot_difficulty", BOT_DIFFICULTY_DEFAULT)) if is_bot else null,
 			"bot_params_hash": bot_hash if is_bot else null,

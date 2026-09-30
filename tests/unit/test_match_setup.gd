@@ -12,7 +12,7 @@ func test_vs_bots_has_one_local_slot_and_bots() -> void:
 	assert_eq(s.bot_slots(), [1, 2] as Array[int])
 	assert_eq(s.slots[1]["controller"], MatchSetup.CONTROLLER_BOT)
 	assert_eq(s.slots[1]["input_device"], MatchSetup.INPUT_BOT)
-	assert_eq(s.slots[0]["character"], String(CharacterCatalog.for_player(0)["name"]))
+	assert_eq(s.slots[0]["character"], CharacterData.DEFAULT, "classic fighter until a character is picked")
 	assert_eq(s.validate().size(), 0)
 
 
@@ -50,9 +50,9 @@ func test_arena_id_selects_the_sim_arena() -> void:
 func test_copy_is_independent() -> void:
 	var s := MatchSetup.vs_bots(2, 1)
 	var c := s.copy()
-	c.slots[0]["character"] = "Mage"
+	c.slots[0]["character"] = CharacterData.MAGE
 	c.seed = 99
-	assert_ne(s.slots[0]["character"], "Mage")
+	assert_ne(s.slots[0]["character"], CharacterData.MAGE)
 	assert_eq(s.seed, 1)
 
 
@@ -80,7 +80,7 @@ func test_local_versus_has_two_local_slots_then_bots() -> void:
 	assert_eq(s.local_slot(), 0, "P1 is the primary local slot")
 	assert_eq(s.bot_slots(), [2, 3] as Array[int], "optional bots fill the remaining slots")
 	assert_eq(s.slots[1]["input_device"], MatchSetup.INPUT_KEYBOARD, "P2 starts on the keyboard")
-	assert_eq(s.slots[1]["character"], String(CharacterCatalog.for_player(1)["name"]), "default character per slot")
+	assert_eq(s.slots[1]["character"], CharacterData.DEFAULT, "classic until the character select fills it")
 	assert_eq(s.validate().size(), 0)
 	assert_eq(MatchSetup.local_versus().player_count(), 2, "1 vs 1 by default")
 
@@ -95,3 +95,52 @@ func test_input_devices_update_local_slots_only() -> void:
 	assert_eq(before["input_device"], MatchSetup.INPUT_KEYBOARD, "slot entries are replaced, not mutated")
 	var t := TelemetrySetup.from_match_setup(s)
 	assert_eq(t["slots"][1]["input_device"], "gamepad", "P2's device reaches the telemetry slots")
+
+
+func test_characters_lists_each_slot_in_order() -> void:
+	var s := MatchSetup.vs_bots(3, 1)
+	assert_eq(s.characters(), ["", "", ""] as Array[String])
+	s.assign_characters({0: CharacterData.MAGE})
+	assert_eq(s.characters()[0], CharacterData.MAGE)
+
+
+func test_assign_characters_gives_bots_distinct_characters_from_the_seed() -> void:
+	var s := MatchSetup.vs_bots(4, 11)
+	var before: Dictionary = s.slots[1]
+	s.assign_characters({0: CharacterData.KNIGHT})
+	var picks := s.characters()
+	assert_eq(picks[0], CharacterData.KNIGHT, "the human keeps the pick")
+	for id: String in picks:
+		assert_true(CharacterData.IDS.has(id), "every slot plays a real character")
+	var unique := {}
+	for id: String in picks:
+		unique[id] = true
+	assert_eq(unique.size(), 4, "four players, four different characters")
+	assert_eq(before["character"], CharacterData.DEFAULT, "slot entries are replaced, not mutated")
+	var again := MatchSetup.vs_bots(4, 11)
+	again.assign_characters({0: CharacterData.KNIGHT})
+	assert_eq(again.characters(), picks, "same seed and picks: same bot characters")
+	var first := MatchSetup.vs_bots(2, 1)
+	first.assign_characters({0: CharacterData.KNIGHT})
+	var seeds_differ := false
+	for seed: int in range(2, 20):
+		var other := MatchSetup.vs_bots(2, seed)
+		other.assign_characters({0: CharacterData.KNIGHT})
+		seeds_differ = seeds_differ or other.characters()[1] != first.characters()[1]
+		assert_ne(other.characters()[1], CharacterData.KNIGHT, "a bot avoids the human's character")
+	assert_true(seeds_differ, "the seed changes which character a bot gets")
+
+
+func test_assign_characters_allows_humans_to_share_a_character() -> void:
+	var s := MatchSetup.local_versus(4, 3)
+	s.assign_characters({0: CharacterData.ROGUE, 1: CharacterData.ROGUE})
+	var picks := s.characters()
+	assert_eq([picks[0], picks[1]], [CharacterData.ROGUE, CharacterData.ROGUE], "a mirror match is allowed")
+	assert_false(picks.slice(2).has(CharacterData.ROGUE), "bots take the characters left over")
+	assert_ne(picks[2], picks[3])
+
+
+func test_validate_rejects_unknown_characters() -> void:
+	var s := MatchSetup.vs_bots(2, 1)
+	s.slots[1] = s.slots[1].merged({"character": "wizard"}, true)
+	assert_string_contains(s.validate()[0], "character")

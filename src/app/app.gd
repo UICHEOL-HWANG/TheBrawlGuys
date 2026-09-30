@@ -2,7 +2,7 @@ class_name App
 extends Node
 ## App shell and main scene (platform B1, PRD §6.5, design.md DS-LAY-03): the menu backdrop keeps
 ## brawling behind a screen stack — login (skipped when a stored session is restored) → title →
-## select screens (SELECT_STEPS: arena, Phase 5 adds character) → match — and the app owns the
+## select screens (SELECT_STEPS: character, arena) → match — and the app owns the
 ## login gate. Each select screen fills the MatchSetup that mode select starts. Entering a match
 ## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
 
@@ -13,8 +13,9 @@ const LOGIN := "login"
 const TITLE := "title"
 const MATCH := "match"
 const ARENA := "arena"
-## Select screens between mode select and the match, in order (Phase 5 adds "character" first).
-const SELECT_STEPS: Array[String] = [ARENA]
+const CHARACTER := "character"
+## Select screens between mode select and the match, in order.
+const SELECT_STEPS: Array[String] = [CHARACTER, ARENA]
 
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
@@ -117,7 +118,7 @@ func _on_mode_chosen(mode: String) -> void:
 		MatchSetup.MODE_BOT:
 			setup = MatchSetup.vs_bots()
 		MatchSetup.MODE_LOCAL_2P:
-			setup = MatchSetup.local_versus()  # P1 vs P2, default characters (select screen: T9)
+			setup = MatchSetup.local_versus()  # P1 vs P2; both pick on the character screen
 		_:
 			return  # 온라인: shown disabled until Phase 6
 	_select_step(setup, 0)
@@ -134,6 +135,14 @@ func _select_step(setup: MatchSetup, step: int) -> void:
 
 ## The select screen for a step; `next` continues the flow once it has filled setup.
 func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Control:
+	if step_id == CHARACTER:
+		var chars := CharacterSelectScreen.new()
+		chars.track = track
+		chars.config = _backdrop.config()
+		chars.setup = setup
+		chars.characters_chosen.connect(next)
+		chars.cancelled.connect(func() -> void: _router.pop())
+		return chars
 	assert(step_id == ARENA, "App: no select screen for step '%s'" % step_id)
 	var screen := ArenaSelectScreen.new()
 	screen.track = track
