@@ -1,6 +1,6 @@
 # Phase 5 — Tasks
 
-**Last Updated:** 2026-09-30 22:30 KST (sim 마무리 검증: test 680/680, check-all 통과)
+**Last Updated:** 2026-09-30 23:40 KST (T7 로컬 2인 + 키 바 필살기 키캡, `feat/p5-local2p`: test 893/893, check-all 통과)
 
 | # | 태스크 | 근거 ID | 검증 | 상태 |
 |---|---|---|---|---|
@@ -10,7 +10,7 @@
 | T4 | 필살기 컷인 연출 (렌더) | GD-CAM-01 | 캡처 | ⬜ |
 | T5 | 봇 스타일 사거리 · 필살기 사용 | PRD-BOT-02 | `test_bot` · `test_bot_style` | ✅ (feat/phase5-sim) |
 | T6 | 밸런스 시뮬 100판 → 승률표 30~70% | PRD-STYLE-01~03 | `evidence/balance.csv` (35~67%) | ✅ (feat/phase5-sim) |
-| T7 | 로컬 2인 (P2 키 · 게임패드 자동 할당) | PRD-LOCAL-01 | `test_local_input` | ⬜ |
+| T7 | 로컬 2인 (P2 키 · 게임패드 자동 할당) + 모드 "로컬 2인" + 키 바 필살기 키캡(게이지 링)·플레이어별 바 | PRD-LOCAL-01, DS-CMP-16 | `test_local_input` · `test_local_match` · `test_key_hint_bar` + `evidence/key-hint-*.png` | ✅ (feat/p5-local2p) — 실제 패드·한 키보드 2인 한 판 완주는 사용자 확인 |
 | T8 | 🖼 스타일 실루엣·악센트 시안 → 확정 | DS-VIS-02 | 사용자 승인 | ⬜ |
 | T9 | 캐릭터 선택 + PlayerSlot + P1~P4 식별 + 버튼 프롬프트 | DS-CMP-08/10, DS-VIS-03, DS-TOK-06 | 흑백 캡처 | ⬜ |
 | T10 | 트래킹: character_selected · special_* · gauge_full · 스타일별 요약 | PRD-DATA-03/04 | `test_match_telemetry` | ⬜ |
