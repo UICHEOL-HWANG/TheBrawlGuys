@@ -18,7 +18,7 @@ var _camera: CameraRig
 var _panel: ConfigPanel
 var _local_input: LocalInput
 var _touch: TouchInput
-var _bot: BotController
+var _bots: Array[BotController] = []
 var _views: Array[FighterView] = []
 var _env: EnvironmentRig
 var _item_layer: ItemLayer
@@ -71,7 +71,7 @@ func _ready() -> void:
 	_music = MusicDirector.new()
 	add_child(_music)
 	_music.setup(_config)
-	for i: int in PLAYER_COUNT:
+	for i: int in _player_count():
 		var view := FighterView.new()
 		add_child(view)
 		view.setup(i, _config)
@@ -112,6 +112,11 @@ func _apply_quality() -> void:
 		v.set_blob_shadow(blobs)
 
 
+## Fighter count; scenes that extend main override it (perf_match uses four).
+func _player_count() -> int:
+	return PLAYER_COUNT
+
+
 func get_world() -> World:
 	return _world
 
@@ -128,9 +133,12 @@ func _start_match() -> void:
 	_local_input.reset()
 	_feel.reset()
 	_item_layer.clear()
-	_world = World.new(_config, SEED, PLAYER_COUNT)
-	_bot = BotController.new(BOT_PLAYER, _config)
-	_hud.setup(PLAYER_COUNT, _config.stocks)
+	_world = World.new(_config, SEED, _player_count())
+	_bots.clear()
+	for id: int in _player_count():
+		if id != LOCAL_PLAYER:
+			_bots.append(BotController.new(id, _config))
+	_hud.setup(_player_count(), _config.stocks)
 	_result_shown = false
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
@@ -138,7 +146,9 @@ func _start_match() -> void:
 
 
 func _gather_inputs() -> Array[InputFrame]:
-	var inputs: Array[InputFrame] = [_local_input.sample(), _bot.sample(_curr_state)]
+	var inputs: Array[InputFrame] = [_local_input.sample()]
+	for b: BotController in _bots:
+		inputs.append(b.sample(_curr_state))
 	return inputs
 
 

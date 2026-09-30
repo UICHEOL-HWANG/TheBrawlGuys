@@ -54,3 +54,16 @@ func test_restart_clears_item_views_immediately() -> void:
 	var hud: Hud = main.call("get_hud")
 	hud.restart_requested.emit()
 	assert_eq(layer.view_count(), 0, "no stale item view survives a restart")
+
+
+func test_perf_match_runs_four_bots() -> void:
+	var scene: Node = (load("res://src/debug/perf_match.tscn") as PackedScene).instantiate()
+	add_child_autofree(scene)
+	await wait_seconds(0.5)
+	var w: World = scene.call("get_world")
+	assert_eq(w.fighters.size(), 4)
+	var moved := 0
+	for i: int in 4:
+		if w.fighters[i].pos != Rules.spawn_point(i, 4, w.config):
+			moved += 1
+	assert_eq(moved, 4, "all four fighters are bots")
