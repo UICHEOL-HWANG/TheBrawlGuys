@@ -153,6 +153,13 @@ const LOGIN_CARD_WIDTH := 560
 const RADIUS_XL := 40
 ## Letter spacing of spaced-out taglines.
 const TRACKING_WIDE := 4
+## SelectCard (DS-CMP-08): card width, diorama thumbnail height, gimmick icon badge size.
+const CARD_WIDTH := 320
+const CARD_THUMB_HEIGHT := 200
+const CARD_ICON := 48
+## Focused / selected cards grow slightly (with the focus / selection ring).
+const CARD_FOCUS_SCALE := 1.04
+const CARD_SELECTED_SCALE := 1.07
 
 # --- Glass & haze strengths (DS-CMP-14, DS-LAY-03), 0..1 ---
 ## How much sage tint covers the blurred scene in the card (Compatibility: no blur, more tint).

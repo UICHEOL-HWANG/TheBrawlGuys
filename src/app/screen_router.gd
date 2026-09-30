@@ -62,6 +62,23 @@ func pop(curtain: bool = false, on_swap: Callable = Callable()) -> void:
 		_shown(from), curtain, on_swap)
 
 
+## Pops every screen above the (topmost) screen `id` (match → title across the select screens).
+func pop_to(id: String, curtain: bool = false, on_swap: Callable = Callable()) -> void:
+	var index := -1
+	for i: int in _stack.size():
+		if String(_stack[i]["id"]) == id:
+			index = i
+	if index < 0 or index == _stack.size() - 1:
+		push_warning("ScreenRouter: no '%s' below the top to go back to" % id)
+		return
+	_go(func() -> void:
+		var from := current_id()
+		while _stack.size() > index + 1:
+			_drop_top()
+		_uncover_top()
+		_shown(from), curtain, on_swap)
+
+
 func current_id() -> String:
 	return "" if _stack.is_empty() else String(_stack.back()["id"])
 
