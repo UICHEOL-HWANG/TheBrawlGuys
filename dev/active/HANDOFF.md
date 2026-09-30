@@ -38,7 +38,7 @@
 
 ## 4. 사용자가 해야 할 일 (Supabase / 외부)
 
-- [ ] 마이그레이션 `supabase/migrations/0002_replay_and_features.sql` SQL Editor 실행 — 안 하면 경기 기록 업로드 실패(`match_inputs` 테이블 없음 확인됨)
+- [x] 마이그레이션 0002·0003 실행 (2026-10-01 확인: special_hits·match_inputs 존재) — 안 하면 경기 기록 업로드 실패(`match_inputs` 테이블 없음 확인됨)
 - [ ] Authentication → URL Configuration: Site URL = `https://thebrawlguys.cloud`, Redirect URLs = `https://thebrawlguys.cloud`, `https://thebrawlguys.cloud/**`, `https://thebrawlguys.vercel.app`, `https://thebrawlguys.vercel.app/**`, `http://127.0.0.1:54321/**`
 - [ ] 이메일 로그인: Email provider 켜기 + 가입 허용, OTP 6자리·600초, Magic Link·Confirm signup 템플릿에 `{{ .Token }}`(템플릿 문구는 feat/email-otp의 platform-context.md), 커스텀 SMTP(Resend 등) — 기본 SMTP는 팀원 주소만
 - [ ] 웹 Google 로그인 실사용 확인(강력 새로고침 후) — 가짜 코드로는 멈춤 수정 확인됨, 진짜 로그인은 미확인
