@@ -30,7 +30,7 @@
 ## 사용자 대기
 - [x] secrets.local.cfg 입력 (Amplitude·Supabase 키 유효 확인)
 - [x] Supabase Google provider 활성화 + Redirect URL 등록 (2026-09-30 확인: authorize → accounts.google.com 302)
-- [ ] 마이그레이션 SQL 실행
+- [x] 마이그레이션 SQL 실행 (2026-09-30 확인: 4개 테이블 존재, anon 읽기·쓰기 42501 거부)
 - [x] `npx vercel login` — uicheol-hwang / team cheorish (Hobby), 2026-09-30
 - [ ] Amplitude MCP 커넥터 인증 (검증용, 선택)
 
