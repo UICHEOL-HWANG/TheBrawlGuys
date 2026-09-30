@@ -2,8 +2,8 @@ class_name OrbitCamera
 extends Node3D
 ## Menu backdrop camera (design.md DS-LAY-03): a lower, closer view than the match camera so the
 ## fighters read, turning slowly around a pivot that drifts after the fight. Distance and look-at come from
-## CameraFraming over the arena-core anchors, rotated with the yaw, so every angle frames the same
-## circle. A screen focus (NDC, x right / y up) slides the fight into the part of the screen the
+## CameraFraming over the arena-core anchors of the arena on show (its own view radius, like the
+## match camera), rotated with the yaw, so every angle frames the same circle. A screen focus (NDC, x right / y up) slides the fight into the part of the screen the
 ## current menu leaves free, eased with cam_smooth. All values are GameConfig Camera settings.
 
 ## Diagonal anchors join the four axis anchors so the ring fits at every yaw.
@@ -14,6 +14,7 @@ var _camera: Camera3D
 var _yaw: float = 0.0
 var _frame: Dictionary = {}
 var _aspect: float = -1.0
+var _arena_radius: float = 0.0
 var _focus: Vector2 = Vector2.ZERO
 var _focus_target: Vector2 = Vector2.ZERO
 var _pivot: Vector3 = Vector3.ZERO
@@ -22,6 +23,7 @@ var _pivot_target: Vector3 = Vector3.ZERO
 
 func setup(config: GameConfig) -> void:
 	_config = config
+	_arena_radius = config.arena_radius
 	_camera = Camera3D.new()
 	add_child(_camera)
 	_camera.current = true
@@ -34,7 +36,7 @@ func advance(delta: float) -> void:
 	var aspect := vp.x / maxf(vp.y, 1.0)
 	if not is_equal_approx(aspect, _aspect):
 		_aspect = aspect
-		_frame = frame(_config, aspect)
+		_frame = frame(_config, aspect, _arena_radius)
 	_focus = _focus.lerp(_focus_target, 1.0 - exp(-_config.cam_smooth * delta))
 	_pivot = _pivot.lerp(_pivot_target, 1.0 - exp(-_config.menu_orbit_follow * delta))
 	var distance := float(_frame["distance"])
@@ -44,6 +46,22 @@ func advance(delta: float) -> void:
 	var lens := lens_offset(_focus, distance, _config.cam_fov, aspect)
 	_camera.h_offset = lens.x
 	_camera.v_offset = lens.y
+
+
+## View radius of the arena on show (the sim view's arena_radius); reframes when it changes.
+func set_arena_radius(radius: float) -> void:
+	if is_equal_approx(radius, _arena_radius):
+		return
+	_arena_radius = radius
+	_aspect = -1.0  # recompute the frame on the next advance
+
+
+func frame_distance() -> float:
+	return float(_frame["distance"])
+
+
+func aspect() -> float:
+	return _aspect
 
 
 ## Where on screen the arena center should sit (NDC: -1..1, x right, y up).
@@ -75,12 +93,12 @@ func yaw() -> float:
 
 
 ## {center, distance} that keep the arena core in frame from the menu pitch.
-static func frame(config: GameConfig, aspect: float) -> Dictionary:
-	var pts := CameraFraming.arena_anchors(config.arena_radius, config.menu_orbit_arena_share)
+static func frame(config: GameConfig, aspect_ratio: float, arena_radius: float) -> Dictionary:
+	var pts := CameraFraming.arena_anchors(arena_radius, config.menu_orbit_arena_share)
 	for p: Vector3 in pts.duplicate():
 		pts.append(p.rotated(Vector3.UP, DIAGONAL))
 	return CameraFraming.compute(pts, config.cam_margin, config.menu_orbit_zoom_min, config.cam_zoom_max,
-			config.cam_fov, aspect, config.menu_orbit_pitch)
+			config.cam_fov, aspect_ratio, config.menu_orbit_pitch)
 
 
 ## CameraRig's model (center + (0, sin p, cos p) * d) turned by yaw around the arena axis.
