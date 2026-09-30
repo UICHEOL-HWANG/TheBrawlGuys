@@ -33,3 +33,8 @@
 - [ ] 마이그레이션 SQL 실행
 - [x] `npx vercel login` — uicheol-hwang / team cheorish (Hobby), 2026-09-30
 - [ ] Amplitude MCP 커넥터 인증 (검증용, 선택)
+
+## 배포 시점 결정 (2026-09-30)
+- 사용자 선택 C: Vercel 프로젝트 생성·도메인 연결·배포는 **Phase 4·5 전부 끝난 뒤** 한 번에 (D1을 맨 마지막으로)
+- 영향: 그 전까지 Google 로그인 검증은 **데스크톱 루프백**으로만. 웹 리다이렉트 경로는 단위 테스트로 검증하고, 배포 시 도메인을 Supabase Redirect URLs + `auth.redirect_web`에 등록 후 실동작 확인
+- Git Import 아님: Vercel 빌드 환경에 Godot 없음 → 로컬 export 후 `npx vercel deploy` (prebuilt)
