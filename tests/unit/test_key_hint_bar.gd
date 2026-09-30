@@ -242,3 +242,18 @@ func test_a_single_bar_never_goes_compact() -> void:
 	var h := _hud()
 	h.fit_to(100.0)
 	assert_false(h.bar().is_compact())
+
+
+func test_bars_hidden_at_start_fit_again_when_shown() -> void:
+	SettingsStore.new(PATH).set_value("hud", "key_hints", false)
+	var h := KeyHintHud.new()
+	add_child_autofree(h)
+	var players: Array[Dictionary] = [
+		{"prefix": "p1", "slot": 0, "accent": DS.P1}, {"prefix": "p2", "slot": 1, "accent": DS.P2}]
+	h.setup_players(players, func() -> bool: return false, SettingsStore.new(PATH),
+			func(_n: String, _p: Dictionary) -> void: pass)
+	assert_false(h.is_shown())
+	var vp_width := get_viewport().get_visible_rect().size.x
+	h.toggle()
+	assert_true(h.is_shown())
+	assert_lte(h.needed_width(), vp_width - DS.S5 * 2, "shown bars fit the screen (compact if needed)")

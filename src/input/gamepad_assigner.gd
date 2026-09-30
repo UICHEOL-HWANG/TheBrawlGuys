@@ -35,7 +35,7 @@ func detach() -> void:
 	if Input.joy_connection_changed.is_connected(_on_joy_changed):
 		Input.joy_connection_changed.disconnect(_on_joy_changed)
 	for prefix: String in _held.keys():
-		PadBindings.unbind(prefix)
+		PadBindings.unbind(prefix, get_instance_id())
 	_held.clear()
 	_queue.clear()
 
@@ -62,7 +62,7 @@ func disconnect_device(device: int) -> void:
 	var prefix := player_for(device)
 	if not prefix.is_empty():
 		_held.erase(prefix)
-		PadBindings.unbind(prefix)
+		PadBindings.unbind(prefix, get_instance_id())
 	_fill()
 
 
@@ -91,7 +91,7 @@ func _fill() -> void:
 		if pad == NO_DEVICE:
 			return
 		_held[prefix] = pad
-		PadBindings.bind(prefix, pad)
+		PadBindings.bind(prefix, pad, get_instance_id())
 
 
 func _next_free() -> int:

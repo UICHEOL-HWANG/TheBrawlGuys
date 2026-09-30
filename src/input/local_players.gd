@@ -66,6 +66,7 @@ func sample(slot: int) -> InputFrame:
 
 
 ## slot -> "gamepad" | P1's platform default (keyboard / touch) | "keyboard" for other humans.
+## A snapshot: main reads it at match start, so a pad plugged in mid-match counts from the next one.
 func input_devices() -> Dictionary:
 	var out := {}
 	for i: int in _slots.size():

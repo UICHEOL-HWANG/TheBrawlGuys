@@ -3,6 +3,8 @@ extends RefCounted
 ## Gamepad events of one local player (PRD §3.2): left stick / d-pad move, A jump, X light, Y heavy,
 ## RB guard, B grab (special = Y+RB on one tick). Bound to one device id, so two pads drive two
 ## players; GamepadAssigner decides which. Keyboard events of the actions are never touched.
+## InputMap is global, so each player's pad binding remembers its owner (an assigner's instance
+## id): a stale owner's unbind cannot strip a newer match's pad.
 
 const BUTTONS := {
 	"jump": [JOY_BUTTON_A], "light": [JOY_BUTTON_X], "heavy": [JOY_BUTTON_Y],
@@ -15,11 +17,17 @@ const AXES := {
 	"left": [JOY_AXIS_LEFT_X, -1.0], "right": [JOY_AXIS_LEFT_X, 1.0],
 	"up": [JOY_AXIS_LEFT_Y, -1.0], "down": [JOY_AXIS_LEFT_Y, 1.0],
 }
+## 0 = no particular owner (any unbind may remove it).
+const ANY_OWNER := 0
+
+## prefix -> owner id of the current pad binding
+static var _owners: Dictionary = {}
 
 
 ## Replaces the player's pad events with ones for `device`.
-static func bind(prefix: String, device: int) -> void:
+static func bind(prefix: String, device: int, owner: int = ANY_OWNER) -> void:
 	unbind(prefix)
+	_owners[prefix] = owner
 	for n: String in InputBindings.NAMES:
 		var action_name := InputBindings.action(prefix, n)
 		if not InputMap.has_action(action_name):
@@ -37,11 +45,20 @@ static func bind(prefix: String, device: int) -> void:
 			InputMap.action_add_event(action_name, motion)
 
 
-## Removes every pad event from the player's actions (keys stay).
-static func unbind(prefix: String) -> void:
+## Removes every pad event from the player's actions (keys stay) and releases those actions so a
+## button held while the pad went away does not stay pressed. With an owner, only that owner's
+## binding is removed.
+static func unbind(prefix: String, owner: int = ANY_OWNER) -> void:
+	if owner != ANY_OWNER and int(_owners.get(prefix, ANY_OWNER)) != owner:
+		return
+	_owners.erase(prefix)
 	for action_name: String in InputBindings.actions(prefix):
 		if not InputMap.has_action(action_name):
 			continue
+		var erased := false
 		for ev: InputEvent in InputMap.action_get_events(action_name):
 			if ev is InputEventJoypadButton or ev is InputEventJoypadMotion:
 				InputMap.action_erase_event(action_name, ev)
+				erased = true
+		if erased:
+			Input.action_release(action_name)

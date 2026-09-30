@@ -201,3 +201,22 @@ func test_input_device_label_follows_the_pad() -> void:
 	pads.connect_device(1)
 	assert_eq(pads.input_device("p1", "touch"), "gamepad")
 	assert_eq(pads.input_device("p2", "keyboard"), "gamepad")
+
+
+func test_a_stale_assigner_cannot_strip_a_newer_ones_pad() -> void:
+	var old := GamepadAssigner.new(["p1"] as Array[String])
+	old.connect_device(0)
+	var fresh := GamepadAssigner.new(["p1"] as Array[String])
+	fresh.connect_device(1)
+	old.detach()
+	assert_true(InputMap.event_is_action(_pad_button(1, JOY_BUTTON_A), "p1_jump"), "the new match keeps its pad")
+	fresh.detach()
+	assert_false(InputMap.event_is_action(_pad_button(1, JOY_BUTTON_A), "p1_jump"))
+
+
+func test_losing_the_pad_releases_what_it_held() -> void:
+	var pads := GamepadAssigner.new(["p1"] as Array[String])
+	pads.connect_device(0)
+	Input.action_press("p1_guard")
+	pads.disconnect_device(0)
+	assert_false(Input.is_action_pressed("p1_guard"), "a guard held on the unplugged pad does not stick")
