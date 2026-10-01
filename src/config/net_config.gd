@@ -1,7 +1,7 @@
 class_name NetConfig
-extends Resource
+extends DdaConfig
 ## Online match tunables (Phase 6 netcode, src/net). GameConfig extends StyleConfig extends ... extends
-## ModeConfig extends this, so every value is a GameConfig value with a debug panel slider. "Net" is a
+## ModeConfig extends this (and this extends DdaConfig), so every value is a GameConfig value with a debug panel slider. "Net" is a
 ## NON_SIM group: none of it changes how a World ticks, only how often it is sent and how it is shown.
 
 @export_group("Net")

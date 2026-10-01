@@ -38,12 +38,13 @@ func telemetry() -> MatchTelemetry:
 	return _telemetry
 
 
-func begin(setup: MatchSetup, world: World) -> void:
+## extra_context: more TelemetrySetup context (BotSquad.context(): dda_variant).
+func begin(setup: MatchSetup, world: World, extra_context: Dictionary = {}) -> void:
 	_world = world
 	_perf = PerfSampler.new()
 	_result_shown_ms = NONE
 	_telemetry = MatchTelemetry.new(_track)
-	_telemetry.begin(TelemetrySetup.from_match_setup(setup, world.config, _context()))
+	_telemetry.begin(TelemetrySetup.from_match_setup(setup, world.config, _context().merged(extra_context)))
 
 
 ## inputs: what World.tick() got this tick, recorded for the replay log.

@@ -2,7 +2,7 @@ class_name ModeConfig
 extends NetConfig
 ## Match mode tunables (combat-depth D, PRD §4.1 modes), split out of GameConfig to keep files
 ## short. GameConfig extends StyleConfig extends SpecialConfig extends DefenseConfig extends
-## KnockdownConfig extends this,
+## KnockdownConfig extends this (which extends NetConfig extends DdaConfig),
 ## so every value here is a GameConfig value (debug panel slider; "Modes" is a sim group and
 ## enters GameConfig.fingerprint()). The rules a match is played under are MatchRules, built from
 ## these values when the match starts.

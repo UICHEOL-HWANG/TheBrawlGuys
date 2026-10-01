@@ -45,6 +45,27 @@ score`. The outcome is **not** in the timeline; it is joined from `match_players
 Matches still running after 6 minutes end as `abandoned` and are dropped (4 of 600).
 `matches.result` is meaningless for bot-only rows (no local slot); use `match_players.result`.
 
+## 1b. DDA models (difficulty dial, probe skill estimator, win probability with d)
+
+Since event schema 9 every synthetic match has slot 0 as the "player" (a dial bot with a known
+`bot_d_start`) that the other bots probe; `timeline.bot_d` holds each slot's dial value.
+
+```bash
+# from the repo root: training data with DDA off (bots keep their sampled d), no models needed
+for s in 0 1 2 3 4 5 6 7; do
+  godot --headless --path . -s res://scripts/gen_dataset.gd -- --matches=100 --seed=1 \
+    --first=$((s*100)) --variant=off --models=none --out-dir=analysis/data/dda_train/shard$s &
+done; wait
+scripts/dda_sweep.sh 320                  # dial monotonicity -> analysis/reports/dda_sweep.csv
+cd analysis && uv run python -m brawl_analysis export-models --data data/dda_train   # -> ../data/models/*.json + reports/dda.md
+cd .. && scripts/dda_converge.sh 100       # DDA convergence (uses the exported models)
+cd analysis && uv run python -m brawl_analysis export-models --data data/dda_train   # re-render dda.md with §4
+```
+
+`export-models` writes `data/models/skill_estimator.json` (Ridge, probe features -> d) and
+`data/models/win_prob.json` (logistic over `DdaFeatures`) with fixtures the GUT test
+`test_dda_controller` replays in GDScript. Results: `reports/dda.md`.
+
 ## 2. Real data (Supabase export)
 
 ```bash

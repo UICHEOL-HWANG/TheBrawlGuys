@@ -255,13 +255,13 @@ const SIM_GROUPS: Array[String] = [
 
 const NON_SIM_GROUPS: Array[String] = [
 	"Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio", "BotStyle", "BotDefense",
-	"BotGetup", "Net",
+	"BotGetup", "Net", "DDA",
 ]
 ## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig
-## extends DefenseConfig extends KnockdownConfig extends ModeConfig extends NetConfig).
+## extends DefenseConfig extends KnockdownConfig extends ModeConfig extends NetConfig extends DdaConfig).
 const CONFIG_SCRIPTS: Array[String] = [
 	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd", "knockdown_config.gd",
-	"mode_config.gd", "net_config.gd",
+	"mode_config.gd", "net_config.gd", "dda_config.gd",
 ]
 
 

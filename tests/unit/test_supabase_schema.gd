@@ -8,6 +8,7 @@ const MIGRATIONS: Array[String] = [
 	"res://supabase/migrations/0002_replay_and_features.sql",
 	"res://supabase/migrations/0003_special_hits.sql",
 	"res://supabase/migrations/0004_match_rules.sql",
+	"res://supabase/migrations/0006_bot_tracking.sql",
 ]
 const SQL_TYPES := "uuid|text|bigint|integer|smallint|real|boolean|jsonb|timestamptz"
 

@@ -6,7 +6,10 @@ extends SceneTree
 ## Match i uses seed (--seed + i) and id 5e7d0000-...-<i>, so a run is reproducible and --first
 ## lets shards run in parallel into separate directories (the analysis loader concatenates them).
 ## Run: godot --headless --path . -s res://scripts/gen_dataset.gd -- --matches=400 --seed=1
-##   --out-dir=analysis/data/synthetic [--first=0]
+##   --out-dir=analysis/data/synthetic [--first=0] [--variant=on|off] [--models=none]
+## Slot 0 is the "player" the other bots probe (and adjust to when the dda variant is on; the spec
+## draws it 50 / 50 unless --variant forces it). DDA and the probe estimate use the models in
+## res://data/models/ unless --models=none (the first training run, before models exist).
 
 const DatasetMatch := preload("res://scripts/dataset/dataset_match.gd")
 const TimelineSampler := preload("res://scripts/dataset/timeline_sampler.gd")
@@ -18,6 +21,7 @@ const DEFAULT_SEED := 1
 const DEFAULT_OUT := "analysis/data/synthetic"
 const EVENT_COLUMNS: Array[String] = ["match_id", "tick", "type", "actor_slot", "target_slot", "payload"]
 const PROGRESS_EVERY := 25
+const MODELS_NONE := "none"
 
 
 func _init() -> void:
@@ -33,13 +37,14 @@ func _init() -> void:
 		quit(1)
 		return
 	var count := int(args.get("matches", DEFAULT_MATCHES))
-	var summary := _run(count, int(args.get("seed", DEFAULT_SEED)), int(args.get("first", 0)), out_dir, config)
+	var opts := {"variant": String(args.get("variant", "")), "models": _models(String(args.get("models", "")))}
+	var summary := _run(count, int(args.get("seed", DEFAULT_SEED)), int(args.get("first", 0)), out_dir, config, opts)
 	print("gen_dataset: %d matches (%d finished, %d hit the tick cap), %d timeline rows -> %s" % [
 		count, summary["finished"], count - int(summary["finished"]), summary["timeline"], out_dir])
 	quit(0)
 
 
-func _run(count: int, seed: int, first: int, out_dir: String, config: GameConfig) -> Dictionary:
+func _run(count: int, seed: int, first: int, out_dir: String, config: GameConfig, opts: Dictionary) -> Dictionary:
 	var matches := CsvTable.new(out_dir.path_join("matches.csv"))
 	var players := CsvTable.new(out_dir.path_join("match_players.csv"))
 	var events := CsvTable.new(out_dir.path_join("match_events.csv"), EVENT_COLUMNS)
@@ -48,7 +53,7 @@ func _run(count: int, seed: int, first: int, out_dir: String, config: GameConfig
 	var started := Time.get_ticks_msec()
 	for i: int in count:
 		var index := first + i
-		var played := DatasetMatch.play(index, seed + index, config)
+		var played := DatasetMatch.play(index, seed + index, config, opts["models"], opts["variant"])
 		matches.add(played["match"])
 		players.add_all(played["players"])
 		events.add_all(played["events"])
@@ -68,6 +73,13 @@ static func _any_draw(players: Array) -> bool:
 		if p.get("result") == "draw":
 			return true
 	return false
+
+
+static func _models(flag: String) -> Dictionary:
+	if flag == MODELS_NONE:
+		return {}
+	return {"win_prob": BotSquadFactory.model(BotSquadFactory.WIN_PROB_PATH),
+		"estimator": BotSquadFactory.model(BotSquadFactory.ESTIMATOR_PATH)}
 
 
 ## Relative paths resolve against the project directory (res://), absolute ones stay.

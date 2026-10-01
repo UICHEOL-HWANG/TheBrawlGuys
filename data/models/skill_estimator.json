@@ -1,0 +1,231 @@
+{
+ "name": "skill_estimator",
+ "kind": "linear",
+ "features": [
+  "react_ticks",
+  "response_rate",
+  "dodge_rate",
+  "tech_rate",
+  "punish_rate",
+  "damage_share",
+  "attack_rate",
+  "edge_share",
+  "player_count"
+ ],
+ "mean": [
+  21.027425000000004,
+  0.18925375,
+  0.02725375,
+  0.6139575,
+  0.46956875000000003,
+  0.6446975,
+  0.5427875,
+  0.11559875000000001,
+  3.0375
+ ],
+ "scale": [
+  12.8267424919336,
+  0.15816933761300733,
+  0.053761364946748706,
+  0.4129718673151357,
+  0.40755086832619736,
+  0.17122313948105847,
+  0.22892514572180575,
+  0.10184316495689585,
+  0.9061422349719717
+ ],
+ "coef": [
+  0.034912685399478886,
+  0.060736163317895255,
+  0.02225203202559677,
+  0.01904696686771938,
+  0.01891267197082081,
+  0.08480248678216923,
+  0.16247679521031663,
+  0.06810813148168958,
+  -0.012061937554048384
+ ],
+ "intercept": 0.48285875000000006,
+ "metrics": {
+  "rows": 800,
+  "mae": 0.14370890248550158,
+  "r2": 0.5839784141419639,
+  "baseline_mae": 0.24465913125,
+  "mae_1v1": 0.14133153658507952,
+  "r2_1v1": 0.592092177924292
+ },
+ "fixtures": [
+  {
+   "x": {
+    "react_ticks": 10.8,
+    "response_rate": 0.5,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 1.0,
+    "damage_share": 0.757,
+    "attack_rate": 0.625,
+    "edge_share": 0.267,
+    "player_count": 2.0
+   },
+   "y": 0.8345161783983706
+  },
+  {
+   "x": {
+    "react_ticks": 16.5,
+    "response_rate": 0.143,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 0.0,
+    "damage_share": 0.515,
+    "attack_rate": 0.333,
+    "edge_share": 0.4,
+    "player_count": 4.0
+   },
+   "y": 0.40176103367587523
+  },
+  {
+   "x": {
+    "react_ticks": 24.0,
+    "response_rate": 0.15,
+    "dodge_rate": 0.1,
+    "tech_rate": 1.0,
+    "punish_rate": 0.0,
+    "damage_share": 0.0,
+    "attack_rate": 0.0,
+    "edge_share": 0.366,
+    "player_count": 2.0
+   },
+   "y": 0.0
+  },
+  {
+   "x": {
+    "react_ticks": 0.0,
+    "response_rate": 0.143,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 1.0,
+    "damage_share": 0.778,
+    "attack_rate": 0.458,
+    "edge_share": 0.078,
+    "player_count": 2.0
+   },
+   "y": 0.43351383767233537
+  },
+  {
+   "x": {
+    "react_ticks": 29.667,
+    "response_rate": 0.25,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 0.0,
+    "damage_share": 0.584,
+    "attack_rate": 0.875,
+    "edge_share": 0.061,
+    "player_count": 4.0
+   },
+   "y": 0.6708310676871028
+  },
+  {
+   "x": {
+    "react_ticks": 9.667,
+    "response_rate": 0.5,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 0.667,
+    "damage_share": 0.664,
+    "attack_rate": 0.333,
+    "edge_share": 0.123,
+    "player_count": 2.0
+   },
+   "y": 0.4663745463535911
+  },
+  {
+   "x": {
+    "react_ticks": 14.0,
+    "response_rate": 0.667,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 0.0,
+    "damage_share": 0.7,
+    "attack_rate": 0.667,
+    "edge_share": 0.0,
+    "player_count": 4.0
+   },
+   "y": 0.6573456798550328
+  },
+  {
+   "x": {
+    "react_ticks": 29.0,
+    "response_rate": 0.063,
+    "dodge_rate": 0.0,
+    "tech_rate": 1.0,
+    "punish_rate": 0.5,
+    "damage_share": 0.449,
+    "attack_rate": 0.5,
+    "edge_share": 0.111,
+    "player_count": 4.0
+   },
+   "y": 0.3208354889614678
+  },
+  {
+   "x": {
+    "react_ticks": 0.0,
+    "response_rate": 0.214,
+    "dodge_rate": 0.0,
+    "tech_rate": 0.0,
+    "punish_rate": 0.5,
+    "damage_share": 0.847,
+    "attack_rate": 0.458,
+    "edge_share": 0.057,
+    "player_count": 2.0
+   },
+   "y": 0.4115830061803304
+  },
+  {
+   "x": {
+    "react_ticks": 20.0,
+    "response_rate": 0.333,
+    "dodge_rate": 0.0,
+    "tech_rate": 0.333,
+    "punish_rate": 1.0,
+    "damage_share": 0.707,
+    "attack_rate": 0.792,
+    "edge_share": 0.0,
+    "player_count": 4.0
+   },
+   "y": 0.6532493257160565
+  },
+  {
+   "x": {
+    "react_ticks": 12.0,
+    "response_rate": 0.118,
+    "dodge_rate": 0.059,
+    "tech_rate": 0.333,
+    "punish_rate": 0.6,
+    "damage_share": 0.598,
+    "attack_rate": 0.583,
+    "edge_share": 0.024,
+    "player_count": 3.0
+   },
+   "y": 0.38181493543320943
+  },
+  {
+   "x": {
+    "react_ticks": 15.5,
+    "response_rate": 0.364,
+    "dodge_rate": 0.091,
+    "tech_rate": 0.0,
+    "punish_rate": 0.167,
+    "damage_share": 0.918,
+    "attack_rate": 0.417,
+    "edge_share": 0.131,
+    "player_count": 2.0
+   },
+   "y": 0.5891364129586824
+  }
+ ],
+ "clip": [
+  0.0,
+  1.0
+ ]
+}

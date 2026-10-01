@@ -8,8 +8,9 @@ extends RefCounted
 const VARIANT_CONTROL := "control"
 const BOT_DIFFICULTY_DEFAULT := "normal"
 const BOT_GROUP := "Bot"
-## Context keys copied as-is (null when absent): session_id, user_match_seq, loss_streak.
-const CONTEXT_KEYS: Array[String] = ["session_id", "user_match_seq", "loss_streak"]
+## Context keys copied as-is (null when absent): session_id, user_match_seq, loss_streak, dda_variant.
+## dda_variant: BotSquad.context() (on / off; null without a human), matches.dda_variant (0006).
+const CONTEXT_KEYS: Array[String] = ["session_id", "user_match_seq", "loss_streak", "dda_variant"]
 
 
 ## config: the match's GameConfig (null leaves config-derived fields null). context["match_id"]

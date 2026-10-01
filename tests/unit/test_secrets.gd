@@ -99,8 +99,11 @@ func test_local_file_is_ignored_and_exported() -> void:
 	assert_true(FileAccess.get_file_as_string("res://.gitignore").contains("config/secrets.local.cfg"))
 	var presets := FileAccess.get_file_as_string("res://export_presets.cfg")
 	assert_gt(presets.count("include_filter="), 0)
-	assert_eq(presets.count("include_filter=\"config/*.cfg\""), presets.count("include_filter="),
+	# The DDA models ride along (PRD-BOT-06): include_filter="config/*.cfg,data/models/*.json".
+	assert_eq(presets.count("include_filter=\"config/*.cfg"), presets.count("include_filter="),
 			"every preset exports config/*.cfg")
+	assert_eq(presets.count("data/models/*.json"), presets.count("include_filter="),
+			"every preset exports the DDA models")
 
 
 func test_check_all_runs_the_secret_scan() -> void:

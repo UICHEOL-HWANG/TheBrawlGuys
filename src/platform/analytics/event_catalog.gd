@@ -19,8 +19,10 @@ extends RefCounted
 ## keys on match_ended / match_abandoned and the matches row, players[] / match_players
 ## disconnect_reason (migration 0007), match_id shared by host and clients, clients upload no rows,
 ## 10 = Phase 6 online lobby (online_lobby_viewed, room_created / room_joined / room_left,
-## peer_connect_failed; controller "remote" in setups).
-const SCHEMA_VERSION := 10
+## peer_connect_failed; controller "remote" in setups), 11 = difficulty dial / probe / DDA bot
+## tracking (BOT_TRACKING_KEYS on match_ended.players[] and match_players, matches.dda_variant,
+## match_events probe_stage / dda_adjusted / bot_intent; migration 0006).
+const SCHEMA_VERSION := 11
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null
@@ -34,6 +36,16 @@ const PLAYER_COMBAT_KEYS: Array[String] = [
 	"high_dmg_guard_presses", "high_dmg_attack_presses", "high_dmg_dodges", "high_dmg_ticks",
 	"team_assists",
 ]
+
+## Keys every match_ended.players[] entry carries from schema 9 (BotSquad.slot_summary; null when
+## not applicable — humans have no d, only the probing bot has probe fields, only the human has
+## skill_rating). Same names as the match_players columns of migration 0006.
+const BOT_TRACKING_KEYS: Array[String] = [
+	"bot_d_start", "bot_d_mean", "bot_d_end", "dda_adjustments", "probe_target_slot", "probe_features",
+	"probe_estimate", "skill_rating",
+]
+## Bot-side match_events types (Supabase only, never Amplitude; docs/tracking-plan.md §4.2).
+const BOT_EVENT_TYPES: Array[String] = ["probe_stage", "dda_adjusted", "bot_intent"]
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -140,7 +152,7 @@ static func _validate_players(players: Array) -> PackedStringArray:
 		if not p is Dictionary:
 			errors.append("match_ended: players[%d] is not an object" % i)
 			continue
-		for key: String in PLAYER_COMBAT_KEYS:
+		for key: String in PLAYER_COMBAT_KEYS + BOT_TRACKING_KEYS:
 			if not (p as Dictionary).has(key):
 				errors.append("match_ended: players[%d] missing '%s'" % [i, key])
 	return errors

@@ -63,9 +63,13 @@ func test_online_lobby_events_need_their_properties() -> void:
 	assert_eq(EventCatalog.validate("peer_connect_failed", {"stage": "ice"}).size(), 1, "is_host is required")
 
 
+func test_schema_version_is_bumped_for_bot_tracking() -> void:
+	assert_gte(EventCatalog.SCHEMA_VERSION, 11)  # 11 = difficulty dial / probe / DDA bot tracking
+
+
 func test_match_ended_players_need_the_defense_counters() -> void:
 	var player := {"slot": 0}
-	for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
+	for key: String in EventCatalog.PLAYER_COMBAT_KEYS + EventCatalog.BOT_TRACKING_KEYS:
 		player[key] = 0
 	var ended := {"match_id": "m", "mode": "bot", "rule": "stock", "arena": "a", "result": "win", "winner_slot": 0,
 		"duration_s": 1.0, "players": [player]}

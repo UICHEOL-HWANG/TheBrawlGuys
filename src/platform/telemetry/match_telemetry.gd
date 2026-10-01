@@ -21,6 +21,8 @@ var _rows: Array[Dictionary] = []
 var _active: bool = false
 var _match_row: Dictionary = {}
 var _player_rows: Array[Dictionary] = []
+## slot -> extra summary keys at match end (BotSquad.slot_summary: bot tracking, PRD-BOT-04).
+var _slot_extras: Callable = Callable()
 
 
 func _init(sink: Callable) -> void:
@@ -100,6 +102,10 @@ func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = 
 		summary.merge(MatchSummary.mode_fields(view, s.slot))
 		summary.merge(_features.summary(s.slot, summary, ticks))
 		summary.merge(NetSummary.player_fields(net, s.slot))
+		for key: String in EventCatalog.BOT_TRACKING_KEYS:
+			summary[key] = null
+		if _slot_extras.is_valid():
+			summary.merge(_slot_extras.call(s.slot), true)
 		players.append(summary)
 		_player_rows.append(RawRows.player_row(match_id(), slot_setup, summary))
 	var local_slot := int(_setup.get("local_slot", 0))
@@ -114,6 +120,17 @@ func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = 
 		return
 	props.merge({"result": local_result, "winner_slot": -1 if winner == null else winner, "players": players})
 	_emit("match_ended", props)
+
+
+## Bot tracking (BotSquad): extras(slot) -> Dictionary merged into each slot summary at end().
+func set_slot_extras(extras: Callable) -> void:
+	_slot_extras = extras
+
+
+## A bot-side match_events row (probe_stage, dda_adjusted, bot_intent); actor / target may be null.
+func add_bot_event(tick: int, type: String, actor: Variant, target: Variant, payload: Dictionary) -> void:
+	if _active:
+		_rows.append(RawRows.bot_row(match_id(), tick, type, actor, target, payload))
 
 
 func match_id() -> String:
