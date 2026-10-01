@@ -111,11 +111,11 @@ func reserve() -> Dictionary:
 	var r := _strip.get_global_rect()
 	if _strip.is_edge_top():
 		return {"top": r.end.y / height, "bottom": 0.0}
-	return {"top": _key_hints_bottom() / height, "bottom": (height - r.position.y) / height}
+	return {"top": key_hints_bottom() / height, "bottom": (height - r.position.y) / height}
 
 
 ## Lowest edge of the key hint bars on the top edge (0 when none are shown).
-func _key_hints_bottom() -> float:
+func key_hints_bottom() -> float:
 	var bottom := 0.0
 	if _key_hints != null and _key_hints.is_shown():
 		for b: KeyHintBar in _key_hints.bars():

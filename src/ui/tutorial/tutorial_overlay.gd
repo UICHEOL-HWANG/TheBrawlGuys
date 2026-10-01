@@ -1,7 +1,7 @@
 class_name TutorialOverlay
 extends CanvasLayer
 ## The tutorial's UI layer (Phase 5 T11, design.md DS-CMP-19): the TutorialCard at the top center
-## inside the safe area (s5 margin, between the HUD's corner counters) and the TutorialSkipDialog
+## inside the safe area (s5 margin, below the HUD's key hint bars) and the TutorialSkipDialog
 ## over everything, touch controls included (layer above TouchInput). While the dialog is open the
 ## tutorial is paused. 건너뛰기 on the card, Esc or a pad's Start open the dialog; Esc again resumes.
 
@@ -15,6 +15,8 @@ const LAYER := TouchInput.LAYER + 1
 var _margin: MarginContainer
 var _card: TutorialCard
 var _dialog: TutorialSkipDialog
+## Lowest edge of the HUD's key hint bars on the top edge: the card sits below them.
+var _top_inset: float = 0.0
 
 
 func _ready() -> void:
@@ -47,6 +49,14 @@ func card() -> TutorialCard:
 
 func dialog() -> TutorialSkipDialog:
 	return _dialog
+
+
+## The key hint bars' bottom edge (0 = none on top); the card moves below them.
+func set_top_inset(y: float) -> void:
+	if is_equal_approx(y, _top_inset):
+		return
+	_top_inset = y
+	_apply_safe_area()
 
 
 func is_paused() -> bool:
@@ -87,6 +97,7 @@ static func is_back_event(event: InputEvent) -> bool:
 func _apply_safe_area() -> void:
 	var vp := get_viewport().get_visible_rect()
 	var safe := SafeArea.rect(get_viewport())
-	_margin.add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5)
+	var top := maxf(safe.position.y - vp.position.y, _top_inset) + DS.S5
+	_margin.add_theme_constant_override("margin_top", int(top))
 	_margin.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
 	_margin.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
