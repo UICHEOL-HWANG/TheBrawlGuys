@@ -13,10 +13,10 @@ const PRIMED_GAUGE := 60.0
 const CLOSE := 1.2
 const XC_HOLD := 20
 const CHARACTER_HASHES := {
-	"barbarian": 3537046789,
-	"rogue": 1086032659,
-	"knight": 1717744113,
-	"mage": 2444104390,
+	"barbarian": 2741412091,
+	"rogue": 495373854,
+	"knight": 1809733745,
+	"mage": 2775547025,
 }
 
 

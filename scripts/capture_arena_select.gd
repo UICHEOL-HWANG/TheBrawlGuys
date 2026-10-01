@@ -4,8 +4,10 @@ extends SceneTree
 ##
 ## Usage (windowed, NOT headless; keep the window on top on macOS):
 ##   godot --path . --resolution 1280x720 --always-on-top -s res://scripts/capture_arena_select.gd -- \
-##       --out-dir=/abs/dir [--tag=SUFFIX]
+##       --out-dir=/abs/dir [--tag=SUFFIX] [--screen=res://...select_screen.gd --name=PREFIX]
 ## Writes <out-dir>/arena-select-focus<tag>.png and <out-dir>/arena-select-chosen<tag>.png.
+## --screen / --name capture another select screen with move/confirm (combat-depth D: the rule
+## select, --screen=res://src/app/screens/rule_select_screen.gd --name=modes-rule-select).
 ## App screens name the Analytics autoload, which `-s` scripts cannot compile against, so the
 ## screen script is loaded at runtime (after the autoloads exist) and its tracking is a no-op.
 
@@ -16,6 +18,8 @@ const WARMUP_FRAMES := 150
 const SETTLE_FRAMES := 20
 
 var _out: String = ""
+var _screen_path: String = SCREEN
+var _name: String = "arena-select"
 var _tag: String = ""
 var _screen: Control
 var _backdrop: MenuBackdrop
@@ -26,6 +30,8 @@ func _init() -> void:
 	var args := CaptureArgs.parse(OS.get_cmdline_user_args())
 	_out = String(args.get("out-dir", ""))
 	_tag = String(args.get("tag", ""))
+	_screen_path = String(args.get("screen", SCREEN))
+	_name = String(args.get("name", _name))
 	if _out.is_empty():
 		push_error("capture_arena_select: usage: -- --out-dir=/abs/dir [--tag=SUFFIX]")
 		quit(1)
@@ -45,10 +51,10 @@ func _on_frame() -> void:
 	elif _frame == WARMUP_FRAMES:
 		_screen.call("move", 1)
 	elif _frame == WARMUP_FRAMES + SETTLE_FRAMES:
-		CaptureArgs.save(root, "%s/arena-select-focus%s.png" % [_out, _tag])
+		CaptureArgs.save(root, "%s/%s-focus%s.png" % [_out, _name, _tag])
 		_screen.call("confirm")
 	elif _frame == WARMUP_FRAMES + SETTLE_FRAMES * 2:
-		CaptureArgs.save(root, "%s/arena-select-chosen%s.png" % [_out, _tag])
+		CaptureArgs.save(root, "%s/%s-chosen%s.png" % [_out, _name, _tag])
 		quit(0)
 
 
@@ -56,6 +62,6 @@ func _add_screen() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = UI_LAYER
 	root.add_child(ui)
-	_screen = (load(SCREEN) as GDScript).new() as Control
+	_screen = (load(_screen_path) as GDScript).new() as Control
 	_screen.set("track", func(_n: String, _p: Dictionary) -> void: pass)
 	ui.add_child(_screen)

@@ -72,7 +72,7 @@ static func find(fighters: Array[Fighter], id: int) -> Fighter:
 
 
 static func _grabbable(holder: Fighter, target: Fighter) -> bool:
-	return target != holder and target.is_alive() and not target.untouchable() \
+	return target != holder and target.is_alive() and not target.untouchable_by(holder.id) \
 			and target.state != Fighter.State.HOLDING and target.state != Fighter.State.HELD
 
 

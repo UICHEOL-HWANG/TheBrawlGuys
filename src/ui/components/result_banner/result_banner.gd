@@ -3,7 +3,9 @@ extends PanelContainer
 ## Match result (design.md DS-CMP-09): "승리!" / "패배…" / "무승부" in Jua display_l with an
 ## elastic pop, plus "다시 하기" and, when an app shell can take the player back, "메뉴로"
 ## (both DS-CMP-06 MenuButtons). Hidden until show_result(). With no single local viewer (local
-## 2-player, PRD-LOCAL-01) the winner is named instead: "P2 승리!".
+## 2-player, PRD-LOCAL-01) the winner is named instead: "P2 승리!". Team and timed matches
+## (combat-depth D, show_outcome) add a detail line under the title: the winning team and its
+## players, or every score (ResultText).
 
 signal restart_requested
 signal menu_requested
@@ -15,6 +17,7 @@ const MENU_TEXT := "메뉴로"
 const NO_LOCAL := -1
 
 var _title: Label
+var _detail: Label
 var _button: UiMenuButton
 var _menu_button: UiMenuButton
 
@@ -29,6 +32,13 @@ func _ready() -> void:
 	_title.add_theme_font_override("font", load(DS.FONT_DISPLAY_PATH) as Font)
 	_title.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_L)
 	col.add_child(_title)
+	_detail = Label.new()
+	_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_detail.add_theme_font_override("font", load(DS.FONT_BODY_PATH) as Font)
+	_detail.add_theme_font_size_override("font_size", DS.SIZE_BODY)
+	_detail.add_theme_color_override("font_color", DS.UI_TEXT)
+	_detail.visible = false
+	col.add_child(_detail)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", DS.S4)
@@ -42,14 +52,15 @@ func _ready() -> void:
 
 
 func show_result(winner_id: int, local_id: int) -> void:
-	if winner_id == Rules.DRAW:
-		_title.text = "무승부"
-	elif local_id == NO_LOCAL:
-		_title.text = "%s 승리!" % PlayerStyle.label(winner_id)
-	elif winner_id == local_id:
-		_title.text = "승리!"
-	else:
-		_title.text = "패배…"
+	show_outcome(winner_id, local_id, {})
+
+
+## mode: the view's "mode" dictionary (rule, teams, scores, winner_team); {} = stock.
+func show_outcome(winner_id: int, local_id: int, mode: Dictionary) -> void:
+	var words := ResultText.of(winner_id, local_id, mode)
+	_title.text = String(words["title"])
+	_detail.text = String(words["detail"])
+	_detail.visible = not _detail.text.is_empty()
 	if is_inside_tree():
 		UiMotion.pop_in(self, POP_FROM)
 		_button.grab_focus()
@@ -70,6 +81,10 @@ func set_menu_available(on: bool) -> void:
 
 func title() -> String:
 	return _title.text
+
+
+func detail() -> String:
+	return _detail.text if _detail.visible else ""
 
 
 func menu_button() -> UiMenuButton:

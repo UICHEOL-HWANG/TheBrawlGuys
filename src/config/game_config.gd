@@ -189,6 +189,8 @@ extends StyleConfig
 @export_range(10.0, 150.0, 0.5) var cam_zoom_max: float = 70.0
 @export_range(0.0, 20.0, 0.1) var cam_smooth: float = 6.0
 @export_range(10.0, 70.0, 0.5) var cam_fov: float = 40.0
+## Share of the top HUD's height the match camera keeps the fight out of (HudSafeFrame); 0 = off.
+@export_range(0.0, 1.5, 0.05) var cam_hud_reserve: float = 1.0
 ## Menu backdrop orbit (design.md DS-LAY-03): yaw speed, a lower pitch than the match camera so
 ## the fighters read, the arena core kept in frame, the zoom floor of that close framing, and how
 ## fast the orbit pivot drifts after the fight (per second, slower than cam_smooth).
@@ -239,7 +241,7 @@ extends StyleConfig
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 	"Arena Gimmicks", "StyleBoxer", "StyleWeapon", "StyleRanged", "Special", "SpecialSlam", "SpecialRush",
-	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "DI", "Knockdown", "Tech",
+	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "DI", "Knockdown", "Tech", "Modes",
 ]
 
 @export_group("Audio")
@@ -256,9 +258,10 @@ const NON_SIM_GROUPS: Array[String] = [
 	"BotGetup",
 ]
 ## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig
-## extends DefenseConfig extends KnockdownConfig).
+## extends DefenseConfig extends KnockdownConfig extends ModeConfig).
 const CONFIG_SCRIPTS: Array[String] = [
 	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd", "knockdown_config.gd",
+	"mode_config.gd",
 ]
 
 

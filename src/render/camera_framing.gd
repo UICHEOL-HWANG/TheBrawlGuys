@@ -16,6 +16,8 @@ extends RefCounted
 
 const SEARCH_ITERATIONS := 48
 const REBALANCE_PASSES := 4
+## Head room over fighter_height kept in frame: FighterIdentity's label gap plus the label itself.
+const LABEL_ROOM := 0.9
 
 
 ## Four ground anchors on a circle of radius * share: the part of the arena always kept in frame.
@@ -24,15 +26,30 @@ static func arena_anchors(radius: float, share: float) -> PackedVector3Array:
 	return PackedVector3Array([Vector3(-r, 0, 0), Vector3(r, 0, 0), Vector3(0, 0, -r), Vector3(0, 0, r)])
 
 
-## The match camera's targets: the anchors of the arena in the view (its reach, state_view's
-## arena_radius; the config radius for views without one) plus every fighter still in play.
+## The match camera's targets: the context anchors (a circle of arena reach × cam_arena_share —
+## state_view's arena_radius, the config radius for views without one — centred on the fighters
+## still in play, or on the arena centre when none are; combat-depth D: around the fight so the
+## fighters sit in the middle of the free screen band instead of being pulled toward the arena
+## centre) plus every fighter in play — its feet and the top of its "P1" label (LABEL_ROOM over
+## its height), so labels stay on screen.
 static func match_targets(view: Dictionary, config: GameConfig) -> PackedVector3Array:
 	var radius := float(view.get("arena_radius", config.arena_radius))
-	var pts := arena_anchors(radius, config.cam_arena_share)
+	var pts := PackedVector3Array()
+	var lo := Vector3.INF
+	var hi := -Vector3.INF
 	for f: Dictionary in view["fighters"]:
 		if int(f["state"]) != Fighter.State.KO:
-			pts.append(f["pos"])
-	return pts
+			var p: Vector3 = f["pos"]
+			pts.append(p)
+			pts.append(p + Vector3.UP * (config.fighter_height + LABEL_ROOM))
+			lo = lo.min(p)
+			hi = hi.max(p)
+	var middle := Vector3((lo.x + hi.x) * 0.5, 0.0, (lo.z + hi.z) * 0.5) if not pts.is_empty() else Vector3.ZERO
+	var anchors := arena_anchors(radius, config.cam_arena_share)
+	for i: int in anchors.size():
+		anchors[i] += middle
+	anchors.append_array(pts)
+	return anchors
 
 
 ## Returns {"center": Vector3, "distance": float}. Defaults (aspect 1, pitch 90) are top-down.

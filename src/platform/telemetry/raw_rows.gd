@@ -4,7 +4,7 @@ extends RefCounted
 ## match_events rows all share the same six columns so PostgREST can bulk insert them.
 
 ## Event types whose "id" is a fighter (item events use "id" for the item).
-const FIGHTER_ID_TYPES: Array[String] = ["ringout", "jumped", "landed", "respawned"]
+const FIGHTER_ID_TYPES: Array[String] = ["ringout", "jumped", "landed", "respawned", "score"]
 const ACTOR_KEYS: Array[String] = ["attacker", "fighter"]
 const TARGET_KEYS: Array[String] = ["target", "victim"]
 ## Reproducibility header copied from the setup onto the matches row (null when absent).
@@ -45,6 +45,9 @@ static func match_row(setup: Dictionary, duration_ticks: int, winner_slot: Varia
 	for key: String in HEADER_KEYS:
 		row[key] = setup.get(key)
 	row["config_variant"] = setup.get("config_variant", VARIANT_DEFAULT)
+	var rule := String(setup.get("rule", MatchRules.STOCK))
+	if rule != MatchRules.STOCK:
+		row["rule"] = rule  # matches.rule (migration 0004); stock rows keep the 0003 shape
 	return row
 
 

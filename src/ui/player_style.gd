@@ -5,6 +5,11 @@ extends RefCounted
 enum Shape { CIRCLE, TRIANGLE, SQUARE, DIAMOND }
 
 const COLORS := [DS.P1, DS.P2, DS.P3, DS.P4]
+## Team 2v2 (combat-depth D, design.md "팀 색"): team 1 (P1 + P3) in P1 blue, team 2 (P2 + P4) in
+## P2 red — always with the player shapes and the "팀 1" / "팀 2" header (DS-VIS-03).
+const TEAM_1 := DS.P1
+const TEAM_2 := DS.P2
+const TEAM_COLORS := [TEAM_1, TEAM_2]
 const SHAPES := [Shape.CIRCLE, Shape.TRIANGLE, Shape.SQUARE, Shape.DIAMOND]
 const CIRCLE_SEGMENTS := 24
 
@@ -19,6 +24,15 @@ static func shape(index: int) -> int:
 
 static func label(index: int) -> String:
 	return "P%d" % (index + 1)
+
+
+## Team 2v2 (combat-depth D): team 0 -> TEAM_1, team 1 -> TEAM_2.
+static func team_color(team: int) -> Color:
+	return TEAM_COLORS[posmod(team, TEAM_COLORS.size())]
+
+
+static func team_label(team: int) -> String:
+	return "팀 %d" % (team + 1)
 
 
 static func polygon(shape_id: int, radius: float, center: Vector2 = Vector2.ZERO) -> PackedVector2Array:

@@ -16,6 +16,7 @@ const KEY := "key_hints"
 const TRACK_KEY := "hud.key_hints"
 
 var _margin: MarginContainer
+var _edge_top: bool = false
 var _row: HBoxContainer
 ## One per player: {bar: KeyHintBar, caps: Array[Dictionary], slot: int}
 var _entries: Array[Dictionary] = []
@@ -50,6 +51,16 @@ func setup_players(players: Array[Dictionary], touch_active: Callable, store: Se
 		(e["bar"] as KeyHintBar).set_state(KeyHintBar.State.SHOWN if shown else KeyHintBar.State.HIDDEN, false)
 	get_viewport().size_changed.connect(_apply_safe_area)
 	_refresh()
+
+
+## The match HUD strip sits at the bottom on desktop (DS-LAY-02 v2): the bars move to the top.
+func set_edge_top(on: bool) -> void:
+	if _margin == null or on == _edge_top:
+		return
+	_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE if on else Control.PRESET_BOTTOM_WIDE)
+	_margin.grow_vertical = Control.GROW_DIRECTION_END if on else Control.GROW_DIRECTION_BEGIN
+	_edge_top = on
+	_apply_safe_area()
 
 
 func bar() -> KeyHintBar:
@@ -169,7 +180,8 @@ func _apply_safe_area() -> void:
 	var safe := SafeArea.rect(get_viewport())
 	_margin.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
 	_margin.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
-	_margin.add_theme_constant_override("margin_bottom", int(vp.end.y - safe.end.y) + DS.S5)
+	_margin.add_theme_constant_override("margin_bottom", 0 if _edge_top else int(vp.end.y - safe.end.y) + DS.S5)
+	_margin.add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5 if _edge_top else 0)
 	if not _entries.is_empty():
 		_fit()
 

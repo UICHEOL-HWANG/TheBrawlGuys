@@ -3,7 +3,9 @@ extends RefCounted
 ## Everything a match needs to start (platform B1, docs/design.md DS-LAY-03): mode, arena, seed
 ## and one entry per slot {slot, character, controller: "local"|"bot", input_device}. Menu screens
 ## fill it (mode, then the SELECT_STEPS: characters and arena); MatchScene and telemetry only read
-## it. character is a CharacterData id ("" = the classic fighter).
+## it. character is a CharacterData id ("" = the classic fighter). rule is the MatchRules mode
+## (stock / team / timed, combat-depth D) picked on the rule select step; it sets the fighter
+## count (RULE_PLAYERS, bots fill new slots) and build_rules turns it into the sim's MatchRules.
 
 const MODE_BOT := "bot"
 const MODE_LOCAL_2P := "local_2p"
@@ -18,10 +20,15 @@ const INPUT_KEYBOARD := "keyboard"
 const LOCAL_2P_HUMANS := 2
 const DEFAULT_SEED := 1
 const DEFAULT_PLAYERS := 2
+## Fighters per rule: team 2v2 needs four, timed FFA plays four, stock keeps the 1v1 default.
+const RULE_PLAYERS := {
+	MatchRules.STOCK: DEFAULT_PLAYERS, MatchRules.TEAM: MatchRules.TEAM_PLAYERS, MatchRules.TIMED: 4,
+}
 
 var mode: String = MODE_BOT
 var arena_id: String = ARENA_DEFAULT
 var seed: int = DEFAULT_SEED
+var rule: String = MatchRules.STOCK
 var slots: Array[Dictionary] = []
 
 
@@ -56,6 +63,26 @@ static func all_bots(player_count: int, p_seed: int = DEFAULT_SEED) -> MatchSetu
 static func slot_entry(slot: int, controller: String, input_device: String) -> Dictionary:
 	return {"slot": slot, "character": CharacterData.DEFAULT, "controller": controller,
 		"input_device": input_device}
+
+
+## Picks the rule (unknown ids play stock) and sizes the line-up for it: existing slots keep
+## their controller and device, missing ones become bots, extra ones are dropped.
+func set_rule(p_rule: String) -> void:
+	rule = p_rule if MatchRules.MODES.has(p_rule) else MatchRules.STOCK
+	var count: int = RULE_PLAYERS[rule]
+	slots.resize(mini(slots.size(), count))
+	for i: int in range(slots.size(), count):
+		slots.append(slot_entry(i, CONTROLLER_BOT, INPUT_BOT))
+
+
+## The sim rules for this setup (World.new), with the config's mode defaults.
+func build_rules(config: GameConfig) -> MatchRules:
+	return MatchRules.for_mode(rule, player_count(), config)
+
+
+## A fresh World for this setup: seed, line-up, characters, arena and rules.
+func build_world(config: GameConfig) -> World:
+	return World.new(config, seed, player_count(), build_arena(config), characters(), build_rules(config))
 
 
 ## A fresh sim arena for arena_id (Phase 4 ArenaCatalog; unknown ids fall back to classic).
@@ -140,6 +167,7 @@ func copy() -> MatchSetup:
 	c.mode = mode
 	c.arena_id = arena_id
 	c.seed = seed
+	c.rule = rule
 	for s: Dictionary in slots:
 		c.slots.append(s.duplicate())
 	return c
@@ -150,6 +178,10 @@ func validate() -> PackedStringArray:
 	var errors := PackedStringArray()
 	if slots.is_empty():
 		errors.append("no slots")
+	if not MatchRules.MODES.has(rule):
+		errors.append("unknown rule '%s'" % rule)
+	elif rule == MatchRules.TEAM and slots.size() != MatchRules.TEAM_PLAYERS:
+		errors.append("team rule needs %d slots" % MatchRules.TEAM_PLAYERS)
 	if not ArenaCatalog.ids().has(arena_id):
 		errors.append("unknown arena '%s'" % arena_id)
 	for i: int in slots.size():

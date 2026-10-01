@@ -1,9 +1,8 @@
 extends Node
-## Match scene: fixed 60 Hz sim loop + interpolated rendering (docs/PRD.md §5.4) for the
-## MatchSetup it is given (platform B1) — local keyboard/touch/pad (up to two humans, PRD-LOCAL-01)
-## or a bot per slot, items, HUD,
-## result, restart and telemetry; camera, feel and sound live in MatchPresentation. The app shell
-## sets `setup` and `menu_available` before adding it; run alone (main.tscn) it plays 1 vs bot.
+## Match scene: fixed 60 Hz sim loop + interpolated rendering (docs/PRD.md §5.4) for the MatchSetup
+## it is given (platform B1; rule = stock/team/timed) — local keyboard/touch/pad (up to two humans,
+## PRD-LOCAL-01) or a bot per slot, items, HUD, result, restart and telemetry; camera, feel and sound
+## live in MatchPresentation. The app shell sets `setup` and `menu_available` before adding it.
 
 signal menu_requested
 
@@ -121,11 +120,11 @@ func _start_match() -> void:
 	_stage.clear_items()
 	if _world != null and new_seed.is_valid():
 		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
-	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config), setup.characters())
+	_world = setup.build_world(_config)
 	_bots.clear()
 	for slot: int in setup.bot_slots():
 		_bots.append(BotController.new(slot, _config))
-	_hud.setup(setup.player_count(), _config.stocks)
+	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
 	_result_shown = false
 	_curr_state = _world.state_view()
@@ -168,11 +167,14 @@ func _process(delta: float) -> void:
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.on_events(events)
-	_hud.update_from(_curr_state)
+	_hud.update_from(_curr_state, events)
+	_presentation.set_hud_reserve(_hud.reserve())
 	_presentation.present(_curr_state, events, view_events, delta, setup.local_slot(), _touch)
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
-		_hud.show_result(int(_curr_state["winner"]), _result_viewer())
+		# The banner speaks for the lone human, or names the winner when two share the screen.
+		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
+		_hud.show_result(int(_curr_state["winner"]), viewer)
 		_tracking.finish(_curr_state)
 	_stats.add_frame(delta, ticks)
 	_tracking.on_frame_time(delta)
@@ -188,11 +190,6 @@ func _after_tick(_inputs: Array[InputFrame]) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _result_shown and event.is_action_pressed("ui_accept"):
 		_start_match()
-
-
-## Whose win or loss the banner speaks for: the lone human, or nobody when two share the screen.
-func _result_viewer() -> int:
-	return setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
 
 
 func _exit_tree() -> void:

@@ -23,8 +23,8 @@ func _run(w: World, from: int, ticks: int) -> Array[int]:
 	return seq
 
 
-func test_snapshot_version_is_9() -> void:
-	assert_eq(WorldCodec.VERSION, 9)
+func test_snapshot_version_has_the_knockdown_fields() -> void:
+	assert_gte(WorldCodec.VERSION, 9, "v9 added the knockdown fields (v10: match modes)")
 
 
 func test_fighter_data_has_every_knockdown_field() -> void:

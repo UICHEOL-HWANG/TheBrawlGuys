@@ -1,6 +1,6 @@
 # TheBrawlGuys — 디자인 시스템
 
-> 버전 0.6 · 2026-09-30 (0.6++ 2026-10-01: Phase 5 T11 온보딩 튜토리얼 — DS-CMP-19, KeyHintBar target 링) (0.6+: Phase 4.0 계획 — LoginPanel 초안, 메뉴 디오라마 배경) (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
+> 버전 0.7 · 2026-10-01 (0.7: combat-depth D — 경기 방식 화면, 팀 색 `team_1`/`team_2`, HUD 스트립 v2 DS-LAY-02, DS-CMP-20~22, HUD 피해 프레이밍 GD-CAM-01) (0.6 · 2026-09-30) (0.6++ 2026-10-01: Phase 5 T11 온보딩 튜토리얼 — DS-CMP-19, KeyHintBar target 링) (0.6+: Phase 4.0 계획 — LoginPanel 초안, 메뉴 디오라마 배경) (0.6: Phase 3 — 캐릭터·애니·VFX·SFX·BGM·품질 단계·모션 토큰) (0.5: Phase 2 — 터치 v2·차지 게이지·가드 버블·아이템 표시) (0.4: Phase 1 HUD·터치·타격감 v1) (0.3: Phase 0 완료 — 토큰·테마·갤러리) (0.2: 팔레트 A안 확정)
 > 상위: [`PRD.md`](./PRD.md) (요구사항) · 일정: [`PHASES.md`](./PHASES.md) (🎨 DS 트랙) · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떻게 보이고, 들리고, 느껴지는지**를 소유한다.
@@ -162,11 +162,15 @@
 
 > 초록 계열 플레이어 색은 바닥과 겹치므로 쓰지 않는다 (P4 = 보라).
 
+**팀 색** (팀전 2:2, combat-depth D) — `team_1` = `p1` 파랑(P1 + P3), `team_2` = `p2` 빨강(P2 + P4). 팀전에서는 발밑 링·P 라벨 외곽선·HUD 카드 테두리·모양 배지가 팀 색이 되고, 모양(●▲■◆)과 "P1" 글자는 그대로라 누구인지는 계속 구분된다
+
 **대미지 램프** — `DamageCounter`가 %에 따라 보간
 
 | % | 0 | 50 | 100 | 150+ |
 |---|---|---|---|---|
 | 색 | `ui_surface` | `petal_yellow` | `fire` | `danger` |
+
+**대미지 바 램프** (`PlayerCard` 굵은 바, DS-CMP-22) — 같은 % 지점에서 `grass_mid` → `petal_yellow` → `fire` → `danger`(초록→노랑→빨강), 바는 150%에서 가득 참. 트랙 `bar_track`(= `ui_surface_dim`), 아래 얇은 필살기 게이지 바 `gauge_bar`(= `petal_blue`)
 
 ### DS-TOK-02 타이포그래피 (초안)
 
@@ -279,22 +283,33 @@
 
 ### DS-LAY-02 HUD 레이아웃
 
-- 정보는 **상단**, 조작은 **하단** (원칙 5)
-- `DamageCounter`는 상단 가장자리에 플레이어 수만큼 균등 배치 (1:1은 좌우 끝, 4인은 4등분)
+**v2 (2026-10-01, combat-depth D — 사용자 지시, 겟앰프드 HUD 레이아웃 참고 [`references/ref-getamped-hud.png`](./references/ref-getamped-hud.png), 배치만 참고하고 그림·에셋은 우리 것)**:
+- `HudStrip`: 화면 **아래** 가장자리 스트립. 왼쪽 묶음 P1·P3, 오른쪽 묶음 P2·P4(팀전은 팀 1 왼쪽 / 팀 2 오른쪽), 묶음마다 카드 한 줄씩 세로로. 오른쪽 카드는 좌우 반전(초상이 바깥쪽). 1:1은 양쪽에 카드 하나씩
+- 얇은 스트립: 720p에서 화면 높이의 약 18% 이하(2줄 카드 + 가장자리 `s3`). 카드 = 한 줄("P1 바바리안 · 스톡/점수 · 42%", `caption`) + 굵은 대미지 바(`s3`) + 얇은 게이지 바(`s1`), 초상(`s7`)이 카드 바깥 가장자리에 겹침
+- 팀전: 묶음 바깥쪽에 세로 탭 "팀/1" · "팀/2"(`caption`, 팀 색 — 높이를 더하지 않음), 카드 테두리·배지가 팀 색
+- 시간제: 두 묶음 사이 가운데에 `MatchTimer`(시계 아이콘 + 남은 시간, DS-CMP-20)
+- 카드는 `PlayerCard`(DS-CMP-22). 스트립이 화면 폭보다 넓으면 바를 짧게(compact)
+- **터치 조작이 보이는 동안은 스트립을 위쪽 가장자리로** 옮긴다 — 아래 왼쪽 스틱·오른쪽 버튼과 겹치지 않게(줄이기보다 옮기는 쪽: 카드 글자 크기를 지킨다). 키보드 키 바(DS-CMP-16)는 스트립 반대편(데스크톱 = 위쪽)
+- 카메라는 스트립(과 위쪽 키 바)이 덮는 높이를 비워 두고 그 사이에 싸움을 잡는다 (GD-CAM-01 HUD 피해 프레이밍)
 - 일시정지 버튼: 우상단, 터치 영역 48dp
 - 모든 HUD는 safe area 안쪽 `s5` 여백
+- 증거 `dev/active/combat-depth/evidence/hud-{stock,team,timed}-*-720.png`(1280×720, 4인) · `hud-stock-*-1v1-720.png` · `hud-*-phone.png`(1170×540 = 2340×1080 절반, UI 배율 1.6, 터치)
+
+v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에 균등 배치 — v2로 대체
 
 ### DS-LAY-03 화면 흐름
 
 ```
 로그인 ─▶ 타이틀/모드 선택 ─┬─ 봇전 ─────────────────┐
-  (세션 있으면 건너뜀)       ├─ 로컬 2인 ──────────────┼─▶ 캐릭터 선택 ─▶ 경기장 선택 ─▶ 대전 ─▶ 결과
-                           └─ 온라인 ─▶ 로비(방 코드) ┘                                ▲        │
-                                                                                     └─ 다시 ─┘
+  (세션 있으면 건너뜀)       ├─ 로컬 2인 ──────────────┼─▶ 경기 방식 ─▶ 캐릭터 선택 ─▶ 경기장 선택 ─▶ 대전 ─▶ 결과
+                           └─ 온라인 ─▶ 로비(방 코드) ┘                                              ▲        │
+                                                                                                   └─ 다시 ─┘
 설정 (어디서든 진입): 접근성 · 조작 편집 · 사운드
 튜토리얼 (Phase 5 T11): 기기에서 첫 로그인 ─▶ 타이틀 위에 연습 경기장 튜토리얼 ─▶ (완료 · 건너뛰기) ─▶ 타이틀
                        타이틀 "튜토리얼 다시 보기" ─▶ 같은 튜토리얼 ─▶ 타이틀
 ```
+
+**경기 방식** (combat-depth D, 근거 PRD-RULE-06): 경기장 선택과 같은 배치(제목 위, 가운데 `Panel`, 뒤로 좌하단·키 안내 우하단)에 `MenuButton` 3개(스톡 / 팀전 2:2 / 시간제)와 한 줄 설명(`caption` `ui_text_soft`) — 새 컴포넌트 없이 DS-CMP-06·07 조합. ←/→·스틱(한 번 밀 때 한 칸)·Z/Enter/Space/패드 A 확정, X/Esc/패드 B 뒤로, 클릭·탭. 팀전·시간제는 4명(봇이 채움)
 
 **온보딩 튜토리얼** (Phase 5 T11, 근거 PRD-UI-02): 고전 경기장에서 Barbarian(필살기가 있는 캐릭터) 대 가만히 서 있는 연습 상대(가드 미션에서만 다가와 약공격). 미션 8개 — 이동 → 점프 → 약공격 → 강공격(모아치기) → 가드 → 잡기·던지기 → 아이템(가운데 떨어지는 방망이 줍기·쓰기) → 필살기(게이지를 채워 줌). 미션마다 위쪽 `TutorialCard`(DS-CMP-19)가 한 줄 안내를, 아래 `KeyHintBar`가 지금 누를 키캡을 target 링으로 보여 준다. 성공하면 카드가 "좋아요!"로 바뀌며 통 튀고(`motion_squish`) `ui_confirm` 소리, 1.2초 뒤 다음 미션. 스톡이 줄지 않고 아이템 상자가 떨어지지 않는다. 안내 문구는 손에 든 장치를 따른다: 터치 컨트롤이 보이면 화면 버튼·스틱 이름(키 바는 숨음), 패드를 쓰면 패드 버튼(Xbox A/X/Y/B/RB, PS × □ △ ○ R1), 아니면 P1 키(InputMap에서 읽음). 건너뛰기 버튼·Esc·패드 Start → 확인창(그동안 일시정지) → 타이틀. 완료 카드 "튜토리얼 완료!" + "타이틀로". 증거 `phase-5/evidence/tutorial-*.png`(1920×1080) · `tutorial-*-phone.png`(1624×750, UI 배율 1.6, 터치)
 
@@ -351,6 +366,9 @@
 | DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed (+ ready 링 · target 링) | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
 | DS-CMP-17 | `TextField` (`UiTextField`) | 짧은 텍스트 입력 (로그인 이메일) | idle · focus(호버 포함) · error(다시 입력하면 해제) · disabled | `ui_surface` 바탕, `radius_m`, `body` `ui_text`, placeholder `ui_text_soft`, 포커스 `stroke_focus` `petal_yellow`, 오류 `stroke_focus` `danger`, `shadow_pressed`, 높이 `field_height`. 모바일 키보드 힌트는 호출자가 지정(이메일) | 4.0 | PRD-AUTH-01 |
 | DS-CMP-18 | `CodeInput` | 6자리 인증코드 입력 | idle · focus(다음 칸 링) · error(모든 칸 `danger` 링) · disabled | 숫자 칸 6개 `code_box`(`ui_surface`, `radius_s`, 간격 `s3`), 숫자 `title` 크기 `ui_text`. 숨은 LineEdit가 입력·붙여넣기·숫자 키보드(모바일)를 받고 숫자만 최대 6자리 남긴다 | 4.0 | PRD-AUTH-01 |
+| DS-CMP-20 | `MatchTimer` · `ClockIcon` | 시간제 남은 시간 | 진행 · 마지막 10초(`danger` 글자 + 초마다 통 튐) · 서든 데스("서든 데스" `danger`) | 크림 알약(DamageCounter 판), 코드로 그린 시계(`ui_surface` 판, `ui_text` 테 `s1`, `danger` 분침), 숫자 `display_l` Jua + `canopy_deep` 외곽선 | 5 (combat-depth D) | PRD-RULE-06 |
+| DS-CMP-21 | `ScoreBadge` | 시간제 점수 (카드에서 스톡 대신) | 기본 · 변경(통 튐) · 음수(`danger`) | "3점" `title` Jua, `canopy_deep` 외곽선 | 5 (combat-depth D) | PRD-RULE-06 |
+| DS-CMP-22 | `PlayerCard` (`CardBar` · `PortraitBadge`) | HUD 스트립의 플레이어 카드 (DS-LAY-02 v2) | 기본 · KO(흐림 40%) · 팀전(팀 색 테두리) · 게이지 가득(파란 바 깜빡임) · "N연타" 배지(같은 대상 1초 안 연속 적중 2회부터, 카드 안쪽 위 모서리 — 초상 반대편 — 에 통 튐, 위쪽 스트립에서는 아래 모서리) | `ui_surface` 70% `radius_s` 얇은 카드, 바깥 가장자리에 겹친 원형 초상(`s7`, 캐릭터 머리 3D 한 번 그림 + 플레이어/팀 색 테 + 모양 배지), 한 줄 "P1 바바리안 · 스톡 점(`s3`)/점수 · 42%"(`caption`, %는 50%부터 램프 색), 굵은 대미지 바(`s3`, 대미지 바 램프), 얇은 게이지 바(`s1`, `gauge_bar`), 연타 배지 = 뾰족한 별(`petal_yellow` + `fire` 테) 위 `caption` Jua | 5 (combat-depth D) | PRD-UI-01, PRD-RULE-06, PRD-STYLE-04 |
 | DS-CMP-19 | `TutorialCard` · `TutorialSkipDialog` | 온보딩 튜토리얼 미션 안내 · 건너뛰기 확인 | 카드: mission · success("좋아요!", `motion_squish` 통 튐) · complete("튜토리얼 완료!" + primary "타이틀로") / 확인창: 닫힘 · 열림(일시정지) | 카드 = `Panel`(DS-CMP-07) 폭 760, 위쪽 가운데 safe area `s5`: 캡션 "튜토리얼 · n/8"(`caption` `ui_text_soft`) + secondary `MenuButton` "건너뛰기"(높이 `s7`, 포커스 안 받음 — Space가 점프), 제목(`title` Jua), 안내 한 줄(`body`, 줄바꿈). 확인창 = 전체 `ui_shadow` 막(터치 컨트롤 위 레이어, 입력 차단) + 가운데 `Panel`: 제목 "튜토리얼을 건너뛸까요?"(`title`) · 다시 보기 안내(`body` `ui_text_soft`) · secondary "계속하기"(포커스) · primary "건너뛰기", `pop_in` | 5 | PRD-UI-02 |
 
 `SelectCard` 구현 (Phase 4 T7, 2026-09-30): `ui_surface` 카드(`radius_l`, `shadow_soft`, 너비 `card_width` 320) 안에 코드로 그린 위에서 본 디오라마 썸네일(`ArenaThumb`, 높이 `card_thumb_height` 200: 바깥 초원·링아웃 물·흙 띠 위 바닥·나무 고리·기믹 표시, 경기장 테마 색) · `title` 이름 · `caption` 한 줄 설명(`ui_text_soft`) · 기믹 아이콘(`GimmickIcon` `card_icon` 48: 물·불·균열·튕김·안개). focus = `petal_yellow` 링 + ×1.04, selected = `ring_color` 링(경기장은 `ui_accent`, Phase 5 캐릭터는 플레이어 색) + ×1.07, locked = `ui_surface_dim` + "준비 중". 경기장 선택 화면: 제목 위, 카드 4장 아래 한 줄, "뒤로" + 조작 안내(←/→ · Z/Enter · X/Esc), 호버 = 포커스, 클릭·탭 = 확정
@@ -364,7 +382,7 @@
 - error 상태는 원인을 한 줄로 보여주고 버튼이 "다시 시도"가 된다. 로그인할 수 없는 환경(모바일·키 없음)은 버튼을 끄고 이유를 보여 준다
 
 `KeyHintBar` 규칙 (DS-CMP-16, 2026-09-30):
-- 위치: 대전 HUD 하단 가운데, safe area 안쪽 `s5` 여백 (DS-LAY-02 "조작은 하단"). 칩은 바 오른쪽 끝
+- 위치: safe area 안쪽 `s5` 여백, 칩은 바 오른쪽 끝. 대전에서는 HUD 스트립 반대편 = 데스크톱에서 **위쪽** (DS-LAY-02 v2, 2026-10-01). 튜토리얼 등 스트립이 없는 곳은 하단
 - 키캡: 방향키는 역T자 묶음 + 캡션 "이동", 그다음 Space "점프" · Z "약공격" · X "강공격" · C "가드" · V "잡기" · X+C "필살기". 필살기는 동시 입력 키캡(여러 액션, 모두 눌렸을 때만 켜짐, 2026-09-30 Phase 5 T7)
 - 필살기 준비: 그 플레이어의 게이지가 가득 차면(view `gauge` ≥ 100, 필살기 있는 캐릭터만) 필살기 키캡 둘레에 `fire` 링(굵기 `s1`, 캡에서 `s1` 띄움). 누름 색과 함께 보일 수 있다
 - 로컬 2인(PRD-LOCAL-01): 플레이어마다 바 하나 — P1 왼쪽 아래, P2 오른쪽 아래(상단 대미지 카운터와 같은 순서), 바 앞에 플레이어 색 "P1"/"P2" 태그(`body` Jua + `ui_surface` 외곽선), 키캡 누름 색도 각자 플레이어 색. P2 키캡은 W/A S D 역T자 · Q · F · G · H · J · G+H. 칩은 마지막(P2) 바에 하나만, 숨기기/보이기는 두 바 함께. 이동 묶음 키캡은 글자여도 화살표 크기(`s6`+`s1`)라 두 바 높이가 같다
@@ -422,6 +440,7 @@
 - 발밑 링: 플레이어 색 + 모양 마커(●▲■◆), 부드러운 발광으로 바닥 위에 항상 그려짐 (안개·그림자 무시)
 - 안개 낀 숲 (Phase 4 T6): 안개가 끼면 각 전투원의 몸 실루엣(플레이어 색 50%)과 발밑 링(90%)이 깊이 검사·안개 없이 안개 층 위에 그려지고 안개 양에 맞춰 나타난다 (`FogSilhouette`). 메뉴 배경에서는 숨긴다
 - 머리 위 `P1`~`P4` 라벨: 로컬 다인 / 온라인에서만 표시
+- 팀전 2:2 (combat-depth D): 발밑 링과 라벨 외곽선이 팀 색(`team_1`/`team_2`), 링 모양은 플레이어 모양 그대로 (`FighterIdentity.set_team_color`). 증거 `combat-depth/evidence/hud-team-*.png`
 - 흑백으로도 구분 가능해야 한다 (Phase 5 완료 기준) — Phase 5 T9: 발밑 링이 플레이어 모양 그대로의 납작한 띠(`PlayerRingMesh`: P1 원 · P2 삼각 · P3 사각 · P4 마름모, 다각형은 변이 몸 밖으로 나오게 키움)로 바뀌었고 안개 실루엣 링도 같은 모양. 증거 `phase-5/evidence/player-ids{,-gray}.png`
 
 ### DS-VIS-04 경기장 가독성
@@ -486,7 +505,7 @@
 | GD-FEEL-02 | 화면 흔들림 | 진폭 = min(k × `shake_per_knockback`, `shake_max`), 지수 감쇠. hitstop이 끝날 때 시작 | `shake_per_knockback`, `shake_max`, `shake_decay` |
 | GD-FEEL-03 | 무적 깜빡임 | 리스폰 무적 동안 반투명 펄스 10Hz, 마지막 0.5초는 20Hz | `blink_hz`, `blink_hz_end` |
 | GD-FEEL-04 | 넉백 궤적 강도 | DS-VFX-04 강도 = 속도 / `trail_speed_full` | `trail_speed_threshold`, `trail_speed_full` |
-| GD-CAM-01 | 카메라 | 겟앰프드식 근접 3/4 부감(피치 42°, 최소 거리 7 m, 여백 1.5 m), 경기장 중심부(반지름 × `cam_arena_share`, 기본 20%)와 모든 생존 전투원을 프레이밍(전투원이 멀어지거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 경기장 전체 → 60%, 2026-10-01 사용자 요청으로 캐릭터가 크게 보이도록 C안 근접 채택), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외. **필살기 컷인 (Phase 5, 렌더 전용)**: sim `special_start`가 오면 시전자 가슴 높이로 완전 확대(거리 7 m, 피치 38°로 낮춤) — 들어가기 `motion_base`(out-quad) → 유지(필살기 sim 길이 − 들어가기, `motion_slow`~`motion_calm`×2 사이) → 복귀 `motion_slow`(in-out-cubic). 그동안 시전자는 캐릭터별 필살기 모션(GD-ANIM-01), 확대된 시전자(화면 중앙) 발밑 아래 — 화면 84% 높이 — 에 시전자 플레이어 색 띠(88%, `s8`+`s5` 높이) + `glow` 줄 2개 + "P1 · 대지 강타"(`display_l`, `ui_surface` 글자·`canopy_deep` 외곽선)가 옆에서 밀려 들어온다(시전자·P 라벨·상단 HUD를 가리지 않고, 터치 버튼은 위 레이어). 확대 중 화면 밖·카메라 뒤 전투원의 충전 게이지는 숨긴다. 슬로우모션 없음(sim 틱·리플레이 해시 불변). 두 번째 필살기는 현재 확대에서 이어서 새 시전자로 초점을 부드럽게 옮기고(`FOCUS_FOLLOW`, 튀지 않음), 시전자가 KO면 마지막 위치에서 바로 복귀. `[accessibility] reduce_motion`(SettingsStore, 경기 시작마다 다시 읽음)이면 카메라는 그대로, 띠는 페이드만 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth` · 컷인 `SpecialCutIn` 상수 |
+| GD-CAM-01 | 카메라 | 겟앰프드식 근접 3/4 부감(피치 42°, 최소 거리 7 m, 여백 1.5 m), 경기장 중심부(반지름 × `cam_arena_share`, 기본 20%)와 모든 생존 전투원을 프레이밍(전투원이 멀어지거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 경기장 전체 → 60%, 2026-10-01 사용자 요청으로 캐릭터가 크게 보이도록 C안 근접 채택), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외. **필살기 컷인 (Phase 5, 렌더 전용)**: sim `special_start`가 오면 시전자 가슴 높이로 완전 확대(거리 7 m, 피치 38°로 낮춤) — 들어가기 `motion_base`(out-quad) → 유지(필살기 sim 길이 − 들어가기, `motion_slow`~`motion_calm`×2 사이) → 복귀 `motion_slow`(in-out-cubic). 그동안 시전자는 캐릭터별 필살기 모션(GD-ANIM-01), 확대된 시전자(화면 중앙) 발밑 아래 — 화면 84% 높이 — 에 시전자 플레이어 색 띠(88%, `s8`+`s5` 높이) + `glow` 줄 2개 + "P1 · 대지 강타"(`display_l`, `ui_surface` 글자·`canopy_deep` 외곽선)가 옆에서 밀려 들어온다(시전자·P 라벨·상단 HUD를 가리지 않고, 터치 버튼은 위 레이어). 확대 중 화면 밖·카메라 뒤 전투원의 충전 게이지는 숨긴다. 슬로우모션 없음(sim 틱·리플레이 해시 불변). 두 번째 필살기는 현재 확대에서 이어서 새 시전자로 초점을 부드럽게 옮기고(`FOCUS_FOLLOW`, 튀지 않음), 시전자가 KO면 마지막 위치에서 바로 복귀. `[accessibility] reduce_motion`(SettingsStore, 경기 시작마다 다시 읽음)이면 카메라는 그대로, 띠는 페이드만 **HUD 피해 프레이밍 (combat-depth D, 렌더 전용)**: HUD 스트립(과 위쪽 키 바)이 덮는 화면 높이 비율을 비워 두고 남은 띠 안에 대상을 맞춘다 — 같은 `cam_fov`를 유지하는 비대칭(오프셋) 프러스텀(`HudSafeFrame`, 최대 45%). 경기장 중심부 앵커(반지름 × `cam_arena_share`)는 2026-10-01부터 **싸움의 중심**(살아 있는 전투원 범위의 가운데)에 놓여, 전투원이 빈 띠 가운데 오고 한쪽에 몰려도 크게 보인다. 대상에는 전투원 발과 함께 머리 위 라벨 꼭대기(키 + 0.9 m)도 들어가 라벨·대미지 숫자가 화면 가장자리나 HUD에 잘리지 않는다 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth`, `cam_hud_reserve`(1 = HUD 높이만큼 비움, 0 = 끔) · 컷인 `SpecialCutIn` 상수 |
 | GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생). SPECIAL은 필살기 id별 모션: 대지 강타 = 양손 내려찍기, 돌진 연타 = 쌍검 찌르기(반복), 회전 베기 = 회전(반복), 거대 화염구 = 주문 발사. 다운(KNOCKDOWN) = 누워 있기(`Lie_Idle`, 반복), 기상(GETUP): 일어서기·제자리 낙법 = `Lie_StandUp`, 기상·낙법 구르기 = `Dodge_Forward`, 기상 공격 = 강공격 모션 (combat-depth C) | — |
 
 ---
@@ -535,7 +554,7 @@
 | DS-THM-01 | 기본 테마 | PRD-UI-01 | 0 | ✅ |
 | DS-THM-02 | 경기장 테마 변형 | PRD-ARENA-01~04 | 4 | ✅ (Phase 4 T6) |
 | DS-LAY-01 | 터치 레이아웃 | PRD-CTL-03 | 1 (기본), 2 🖼 | 🟨 (3안 구현, 기본값 0 호 배치, Stitch 시안 게이트 T13 대기) |
-| DS-LAY-02 | HUD 레이아웃 | PRD-UI-01 | 1 | 🟨 (기본 배치 구현, 🖼 시안 게이트 대기) |
+| DS-LAY-02 | HUD 레이아웃 | PRD-UI-01, PRD-RULE-06 | 1, 5 (combat-depth D v2) | ✅ (2026-10-01 v2 하단 스트립 — 사용자 지시 겟앰프드 배치, 터치 시 위쪽. 증거 `combat-depth/evidence/hud-*.png`) |
 | DS-LAY-03 | 화면 흐름 · 메뉴 궤도 디오라마 배경 | PRD-UI-02, PRD-AUTH-01 | 4.0 (로그인·배경), 4, 5, 6 | 🔨 (4.0 로그인·타이틀·배경 완료, 캐릭터·경기장 선택은 4·5) |
 | DS-LAY-04 | 모바일 반응형 스케일 · 세로 안내 | PRD-UI-01, PRD-PLT-01, PRD-PLT-03 | 4 | ✅ (2026-09-30, `platform/evidence/mobile-*.png`) |
 | DS-CMP-12 | 컴포넌트 — `DebugPanel` | §6 표 참조 | 0 | ✅ |
@@ -552,6 +571,7 @@
 | DS-CMP-17 | 컴포넌트 — `TextField` (로그인 이메일 입력) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-step.png`) |
 | DS-CMP-18 | 컴포넌트 — `CodeInput` (6자리 인증코드) | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30, 갤러리 + `evidence/login-email-code.png`·`-error.png`) |
 | DS-CMP-19 | 컴포넌트 — `TutorialCard` · `TutorialSkipDialog` (온보딩 튜토리얼) | PRD-UI-02 | 5 | ✅ (2026-10-01, `phase-5/evidence/tutorial-*.png` 데스크톱 + 폰 터치) |
+| DS-CMP-20~22 | 컴포넌트 — `MatchTimer` · `ScoreBadge` · `PlayerCard` (HUD 스트립) | PRD-UI-01, PRD-RULE-06 | 5 (combat-depth D) | ✅ (2026-10-01, `combat-depth/evidence/hud-*.png`, 갤러리 미등록 — `ds_gallery.gd` 388줄 분리 후 등록) |
 | DS-VIS-01 | 소프트 툰 셰이딩 | PRD-FX-03, PRD-PLT-05 | 0 (프로토), 3 🖼 | 🟨 (툰 v2·글로벌 유니폼 구현, 🖼 룩 게이트 T7 대기) |
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용 · Phase 5 🖼 스타일 룩 A 장비 승인·적용 2026-10-01 `silhouette-final*.png` · Phase 3 🖼 T7 대기) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ✅ (안개 실루엣 Phase 4, 모양 링 P1~P4 Phase 5 T9 — 흑백 캡처 `phase-5/evidence/player-ids-gray.png`) |

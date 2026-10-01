@@ -25,7 +25,7 @@ const DATA_TYPES := {
 	"guard_prev": TYPE_BOOL, "guard_press_age": TYPE_INT, "guard_rest_ticks": TYPE_INT, "guard_hp": TYPE_FLOAT, "guard_idle_ticks": TYPE_INT,
 	"guard_break_left": TYPE_INT, "perfect_by": TYPE_INT, "dodge_kind": TYPE_INT, "dodge_ticks": TYPE_INT,
 	"dodge_total": TYPE_INT, "dodge_dir": TYPE_VECTOR3, "intangible": TYPE_BOOL, "air_dodge_used": TYPE_BOOL,
-	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT,
+	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT, "ally_mask": TYPE_INT,
 	"tumble": TYPE_BOOL, "di_pending": TYPE_BOOL, "tech_clock": TYPE_INT, "getup_kind": TYPE_INT,
 	"getup_ticks": TYPE_INT, "getup_dir": TYPE_VECTOR3,
 }
@@ -99,6 +99,9 @@ var tech_clock: int = 0
 var getup_kind: int = 0
 var getup_ticks: int = 0
 var getup_dir: Vector3 = Vector3.ZERO
+## Bit i set = fighter i's hits pass through (team mode teammates with friendly fire off,
+## MatchRules.ally_mask); fixed for the match.
+var ally_mask: int = 0
 
 
 func is_alive() -> bool:
@@ -108,6 +111,11 @@ func is_alive() -> bool:
 ## Hits, grabs and projectiles pass through: respawn / special invulnerability or a dodge window.
 func untouchable() -> bool:
 	return invuln_ticks > 0 or intangible
+
+
+## untouchable() or a teammate's hit while friendly fire is off (source_id < 0 = no owner).
+func untouchable_by(source_id: int) -> bool:
+	return untouchable() or (source_id >= 0 and ally_mask & (1 << source_id) != 0)
 
 
 func can_act() -> bool:

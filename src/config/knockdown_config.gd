@@ -1,5 +1,5 @@
 class_name KnockdownConfig
-extends Resource
+extends ModeConfig
 ## Combat-depth C tunables (PRD §4.3): directional influence, knockdown and getup options, tech.
 ## DefenseConfig extends this, so every value here is a GameConfig value (debug panel sliders;
 ## the DI / Knockdown / Tech groups enter GameConfig.fingerprint()). Frames are sim ticks (60 Hz).

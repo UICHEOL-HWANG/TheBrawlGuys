@@ -47,6 +47,16 @@ func restart() -> void:
 	_music.play_battle()
 
 
+## Shares of the screen height the HUD strip covers {top, bottom} (Hud.reserve): the camera
+## frames the fight in between.
+func set_hud_reserve(reserve: Dictionary) -> void:
+	_camera.set_hud_reserve(float(reserve["top"]), float(reserve["bottom"]))
+
+
+func camera_rig() -> CameraRig:
+	return _camera
+
+
 func play_ui(sound: String) -> void:
 	_sfx.play_ui(sound)
 

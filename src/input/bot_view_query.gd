@@ -14,17 +14,23 @@ static func flat(from: Vector3, to: Vector3) -> Vector2:
 	return Vector2(to.x - from.x, to.z - from.z)
 
 
+## Nearest fighter still in the match that is not a teammate (team mode, view["mode"]["teams"]).
 static func nearest_foe(view: Dictionary, self_id: int, my_pos: Vector3) -> Dictionary:
 	var best: Dictionary = {}
 	var best_dist := INF
+	var teams: Array = (view.get("mode", {}) as Dictionary).get("teams", [])
 	for f: Dictionary in view["fighters"]:
-		if int(f["id"]) == self_id or int(f["state"]) == Fighter.State.KO:
+		if int(f["id"]) == self_id or int(f["state"]) == Fighter.State.KO or _teammates(teams, self_id, int(f["id"])):
 			continue
 		var d := flat(my_pos, f["pos"]).length()
 		if d < best_dist:
 			best_dist = d
 			best = f
 	return best
+
+
+static func _teammates(teams: Array, a: int, b: int) -> bool:
+	return a < teams.size() and b < teams.size() and int(teams[a]) == int(teams[b])
 
 
 ## Nearest lit-free item on the ground, or still falling (it lands straight below at pos.x, pos.z)

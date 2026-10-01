@@ -70,7 +70,10 @@ static func _replay(header: Dictionary, log: InputLog, config: GameConfig, resul
 		characters: Array[String]) -> void:
 	var setup := MatchSetup.new()
 	setup.arena_id = String(header["arena"])
-	var world := World.new(config, int(header["seed"]), log.slot_count(), setup.build_arena(config), characters)
+	setup.rule = String(header.get("rule", MatchRules.STOCK))  # matches.rule (0004); absent = stock
+	var rules := MatchRules.for_mode(setup.rule, log.slot_count(), config)
+	var world := World.new(config, int(header["seed"]), log.slot_count(), setup.build_arena(config), characters,
+			rules)
 	for t: int in log.frame_count():
 		world.tick(log.inputs_at(t))
 	result["ticks"] = world.tick_count

@@ -8,6 +8,8 @@ const POP_SCALE := 1.4
 var _index: int = 0
 var _diameter: float = DS.S6
 var _dimmed: bool = false
+## Team mode draws the shape in the team color (set_tint); null = the player color.
+var _tint: Variant = null
 
 
 func setup(index: int, diameter: float) -> void:
@@ -25,6 +27,11 @@ func set_dimmed(d: bool) -> void:
 	queue_redraw()
 
 
+func set_tint(c: Variant) -> void:
+	_tint = c
+	queue_redraw()
+
+
 func is_dimmed() -> bool:
 	return _dimmed
 
@@ -36,4 +43,4 @@ func _draw() -> void:
 		pts.append(pts[0])
 		draw_polyline(pts, DS.UI_TEXT_SOFT, DS.S1)
 	else:
-		draw_colored_polygon(pts, PlayerStyle.color(_index))
+		draw_colored_polygon(pts, _tint if _tint != null else PlayerStyle.color(_index))

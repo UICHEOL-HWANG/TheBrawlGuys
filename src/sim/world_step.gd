@@ -42,7 +42,7 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 	events.append_array(w.items.spawn_step(w.tick_count, rng, c, w.arena.item_area))
 	events.append_array(GuardMeter.step(w.fighters, c))
 	events.append_array(SpecialGauge.apply(w.fighters, events, c))
-	events.append_array(Rules.apply(w.fighters, c, w.arena))
+	events.append_array(Rules.apply(w.fighters, c, w.arena, w.mode_state.infinite_stocks()))
 	Grab.cleanup(w.fighters)
 	events.append_array(ItemActions.drop_from_disabled(w.fighters, w.items, c))
 	return events
