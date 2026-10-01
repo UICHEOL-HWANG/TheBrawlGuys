@@ -210,3 +210,8 @@ func test_autoload_is_disabled_headless_but_still_validates() -> void:
 	assert_false(analytics.call("is_enabled"), "no network from tests or headless runs")
 	analytics.call("track", "made_up_event", {})
 	assert_push_error("made_up_event")
+
+
+func test_matches_played_user_property_comes_from_the_match_counter() -> void:
+	assert_eq(MatchTracking.user_props_for_seq(7), {"matches_played": 7})
+	assert_eq(MatchTracking.user_props_for_seq(0), {}, "no counter, no property")

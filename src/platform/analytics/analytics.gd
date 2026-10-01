@@ -73,6 +73,16 @@ func identify(user_id: String, user_props: Dictionary = {}) -> void:
 		_client.identify(user_id, user_props)
 
 
+## Person-level properties on later events (skill_rating, dda_variant, matches_played).
+func set_user_properties(props: Dictionary) -> void:
+	var known := props.duplicate()
+	for key: Variant in props:
+		if props[key] == null:
+			known.erase(key)  # unrated: leave the property unset
+	if _client != null and not known.is_empty():
+		_client.set_user_properties(known)
+
+
 func set_super_property(key: String, value: Variant) -> void:
 	if _client != null:
 		_client.set_super_property(key, value)

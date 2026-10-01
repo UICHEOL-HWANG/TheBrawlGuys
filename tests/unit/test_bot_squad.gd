@@ -125,3 +125,23 @@ func test_variant_bucket_is_stable_and_settings_win() -> void:
 	for i: int in 400:
 		on += 1 if BotSquadFactory.variant(c, "auto", "dev%d" % i) == BotSquad.ON else 0
 	assert_between(on, 160, 240, "about dda_on_share of devices")
+
+
+func test_finish_returns_the_player_user_properties() -> void:
+	var rating := SkillRating.new()
+	var s := _squad(BotSquad.ON, rating)
+	_play(s, 60)
+	var props := s.finish({"match_over": true, "winner": HUMAN})
+	assert_eq(props["dda_variant"], BotSquad.ON)
+	assert_eq(props["skill_matches"], 1)
+	assert_almost_eq(float(props["skill_rating"]), rating.rating(), 1e-6, "the rating after this match")
+	var unrated := _squad(BotSquad.OFF, SkillRating.new())
+	var early := unrated.finish({"match_over": false})
+	assert_eq(early["dda_variant"], BotSquad.OFF)
+	assert_null(early["skill_rating"], "no observation yet: unrated, not 0.5")
+	assert_eq(early["skill_matches"], 0)
+
+
+func test_bot_only_match_reports_no_player_properties() -> void:
+	var s := BotSquad.new(GameConfig.new(), [0, 1] as Array[int], [] as Array[int], {})
+	assert_eq(s.finish({"match_over": true, "winner": 0}), {})

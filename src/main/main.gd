@@ -168,7 +168,7 @@ func _process(delta: float) -> void:
 		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
 		_hud.show_result(int(_curr_state["winner"]), viewer)
 		_tracking.finish(_curr_state)
-		_squad.finish(_curr_state)
+		Analytics.set_user_properties(_squad.finish(_curr_state))
 	_stats.add_frame(delta, ticks)
 	_tracking.on_frame_time(delta)
 	if _panel != null:

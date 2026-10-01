@@ -117,8 +117,15 @@ func _close_result(next: String) -> void:
 
 
 func _context() -> Dictionary:
-	return {"session_id": Analytics.session_id(), "user_match_seq": _counter.next(_user_id()),
+	var seq := _counter.next(_user_id())
+	Analytics.set_user_properties(user_props_for_seq(seq))
+	return {"session_id": Analytics.session_id(), "user_match_seq": seq,
 		"loss_streak": Analytics.loss_streak(), "match_id": match_id}
+
+
+## matches_played user property: this install's match count for the user (user_match_seq).
+static func user_props_for_seq(seq: int) -> Dictionary:
+	return {"matches_played": seq} if seq > 0 else {}
 
 
 func _net() -> Dictionary:

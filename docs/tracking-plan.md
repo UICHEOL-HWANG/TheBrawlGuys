@@ -42,13 +42,17 @@
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
 | `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 11 — 봇 트래킹: `players[]`·`match_players`에 `EventCatalog.BOT_TRACKING_KEYS`(§3.4.2), `matches.dda_variant`, `match_events` `probe_stage`·`dda_adjusted`·`bot_intent`(0006). 10 = Phase 6 온라인 로비 이벤트 5종(§3.3.2), 셋업 `controller`에 `remote`. 9 = 온라인 경기 네트워크 요약(`NetSummary.KEYS`, 온라인이면 필수·값은 null 가능)이 `match_ended`/`match_abandoned`·`matches`(0007)에, `disconnect_reason`이 `players[]`·`match_players`(0007)에, 한 온라인 경기의 모든 피어가 호스트의 `match_id`를 공유하고 Supabase 행은 호스트만 올림. 8 = 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
-**사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
+**사용자 속성** (Amplitude `user_properties`; 설치 정보는 `InstallInfo`가 `user://install.cfg`에 보관(A8), `matches_played`는 `MatchTracking`, `dda_variant`·`skill_*`는 `BotSquad.finish()`가 `Analytics.set_user_properties`로 보냄):
 
 | 속성 | 타입 | 값 |
 |---|---|---|
 | `first_seen_at` | str (ISO-8601 UTC) | 이 설치의 첫 실행 시각. 이후 바뀌지 않음 |
 | `install_build` | str | 첫 실행 때의 `build_version` |
 | `input_device_primary` | enum(keyboard\|gamepad\|touch) | 이 설치에서 경기를 가장 많이 한 입력 장치 (`match_started.input_device` 누적) |
+| `matches_played` | int | 이 설치에서 이 사용자가 시작한 경기 수 (= `user_match_seq`, `MatchTracking`이 경기 시작마다 갱신) |
+| `dda_variant` | enum(on\|off) | 이 기기의 DDA A/B 그룹 (`BotSquadFactory.variant`). 사람이 봇과 붙은 경기가 끝날 때 설정 |
+| `skill_rating` | float? (0..1) | 기기 실력 점수 (`SkillRating`, 경기 끝 반영 후 값). 관측 0회면 null(미평가) |
+| `skill_matches` | int | 실력 점수에 반영된 경기 수 (프로브 단계 판단 기준) |
 | `viewport_class` | enum(phone\|tablet\|desktop) | 창 짧은 변(CSS px)·터치로 분류 (design.md DS-LAY-04). `app_opened`부터 붙고 창이 바뀌면 갱신 | `event_properties` |
 | `orientation` | enum(portrait\|landscape) | 창 가로·세로 | `event_properties` |
 | `ui_scale` | float | 적용한 2D UI 배율 (`content_scale_factor`, desktop 1.0) | `event_properties` |
@@ -76,8 +80,8 @@
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
 | `login_viewed` | 로그인 화면 표시 (세션 복원 실패 포함) | `reason: enum(first_run\|no_session\|refresh_failed\|logged_out\|online)` (`online` = 온라인 메뉴의 로그인 안내에서 옴, 스키마 10) | — | A | 4.0 |
-| `login_started` | Google 버튼 클릭 / 이메일은 새 주소로 첫 코드 요청이 서버로 나갈 때 (재전송은 `email_code_resent`) | `provider: enum(google\|email)`, `flow: enum(web_redirect\|desktop_loopback)` | — | A | 4.0 |
-| `login_completed` | 토큰 교환 성공 / 이메일 코드 확인 성공 | `provider: enum(google\|email)`, `flow: enum(...)`, `duration_ms: int` (started → completed), `is_new_user: bool` | — | A | 4.0 |
+| `login_started` | Google 버튼 클릭 / 이메일은 새 주소로 첫 코드 요청이 서버로 나갈 때 (재전송은 `email_code_resent`) | `provider: enum(google\|email)`, `platform: enum(web\|mobile\|desktop)` | — | A | 4.0 |
+| `login_completed` | 토큰 교환 성공 / 이메일 코드 확인 성공 | `provider: enum(google\|email)`, `platform: enum(web\|mobile\|desktop)`, `duration_ms: int` (started → completed), `is_new_user: bool` | — | A | 4.0 |
 | `login_failed` | 교환 실패·취소·타임아웃 / 이메일 요청이 서버에서 실패 | `provider: enum(google\|email)`, `flow: enum(...)`, `reason: enum(cancelled\|timeout\|exchange_error\|network\|port_in_use\|config_missing` · 이메일: `send_rate_limited\|send_invalid_email\|send_error\|verify_wrong_code\|verify_rate_limited\|verify_error)` | `http_status: int` | A | 4.0 |
 | `login_skipped` | 모바일 debug 빌드 "건너뛰기" | — | — | A | 4.0 |
 | `email_code_requested` | "인증코드 받기"·"코드 다시 받기" 결과 (요청 전 거절 포함) | `result: enum(ok\|rate_limited\|invalid_email\|error)` | — | A | 4.0 |
@@ -228,7 +232,7 @@
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
 | `item_picked_up` | sim `item_pickup` (사람 슬롯만, 봇은 요약에만) | `match_id: str`, `slot: int`, `item: enum(bat\|bomb\|rock)`, `ms_since_spawn: int`, `contested: bool` (다른 파이터가 2 m 안) | — | A (+ S) | 4.0 |
-| `item_used` | 방망이 휘두름 / `item_throw` / 폭탄 `explosion` | `match_id: str`, `slot: int`, `item: enum(...)`, `use: enum(swing\|throw\|explode)` | `uses_left: int` | A (+ S) | 4.0 |
+| `item_used` | 방망이 휘두름 / `item_throw` / 폭탄 `explosion` | `match_id: str`, `slot: int`, `item: enum(...)`, `action: enum(swing\|throw\|explode)` | `uses_left: int` | A (+ S) | 4.0 |
 | `item_hit` | 아이템 판정으로 `hit`·`guard_hit` 발생 | `match_id: str`, `slot: int`, `item: enum(...)`, `target_slot: int`, `knockback: float`, `guarded: bool` | — | A (+ S) | 4.0 |
 
 ### 3.7 경기장 기믹 (`PRD-ARENA-01~04`)
@@ -242,7 +246,7 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `settings_changed` | 설정 값 저장 (key 예: `language`, `hud.key_hints`) | `key: str`, `old_value: str`, `new_value: str` | — | A | 4.0 (설정 화면은 6) |
+| `settings_changed` | 설정 값 저장 (key 예: `language`, `hud.key_hints`) | `key: str`, `old: str`, `new: str` | — | A | 4.0 (설정 화면은 6) |
 | `quality_changed` | 품질 단계 변경 (수동·자동) | `from: enum(...)`, `to: enum(...)`, `auto: bool` | `fps_avg_before: float` | A | 4.0 |
 | `input_device_changed` | P1 입력 장치 전환 | `from: str`, `to: str`, `screen: str` | — | A | 4.0 |
 | `touch_layout_changed` | 터치 레이아웃·크기 변경 | `layout: int`, `button_scale: float` | — | A | 4.0 (편집은 6) |

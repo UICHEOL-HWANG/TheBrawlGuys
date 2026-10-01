@@ -103,14 +103,24 @@ func after_tick(view: Dictionary, telemetry: MatchTelemetry) -> void:
 ## the bots' end d (on arm, after DDA) or the probe estimate (off arm), moved dda_rating_result_step
 ## toward the result — a win says the human is above it, a loss below — an Elo-like step that
 ## settles the rating where the human wins half the time.
-func finish(view: Dictionary) -> void:
-	if _rating == null or _humans.size() != 1 or not bool(view.get("match_over", false)):
-		return
-	var base: float = _mean_bot_d()
-	if _variant != ON and _probe_estimate != null:
-		base = float(_probe_estimate)
-	var obs := base + _config.dda_rating_result_step * (2.0 * _human_score(view) - 1.0)
-	_rating.record(obs, _config.dda_rating_weight)
+## Returns the human's Amplitude user properties afterwards ({} without a human).
+func finish(view: Dictionary) -> Dictionary:
+	if _rating != null and _humans.size() == 1 and bool(view.get("match_over", false)):
+		var base: float = _mean_bot_d()
+		if _variant != ON and _probe_estimate != null:
+			base = float(_probe_estimate)
+		var obs := base + _config.dda_rating_result_step * (2.0 * _human_score(view) - 1.0)
+		_rating.record(obs, _config.dda_rating_weight)
+	return player_props()
+
+
+## dda_variant, skill_rating (null while unrated) and skill_matches for user properties.
+func player_props() -> Dictionary:
+	if _variant == NONE or _humans.size() != 1:
+		return {}  # no lone human facing bots: nothing to say about DDA or skill
+	var rated := _rating != null and _rating.matches() > 0
+	return {"dda_variant": _variant, "skill_rating": _rating.rating() if rated else null,
+		"skill_matches": _rating.matches() if _rating != null else 0}
 
 
 func _mean_bot_d() -> float:
