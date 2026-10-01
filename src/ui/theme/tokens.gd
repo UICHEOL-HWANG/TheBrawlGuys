@@ -97,6 +97,10 @@ const P1 := Color("#3E7BF0")
 const P2 := Color("#F25C5C")
 const P3 := Color("#FFC93C")
 const P4 := Color("#B46CF0")
+## Team 2v2 (combat-depth D): team 1 (P1 + P3) in P1 blue, team 2 (P2 + P4) in P2 red — always
+## with the player shapes and the "팀 1" / "팀 2" header (DS-VIS-03).
+const TEAM_1 := P1
+const TEAM_2 := P2
 
 ## DamageCounter color stops at 0 / 50 / 100 / 150+ percent.
 const DAMAGE_RAMP := [UI_SURFACE, PETAL_YELLOW, FIRE, DANGER]

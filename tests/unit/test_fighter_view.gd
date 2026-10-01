@@ -128,3 +128,17 @@ func test_the_chosen_character_picks_the_model_and_the_slot_picks_the_ring() -> 
 	assert_has(mage, "Mage_Body", "P2 plays the Mage model, not the slot's Knight/Barbarian")
 	v.set_identity_visible(false)
 	assert_false(v.identity().ring().visible)
+
+
+func test_team_color_tints_the_ring_and_keeps_the_shape() -> void:
+	var v := FighterView.new()
+	add_child_autofree(v)
+	v.setup(2, GameConfig.new())
+	v.identity().set_team_color(PlayerStyle.team_color(0))
+	var mat := v.identity().ring().material_override as ShaderMaterial
+	assert_eq(mat.get_shader_parameter("albedo"), DS.TEAM_1, "P3 on team 1: blue ring")
+	assert_eq(v.identity().ring_shape(), PlayerStyle.Shape.SQUARE, "still P3's square")
+	assert_eq(v.identity().label().outline_modulate, DS.TEAM_1)
+	v.identity().set_team_color(null)
+	mat = v.identity().ring().material_override as ShaderMaterial
+	assert_eq(mat.get_shader_parameter("albedo"), DS.P3, "no team: the player color again")

@@ -1,67 +1,46 @@
 class_name Hud
 extends CanvasLayer
 ## In-match HUD (design.md DS-LAY-02): damage counter + stocks per player along the top edge
-## (1v1 at the far left and right, N players spread evenly), result banner in the center, the
+## (1v1 at the far left and right, N players spread evenly; team 2v2 in two team frames, timed
+## with the clock top-center and scores for stocks — HudSlots), result banner in the center, the
 ## local players' key hints along the bottom (DS-CMP-16, one bar per human in local 2-player).
 
 signal restart_requested
 signal menu_requested
 
-const DAMAGE_COUNTER_SCENE := preload("res://src/ui/components/damage_counter/damage_counter.tscn")
-const STOCK_ICONS_SCENE := preload("res://src/ui/components/stock_icons/stock_icons.tscn")
 const RESULT_BANNER_SCENE := preload("res://src/ui/components/result_banner/result_banner.tscn")
 const LAYER := 5
 
 var _margin: MarginContainer
 var _row: HBoxContainer
 var _banner: ResultBanner
-var _counters: Array[DamageCounter] = []
-var _stocks: Array[StockIcons] = []
+var _slots: HudSlots
+var _mode: Dictionary = {}
 var _key_hints: KeyHintHud = null
 
 
-func setup(player_count: int, max_stocks: int) -> void:
+## mode: the view's "mode" dictionary (combat-depth D): team frames, timer and scores per rule
+## (HudSlots); {} = stock.
+func setup(player_count: int, max_stocks: int, mode: Dictionary = {}) -> void:
 	layer = LAYER
 	if _row == null:
 		_build_frame()
 	for child: Node in _row.get_children():
 		_row.remove_child(child)
 		child.queue_free()
-	_counters.clear()
-	_stocks.clear()
-	for i: int in player_count:
-		if i > 0:
-			var spacer := Control.new()
-			spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			_row.add_child(spacer)
-		var slot := VBoxContainer.new()
-		slot.add_theme_constant_override("separation", DS.S2)
-		_row.add_child(slot)
-		var counter := DAMAGE_COUNTER_SCENE.instantiate() as DamageCounter
-		slot.add_child(counter)
-		counter.setup(i)
-		var stocks := STOCK_ICONS_SCENE.instantiate() as StockIcons
-		slot.add_child(stocks)
-		stocks.setup(i, max_stocks)
-		_counters.append(counter)
-		_stocks.append(stocks)
+	_mode = mode
+	_slots = HudSlots.build(_row, player_count, max_stocks, mode)
 	hide_result()
 
 
 func update_from(view: Dictionary) -> void:
-	for f: Dictionary in view["fighters"]:
-		var i := int(f["id"])
-		if i >= _counters.size():
-			continue
-		_counters[i].set_damage(float(f["damage"]))
-		_counters[i].set_ko(int(f["state"]) == Fighter.State.KO)
-		_stocks[i].set_stocks(int(f["stocks"]))
+	_slots.update_from(view)
 	if _key_hints != null:
 		_key_hints.update_gauges(view)
 
 
 func show_result(winner_id: int, local_id: int) -> void:
-	_banner.show_result(winner_id, local_id)
+	_banner.show_outcome(winner_id, local_id, _mode)
 
 
 func hide_result() -> void:
@@ -92,11 +71,19 @@ func key_hints() -> KeyHintHud:
 
 
 func counter_text(i: int) -> String:
-	return _counters[i].text()
+	return _slots.counters[i].text()
 
 
 func stocks_shown(i: int) -> int:
-	return _stocks[i].shown()
+	return _slots.stocks[i].shown()
+
+
+func slots() -> HudSlots:
+	return _slots
+
+
+func banner() -> ResultBanner:
+	return _banner
 
 
 func result_visible() -> bool:

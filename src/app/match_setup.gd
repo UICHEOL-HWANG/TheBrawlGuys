@@ -80,6 +80,11 @@ func build_rules(config: GameConfig) -> MatchRules:
 	return MatchRules.for_mode(rule, player_count(), config)
 
 
+## A fresh World for this setup: seed, line-up, characters, arena and rules.
+func build_world(config: GameConfig) -> World:
+	return World.new(config, seed, player_count(), build_arena(config), characters(), build_rules(config))
+
+
 ## A fresh sim arena for arena_id (Phase 4 ArenaCatalog; unknown ids fall back to classic).
 func build_arena(config: GameConfig) -> ArenaData:
 	var arena := ArenaCatalog.build(arena_id, config) if ArenaCatalog.ids().has(arena_id) else null

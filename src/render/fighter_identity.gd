@@ -13,9 +13,11 @@ const LABEL_PIXEL_SIZE := 0.01
 var _ring: MeshInstance3D
 var _label: Label3D
 var _shape: int = PlayerStyle.Shape.CIRCLE
+var _index: int = 0
 
 
 func setup(index: int, config: GameConfig) -> void:
+	_index = index
 	_shape = PlayerStyle.shape(index)
 	_ring = MeshInstance3D.new()
 	_ring.mesh = PlayerRingMesh.build(_shape, config.fighter_radius * RING_INNER_RATIO,
@@ -34,6 +36,13 @@ func setup(index: int, config: GameConfig) -> void:
 	_label.outline_size = DS.TEXT_OUTLINE * 2
 	_label.position.y = config.fighter_height + LABEL_GAP
 	add_child(_label)
+
+
+## Team mode (combat-depth D): the ring in the team color and the label outlined in it, the
+## shape and "P1" text unchanged; null restores the player color.
+func set_team_color(c: Variant) -> void:
+	_ring.material_override = ToonMaterials.toon(c if c != null else PlayerStyle.color(_index))
+	_label.outline_modulate = c if c != null else DS.CANOPY_DEEP
 
 
 func set_shown(on: bool) -> void:

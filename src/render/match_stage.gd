@@ -20,6 +20,7 @@ var _hazards: Array[FighterHazards] = []
 var _defense: Array[DefenseFx] = []
 var _reactions: Array[HitReaction] = []
 var _items: ItemLayer
+var _teams: Array = []
 
 
 ## characters[i]: slot i's CharacterData id, which picks its model ("" / missing = slot model).
@@ -80,6 +81,7 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 	var before_all: Array = prev["fighters"]
 	var now_all: Array = curr["fighters"]
 	var tick := int(curr["tick"])
+	_sync_teams((curr.get("mode", {}) as Dictionary).get("teams", []))
 	_arena_view.sync(curr, tick, delta)
 	var fog := _arena_view.fog_amount()
 	_env.set_fog_boost(fog)
@@ -134,6 +136,16 @@ func set_identity_visible(on: bool) -> void:
 		v.set_identity_visible(on)
 	for h: FighterHazards in _hazards:
 		h.set_identity_visible(on)
+
+
+## Team mode (combat-depth D): foot rings and labels in each fighter's team color (teams[i],
+## the view's mode teams, applied when they change); an empty array restores the player colors.
+func _sync_teams(teams: Array) -> void:
+	if teams == _teams:
+		return
+	_teams = teams.duplicate()
+	for i: int in _views.size():
+		_views[i].identity().set_team_color(PlayerStyle.team_color(int(teams[i])) if i < teams.size() else null)
 
 
 func views() -> Array[FighterView]:

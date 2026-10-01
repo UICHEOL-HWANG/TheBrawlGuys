@@ -16,6 +16,12 @@ func setup(index: int, max_stocks: int) -> void:
 		add_child(m)
 
 
+## Team mode: every marker in the team color (null = the player color).
+func set_tint(c: Variant) -> void:
+	for child: Node in get_children():
+		(child as PlayerMarker).set_tint(c)
+
+
 func set_stocks(n: int) -> void:
 	for i: int in get_child_count():
 		var marker := get_child(i) as PlayerMarker
