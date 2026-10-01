@@ -71,9 +71,12 @@ static func find(fighters: Array[Fighter], id: int) -> Fighter:
 	return null
 
 
+## A lying fighter cannot be grabbed (a throw would knock it down again: an endless loop); a
+## getup only once its intangible frames are over (untouchable).
 static func _grabbable(holder: Fighter, target: Fighter) -> bool:
 	return target != holder and target.is_alive() and not target.untouchable_by(holder.id) \
-			and target.state != Fighter.State.HOLDING and target.state != Fighter.State.HELD
+			and target.state != Fighter.State.HOLDING and target.state != Fighter.State.HELD \
+			and target.state != Fighter.State.KNOCKDOWN
 
 
 static func _start_hold(holder: Fighter, target: Fighter, config: GameConfig) -> void:
@@ -92,6 +95,7 @@ static func _start_hold(holder: Fighter, target: Fighter, config: GameConfig) ->
 	target.combo_queued = false
 	target.hit_ids.clear()
 	Dodge.clear(target)
+	Getup.clear(target)
 	_place(holder, target, config)
 
 

@@ -63,10 +63,52 @@ func test_tumbling_bot_sometimes_techs_just_before_landing() -> void:
 		var bot := BotController.new(1, c)
 		assert_false(bot.sample(_view(_me(Fighter.State.HITSTUN, Vector3(0, 4, 0), true, false), tick)).guard,
 				"never presses high up")
-		var low := _me(Fighter.State.HITSTUN, Vector3(0, c.bot_tech_height * 0.5, 0), true, false)
+		var low := _me(Fighter.State.HITSTUN, Vector3(0, 0.3, 0), true, false)
 		techs += 1 if bot.sample(_view(low, tick + 1)).guard else 0
 	assert_gt(techs, 0, "some knockdowns are teched")
 	assert_lt(techs, 40, "not every one")
+
+
+## A slow fall from a low apex (0.85 m, at rest): the press must still land inside the tech
+## window, as one fresh press.
+func test_tech_press_is_timed_by_the_fall_not_the_height() -> void:
+	var c := GameConfig.new()
+	c.bot_tech_chance = 1.0
+	var ys: Array[float] = []
+	var y := 0.85
+	var vy := 0.0
+	while y > 0.0:
+		ys.append(y)
+		vy += c.gravity * SimTime.TICK_DT
+		y += vy * SimTime.TICK_DT
+	var landing := ys.size()  # the tick the fighter touches down
+	var bot := BotController.new(1, c)
+	var presses: Array[int] = []
+	var was_guard := false
+	for t: int in ys.size():
+		var f := bot.sample(_view(_me(Fighter.State.HITSTUN, Vector3(0, ys[t], 0), true, false), t))
+		if f.guard and not was_guard:
+			presses.append(t)
+		was_guard = f.guard
+	assert_eq(presses.size(), 1, "one fresh press")
+	assert_lt(landing - presses[0], c.tech_window_ticks, "inside the window (pressed at %d, lands at %d)" % [presses[0], landing])
+
+
+func test_tech_press_releases_a_held_guard_first() -> void:
+	var c := GameConfig.new()
+	c.bot_tech_chance = 1.0
+	var getup := BotGetup.new(1, c)
+	var arena := ArenaCatalog.default(c)
+	var high := _me(Fighter.State.HITSTUN, Vector3(0, 4, 0), true, false)
+	assert_null(getup.decide(high, {}, 0, arena))
+	getup.note(InputFrame.make(0, 0, false, false, false, true))  # guard was held last tick
+	var low := _me(Fighter.State.HITSTUN, Vector3(0, 0.3, 0), true, false)
+	var f := getup.decide(low, {}, 1, arena)
+	assert_not_null(f)
+	assert_false(f.guard, "let go first so the next press is fresh")
+	getup.note(f)
+	low["pos"] = Vector3(0, 0.1, 0)
+	assert_true(getup.decide(low, {}, 2, arena).guard)
 
 
 static func _guards(f: InputFrame) -> bool:

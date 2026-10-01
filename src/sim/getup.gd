@@ -124,7 +124,8 @@ static func _intangible_ticks(kind: int, config: GameConfig) -> int:
 		Kind.TECH, Kind.TECH_ROLL:
 			return config.tech_intangible_ticks
 		Kind.ATTACK:
-			return config.getup_attack_startup_ticks
+			# ticks 0..startup + 1: through the first active tick (startup + 1), so it never trades
+			return config.getup_attack_startup_ticks + 2
 	return config.getup_intangible_ticks
 
 

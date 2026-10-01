@@ -77,7 +77,8 @@ func test_getup_attack_hits_a_foe_beside_it() -> void:
 	assert_eq(f.state, Fighter.State.GETUP)
 	var hits: Array[Dictionary] = []
 	for i: int in w.config.getup_attack_startup_ticks + w.config.getup_attack_active_ticks:
-		assert_eq(f.intangible, i < w.config.getup_attack_startup_ticks, "intangible startup %d" % i)
+		var t := f.getup_ticks  # (the hit's hitstop pauses the clock)
+		assert_eq(f.intangible, t <= w.config.getup_attack_startup_ticks + 1, "intangible through the first active tick, %d" % t)
 		K.step(w, InputFrame.neutral())
 		hits.append_array(K.events_of(w, "hit"))
 	assert_eq(hits.size(), 1, "one hit per getup attack")

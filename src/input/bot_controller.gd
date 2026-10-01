@@ -45,6 +45,7 @@ static func attack_range(id: int, config: GameConfig) -> float:
 func sample(view: Dictionary) -> InputFrame:
 	var sent := _sample(view)
 	_defense.note(sent)
+	_getup.note(sent)
 	return sent
 
 
