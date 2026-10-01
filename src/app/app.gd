@@ -18,6 +18,7 @@ const ARENA := "arena"
 const CHARACTER := "character"
 const RULE := "rule"
 const TUTORIAL := "tutorial"
+const RESTORE_GRACE_S := AppRestore.GRACE_S
 ## Select screens between mode select and the match, in order.
 const SELECT_STEPS: Array[String] = [RULE, CHARACTER, ARENA]
 
@@ -32,7 +33,7 @@ var new_seed: Callable = MatchSeed.fresh
 
 var _backdrop: MenuBackdrop
 var _router: ScreenRouter
-var _restoring: bool = false
+var _restore: AppRestore
 
 
 func _ready() -> void:
@@ -54,11 +55,10 @@ func _ready() -> void:
 		gate = LoginGate.create_default()
 	add_child(gate)
 	gate.signed_in.connect(_on_signed_in)
-	gate.session_lost.connect(_on_restore_failed.bind(true))
-	gate.failed.connect(func(_reason: String) -> void: _on_restore_failed(false))
-	_restoring = gate.restore()
-	if _router.depth() == 0:
-		_show_login("no_session", _restoring)
+	_restore = AppRestore.new(_router, _show_login, track)
+	gate.session_lost.connect(_restore.failed.bind(true))
+	gate.failed.connect(func(_reason: String) -> void: _restore.failed(false))
+	_restore.begin(gate, get_tree())
 	if animate:
 		_backdrop.reveal()
 
@@ -108,21 +108,12 @@ func _on_screen_shown(_id: String, _from: String) -> void:
 
 
 func _on_signed_in() -> void:
-	_restoring = false
+	if _restore != null:
+		_restore.signed_in()
 	if _router.depth() == 0 or _router.current_id() == LOGIN:
 		_show_title()
 		if tutorial.is_pending():
 			_start_tutorial(TutorialFlow.SOURCE_FIRST_LOGIN)
-
-
-## A stored session could not be resumed: the login screen becomes usable (and is counted).
-func _on_restore_failed(session_dropped: bool) -> void:
-	if not _restoring:
-		return
-	_restoring = false
-	if session_dropped and _router.current() is LoginScreen:
-		(_router.current() as LoginScreen).show_idle(LoginMessages.for_failure("refresh_"))
-	track.call("login_viewed", {"reason": "refresh_failed"})
 
 
 func _on_mode_chosen(mode: String) -> void:

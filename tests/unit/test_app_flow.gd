@@ -199,17 +199,39 @@ func test_restored_session_skips_the_login_screen() -> void:
 	assert_false(_names().has("login_viewed"), "the login screen was never shown")
 
 
+func test_refreshed_session_never_flashes_the_login_screen() -> void:
+	SessionStore.new(STORE_PATH).save(SupabaseSession.new("a", "r", NOW, "user-7"))
+	var app := _app(true)
+	await wait_process_frames(2)
+	assert_eq(app.router().depth(), 0, "only the backdrop while the stored session refreshes")
+	_http.respond(200, JSON.stringify({"access_token": "b", "refresh_token": "r2", "expires_in": 3600,
+		"user": {"id": "user-7"}}))
+	await wait_process_frames(2)
+	assert_eq(app.router().current_id(), App.TITLE)
+	var screens := _props("screen_viewed").map(func(p: Dictionary) -> String: return p["screen"])
+	assert_false(screens.has("login"), "no login screen on the way to the title")
+
+
+func test_slow_refresh_shows_the_login_screen_loading() -> void:
+	SessionStore.new(STORE_PATH).save(SupabaseSession.new("a", "r", NOW, "user-7"))
+	var app := _app(true)
+	await wait_seconds(App.RESTORE_GRACE_S + 0.2)
+	assert_eq(app.router().current_id(), App.LOGIN)
+	assert_eq((app.router().current() as LoginScreen).panel().state(), LoginPanel.State.LOADING)
+
+
 func test_rejected_refresh_shows_the_login_screen() -> void:
 	SessionStore.new(STORE_PATH).save(SupabaseSession.new("a", "r", NOW, "user-7"))
 	var app := _app(true)
 	await wait_process_frames(2)
-	assert_eq(app.router().current_id(), App.LOGIN)
-	var login := app.router().current() as LoginScreen
-	assert_eq(login.panel().state(), LoginPanel.State.LOADING, "checking the stored session")
 	assert_false(_names().has("login_viewed"))
 	_http.respond(400, "{}")
+	await wait_process_frames(2)
+	assert_eq(app.router().current_id(), App.LOGIN)
+	var login := app.router().current() as LoginScreen
 	assert_eq(login.panel().state(), LoginPanel.State.IDLE)
 	assert_false(login.panel().google_button().disabled)
+	assert_eq(_props("login_viewed").size(), 1, "counted once")
 	assert_eq(_props("login_viewed")[0]["reason"], "refresh_failed")
 
 
