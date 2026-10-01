@@ -5,7 +5,11 @@ extends RefCounted
 enum Shape { CIRCLE, TRIANGLE, SQUARE, DIAMOND }
 
 const COLORS := [DS.P1, DS.P2, DS.P3, DS.P4]
-const TEAM_COLORS := [DS.TEAM_1, DS.TEAM_2]
+## Team 2v2 (combat-depth D, design.md "팀 색"): team 1 (P1 + P3) in P1 blue, team 2 (P2 + P4) in
+## P2 red — always with the player shapes and the "팀 1" / "팀 2" header (DS-VIS-03).
+const TEAM_1 := DS.P1
+const TEAM_2 := DS.P2
+const TEAM_COLORS := [TEAM_1, TEAM_2]
 const SHAPES := [Shape.CIRCLE, Shape.TRIANGLE, Shape.SQUARE, Shape.DIAMOND]
 const CIRCLE_SEGMENTS := 24
 

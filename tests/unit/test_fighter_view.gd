@@ -136,9 +136,9 @@ func test_team_color_tints_the_ring_and_keeps_the_shape() -> void:
 	v.setup(2, GameConfig.new())
 	v.identity().set_team_color(PlayerStyle.team_color(0))
 	var mat := v.identity().ring().material_override as ShaderMaterial
-	assert_eq(mat.get_shader_parameter("albedo"), DS.TEAM_1, "P3 on team 1: blue ring")
+	assert_eq(mat.get_shader_parameter("albedo"), PlayerStyle.TEAM_1, "P3 on team 1: blue ring")
 	assert_eq(v.identity().ring_shape(), PlayerStyle.Shape.SQUARE, "still P3's square")
-	assert_eq(v.identity().label().outline_modulate, DS.TEAM_1)
+	assert_eq(v.identity().label().outline_modulate, PlayerStyle.TEAM_1)
 	v.identity().set_team_color(null)
 	mat = v.identity().ring().material_override as ShaderMaterial
 	assert_eq(mat.get_shader_parameter("albedo"), DS.P3, "no team: the player color again")

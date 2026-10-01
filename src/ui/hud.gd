@@ -38,10 +38,13 @@ func setup(player_count: int, max_stocks: int, mode: Dictionary = {}, characters
 	hide_result()
 
 
-## view: the latest state view; events: every sim event since the last frame (combo badges).
+## view: the latest state view; events: every sim event since the last frame (combo badges;
+## empty on frames without a sim tick, so no hit is counted twice).
 func update_from(view: Dictionary, events: Array = []) -> void:
+	if _strip == null:
+		return
 	_follow_touch()
-	_strip.update_from(view, events if not events.is_empty() else view.get("events", []))
+	_strip.update_from(view, events)
 	if _key_hints != null:
 		_key_hints.update_gauges(view)
 
@@ -103,8 +106,8 @@ func result_visible() -> bool:
 ## bars) cover, so the camera frames the fight clear of them (HudSafeFrame).
 func reserve() -> Dictionary:
 	var height := get_viewport().get_visible_rect().size.y
-	if _strip == null or height <= 0.0:
-		return {"top": 0.0, "bottom": 0.0}
+	if _strip == null or height <= 0.0 or _strip.size.y <= 0.0:
+		return {"top": 0.0, "bottom": 0.0}  # not laid out yet
 	var r := _strip.get_global_rect()
 	if _strip.is_edge_top():
 		return {"top": r.end.y / height, "bottom": 0.0}

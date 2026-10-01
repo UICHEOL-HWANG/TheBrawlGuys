@@ -97,12 +97,12 @@ func set_shake_offset(offset: Vector3) -> void:
 	_shake_offset = offset
 
 
-## Whether a world point is in front of the camera and inside the viewport (a special cut-in
-## close shot leaves most of the arena out of frame).
 func camera() -> Camera3D:
 	return _camera
 
 
+## Whether a world point is in front of the camera and inside the viewport (a special cut-in
+## close shot leaves most of the arena out of frame).
 func sees(world: Vector3) -> bool:
 	if _camera.is_position_behind(world):
 		return false

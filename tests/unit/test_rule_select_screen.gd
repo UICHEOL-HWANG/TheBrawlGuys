@@ -79,3 +79,15 @@ func test_timed_caption_reads_the_config() -> void:
 	assert_string_contains(String(RuleOptions.entries(c)[2]["caption"]), "1분 30초")
 	assert_eq(RuleOptions.duration_text(120.0), "2분")
 	assert_eq(RuleOptions.duration_text(45.0), "45초")
+
+
+func test_confirm_on_the_back_button_goes_back() -> void:
+	var s := _screen()
+	await wait_process_frames(1)
+	var left := [false]
+	s.cancelled.connect(func() -> void: left[0] = true)
+	s.back_button().focus_mode = Control.FOCUS_ALL
+	s.back_button().grab_focus()
+	s._input(_key(KEY_ENTER))
+	assert_true(left[0])
+	assert_true(_chosen.is_empty(), "no rule picked")

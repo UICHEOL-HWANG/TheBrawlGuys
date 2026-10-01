@@ -1,13 +1,16 @@
 class_name CardBar
 extends Control
-## A PlayerCard bar (design.md DS-CMP-22): a rounded track (DS.BAR_TRACK) with a fill.
-## DAMAGE: thick, fills with the damage % (full at FULL_PERCENT) in DS.DAMAGE_BAR_RAMP green ->
+## A PlayerCard bar (design.md DS-CMP-22): a rounded track (BAR_TRACK) with a fill.
+## DAMAGE: thick, fills with the damage % (full at FULL_PERCENT) in DAMAGE_BAR_RAMP green ->
 ## yellow -> red, the "42%" number on its right end. GAUGE: thin, the special gauge in
-## DS.GAUGE_BAR, flashing (alpha pulse) while full.
+## GAUGE_BAR, flashing (alpha pulse) while full. Colors are DS tokens (design.md "대미지 바 램프").
 
 enum Kind { DAMAGE, GAUGE }
 
 const FULL_PERCENT := 150.0
+const DAMAGE_BAR_RAMP := [DS.GRASS_MID, DS.PETAL_YELLOW, DS.FIRE, DS.DANGER]
+const BAR_TRACK := DS.UI_SURFACE_DIM
+const GAUGE_BAR := DS.PETAL_BLUE
 const FLASH_HZ := 3.0
 const FLASH_LOW := 0.45
 
@@ -42,7 +45,7 @@ func set_width(width: float) -> void:
 
 func set_percent(p: float) -> void:
 	_ratio = clampf(p / FULL_PERCENT, 0.0, 1.0)
-	_color = DamageColor.for_percent(p, DS.DAMAGE_BAR_RAMP)
+	_color = DamageColor.for_percent(p, DAMAGE_BAR_RAMP)
 	if _label != null:
 		_label.text = "%d%% " % roundi(p)
 	queue_redraw()
@@ -51,7 +54,7 @@ func set_percent(p: float) -> void:
 ## Special gauge share 0..1; full starts the flash.
 func set_gauge(ratio: float) -> void:
 	_ratio = clampf(ratio, 0.0, 1.0)
-	_color = DS.GAUGE_BAR
+	_color = GAUGE_BAR
 	_full = _ratio >= 1.0
 	if not _full:
 		modulate.a = 1.0
@@ -79,7 +82,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	var radius := int(size.y * 0.5)
 	var track := StyleBoxFlat.new()
-	track.bg_color = DS.BAR_TRACK
+	track.bg_color = BAR_TRACK
 	track.set_corner_radius_all(radius)
 	draw_style_box(track, Rect2(Vector2.ZERO, size))
 	if _ratio <= 0.0:

@@ -59,6 +59,8 @@ func _input(event: InputEvent) -> void:
 		move(step)
 	elif _stick.owns(event):
 		pass  # a held or returning stick: consumed so GUI focus navigation cannot repeat it
+	elif ArenaSelectScreen._is_press(event, "ui_accept", CONFIRM_KEYS) and _back.has_focus():
+		back()
 	elif ArenaSelectScreen._is_press(event, "ui_accept", CONFIRM_KEYS):
 		confirm()
 	elif ArenaSelectScreen._is_press(event, "ui_cancel", BACK_KEYS):

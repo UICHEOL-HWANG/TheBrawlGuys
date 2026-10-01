@@ -97,18 +97,9 @@ const P1 := Color("#3E7BF0")
 const P2 := Color("#F25C5C")
 const P3 := Color("#FFC93C")
 const P4 := Color("#B46CF0")
-## Team 2v2 (combat-depth D): team 1 (P1 + P3) in P1 blue, team 2 (P2 + P4) in P2 red — always
-## with the player shapes and the "팀 1" / "팀 2" header (DS-VIS-03).
-const TEAM_1 := P1
-const TEAM_2 := P2
 
 ## DamageCounter color stops at 0 / 50 / 100 / 150+ percent.
 const DAMAGE_RAMP := [UI_SURFACE, PETAL_YELLOW, FIRE, DANGER]
-## PlayerCard damage bar (DS-CMP-22): green -> yellow -> red over the same 0 / 50 / 100 / 150 stops,
-## on a dim track; the thin special gauge bar under it in petal blue.
-const DAMAGE_BAR_RAMP := [GRASS_MID, PETAL_YELLOW, FIRE, DANGER]
-const BAR_TRACK := UI_SURFACE_DIM
-const GAUGE_BAR := PETAL_BLUE
 
 const PALETTE := {
 	"grass_sun": GRASS_SUN, "grass": GRASS, "grass_mid": GRASS_MID, "grass_shade": GRASS_SHADE,

@@ -154,3 +154,13 @@ func test_hud_safe_frame_math() -> void:
 	assert_almost_eq(float(bottom["shift"]), -0.25, 0.0001, "window shifted down for a bottom strip")
 	var capped := HudSafeFrame.fit(40.0, 1.6, 0.4, 0.4)
 	assert_almost_eq(float(capped["aspect"]), 1.6 / (1.0 - HudSafeFrame.MAX_SHARE), 0.0001)
+
+
+func test_frames_without_a_tick_do_not_recount_hits() -> void:
+	var hud := _hud(2, {})
+	var hit := {"type": "hit", "attacker": 0, "target": 1}
+	for t: int in [10, 20]:
+		hud.update_from({"tick": t, "fighters": _fighters(2), "mode": {}, "events": [hit]}, [hit])
+	for i: int in 3:
+		hud.update_from({"tick": 20, "fighters": _fighters(2), "mode": {}, "events": [hit]})
+	assert_eq(hud.strip().cards[0].combo_text(), "2연타", "render frames with no sim tick add nothing")
