@@ -79,7 +79,8 @@ func on_frame(events: Array, view_events: Array, view: Dictionary, inputs: Array
 
 ## Ends the match once: match_ended (or match_abandoned) with slot summaries and final rows.
 ## final_state_hash: World.state_hash() now, so an offline replay can be checked (A7).
-func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = null) -> void:
+## net: online matches only, NetStats.props() (NetSummary); {} keeps every row and event offline-shaped.
+func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = null, net: Dictionary = {}) -> void:
 	if not _active:
 		return
 	_active = false
@@ -98,12 +99,15 @@ func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = 
 		summary["stocks_left"] = MatchSummary.stocks_left(view, s.slot)
 		summary.merge(MatchSummary.mode_fields(view, s.slot))
 		summary.merge(_features.summary(s.slot, summary, ticks))
+		summary.merge(NetSummary.player_fields(net, s.slot))
 		players.append(summary)
 		_player_rows.append(RawRows.player_row(match_id(), slot_setup, summary))
 	var local_slot := int(_setup.get("local_slot", 0))
 	var local_result := MatchSummary.result(local_slot, over, winner, teams)
 	_match_row = RawRows.match_row(_setup, ticks, winner, local_result, final_state_hash)
+	_match_row.merge(NetSummary.match_fields(net))
 	var props := {"mode": _setup["mode"], "rule": _setup.get("rule", MatchRules.STOCK), "arena": _setup["arena"], "duration_s": MatchSummary.seconds(ticks)}
+	props.merge(NetSummary.match_fields(net))
 	if abandoned:
 		props.merge(_features.abandon_context(local_slot, view.get("fighters", []), ticks))
 		_emit("match_abandoned", props)

@@ -8,6 +8,11 @@ extends RefCounted
 
 const NONE := -1
 
+## Online (NetMatch): the host's match id shared by every peer ("" = a fresh one per match), and the
+## network summary (NetStats.props) added to match_ended / matches / match_players at the end.
+var match_id: String = ""
+var net_props: Callable = Callable()
+
 var _track: Callable
 var _recorder: MatchRecorder
 var _counter: MatchCounter
@@ -59,7 +64,7 @@ func on_frame_time(delta: float) -> void:
 func finish(view: Dictionary) -> void:
 	if _telemetry == null:
 		return
-	_telemetry.end(view, false, _world.state_hash())
+	_telemetry.end(view, false, _world.state_hash(), _net())
 	_send_perf()
 	_result_shown_ms = int(_clock.call())
 	Analytics.flush()
@@ -93,7 +98,7 @@ func close_for_exit(view: Dictionary) -> void:
 
 
 func _abandon(view: Dictionary) -> void:
-	_telemetry.end(view, true, _world.state_hash())
+	_telemetry.end(view, true, _world.state_hash(), _net())
 	_send_perf()
 
 
@@ -112,7 +117,11 @@ func _close_result(next: String) -> void:
 
 func _context() -> Dictionary:
 	return {"session_id": Analytics.session_id(), "user_match_seq": _counter.next(_user_id()),
-		"loss_streak": Analytics.loss_streak()}
+		"loss_streak": Analytics.loss_streak(), "match_id": match_id}
+
+
+func _net() -> Dictionary:
+	return net_props.call() if net_props.is_valid() else {}
 
 
 static func _user_id() -> String:

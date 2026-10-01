@@ -1,5 +1,5 @@
 class_name ModeConfig
-extends Resource
+extends NetConfig
 ## Match mode tunables (combat-depth D, PRD §4.1 modes), split out of GameConfig to keep files
 ## short. GameConfig extends StyleConfig extends SpecialConfig extends DefenseConfig extends
 ## KnockdownConfig extends this,

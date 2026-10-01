@@ -361,11 +361,11 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 ### ⚙️ 개발 트랙
 
 **6a — 넷코드**
-- [ ] `protocol.gd`: 바이너리 메시지 (입력 + 최근 N개 중복, 스냅샷 델타, 입장/퇴장) `[PRD-NET-01]`
-- [ ] `server_main.gd`: 헤드리스 서버, 방별 `World`, 60Hz 틱, 20~30Hz 스냅샷 `[PRD-NET-01]` `[PRD-PLT-04]`
-- [ ] `client_session.gd`: 자기 캐릭터 예측, `restore()` + 미확인 입력 재적용, 타 캐릭터 약 100ms 보간 `[PRD-NET-02]`
-- [ ] 지연·패킷 손실 시뮬레이터 (디버그 패널) `[PRD-CFG-01]`
-- [ ] 재조정 비용 계측 → PRD §5.6 기준 초과 시 GDExtension 판단 `[PRD-NFR-02]`
+- [x] `protocol.gd`: 바이너리 메시지 (입력 + 최근 N개 중복, 스냅샷 델타, 입장/퇴장) `[PRD-NET-01]` — 2026-10-01 N1: 델타 대신 WorldCodec 전체 + zstd (4인 6.8KB → 1.3KB)
+- [ ] `server_main.gd`: 헤드리스 서버, 방별 `World`, 60Hz 틱, 20~30Hz 스냅샷 `[PRD-NET-01]` `[PRD-PLT-04]` — P2P 결정(online 설계)으로 호스트 피어의 `host_session.gd`가 대신함(N1 완료); 헤드리스 서버는 보류
+- [x] `client_session.gd`: 자기 캐릭터 예측, `restore()` + 미확인 입력 재적용, 타 캐릭터 약 100ms 보간 `[PRD-NET-02]`
+- [x] 지연·패킷 손실 시뮬레이터 (디버그 패널) `[PRD-CFG-01]` — GameConfig "Net" net_sim_* (LaggedTransport), 테스트는 LoopbackHub
+- [ ] 재조정 비용 계측 → PRD §5.6 기준 초과 시 GDExtension 판단 `[PRD-NFR-02]` — 데스크톱 헤드리스 4인 15틱 3.1ms(기준 통과), 웹·모바일 실측 남음
 
 **6b — 로비·배포**
 - [ ] 방 코드 생성·입장, 최대 4인, 빈 방 자동 종료, 로비 HTTP API `[PRD-NET-03]`

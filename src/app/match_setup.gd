@@ -1,7 +1,7 @@
 class_name MatchSetup
 extends RefCounted
 ## Everything a match needs to start (platform B1, docs/design.md DS-LAY-03): mode, arena, seed
-## and one entry per slot {slot, character, controller: "local"|"bot", input_device}. Menu screens
+## and one entry per slot {slot, character, controller: "local"|"bot"|"remote", input_device}. Menu screens
 ## fill it (mode, then the SELECT_STEPS: characters and arena); MatchScene and telemetry only read
 ## it. character is a CharacterData id ("" = the classic fighter). rule is the MatchRules mode
 ## (stock / team / timed, combat-depth D) picked on the rule select step; it sets the fighter
@@ -13,7 +13,9 @@ const MODE_ONLINE := "online"
 const ARENA_DEFAULT := ArenaCatalog.DEFAULT_ID
 const CONTROLLER_LOCAL := "local"
 const CONTROLLER_BOT := "bot"
-const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT]
+## A human on another machine (online, Phase 6): its inputs arrive over the network (src/net).
+const CONTROLLER_REMOTE := "remote"
+const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT, CONTROLLER_REMOTE]
 const INPUT_BOT := "bot"
 const INPUT_KEYBOARD := "keyboard"
 ## Humans in a local 2-player match (PRD-LOCAL-01): P1 and P2, always the first two slots.

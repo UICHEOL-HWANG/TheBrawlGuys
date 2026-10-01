@@ -15,8 +15,10 @@ extends RefCounted
 ## matches.rule and match_players.team / score from migration 0004), 8 = defense and recovery
 ## counters and skill / context signals on match_ended.players[] and match_players
 ## (PLAYER_COMBAT_KEYS, migration 0004), rule_selected.focused, match_events actor_slot for
-## projectile events and target_slot for perfect_guard.
-const SCHEMA_VERSION := 8
+## projectile events and target_slot for perfect_guard, 9 = online matches (Phase 6): NetSummary
+## keys on match_ended / match_abandoned and the matches row, players[] / match_players
+## disconnect_reason (migration 0007), match_id shared by host and clients, clients upload no rows.
+const SCHEMA_VERSION := 9
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null
@@ -116,6 +118,10 @@ static func validate(event_name: String, props: Dictionary) -> PackedStringArray
 			errors.append("%s: property '%s' is not JSON-safe" % [event_name, str(key)])
 	if event_name == "match_ended" and props.get("players") is Array:
 		errors.append_array(_validate_players(props["players"]))
+	if props.get("mode") == MatchSetup.MODE_ONLINE and event_name in ["match_ended", "match_abandoned"]:
+		for key: String in NetSummary.KEYS:  # schema 9; values may be null (no rtt samples)
+			if not props.has(key):
+				errors.append("%s: online match missing '%s'" % [event_name, key])
 	return errors
 
 

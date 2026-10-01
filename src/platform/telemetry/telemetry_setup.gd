@@ -12,10 +12,12 @@ const BOT_GROUP := "Bot"
 const CONTEXT_KEYS: Array[String] = ["session_id", "user_match_seq", "loss_streak"]
 
 
-## config: the match's GameConfig (null leaves config-derived fields null).
+## config: the match's GameConfig (null leaves config-derived fields null). context["match_id"]
+## (online: the host's id, shared by every peer) replaces the fresh uuid.
 static func from_match_setup(setup: MatchSetup, config: GameConfig = null, context: Dictionary = {}) -> Dictionary:
+	var shared_id := String(context.get("match_id", ""))
 	var out := {
-		"match_id": Uuid.v4(), "mode": setup.mode, "rule": setup.rule, "arena": setup.arena_id, "seed": setup.seed,
+		"match_id": shared_id if shared_id != "" else Uuid.v4(), "mode": setup.mode, "rule": setup.rule, "arena": setup.arena_id, "seed": setup.seed,
 		"local_slot": setup.local_slot(), "started_at": Time.get_datetime_string_from_system(true) + "Z",
 		"build_version": PlatformEnv.app_version(), "platform": PlatformEnv.kind(),
 		"slots": _slots(setup, config),
