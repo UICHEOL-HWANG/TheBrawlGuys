@@ -16,7 +16,7 @@ const CHARACTER_HASHES := {
 	"barbarian": 3537046789,
 	"rogue": 1086032659,
 	"knight": 1717744113,
-	"mage": 2444104390,
+	"mage": 791748531,
 }
 
 

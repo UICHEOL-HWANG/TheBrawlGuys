@@ -44,7 +44,7 @@ static func decode(w: World, data: PackedByteArray) -> Dictionary:
 	var projectiles := ProjectileField.from_data(s["projectiles"])
 	if projectiles == null:
 		return _fail("invalid projectile data")
-	if not _consistent(restored, projectiles):
+	if not _consistent(restored, projectiles, w.config):
 		return _fail("inconsistent fighter or projectile data")
 	var arena := w.arena.copy()
 	if not arena.load_data(s["arena"]):
@@ -71,11 +71,12 @@ static func _checked(w: World, data: PackedByteArray) -> Dictionary:
 ## Values later used as indices stay in range: fighter ids are their slots, states / attack kinds
 ## are known enum values, gauges and guard meters are 0..MAX, a perfect guard names a fighter,
 ## projectiles belong to a fighter and use known kinds.
-static func _consistent(fighters: Array[Fighter], projectiles: ProjectileField) -> bool:
+static func _consistent(fighters: Array[Fighter], projectiles: ProjectileField, config: GameConfig) -> bool:
 	for i: int in fighters.size():
 		var f := fighters[i]
 		if f.id != i or not _in_enum(f.state, Fighter.State) or not _in_enum(f.attack_kind, AttackSet.Kind) \
-				or not (f.gauge >= 0.0 and f.gauge <= SpecialGauge.MAX) or not _defense_ok(f, fighters.size()):
+				or not (f.gauge >= 0.0 and f.gauge <= SpecialGauge.MAX) or not _defense_ok(f, fighters.size()) \
+				or not _knockdown_ok(f, config):
 			return false
 	for p: Projectile in projectiles.list:
 		if p.owner_id < 0 or p.owner_id >= fighters.size() or not _in_enum(p.kind, Projectile.Kind) \
@@ -86,8 +87,15 @@ static func _consistent(fighters: Array[Fighter], projectiles: ProjectileField) 
 
 static func _defense_ok(f: Fighter, count: int) -> bool:
 	return f.guard_hp >= 0.0 and f.guard_hp <= GuardMeter.MAX and _in_enum(f.dodge_kind, Dodge.Kind) \
-			and f.perfect_by >= Fighter.NONE and f.perfect_by < count and _in_enum(f.getup_kind, Getup.Kind) \
-			and f.tech_clock >= 0
+			and f.perfect_by >= Fighter.NONE and f.perfect_by < count
+
+
+## Getup kinds are known (and set while getting up), clocks within their ranges (combat-depth C).
+static func _knockdown_ok(f: Fighter, config: GameConfig) -> bool:
+	var getting_up := f.state == Fighter.State.GETUP
+	return _in_enum(f.getup_kind, Getup.Kind) and f.getup_ticks >= 0 \
+			and (not getting_up or f.getup_kind != Getup.Kind.NONE) and f.tech_clock >= 0 \
+			and f.tech_clock <= config.tech_window_ticks + config.tech_lockout_ticks
 
 
 static func _in_enum(value: int, e: Dictionary) -> bool:

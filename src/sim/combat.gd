@@ -112,7 +112,8 @@ static func _launch(target: Fighter, attack: AttackData, flat_dir: Vector3, kb: 
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
 	_interrupt(target)
-	target.tumble = Knockdown.tumbles(kb, target.vel, was_lying, config)
+	# a weak hit on a fighter already tumbling (still in the air) keeps the tumble
+	target.tumble = (target.tumble and not target.on_ground) or Knockdown.tumbles(kb, target.vel, was_lying, config)
 	target.di_pending = true
 
 

@@ -50,7 +50,7 @@ extends Resource
 @export_range(0, 60, 1) var tech_intangible_ticks: int = 12
 
 @export_group("BotGetup")
-## Share of a bot's launches it tries to tech, pressing guard once it falls within bot_tech_height
-## of the floor (BotGetup).
+## Share of a bot's launches it tries to tech, pressing guard once its fall lands within
+## bot_tech_lead_ticks (kept under tech_window_ticks by BotGetup's horizon) (BotGetup).
 @export_range(0.0, 1.0, 0.05) var bot_tech_chance: float = 0.35
-@export_range(0.1, 3.0, 0.05) var bot_tech_height: float = 0.9
+@export_range(1, 30, 1) var bot_tech_lead_ticks: int = 4

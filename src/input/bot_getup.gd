@@ -4,7 +4,9 @@ extends RefCounted
 ## picks one option per knockdown — stand up, roll away from the foe (toward the middle when that
 ## would leave safe ground), getup attack when the foe is within reach, or stay down — and holds
 ## it until the sim lets it act. Tumbling, it decides once per launch (bot_tech_chance) whether
-## to tech, then presses guard once while falling within bot_tech_height of the floor.
+## to tech, then presses guard once when its fall (speed from the last two views, gravity from
+## the config) lands within bot_tech_lead_ticks — always inside the tech window — letting go of
+## a held guard one tick first so the press is fresh. note() records what was sent.
 ## Choices are deterministic: a hash of the view tick and the bot id (bots never read the sim RNG).
 
 enum Option { STAND, ROLL, ATTACK, WAIT }
@@ -13,6 +15,8 @@ enum Option { STAND, ROLL, ATTACK, WAIT }
 const ATTACK_REACH_PAD := 0.3
 const OPTION_SALT := 17
 const TECH_SALT := 31
+## _ticks_to_land when no landing is in sight.
+const NEVER := 1 << 20
 
 var _self_id: int
 var _config: GameConfig
@@ -20,6 +24,7 @@ var _choice: int = -1
 var _launch_seen: bool = false
 var _plan_tech: bool = false
 var _last_y: float = 0.0
+var _guard_was: bool = false
 
 
 func _init(p_self_id: int, p_config: GameConfig) -> void:
@@ -30,7 +35,7 @@ func _init(p_self_id: int, p_config: GameConfig) -> void:
 ## A frame for a lying or tumbling bot, or null to let the usual logic run. Call every sample.
 func decide(me: Dictionary, foe: Dictionary, tick: int, arena: ArenaData) -> InputFrame:
 	var pos: Vector3 = me["pos"]
-	var falling := pos.y < _last_y
+	var vy := (pos.y - _last_y) / SimTime.TICK_DT
 	_last_y = pos.y
 	if int(me["state"]) == Fighter.State.KNOCKDOWN:
 		if _choice < 0:
@@ -43,10 +48,17 @@ func decide(me: Dictionary, foe: Dictionary, tick: int, arena: ArenaData) -> Inp
 	if not _launch_seen:
 		_launch_seen = true
 		_plan_tech = posmod(hash([_self_id, tick, TECH_SALT]), 100) < int(_config.bot_tech_chance * 100.0)
-	if _plan_tech and falling and _near_floor(pos, arena):
-		_plan_tech = false
-		return InputFrame.make(0, 0, false, false, false, true)
-	return null
+	if not _plan_tech or vy >= 0.0 or _ticks_to_land(pos, vy, arena) > _config.bot_tech_lead_ticks:
+		return null
+	if _guard_was:
+		return InputFrame.neutral()  # let go first: only a fresh press arms a tech
+	_plan_tech = false
+	return InputFrame.make(0, 0, false, false, false, true)
+
+
+## What the bot actually sent this tick.
+func note(sent: InputFrame) -> void:
+	_guard_was = sent.guard
 
 
 func _option(me: Dictionary, foe: Dictionary, arena: ArenaData) -> InputFrame:
@@ -76,6 +88,17 @@ func _roll_dir(pos: Vector3, foe: Dictionary, arena: ArenaData) -> Vector2:
 	return BotViewQuery.flat(pos, Vector3.ZERO).normalized()
 
 
-func _near_floor(pos: Vector3, arena: ArenaData) -> bool:
+## Ticks until a fall from pos at vertical speed vy reaches the floor below (the sim's order:
+## gravity, then move), or a big number when it does not land within the tech window.
+func _ticks_to_land(pos: Vector3, vy: float, arena: ArenaData) -> int:
 	var top := ArenaFloor.ground_top(arena, pos, pos.y)
-	return top != ArenaFloor.NO_GROUND and pos.y - top <= _config.bot_tech_height
+	if top == ArenaFloor.NO_GROUND:
+		return NEVER
+	var y := pos.y
+	var v := vy
+	for n: int in _config.tech_window_ticks:
+		v += _config.gravity * SimTime.TICK_DT
+		y += v * SimTime.TICK_DT
+		if y <= top:
+			return n
+	return NEVER
