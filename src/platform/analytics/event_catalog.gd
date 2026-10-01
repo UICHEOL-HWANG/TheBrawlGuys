@@ -12,8 +12,17 @@ extends RefCounted
 ## styles on match_players and match_ended.players[]), 6 = Phase 5 onboarding tutorial funnel
 ## (tutorial_started / tutorial_step_completed / tutorial_skipped / tutorial_completed), 7 =
 ## combat-depth D match rules (rule_selected, "rule" on match events, players[] team / score,
-## matches.rule and match_players.team / score from migration 0004).
-const SCHEMA_VERSION := 7
+## matches.rule and match_players.team / score from migration 0004), 8 = defense and recovery
+## counters on match_ended.players[] and match_players (PLAYER_DEFENSE_KEYS, migration 0004),
+## match_events actor_slot for projectile events and target_slot for perfect_guard.
+const SCHEMA_VERSION := 8
+
+## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery, the
+## same names as the match_players columns).
+const PLAYER_DEFENSE_KEYS: Array[String] = [
+	"hits_taken", "di_inputs", "dodges_roll", "dodges_air", "perfect_guards", "guard_breaks",
+	"guard_breaks_caused", "knockdowns", "techs", "getups_stand", "getups_roll", "getups_attack",
+]
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -98,4 +107,19 @@ static func validate(event_name: String, props: Dictionary) -> PackedStringArray
 	for key: Variant in props:
 		if typeof(key) != TYPE_STRING or not JsonSafe.is_safe(props[key]):
 			errors.append("%s: property '%s' is not JSON-safe" % [event_name, str(key)])
+	if event_name == "match_ended" and props.get("players") is Array:
+		errors.append_array(_validate_players(props["players"]))
+	return errors
+
+
+static func _validate_players(players: Array) -> PackedStringArray:
+	var errors := PackedStringArray()
+	for i: int in players.size():
+		var p: Variant = players[i]
+		if not p is Dictionary:
+			errors.append("match_ended: players[%d] is not an object" % i)
+			continue
+		for key: String in PLAYER_DEFENSE_KEYS:
+			if not (p as Dictionary).has(key):
+				errors.append("match_ended: players[%d] missing '%s'" % [i, key])
 	return errors

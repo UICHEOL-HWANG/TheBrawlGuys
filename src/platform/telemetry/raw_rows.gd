@@ -5,8 +5,11 @@ extends RefCounted
 
 ## Event types whose "id" is a fighter (item events use "id" for the item).
 const FIGHTER_ID_TYPES: Array[String] = ["ringout", "jumped", "landed", "respawned", "score"]
-const ACTOR_KEYS: Array[String] = ["attacker", "fighter"]
+## "owner": projectile events (event schema 8; before that the owner stayed in the payload).
+const ACTOR_KEYS: Array[String] = ["attacker", "fighter", "owner"]
 const TARGET_KEYS: Array[String] = ["target", "victim"]
+## Events whose "fighter" is the one hit, so actor = attacker / target = fighter like guard_hit.
+const FIGHTER_TARGET_TYPES: Array[String] = ["perfect_guard"]
 ## Reproducibility header copied from the setup onto the matches row (null when absent).
 const HEADER_KEYS: Array[String] = [
 	"config_fingerprint", "sim_version", "event_schema_version", "session_id", "user_match_seq",
@@ -19,10 +22,12 @@ static func event_row(match_id: String, tick: int, e: Dictionary) -> Dictionary:
 	var type := String(e.get("type", ""))
 	var payload := e.duplicate()
 	payload.erase("type")
+	var target: Variant = _take(payload, ["fighter"]) if FIGHTER_TARGET_TYPES.has(type) else null
 	var actor: Variant = _take(payload, ACTOR_KEYS)
 	if actor == null and FIGHTER_ID_TYPES.has(type):
 		actor = _take(payload, ["id"])
-	var target: Variant = _take(payload, TARGET_KEYS)
+	if target == null:
+		target = _take(payload, TARGET_KEYS)
 	return _row(match_id, tick, type, actor, target, payload)
 
 

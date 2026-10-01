@@ -86,3 +86,50 @@ select date_trunc('day', started_at)::date as day,
 from matches
 group by 1
 order by 1 desc;
+
+
+-- 9. 방어 수단 사용률 (스타일·캐릭터별, 사람만, 경기 1분당) — 0004 이후 경기 (event_schema_version >= 8)
+select p.style,
+       p.character,
+       count(*)                                                                as games,
+       round(avg(p.dodges_roll + p.dodges_air) / avg(m.duration_ticks / 3600.0), 2) as dodges_per_min,
+       round(avg(p.perfect_guards) / avg(m.duration_ticks / 3600.0), 2)          as perfect_guards_per_min,
+       round(avg((p.dodges_roll + p.dodges_air + p.perfect_guards > 0)::int) * 100, 1) as used_any_pct,
+       round(avg((p.result = 'win')::int) * 100, 1)                             as win_rate_pct
+from match_players p
+join matches m on m.id = p.match_id
+where not p.is_bot and m.event_schema_version >= 8 and m.duration_ticks > 0
+group by 1, 2
+order by 1, 2;
+
+
+-- 10. 낙법률 · DI 시도율 · 기상 선택 (경험이 쌓이며 배우나? user_match_seq 구간별, 사람만)
+select case when m.user_match_seq <= 3 then '01-03'
+            when m.user_match_seq <= 10 then '04-10'
+            else '11+' end                                                       as match_seq_bucket,
+       count(*)                                                                  as players,
+       round(sum(p.techs)::numeric / nullif(sum(p.techs + p.knockdowns), 0) * 100, 1) as tech_rate_pct,
+       round(sum(p.di_inputs)::numeric / nullif(sum(p.hits_taken), 0) * 100, 1)      as di_attempt_pct,
+       round(sum(p.getups_roll)::numeric / nullif(sum(p.getups_stand + p.getups_roll + p.getups_attack), 0) * 100, 1)
+                                                                                 as getup_roll_pct,
+       round(sum(p.getups_attack)::numeric / nullif(sum(p.getups_stand + p.getups_roll + p.getups_attack), 0) * 100, 1)
+                                                                                 as getup_attack_pct
+from match_players p
+join matches m on m.id = p.match_id
+where not p.is_bot and m.event_schema_version >= 8
+group by 1
+order by 1;
+
+
+-- 11. 가드 브레이크 빈도 (스타일별: 경기당 당한 수 / 깬 수. 깬 사람 없는 브레이크 = 가드를 쥐고 있다 바닥남,
+--     match_events type 'guard_break' payload attacker_slot = -1)
+select p.style,
+       count(*)                                    as games,
+       round(avg(p.guard_breaks), 2)               as broken_per_game,
+       round(avg(p.guard_breaks_caused), 2)        as caused_per_game,
+       round(sum(p.guard_breaks - p.guard_breaks_caused)::numeric / count(*), 2) as net_broken_per_game
+from match_players p
+join matches m on m.id = p.match_id
+where m.event_schema_version >= 8
+group by 1
+order by broken_per_game desc;

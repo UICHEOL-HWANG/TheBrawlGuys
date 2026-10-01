@@ -13,6 +13,8 @@ const HTTP_TOO_MANY_REQUESTS := 429
 const HTTP_SERVER_ERROR := 500
 ## An open request older than this is treated as lost (transport timeout is 15 s).
 const IN_FLIGHT_TIMEOUT_MS := 30_000
+## Events per navigator.sendBeacon call: browsers refuse beacons once ~64 KB is in flight.
+const BEACON_MAX_EVENTS := 20
 
 ## Monotonic milliseconds (batch timer, backoff).
 var clock_ms: Callable = Time.get_ticks_msec
@@ -101,6 +103,28 @@ func flush() -> void:
 			func(status: int, body: String) -> void:
 				if id == _request_id and _sending > 0:
 					_on_response(status, body))
+
+
+## The page is going away (web): hands everything queued to send(url, body) -> bool
+## (navigator.sendBeacon, delivered by the browser after the page is gone). Accepted batches leave
+## the queue; a refused one stays for the next visit. An open request is abandoned: its events go
+## in the beacon too and Amplitude drops the duplicate by insert_id. Returns the events handed over.
+func beacon_flush(send: Callable) -> int:
+	_sending = 0
+	_request_id += 1  # a late answer of the abandoned request is ignored
+	var handed := 0
+	while _queue.size() > 0:
+		var batch := _queue.peek(BEACON_MAX_EVENTS)
+		if not bool(send.call(ENDPOINT, AmplitudePayload.body(_api_key, batch))):
+			break
+		_queue.drop_front(batch.size())
+		handed += batch.size()
+	return handed
+
+
+## A new Amplitude session (back after SessionTracker.SESSION_TIMEOUT_MS in the background).
+func renew_session() -> void:
+	session_id = int(wall_ms.call())
 
 
 func persist() -> void:

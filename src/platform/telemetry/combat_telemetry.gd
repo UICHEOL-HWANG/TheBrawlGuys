@@ -1,7 +1,7 @@
 class_name CombatTelemetry
 extends RefCounted
 ## Combat bookkeeping for MatchTelemetry (platform A6): turns sim events and fighter views into
-## SlotStats counters, the stock_lost / gimmick / item / special Amplitude events and the extra raw-row
+## SlotStats counters (defense and recovery in DefenseTelemetry), the stock_lost / gimmick / item / special Amplitude events and the extra raw-row
 ## fields (attack_kind on hits, cause and credited attacker on ringouts). Split out of
 ## MatchTelemetry so the match lifecycle and the combat reading stay one responsibility each.
 
@@ -14,6 +14,7 @@ var _loss := StockLoss.new()
 var _attacks := AttackTracker.new()
 var _items := ItemTelemetry.new()
 var _specials: SpecialTelemetry
+var _defense: DefenseTelemetry
 var _prev: Array = []
 var _dealer: Dictionary = {}  # target -> attacker of this tick's last hit
 
@@ -22,6 +23,7 @@ func _init(stat: Callable, emit: Callable) -> void:
 	_stat = stat
 	_emit = emit
 	_specials = SpecialTelemetry.new(emit, _count)
+	_defense = DefenseTelemetry.new(_count)
 
 
 ## Fighter views of the previous tick (damage at death, swing starts).
@@ -29,9 +31,11 @@ func previous() -> Array:
 	return _prev
 
 
-## Start of a tick: swings opened or closed since the last view, special hits whose window passed.
-func begin_tick(fighters: Array, tick: int) -> void:
+## Start of a tick: swings opened or closed since the last view, special hits whose window passed,
+## DI taken with this tick's inputs (InputFrames in slot order, empty = unknown).
+func begin_tick(fighters: Array, tick: int, inputs: Array = []) -> void:
 	_specials.begin_tick(fighters, tick)
+	_defense.begin_tick(_prev, inputs)
 	var seen := _attacks.observe(_prev, fighters)
 	for slot: int in seen["whiffs"]:
 		_count(slot, "whiffs")
@@ -63,6 +67,7 @@ func on_event(e: Dictionary, tick: int, fighters: Array, arena_radius: float) ->
 		if victim >= 0:
 			_loss.note_gimmick(victim, String(e.get("kind", type)), tick)
 		_emit.call("gimmick_triggered", {"kind": String(e.get("kind", type)), "victim_slot": victim})
+	extra.merge(_defense.on_event(e, tick))
 	_items.on_event(e, _emit, _count)
 	_specials.on_event(e.merged(extra), tick, fighters)
 	return extra

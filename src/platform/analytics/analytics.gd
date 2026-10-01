@@ -4,6 +4,9 @@ extends Node
 ## otherwise it still validates every event (invalid ones fail tests) and drops it.
 ## A8: every tracked event also feeds the SessionTracker (session_started / session_ended,
 ## load_timed, the session loss streak) and install user properties (InstallInfo).
+## Background (mobile pause, web tab hidden or closed) ends the session; coming back starts one,
+## under a new Amplitude session id after SessionTracker.SESSION_TIMEOUT_MS away. Web exports get
+## the page lifecycle from WebLifecycle and leave by navigator.sendBeacon.
 
 var _client: AnalyticsClient = null
 ## Offline runs still stamp matches with a per-run session id (epoch ms at startup).
@@ -11,6 +14,9 @@ var _offline_session_id: int = int(Time.get_unix_time_from_system() * 1000.0)
 var _session := SessionTracker.new()
 var _install: InstallInfo = null
 var _session_open: bool = false
+var _web := WebLifecycle.new()
+## Wall-clock ms when the app went to the background, -1 while in the foreground.
+var _away_since_ms: int = -1
 
 
 func _ready() -> void:
@@ -35,6 +41,7 @@ func _ready() -> void:
 	track("app_opened")
 	_start_session()
 	_client.flush()
+	_web.attach(_on_page_hidden, _on_page_visible)
 
 
 func is_enabled() -> bool:
@@ -118,12 +125,44 @@ func _notification(what: int) -> void:
 			_end_session()
 			flush()
 		NOTIFICATION_APPLICATION_PAUSED:
-			track("app_backgrounded")
-			_end_session()
+			_go_background()
 			flush()
 		NOTIFICATION_APPLICATION_RESUMED:
-			_start_session()
+			_come_back()
 		NOTIFICATION_APPLICATION_FOCUS_OUT:
-			if PlatformEnv.kind() != "desktop":
+			if PlatformEnv.kind() == "mobile":  # web: WebLifecycle (canvas blur is not background)
 				track("app_backgrounded")
 				flush()
+
+
+## Web tab hidden or page unloading: end the session and hand the queue to sendBeacon.
+func _on_page_hidden() -> void:
+	if _away_since_ms >= 0:
+		return  # visibilitychange already did it before pagehide
+	_go_background()
+	_client.beacon_flush(WebLifecycle.send_beacon)
+	_client.persist()
+
+
+func _on_page_visible() -> void:
+	_come_back()
+
+
+func _go_background() -> void:
+	if _away_since_ms < 0:
+		_away_since_ms = _wall_ms()
+		track("app_backgrounded")
+	_end_session()
+
+
+## Back in the foreground: a new Amplitude session after a long absence, then session_started.
+func _come_back() -> void:
+	if _away_since_ms >= 0 and SessionTracker.is_new_session(_wall_ms() - _away_since_ms):
+		_client.renew_session()
+		track("app_opened", {"cold_start": false})
+	_away_since_ms = -1
+	_start_session()
+
+
+static func _wall_ms() -> int:
+	return int(Time.get_unix_time_from_system() * 1000.0)

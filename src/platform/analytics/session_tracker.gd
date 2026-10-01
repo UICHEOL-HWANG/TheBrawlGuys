@@ -5,6 +5,10 @@ extends RefCounted
 ## session's loss streak and derives load timings from screen changes (boot → first login screen,
 ## first login screen → first title). observe() returns follow-up events to send.
 
+## Back from the background after this long, the app starts a new Amplitude session
+## (tracking-plan §2 session_id).
+const SESSION_TIMEOUT_MS := 30 * 60 * 1000
+
 ## Monotonic ms since engine start (boot time for boot_to_login).
 var clock_ms: Callable = Time.get_ticks_msec
 var matches: int = 0
@@ -31,6 +35,11 @@ func observe(event_name: String, props: Dictionary) -> Array:
 		"match_ended":
 			loss_streak = loss_streak + 1 if props.get("result") == "loss" else 0
 	return []
+
+
+## True when an app that was in the background for away_ms needs a new Amplitude session.
+static func is_new_session(away_ms: int) -> bool:
+	return away_ms >= SESSION_TIMEOUT_MS
 
 
 ## session_ended properties.

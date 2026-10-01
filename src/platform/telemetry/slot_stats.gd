@@ -6,6 +6,9 @@ extends RefCounted
 const COUNTERS: Array[String] = [
 	"hits", "guards", "grabs", "jumps", "whiffs", "ringouts_scored", "falls", "falls_by_gimmick",
 	"specials", "special_hits", "items_used",
+	# Defense and recovery (event schema 8, DefenseTelemetry)
+	"hits_taken", "di_inputs", "dodges_roll", "dodges_air", "perfect_guards", "guard_breaks",
+	"guard_breaks_caused", "knockdowns", "techs", "getups_stand", "getups_roll", "getups_attack",
 ]
 ## Damage is reported in 0.1 % steps.
 const DAMAGE_STEP := 0.1
