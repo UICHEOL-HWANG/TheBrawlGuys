@@ -34,7 +34,7 @@
 4. 터치 튜토리얼 버튼 강조 링 — `touch_input.gd`(270줄) 먼저 분리
 5. 튜토리얼 진행 상태가 기기(`user://`) 저장 → 계정 단위로 옮길지 결정
 6. 🖼 사용자 확인 대기: Phase 4 경기장·아이템 룩(`dev/active/phase-4/evidence/`)
-7. 부채: `game_config.gd` 278줄, `touch_input.gd` 270줄, `ds_gallery.gd` 388줄, `capture_evidence.gd`는 `-s` 모드에서 main/app 씬 못 엶, 웹 빌드 `session_ended` 없음, 30분 백그라운드 세션 분리 미구현, Amplitude 퍼널 대시보드 없음
+7. 부채: `game_config.gd` 278줄, `touch_input.gd` 270줄, `ds_gallery.gd` 388줄, `capture_evidence.gd`는 `-s` 모드에서 main/app 씬 못 엶, Amplitude 퍼널 대시보드 없음
 
 ## 4. 사용자가 해야 할 일 (Supabase / 외부)
 
