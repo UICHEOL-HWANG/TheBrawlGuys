@@ -8,6 +8,7 @@ extends RefCounted
 ## the config) lands within bot_tech_lead_ticks — always inside the tech window — letting go of
 ## a held guard one tick first so the press is fresh. note() records what was sent.
 ## Choices are deterministic: a hash of the view tick and the bot id (bots never read the sim RNG).
+## Tech chance and how often the getup is the sensible one come from `skill` (BotSkill).
 
 enum Option { STAND, ROLL, ATTACK, WAIT }
 
@@ -20,6 +21,8 @@ const NEVER := 1 << 20
 
 var _self_id: int
 var _config: GameConfig
+## Tech, DI and getup choices (BotDifficulty); BotController swaps it when d changes.
+var skill: BotSkill
 var _choice: int = -1
 var _launch_seen: bool = false
 var _plan_tech: bool = false
@@ -30,6 +33,7 @@ var _guard_was: bool = false
 func _init(p_self_id: int, p_config: GameConfig) -> void:
 	_self_id = p_self_id
 	_config = p_config
+	skill = BotSkill.from_config(p_config)
 
 
 ## A frame for a lying or tumbling bot, or null to let the usual logic run. Call every sample.
@@ -39,7 +43,7 @@ func decide(me: Dictionary, foe: Dictionary, tick: int, arena: ArenaData) -> Inp
 	_last_y = pos.y
 	if int(me["state"]) == Fighter.State.KNOCKDOWN:
 		if _choice < 0:
-			_choice = posmod(hash([_self_id, tick, OPTION_SALT]), Option.size())
+			_choice = _pick_option(me, foe, tick)
 		return _option(me, foe, arena)
 	_choice = -1
 	if not bool(me.get("tumbling", false)):
@@ -47,13 +51,24 @@ func decide(me: Dictionary, foe: Dictionary, tick: int, arena: ArenaData) -> Inp
 		return null
 	if not _launch_seen:
 		_launch_seen = true
-		_plan_tech = posmod(hash([_self_id, tick, TECH_SALT]), 100) < int(_config.bot_tech_chance * 100.0)
+		_plan_tech = posmod(hash([_self_id, tick, TECH_SALT]), 100) < int(skill.tech_chance * 100.0)
 	if not _plan_tech or vy >= 0.0 or _ticks_to_land(pos, vy, arena) > _config.bot_tech_lead_ticks:
 		return null
 	if _guard_was:
 		return InputFrame.neutral()  # let go first: only a fresh press arms a tech
 	_plan_tech = false
 	return InputFrame.make(0, 0, false, false, false, true)
+
+
+## A sensible pick (skill.smart_getup): getup attack with the foe in reach, else roll away;
+## otherwise a uniform one of the four.
+func _pick_option(me: Dictionary, foe: Dictionary, tick: int) -> int:
+	if not skill.smart_getup_now(_self_id, tick):
+		return posmod(hash([_self_id, tick, OPTION_SALT]), Option.size())
+	var reach := _config.getup_attack_radius + _config.fighter_radius + ATTACK_REACH_PAD
+	if not foe.is_empty() and BotViewQuery.flat(me["pos"], foe["pos"]).length() <= reach:
+		return Option.ATTACK
+	return Option.ROLL
 
 
 ## What the bot actually sent this tick.

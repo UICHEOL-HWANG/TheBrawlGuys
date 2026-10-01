@@ -12,6 +12,8 @@ extends RefCounted
 ## bot's own swing range makes it raise its guard before the swing (once per turn), a plain
 ## block; missing that, it is too slow for the swing (a charge it still guards, never perfectly).
 ## Which turns is deterministic (a hash of the bot id, its guard-turn count and the view tick).
+## The reaction delay and chances come from `skill` (BotSkill, the difficulty dial); a threat the
+## skill does not answer (guard_chance) gets no reaction at all.
 
 const EARLY_SALT := 53
 ## The foe counts as moving in when it got at least this much closer since the last sample (m).
@@ -19,6 +21,8 @@ const APPROACH_EPSILON := 0.001
 
 var _self_id: int
 var _config: GameConfig
+## Reaction delay and guard chances (BotDifficulty); BotController swaps it when d changes.
+var skill: BotSkill
 var _guard_left: int = 0
 ## Samples until the bot reacts to the current threat (0 = nothing pending).
 var _react_left: int = 0
@@ -40,6 +44,7 @@ var _tick: int = 0
 func _init(p_self_id: int, p_config: GameConfig) -> void:
 	_self_id = p_self_id
 	_config = p_config
+	skill = BotSkill.from_config(p_config)
 	_early_next = _roll_early()
 
 
@@ -80,7 +85,7 @@ func note(sent: InputFrame) -> void:
 
 ## A foe just started attacking or charging in range: plan the reaction, flip the turn.
 func _new_threat(foe: Dictionary) -> void:
-	_react_left = _config.bot_guard_react_ticks + 1
+	_react_left = skill.react_ticks + 1 if skill.answers_threat(_self_id, _tick) else 0
 	_react_guard = _guard_next_threat
 	_react_heavy = int(foe["state"]) == Fighter.State.CHARGE
 	_react_late = _early_next and not _react_heavy
@@ -94,6 +99,8 @@ func _new_threat(foe: Dictionary) -> void:
 func _guard_early(me: Dictionary, dist: float) -> void:
 	if not _guard_next_threat or not _early_next or _early_done or _guard_left > 0:
 		return
+	if not skill.answers_threat(_self_id, _guard_turns):
+		return
 	if bool(me["on_ground"]) and dist <= _config.bot_guard_range:
 		_guard_left = _config.bot_guard_ticks
 		_early_done = true
@@ -103,7 +110,7 @@ func _guard_early(me: Dictionary, dist: float) -> void:
 func _roll_early() -> bool:
 	_guard_turns += 1
 	var roll := posmod(hash([_self_id, _guard_turns, _tick, EARLY_SALT]), 100)
-	return roll >= int(_config.bot_perfect_guard_chance * 100.0)
+	return roll >= int(skill.perfect_guard_chance * 100.0)
 
 
 func _is_threat(foe: Dictionary, my_pos: Vector3) -> bool:

@@ -1,13 +1,14 @@
 extends RefCounted
 ## 1 Hz state timeline for the win-probability model (A9, analytics-strategy M2): one row per
 ## fighter per sample from World.state_view(). Only values known at that tick — the outcome is
-## joined later from match_players, never written here. edge_dist is the arena view radius minus
+## joined later from match_players, never written here. bot_d is each slot's dial value then
+## (DDA may move it; the dataset's "player" slot 0 keeps its own). edge_dist is the arena view radius minus
 ## the fighter's distance from the centre (negative = outside), the same radius telemetry uses.
 
 const SAMPLE_EVERY_TICKS := 60
 const COLUMNS: Array[String] = [
 	"match_id", "tick", "t", "slot", "damage", "stocks", "x", "y", "z", "edge_dist", "gauge",
-	"state", "holding_item", "item_kind", "on_ground", "guard_hp_ratio", "team", "score",
+	"state", "holding_item", "item_kind", "on_ground", "guard_hp_ratio", "team", "score", "bot_d",
 ]
 const NO_TEAM := -1
 
@@ -16,7 +17,8 @@ static func due(tick: int) -> bool:
 	return tick % SAMPLE_EVERY_TICKS == 0
 
 
-static func rows(match_id: String, view: Dictionary) -> Array[Dictionary]:
+## skill: slot -> the slot's dial d at this tick (bot_d; empty cell when missing).
+static func rows(match_id: String, view: Dictionary, skill: Dictionary = {}) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var tick := int(view["tick"])
 	var radius := float(view["arena_radius"])
@@ -24,7 +26,9 @@ static func rows(match_id: String, view: Dictionary) -> Array[Dictionary]:
 	var teams: Array = mode.get("teams", []) if String(mode.get("rule", "")) == MatchRules.TEAM else []
 	var scores: Array = mode.get("scores", [])
 	for f: Dictionary in view["fighters"]:
-		out.append(_row(match_id, tick, radius, f, teams, scores))
+		var row := _row(match_id, tick, radius, f, teams, scores)
+		row["bot_d"] = skill.get(int(f["id"]))
+		out.append(row)
 	return out
 
 

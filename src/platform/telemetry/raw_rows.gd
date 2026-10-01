@@ -13,6 +13,7 @@ const FIGHTER_TARGET_TYPES: Array[String] = ["perfect_guard"]
 ## Reproducibility header copied from the setup onto the matches row (null when absent).
 const HEADER_KEYS: Array[String] = [
 	"config_fingerprint", "sim_version", "event_schema_version", "session_id", "user_match_seq",
+	"dda_variant",
 ]
 ## matches.config_variant is NOT NULL: setups without an experiment are the control group.
 const VARIANT_DEFAULT := "control"
@@ -63,9 +64,16 @@ static func player_row(match_id: String, slot_setup: Dictionary, summary: Dictio
 		row[key] = slot_setup[key]
 	var is_bot := bool(slot_setup["is_bot"])
 	row["controller"] = slot_setup.get("controller", "bot" if is_bot else "local")
-	row["bot_difficulty"] = slot_setup.get("bot_difficulty")
-	row["bot_params_hash"] = slot_setup.get("bot_params_hash")
+	# A dial bot's own preset / params hash (BotSquad summary) wins over the setup's.
+	row["bot_difficulty"] = summary.get("bot_difficulty", slot_setup.get("bot_difficulty"))
+	row["bot_params_hash"] = summary.get("bot_params_hash", slot_setup.get("bot_params_hash"))
 	return row
+
+
+## A bot-side event row (BotSquad: probe_stage, dda_adjusted, bot_intent), same six columns.
+static func bot_row(match_id: String, tick: int, type: String, actor: Variant, target: Variant,
+		payload: Dictionary) -> Dictionary:
+	return _row(match_id, tick, type, actor, target, payload)
 
 
 static func _row(match_id: String, tick: int, type: String, actor: Variant, target: Variant,

@@ -1,0 +1,355 @@
+{
+ "name": "win_prob_dda",
+ "kind": "logistic",
+ "features": [
+  "t",
+  "player_count",
+  "damage",
+  "stocks",
+  "edge_dist",
+  "side_stocks",
+  "side_damage",
+  "foe_best_stocks",
+  "foe_damage",
+  "stock_diff",
+  "damage_diff",
+  "score_diff",
+  "foe_sides_alive",
+  "d_diff",
+  "is_team",
+  "is_timed"
+ ],
+ "mean": [
+  43.78121543161406,
+  3.3412562402205497,
+  30.23876989562855,
+  2.488310512228253,
+  4.699791772939079,
+  2.990336613688078,
+  30.23876989562855,
+  3.069305852481473,
+  30.23876989562855,
+  -0.07896923879339497,
+  -4.683384512928162e-19,
+  -0.48588033678563447,
+  1.7996595461761993,
+  -4.829740278957167e-19,
+  0.24079370447003262,
+  0.44802920795767825
+ ],
+ "scale": [
+  31.575590300124635,
+  0.8242733987992911,
+  31.53135265698888,
+  0.8483317196340953,
+  4.209700434410323,
+  1.2555578926936304,
+  29.804135307946922,
+  1.158187922189414,
+  23.80691519101268,
+  0.905684401290342,
+  36.91962615674553,
+  2.06536542349974,
+  0.8630306098970076,
+  0.34151914444497566,
+  0.42756531238821416,
+  0.497291701895873
+ ],
+ "coef": [
+  0.11285281020176718,
+  -0.11308100797836008,
+  -0.03953913745552142,
+  0.21606407156879331,
+  0.11569992473892683,
+  0.2833825305014557,
+  -0.1189202321298087,
+  -0.3752668990131585,
+  0.1789827121209759,
+  0.8727463581473957,
+  0.2114144088088158,
+  1.8748272646387443,
+  -0.29183761012845444,
+  0.8792411030063827,
+  0.25056844147250285,
+  -0.04573772585299957
+ ],
+ "intercept": -0.9422791373931416,
+ "metrics": {
+  "rows": 174473,
+  "matches": 800,
+  "with_d": {
+   "log_loss": 0.4032205087779039,
+   "auc": 0.8873658561747291,
+   "brier": 0.13110050156696978
+  },
+  "without_d": {
+   "log_loss": 0.4435984825329516,
+   "auc": 0.8613476032363253,
+   "brier": 0.1457354994073368
+  },
+  "with_d_first_30s": {
+   "log_loss": 0.5063730157795605,
+   "auc": 0.8186462700884488,
+   "brier": 0.1679988678794306
+  },
+  "without_d_first_30s": {
+   "log_loss": 0.5647166237026412,
+   "auc": 0.763565167157015,
+   "brier": 0.1915713454826474
+  }
+ },
+ "fixtures": [
+  {
+   "x": {
+    "t": 88.0,
+    "player_count": 4.0,
+    "damage": 76.0,
+    "stocks": 3.0,
+    "edge_dist": 4.68,
+    "side_stocks": 3.0,
+    "side_damage": 76.0,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 27.066666666666663,
+    "stock_diff": 0.0,
+    "damage_diff": -48.93333333333334,
+    "score_diff": -1.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.22700000000000004,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.05535670470641221
+  },
+  {
+   "x": {
+    "t": 117.0,
+    "player_count": 4.0,
+    "damage": 30.6,
+    "stocks": 3.0,
+    "edge_dist": 8.44,
+    "side_stocks": 3.0,
+    "side_damage": 30.6,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 26.566666666666663,
+    "stock_diff": 0.0,
+    "damage_diff": -4.0333333333333385,
+    "score_diff": -4.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.4106666666666666,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.004798329826217932
+  },
+  {
+   "x": {
+    "t": 78.0,
+    "player_count": 4.0,
+    "damage": 139.5,
+    "stocks": 3.0,
+    "edge_dist": -4.03,
+    "side_stocks": 3.0,
+    "side_damage": 139.5,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 18.333333333333332,
+    "stock_diff": 0.0,
+    "damage_diff": -121.16666666666667,
+    "score_diff": -3.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.3353333333333333,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.0024266372668577322
+  },
+  {
+   "x": {
+    "t": 20.0,
+    "player_count": 4.0,
+    "damage": 49.7,
+    "stocks": 3.0,
+    "edge_dist": 8.36,
+    "side_stocks": 6.0,
+    "side_damage": 59.35,
+    "foe_best_stocks": 6.0,
+    "foe_damage": 59.8,
+    "stock_diff": 0.0,
+    "damage_diff": 0.44999999999999574,
+    "score_diff": 0.0,
+    "foe_sides_alive": 1.0,
+    "d_diff": -0.55,
+    "is_team": 1.0,
+    "is_timed": 0.0
+   },
+   "y": 0.2288104794124708
+  },
+  {
+   "x": {
+    "t": 15.0,
+    "player_count": 4.0,
+    "damage": 0.0,
+    "stocks": 3.0,
+    "edge_dist": 5.0,
+    "side_stocks": 3.0,
+    "side_damage": 0.0,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 33.166666666666664,
+    "stock_diff": 0.0,
+    "damage_diff": 33.166666666666664,
+    "score_diff": -1.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.30666666666666664,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.08473509355240022
+  },
+  {
+   "x": {
+    "t": 75.0,
+    "player_count": 4.0,
+    "damage": 3.6,
+    "stocks": 3.0,
+    "edge_dist": 8.69,
+    "side_stocks": 3.0,
+    "side_damage": 3.6,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 14.299999999999999,
+    "stock_diff": 0.0,
+    "damage_diff": 10.7,
+    "score_diff": -4.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.1803333333333334,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.008567382035151283
+  },
+  {
+   "x": {
+    "t": 40.0,
+    "player_count": 4.0,
+    "damage": 20.0,
+    "stocks": 1.0,
+    "edge_dist": 3.12,
+    "side_stocks": 1.0,
+    "side_damage": 28.5,
+    "foe_best_stocks": 5.0,
+    "foe_damage": 22.55,
+    "stock_diff": -4.0,
+    "damage_diff": -5.949999999999999,
+    "score_diff": 0.0,
+    "foe_sides_alive": 1.0,
+    "d_diff": -0.09849999999999992,
+    "is_team": 1.0,
+    "is_timed": 0.0
+   },
+   "y": 0.0042780771595590595
+  },
+  {
+   "x": {
+    "t": 114.0,
+    "player_count": 4.0,
+    "damage": 81.0,
+    "stocks": 3.0,
+    "edge_dist": 6.1,
+    "side_stocks": 3.0,
+    "side_damage": 81.0,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 15.666666666666666,
+    "stock_diff": 0.0,
+    "damage_diff": -65.33333333333333,
+    "score_diff": -6.0,
+    "foe_sides_alive": 3.0,
+    "d_diff": -0.48400000000000004,
+    "is_team": 0.0,
+    "is_timed": 1.0
+   },
+   "y": 0.0003000468248940486
+  },
+  {
+   "x": {
+    "t": 21.0,
+    "player_count": 3.0,
+    "damage": 45.0,
+    "stocks": 3.0,
+    "edge_dist": 4.49,
+    "side_stocks": 3.0,
+    "side_damage": 45.0,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 59.0,
+    "stock_diff": 0.0,
+    "damage_diff": 14.0,
+    "score_diff": 0.0,
+    "foe_sides_alive": 2.0,
+    "d_diff": -0.2495,
+    "is_team": 0.0,
+    "is_timed": 0.0
+   },
+   "y": 0.2887349108029873
+  },
+  {
+   "x": {
+    "t": 48.0,
+    "player_count": 4.0,
+    "damage": 81.8,
+    "stocks": 1.0,
+    "edge_dist": -3.09,
+    "side_stocks": 3.0,
+    "side_damage": 40.9,
+    "foe_best_stocks": 4.0,
+    "foe_damage": 32.0,
+    "stock_diff": -1.0,
+    "damage_diff": -8.899999999999999,
+    "score_diff": 0.0,
+    "foe_sides_alive": 1.0,
+    "d_diff": 0.057499999999999996,
+    "is_team": 1.0,
+    "is_timed": 0.0
+   },
+   "y": 0.16841085467381212
+  },
+  {
+   "x": {
+    "t": 20.0,
+    "player_count": 2.0,
+    "damage": 0.0,
+    "stocks": 1.0,
+    "edge_dist": 5.19,
+    "side_stocks": 1.0,
+    "side_damage": 0.0,
+    "foe_best_stocks": 3.0,
+    "foe_damage": 0.0,
+    "stock_diff": -2.0,
+    "damage_diff": 0.0,
+    "score_diff": 0.0,
+    "foe_sides_alive": 1.0,
+    "d_diff": -0.496,
+    "is_team": 0.0,
+    "is_timed": 0.0
+   },
+   "y": 0.014472130056109428
+  },
+  {
+   "x": {
+    "t": 43.0,
+    "player_count": 2.0,
+    "damage": 75.9,
+    "stocks": 3.0,
+    "edge_dist": 9.03,
+    "side_stocks": 3.0,
+    "side_damage": 75.9,
+    "foe_best_stocks": 2.0,
+    "foe_damage": 65.0,
+    "stock_diff": 1.0,
+    "damage_diff": -10.900000000000006,
+    "score_diff": 0.0,
+    "foe_sides_alive": 1.0,
+    "d_diff": 0.23899999999999993,
+    "is_team": 0.0,
+    "is_timed": 0.0
+   },
+   "y": 0.8872529942827058
+  }
+ ]
+}

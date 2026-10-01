@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 8 — 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 9 — 봇 트래킹: `players[]`·`match_players`에 `EventCatalog.BOT_TRACKING_KEYS`(§3.4.2), `matches.dda_variant`, `match_events` `probe_stage`·`dda_adjusted`·`bot_intent`(0006). 8 = 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -184,6 +184,21 @@
 | `first_blood` | bool | 경기 첫 링아웃의 가격자 |
 | `comeback_win` | bool | 한 번이라도 스톡 1개 이상 뒤진 뒤 승리 |
 
+#### 3.4.2 봇 트래킹 열 (스키마 9, `EventCatalog.BOT_TRACKING_KEYS`, 마이그레이션 0006, `PRD-BOT-04`)
+
+모든 `players[]` 항목·`match_players` 행에 항상 실린다 (해당 없으면 null). 값은 `BotSquad.slot_summary`.
+
+| 키 | 타입 | 정의 |
+|---|---|---|
+| `bot_d_start` · `bot_d_mean` · `bot_d_end` | float? | 봇의 난이도 다이얼 d (0–1): 경기 시작, 틱 평균, 끝. 사람은 null |
+| `dda_adjustments` | int? | DDA가 이 봇의 d를 옮긴 횟수 (봇만) |
+| `probe_target_slot` | int? | 프로브한 봇의 행에만: 프로브 대상(사람) 슬롯 |
+| `probe_features` | obj? | 프로브 피처 `{react_ticks, response_rate, dodge_rate, tech_rate, punish_rate, damage_share, attack_rate, edge_share}` (`ProbeObserver.FEATURES`) |
+| `probe_estimate` | float? | 프로브 피처로 낸 실력 추정 d (실력 추정기 모델) |
+| `skill_rating` | float? | 사람의 행에만: 이 경기 전 기기 실력 레이팅 (미평가면 null) |
+
+`bot_difficulty`는 봇의 시작 d에 가장 가까운 프리셋 이름(`slow` 0.2 / `normal` 0.5 / `busy` 0.8), `bot_params_hash`는 시작 `BotSkill` 해시. `matches.dda_variant`(`on`|`off`, 사람 없으면 null)는 A/B 변형.
+
 ### 3.5 전투 핵심
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
@@ -230,7 +245,7 @@
 
 ## 4. Supabase 원시 테이블 (`PRD-DATA-04`)
 
-마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` → `0003_special_hits.sql` → `0004_match_rules.sql` (순서대로). **스키마 8 빌드는 모든 `match_players` 행에 방어·복귀 열(0004)을 보내므로 0004를 실행하기 전에는 모든 경기 업로드가 `matches` 행만 남기고 거절된다** (`match_players`부터 실패하면 `match_events`·`match_inputs`도 안 올라감). `matches.rule`·`team`·`score`는 여전히 팀전·시간제에서만 보낸다. 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
+마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` → `0003_special_hits.sql` → `0004_match_rules.sql` → `0006_bot_tracking.sql` (순서대로; 0005는 온라인 방). **스키마 9 빌드는 모든 `matches` 행에 `dda_variant`, 모든 `match_players` 행에 봇 트래킹 열(§3.4.2)을 보내므로 0006 실행 전에는 경기 업로드 전체가 거절된다.** **스키마 8 빌드는 모든 `match_players` 행에 방어·복귀 열(0004)을 보내므로 0004를 실행하기 전에는 모든 경기 업로드가 `matches` 행만 남기고 거절된다** (`match_players`부터 실패하면 `match_events`·`match_inputs`도 안 올라감). `matches.rule`·`team`·`score`는 여전히 팀전·시간제에서만 보낸다. 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
 
 ### 4.1 테이블
 
@@ -264,6 +279,9 @@
 | sim (combat-depth C) | `knockdown` · `tech` · `getup` | 파이터 / — | `pos` · `kind` (`place`\|`roll` · `stand`\|`roll`\|`attack`) | 5 (스키마 8) |
 | view | `jumped` · `landed` · `respawned` | id / — | `pos` (`landed`는 `intensity`) | 4.0 |
 | 샘플 | `pos` | — / — | 전원의 `pos`·`damage`·`state`를 **30틱(0.5초)마다** 1행 | 4.0 |
+| 봇 (`PRD-BOT-05`) | `probe_stage` | 프로브한 봇 / 대상 사람 | `stage` (`frontal`\|`edge`\|`ranged`\|`punish`), `result` (그 단계의 프로브 피처) — 단계 끝마다 1행, 경기당 최대 4행 | 5 (스키마 9) |
+| 봇 (`PRD-BOT-06`) | `dda_adjusted` | 조정된 봇 / 사람 | `from`, `to` (d), `reason` (`player_ahead`\|`player_behind`), `win_prob` (사람의 상대 승률) | 5 (스키마 9) |
+| 봇 (`PRD-BOT-04`) | `bot_intent` | 봇 / 보던 상대 | `intent` (approach·attack·defend·edge·getup·probe_* …), `dist`, `threat` — 의도가 바뀔 때만, 봇당 20틱 간격 이상, **경기당 최대 300행** (`dda_intent_cap`) | 5 (스키마 9) |
 
 렌더 전용 `trail`은 저장하지 않는다 (속도에서 재구성할 수 있다).
 
@@ -311,6 +329,7 @@
 | Q22 | **낙법률·기상 선택·DI** — 다운에서의 복귀 기술을 배우나(경기 수에 따라 오르나)? DI가 생존을 늘리나? | `techs / (techs + knockdowns)`, `techs / tech_attempts`, `getups_*`, `di_inputs / hits_taken`, `di_perp_avg`, `tumbles_survived / tumbles`, `matches.user_match_seq`, `match_events` `knockdown`·`tech`·`getup` | 낙법 입력 창, 기상 공격 위력, `di_max_deg`, 튜토리얼·힌트 |
 | Q23 | **위험 상황의 선택·팀워크** — 가장자리·고%에서 공격하나 지키나, 그 선택이 생존·승리로 이어지나? 팀전에서 협공이 생기나? | `edge_*`·`high_dmg_*` (`high_dmg_ticks`, `edge_time_ratio`로 정규화), `stock_lost`, `team_assists`, `result` | 넉백 스케일·가장자리 기믹, 팀전 아군 공격·어시스트 보상 |
 | Q24 | **경기 방식 선택 고민** — 어떤 방식을 들여다보고 무엇을 고르나? | `rule_selected.focused`·`browse_count`·`rule` | 기본 방식·정렬, 설명 문구 |
+| Q25 | **난이도가 맞나?** — 프로브 추정 실력과 레이팅, DDA가 승률을 목표 대역에 묶어 두나, DDA on/off가 재대전·재방문을 바꾸나? | `matches.dda_variant`, `match_players` 봇 트래킹 열(§3.4.2), `match_events` `probe_stage`·`dda_adjusted`·`bot_intent`, `rematch_clicked`, `result` | 다이얼 앵커(`BotDifficulty.ANCHORS`), DDA 대역·스텝·쿨다운(`DDA` 그룹), 프로브 단계 길이 |
 
 ---
 

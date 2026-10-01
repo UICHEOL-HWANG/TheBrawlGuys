@@ -18,6 +18,6 @@ func _start_match() -> void:
 
 func _gather_inputs() -> Array[InputFrame]:
 	var inputs: Array[InputFrame] = [_local_bot.sample(_curr_state)]
-	for b: BotController in _bots:
-		inputs.append(b.sample(_curr_state))
+	for slot: int in setup.bot_slots():
+		inputs.append(_squad.sample(slot, _curr_state))
 	return inputs

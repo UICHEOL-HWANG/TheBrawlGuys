@@ -28,7 +28,8 @@ var _presentation: MatchPresentation
 var _panel: ConfigPanel
 var _locals: LocalPlayers
 var _touch: TouchInput
-var _bots: Array[BotController] = []
+## The match's bots: dial, probe, DDA and bot tracking (PRD-BOT-03~06).
+var _squad: BotSquad
 var _hud: Hud
 var _result_shown: bool = false
 ## Platform A6: reads sim/view events only, never writes to the sim.
@@ -121,9 +122,7 @@ func _start_match() -> void:
 	if _world != null and new_seed.is_valid():
 		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
 	_world = setup.build_world(_config)
-	_bots.clear()
-	for slot: int in setup.bot_slots():
-		_bots.append(BotController.new(slot, _config))
+	_squad = BotSquadFactory.for_setup(setup, _config)
 	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
 	_result_shown = false
@@ -131,19 +130,18 @@ func _start_match() -> void:
 	_prev_state = _curr_state
 	_presentation.restart()
 	setup.set_input_devices(_locals.input_devices())
-	_tracking.begin(setup, _world)
+	_tracking.begin(setup, _world, _squad.context())
+	_tracking.telemetry().set_slot_extras(_squad.slot_summary)
 
 
 ## One input per slot in slot order: the local device or that slot's bot.
 func _gather_inputs() -> Array[InputFrame]:
 	var inputs: Array[InputFrame] = []
-	var next_bot := 0
 	for s: Dictionary in setup.slots:
 		if s["controller"] == MatchSetup.CONTROLLER_LOCAL:
 			inputs.append(_locals.sample(int(s["slot"])))
 		else:
-			inputs.append(_bots[next_bot].sample(_curr_state))
-			next_bot += 1
+			inputs.append(_squad.sample(int(s["slot"]), _curr_state))
 	return inputs
 
 
@@ -163,6 +161,7 @@ func _process(delta: float) -> void:
 		events.append_array(_curr_state["events"])
 		view_events.append_array(tick_view_events)
 		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state, inputs)
+		_squad.after_tick(_curr_state, _tracking.telemetry())
 		_after_tick(inputs)
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
@@ -176,6 +175,7 @@ func _process(delta: float) -> void:
 		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
 		_hud.show_result(int(_curr_state["winner"]), viewer)
 		_tracking.finish(_curr_state)
+		_squad.finish(_curr_state)
 	_stats.add_frame(delta, ticks)
 	_tracking.on_frame_time(delta)
 	if _panel != null:
