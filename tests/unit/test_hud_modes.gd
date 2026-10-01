@@ -40,14 +40,14 @@ func test_cards_sit_along_the_bottom_odd_slots_right() -> void:
 	assert_gt(cards[1].get_global_rect().position.x, vp.size.x * 0.5, "P2 right")
 	assert_gt(cards[3].get_global_rect().position.x, vp.size.x * 0.5, "P4 right")
 	assert_false(cards[0].get_global_rect().intersects(cards[2].get_global_rect()))
-	assert_eq(hud.frame_margin("bottom"), DS.S5)
+	assert_eq(hud.frame_margin("bottom"), HudStrip.EDGE)
 
 
 func test_team_groups_have_headers_and_keep_teammates_together() -> void:
 	var hud := _hud(4, {"rule": "team", "teams": [0, 0, 1, 1]})
 	await wait_process_frames(2)
 	var strip := hud.strip()
-	assert_eq(strip.headers.map(func(l: Label) -> String: return l.text), ["팀 1", "팀 2"])
+	assert_eq(strip.headers.map(func(l: Label) -> String: return l.text), ["팀\n1", "팀\n2"])
 	var mid := hud.get_viewport().get_visible_rect().size.x * 0.5
 	assert_lt(strip.cards[1].get_global_rect().position.x, mid, "teams decide the side, not the slot")
 	assert_gt(strip.cards[2].get_global_rect().position.x, mid)
@@ -90,7 +90,7 @@ func test_touch_moves_the_strip_to_the_top_and_the_camera_follows() -> void:
 	var hud := _hud(2, {})
 	await wait_process_frames(2)
 	var bottom := hud.reserve()
-	assert_gt(float(bottom["bottom"]), 0.05)
+	assert_gt(float(bottom["bottom"]), 0.02)
 	assert_eq(float(bottom["top"]), 0.0)
 	var touch := [true]
 	hud.show_key_hints([{"prefix": "p1", "slot": 0, "accent": DS.P1}] as Array[Dictionary],
@@ -98,7 +98,7 @@ func test_touch_moves_the_strip_to_the_top_and_the_camera_follows() -> void:
 	await wait_process_frames(2)
 	assert_true(hud.strip().is_edge_top())
 	assert_lt(hud.strip().cards[0].get_global_rect().end.y, hud.get_viewport().get_visible_rect().size.y * 0.5)
-	assert_gt(float(hud.reserve()["top"]), 0.05)
+	assert_gt(float(hud.reserve()["top"]), 0.02)
 	assert_eq(float(hud.reserve()["bottom"]), 0.0)
 
 

@@ -48,4 +48,4 @@ func test_result_banner_texts() -> void:
 func test_frame_keeps_the_s5_margin_inside_the_safe_area() -> void:
 	# desktop: the safe area is the whole viewport, so the margin is exactly s5
 	assert_eq(_hud.frame_margin("left"), DS.S5)
-	assert_eq(_hud.frame_margin("bottom"), DS.S5, "the strip sits on the bottom edge (DS-LAY-02 v2)")
+	assert_eq(_hud.frame_margin("bottom"), HudStrip.EDGE, "the strip sits on the bottom edge (DS-LAY-02 v2)")

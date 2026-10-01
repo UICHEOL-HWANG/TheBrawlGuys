@@ -7,11 +7,13 @@ extends Label
 const BUMP_SCALE := 1.3
 
 var _score: int = 0
+## Set before it enters the tree (the HUD PlayerCard uses the caption size).
+var font_size: int = DS.SIZE_TITLE
 
 
 func _ready() -> void:
 	add_theme_font_override("font", load(DS.FONT_DISPLAY_PATH) as Font)
-	add_theme_font_size_override("font_size", DS.SIZE_TITLE)
+	add_theme_font_size_override("font_size", font_size)
 	add_theme_color_override("font_outline_color", DS.CANOPY_DEEP)
 	add_theme_constant_override("outline_size", DS.TEXT_OUTLINE * 2)
 	resized.connect(func() -> void: pivot_offset = size * 0.5)

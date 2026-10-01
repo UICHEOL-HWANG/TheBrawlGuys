@@ -5,9 +5,9 @@ extends Control
 ## team's — color, with the player's shape badge (PlayerMarker, DS-VIS-03) on its lower corner so
 ## the P number reads without color. Tests and evidence can skip the 3D head (with_head = false).
 
-const DIAMETER := DS.S8
+const DIAMETER := DS.S7
 const RING := DS.S1
-const BADGE := DS.S4
+const BADGE := DS.S3
 
 var _disc: Panel
 var _ring: Panel

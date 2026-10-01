@@ -4,9 +4,12 @@ extends MarginContainer
 ## reference docs/references/ref-getamped-hud.png, our own art): two groups of PlayerCards —
 ## left P1 + P3 (team 1), right P2 + P4 (team 2, cards mirrored so portraits face outward) — one
 ## card per row, and between them the MatchTimer in timed matches. Team mode heads each group
-## with a "팀 1" / "팀 2" pill and frames the cards in the team color. It sits on the bottom edge,
+## with a thin vertical "팀 1" / "팀 2" tab on its outer edge and frames the cards in the team color. It sits on the bottom edge,
 ## or on the top edge while touch controls own the bottom (set_edge_top); compact bars when the
 ## full strip is wider than the screen. Feeds a ComboTracker for the cards' "N연타" badges.
+
+## Gap to the screen edge the strip sits on (inside the safe area): s3 keeps the slim strip low.
+const EDGE := DS.S3
 
 var cards: Array[PlayerCard] = []
 var timer: MatchTimer = null
@@ -33,9 +36,6 @@ func build(player_count: int, max_stocks: int, mode: Dictionary, characters: Arr
 	var teams: Array = mode.get("teams", []) if rule == MatchRules.TEAM else []
 	var by_team := teams.size() == player_count
 	var groups: Array[VBoxContainer] = [_group(), _group()]
-	for side: int in 2:
-		if by_team:
-			groups[side].add_child(_header(side))
 	cards.resize(player_count)
 	for i: int in player_count:
 		var side := int(teams[i]) if by_team else i % 2
@@ -45,36 +45,54 @@ func build(player_count: int, max_stocks: int, mode: Dictionary, characters: Arr
 			"mirrored": side == 1, "tint": PlayerStyle.team_color(side) if by_team else null,
 			"max_stocks": max_stocks, "timed": rule == MatchRules.TIMED, "config": config})
 		cards[i] = card
-	_row.add_child(groups[0])
+	_row.add_child(_side(groups[0], 0, by_team))
 	_row.add_child(_spacer())
 	if rule == MatchRules.TIMED:
 		timer = MatchTimer.new()
 		timer.size_flags_vertical = Control.SIZE_SHRINK_END
 		_row.add_child(timer)
 		_row.add_child(_spacer())
-	_row.add_child(groups[1])
+	_row.add_child(_side(groups[1], 1, by_team))
 	set_edge_top(_edge_top)
 	resized.connect(_fit)
 
 
 func _group() -> VBoxContainer:
 	var g := VBoxContainer.new()
-	g.add_theme_constant_override("separation", DS.S1)
+	g.add_theme_constant_override("separation", DS.S1 / 2)
 	g.alignment = BoxContainer.ALIGNMENT_END
 	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return g
 
 
+## A card group with, in team mode, a thin team tab on its outer edge (takes no strip height).
+func _side(group: VBoxContainer, side: int, by_team: bool) -> Control:
+	if not by_team:
+		return group
+	var box := HBoxContainer.new()
+	box.add_theme_constant_override("separation", DS.S1)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(group)
+	var tab := _header(side)
+	box.add_child(tab)
+	box.move_child(tab, 0 if side == 0 else -1)
+	return box
+
+
+## A narrow vertical pill in the team color, "팀" over the number.
 func _header(team: int) -> Label:
 	var l := Label.new()
-	l.text = PlayerStyle.team_label(team)
+	l.text = PlayerStyle.team_label(team).replace(" ", "\n")
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", load(DS.FONT_DISPLAY_PATH) as Font)
 	l.add_theme_font_size_override("font_size", DS.SIZE_CAPTION)
 	l.add_theme_color_override("font_color", DS.UI_SURFACE)
 	var pill := StyleBoxFlat.new()
 	pill.bg_color = PlayerStyle.team_color(team)
-	pill.set_corner_radius_all(DS.RADIUS_PILL)
+	pill.set_corner_radius_all(DS.RADIUS_S)
+	pill.content_margin_left = DS.S1
+	pill.content_margin_right = DS.S1
 	l.add_theme_stylebox_override("normal", pill)
 	headers.append(l)
 	return l
@@ -100,14 +118,14 @@ func is_edge_top() -> bool:
 	return _edge_top
 
 
-## s5 inside the device safe area on the sides and the strip's own edge.
+## Inside the device safe area: s5 on the sides, EDGE on the strip's own edge.
 func apply_safe_area(viewport: Viewport) -> void:
 	var vp := viewport.get_visible_rect()
 	var safe := SafeArea.rect(viewport)
 	add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
 	add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
-	add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5 if _edge_top else 0)
-	add_theme_constant_override("margin_bottom", 0 if _edge_top else int(vp.end.y - safe.end.y) + DS.S5)
+	add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + EDGE if _edge_top else 0)
+	add_theme_constant_override("margin_bottom", 0 if _edge_top else int(vp.end.y - safe.end.y) + EDGE)
 	_fit()
 
 
