@@ -465,6 +465,7 @@
 | DS-VFX-11 | 가드 내구도 버블 | 가드 중 | 버블 반지름 = 내구도 비율(최소 45%), 30% 미만이면 `GUARD_BUBBLE_LOW`와 번갈아 깜빡임 | combat-depth A |
 | DS-VFX-12 | 가드 브레이크 | `guard_break` (내구도 0) | 머리 위 높이 `petal_yellow` 평면 별 3개(`canopy_deep` 잉크 외곽선, 카메라를 향함)가 도는 기절 표시, 기절 동안 유지 (`DizzyStars`) | combat-depth A |
 | DS-VFX-13 | 저스트 가드 | `perfect_guard` | 가드 클랭 대신 흰 별 플래시(`canopy_deep` 잉크 외곽선, 클랭보다 크고 길게) + 몸통에서 흰 링(잉크 테두리)이 퍼지며 `MOTION_SLOW` 동안 사라짐 (`PerfectRing`) | combat-depth A |
+| DS-VFX-14 | 낙법 링 | `tech` (제자리·구르기 낙법) | DS-VFX-13의 흰 링(`PerfectRing`)을 그대로 재사용해 몸통에서 퍼지며 사라짐 (별 플래시 없음). 다운(`knockdown`)은 착지 먼지(DS-VFX-03)와 누운 모션(GD-ANIM-01)으로만 표시 | combat-depth C |
 
 | ID | 사운드 세트 | 내용 |
 |---|---|---|
@@ -486,7 +487,7 @@
 | GD-FEEL-03 | 무적 깜빡임 | 리스폰 무적 동안 반투명 펄스 10Hz, 마지막 0.5초는 20Hz | `blink_hz`, `blink_hz_end` |
 | GD-FEEL-04 | 넉백 궤적 강도 | DS-VFX-04 강도 = 속도 / `trail_speed_full` | `trail_speed_threshold`, `trail_speed_full` |
 | GD-CAM-01 | 카메라 | 겟앰프드식 근접 3/4 부감(피치 42°, 최소 거리 7 m, 여백 1.5 m), 경기장 중심부(반지름 × `cam_arena_share`, 기본 20%)와 모든 생존 전투원을 프레이밍(전투원이 멀어지거나 밖으로 날아가면 시야가 넓어진다. 2026-09-30 경기장 전체 → 60%, 2026-10-01 사용자 요청으로 캐릭터가 크게 보이도록 C안 근접 채택), 줌 최소·최대 제한, 스무딩. KO된 전투원은 추적 제외. **필살기 컷인 (Phase 5, 렌더 전용)**: sim `special_start`가 오면 시전자 가슴 높이로 완전 확대(거리 7 m, 피치 38°로 낮춤) — 들어가기 `motion_base`(out-quad) → 유지(필살기 sim 길이 − 들어가기, `motion_slow`~`motion_calm`×2 사이) → 복귀 `motion_slow`(in-out-cubic). 그동안 시전자는 캐릭터별 필살기 모션(GD-ANIM-01), 확대된 시전자(화면 중앙) 발밑 아래 — 화면 84% 높이 — 에 시전자 플레이어 색 띠(88%, `s8`+`s5` 높이) + `glow` 줄 2개 + "P1 · 대지 강타"(`display_l`, `ui_surface` 글자·`canopy_deep` 외곽선)가 옆에서 밀려 들어온다(시전자·P 라벨·상단 HUD를 가리지 않고, 터치 버튼은 위 레이어). 확대 중 화면 밖·카메라 뒤 전투원의 충전 게이지는 숨긴다. 슬로우모션 없음(sim 틱·리플레이 해시 불변). 두 번째 필살기는 현재 확대에서 이어서 새 시전자로 초점을 부드럽게 옮기고(`FOCUS_FOLLOW`, 튀지 않음), 시전자가 KO면 마지막 위치에서 바로 복귀. `[accessibility] reduce_motion`(SettingsStore, 경기 시작마다 다시 읽음)이면 카메라는 그대로, 띠는 페이드만 | `cam_pitch`, `cam_margin`, `cam_arena_share`, `cam_zoom_min/max`, `cam_smooth` · 컷인 `SpecialCutIn` 상수 |
-| GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생). SPECIAL은 필살기 id별 모션: 대지 강타 = 양손 내려찍기, 돌진 연타 = 쌍검 찌르기(반복), 회전 베기 = 회전(반복), 거대 화염구 = 주문 발사 | — |
+| GD-ANIM-01 | 애니메이션 매핑 | sim 상태 → 애니 상태 1:1. 애니가 sim 타이밍을 바꾸지 않는다 (히트박스 활성 프레임은 sim이 결정, 애니는 맞춰 재생). SPECIAL은 필살기 id별 모션: 대지 강타 = 양손 내려찍기, 돌진 연타 = 쌍검 찌르기(반복), 회전 베기 = 회전(반복), 거대 화염구 = 주문 발사. 다운(KNOCKDOWN) = 누워 있기(`Lie_Idle`, 반복), 기상(GETUP): 일어서기·제자리 낙법 = `Lie_StandUp`, 기상·낙법 구르기 = `Dodge_Forward`, 기상 공격 = 강공격 모션 (combat-depth C) | — |
 
 ---
 
@@ -561,6 +562,7 @@
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |
 | DS-VFX-07~09 | 가드 클랭·피격 플래시·대미지 숫자 | PRD-FX-02, PRD-RULE-05 | 5 | ✅ (2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
 | DS-VFX-10~13 | 방어 연출 (회피 잔상·내구도 버블·브레이크 별·저스트 가드 링) | PRD-CMB-03 | combat-depth A | ✅ (2026-09-30, 증거 `dev/active/combat-depth/evidence/defense-sheet.png`) |
+| DS-VFX-14 | 낙법 링 | PRD-CMB-03 | combat-depth C | ✅ (2026-10-01, `PerfectRing` 재사용) |
 | DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |

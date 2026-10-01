@@ -21,7 +21,7 @@ const HINTS: Array[Dictionary] = [
 	{"id": "jump", "names": ["jump"], "label": "점프"},
 	{"id": "light", "names": ["light"], "label": "약공격"},
 	{"id": "heavy", "names": ["heavy"], "label": "강공격"},
-	{"id": "guard", "names": ["guard"], "label": "가드 · +방향 구르기"},
+	{"id": "guard", "names": ["guard"], "label": "가드 · +방향 구르기 · 착지 직전 낙법"},
 	{"id": "grab", "names": ["grab"], "label": "잡기"},
 	{"id": SPECIAL_ID, "names": ["heavy", "guard"], "label": "필살기"},
 ]

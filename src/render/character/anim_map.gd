@@ -6,7 +6,7 @@ extends RefCounted
 
 enum Anim {
 	IDLE, RUN, JUMP, FALL, LIGHT, HEAVY, CHARGE, BAT, GRAB, HOLD, HELD, THROW, HIT, LAUNCHED, GUARD, KO,
-	SLAM, RUSH, SPIN, CAST,
+	SLAM, RUSH, SPIN, CAST, LIE, GETUP, ROLL,
 }
 
 const TIMED: Array[int] = [Anim.LIGHT, Anim.HEAVY, Anim.BAT, Anim.GRAB]
@@ -41,7 +41,21 @@ static func anim_for(view: Dictionary) -> int:
 			return int(SPECIAL_ANIMS.get(String(view.get("special", "")), Anim.HEAVY))
 		Fighter.State.DODGE:
 			return Anim.RUN if on_ground else Anim.JUMP  # a roll / air dodge (combat-depth A)
+		Fighter.State.KNOCKDOWN:
+			return Anim.LIE
+		Fighter.State.GETUP:
+			return _getup_anim(String(view.get("getup", "")))
 	return Anim.IDLE
+
+
+## Getup kinds (combat-depth C): rolls roll, the getup attack swings like a heavy, the rest stand.
+static func _getup_anim(kind: String) -> int:
+	match kind:
+		"roll", "tech_roll":
+			return Anim.ROLL
+		"attack":
+			return Anim.HEAVY
+	return Anim.GETUP
 
 
 static func anim_name(anim: int) -> String:
