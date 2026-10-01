@@ -18,4 +18,5 @@ static func of(f: Fighter) -> Dictionary:
 		"special": CharacterData.special_of(f.character), "gauge": f.gauge,
 		"is_dodging": f.intangible, "guard_hp_ratio": f.guard_hp / GuardMeter.MAX,
 		"guard_broken": f.guard_break_left > 0,
+		"tumbling": f.tumble, "knocked_down": f.state == Fighter.State.KNOCKDOWN, "getup": Getup.name_of(f),
 	}

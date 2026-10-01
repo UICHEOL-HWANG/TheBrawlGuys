@@ -60,6 +60,10 @@ static func clear_actions(f: Fighter) -> void:
 	f.held_presses = 0
 	f.roll_streak = 0
 	f.roll_recent = 0
+	f.tumble = false
+	f.di_pending = false
+	f.tech_clock = 0
+	Getup.clear(f)
 	Dodge.clear(f)
 	GuardMeter.reset(f)
 

@@ -15,7 +15,7 @@ const STOCK_PIP := DS.S3
 const PCT_TINT_FROM := 50.0
 ## How far the portrait reaches over the card's outer edge.
 const OVERLAP := DS.S4
-## How far the combo burst's centre sits past the bar's inner end (on the card's inner edge).
+## The combo burst sits just past the card's inner edge (mostly outside, clear of the % text).
 const COMBO_OUT := DS.S3
 
 var _index: int = 0
@@ -133,7 +133,8 @@ func set_combo(hits: int) -> void:
 
 ## The inner top corner: centred on the card's inner edge (away from the portrait) and its top.
 func _place_combo() -> void:
-	var edge_x: float = -COMBO_OUT if _mirrored else _bar.size.x + COMBO_OUT
+	var out := COMBO_OUT + _combo.size.x * 0.4
+	var edge_x: float = -out if _mirrored else _bar.size.x + out
 	_combo.position = Vector2(edge_x, -_bar.position.y) - _combo.size * 0.5
 	if is_inside_tree() and _combo.get_global_rect().position.y < 0.0:
 		_combo.position.y = _bar.size.y + DS.S2 - _combo.size.y * 0.5  # strip on the top edge

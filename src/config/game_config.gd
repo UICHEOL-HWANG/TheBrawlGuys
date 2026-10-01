@@ -37,7 +37,7 @@ extends StyleConfig
 @export_range(0.0, 10.0, 0.01) var global_knockback_mul: float = 1.7
 @export_range(0.0, 0.2, 0.001) var hitstun_factor: float = 0.04
 @export_range(0.0, 0.3, 0.005) var hitstop_light: float = 0.06
-@export_range(0.0, 0.3, 0.005) var hitstop_heavy: float = 0.1
+@export_range(0.0, 0.3, 0.005) var hitstop_heavy: float = 0.13
 @export_range(0.0, 1.0, 0.01) var guard_damage_mul: float = 0.2
 @export_range(0.0, 1.0, 0.01) var guard_knockback_mul: float = 0.0
 
@@ -241,7 +241,7 @@ extends StyleConfig
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 	"Arena Gimmicks", "StyleBoxer", "StyleWeapon", "StyleRanged", "Special", "SpecialSlam", "SpecialRush",
-	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "Modes",
+	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "DI", "Knockdown", "Tech", "Modes",
 ]
 
 @export_group("Audio")
@@ -255,11 +255,13 @@ const SIM_GROUPS: Array[String] = [
 
 const NON_SIM_GROUPS: Array[String] = [
 	"Bot", "Feel", "Loop", "Camera", "Touch", "Look", "Quality", "FeelVfx", "Audio", "BotStyle", "BotDefense",
+	"BotGetup",
 ]
 ## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig
-## extends DefenseConfig extends ModeConfig).
+## extends DefenseConfig extends KnockdownConfig extends ModeConfig).
 const CONFIG_SCRIPTS: Array[String] = [
-	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd", "mode_config.gd",
+	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd", "knockdown_config.gd",
+	"mode_config.gd",
 ]
 
 

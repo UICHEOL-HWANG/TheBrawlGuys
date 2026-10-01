@@ -84,7 +84,7 @@ static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: 
 	var dealt := attack.damage * power * (0.0 if perfect else config.guard_damage_mul if guarded else 1.0)
 	target.damage += dealt
 	var kb := knockback(attack, target.damage, config) * power * StyleCatalog.knockback_taken(
-			CharacterData.style_of(target.character), config)
+			CharacterData.style_of(target.character), config) * Knockdown.hit_mul(target, config)
 	target.hitstop_ticks = attack.hitstop_ticks
 	var event := {
 		"type": "hit", "attacker": source_id, "target": target.id, "pos": at, "damage": dealt,
@@ -99,12 +99,21 @@ static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: 
 			GuardMeter.block(target, attack.damage * power, config)
 		_guard_push(target, flat_dir, kb * config.guard_knockback_mul, event)
 		return event
+	_launch(target, attack, flat_dir, kb, config)
+	return event
+
+
+## A clean hit: launch, hitstun, interrupt; a strong upward launch tumbles (Knockdown) and every
+## launch takes DI when its hitstop ends (LaunchInfluence).
+static func _launch(target: Fighter, attack: AttackData, flat_dir: Vector3, kb: float, config: GameConfig) -> void:
+	var was_lying := target.state == Fighter.State.KNOCKDOWN
 	target.vel = launch_velocity(flat_dir, attack, kb)
 	if target.vel.y > 0.0:
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
 	_interrupt(target)
-	return event
+	target.tumble = Knockdown.tumbles(kb, target.vel, was_lying, config)
+	target.di_pending = true
 
 
 static func _guard_push(target: Fighter, flat_dir: Vector3, kb: float, event: Dictionary) -> void:
@@ -123,4 +132,5 @@ static func _interrupt(target: Fighter) -> void:
 	target.charge_ticks = 0
 	target.guard_break_left = 0
 	Dodge.clear(target)
+	Getup.clear(target)
 	target.set_state(Fighter.State.HITSTUN)

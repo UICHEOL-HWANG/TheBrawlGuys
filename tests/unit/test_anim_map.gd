@@ -55,3 +55,15 @@ func test_special_state_plays_the_character_special_motion() -> void:
 		assert_eq(AnimMap.anim_for(v), expected[id], id)
 	v["special"] = ""
 	assert_eq(AnimMap.anim_for(v), AnimMap.Anim.HEAVY, "unknown special falls back to a heavy swing")
+
+
+func test_knockdown_lies_and_getup_kinds_pick_their_motion() -> void:
+	assert_eq(AnimMap.anim_for(_v(Fighter.State.KNOCKDOWN)), AnimMap.Anim.LIE)
+	var v := _v(Fighter.State.GETUP)
+	var expected := {
+		"stand": AnimMap.Anim.GETUP, "tech": AnimMap.Anim.GETUP, "roll": AnimMap.Anim.ROLL,
+		"tech_roll": AnimMap.Anim.ROLL, "attack": AnimMap.Anim.HEAVY,
+	}
+	for kind: String in expected:
+		v["getup"] = kind
+		assert_eq(AnimMap.anim_for(v), expected[kind], kind)

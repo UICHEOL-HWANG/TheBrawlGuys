@@ -105,7 +105,7 @@ func on_events(events: Array) -> void:
 					_views[id].wobble()
 			"hit":
 				_react(e)
-			"perfect_guard":
+			"perfect_guard", "tech":  # a tech flashes the same white ring (DS-VFX-14)
 				if int(e["fighter"]) < _defense.size():
 					_defense[int(e["fighter"])].perfect_flash()
 	_arena_view.on_events(events)

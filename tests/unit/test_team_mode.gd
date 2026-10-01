@@ -81,3 +81,21 @@ func test_view_reports_teams() -> void:
 	var m: Dictionary = _world(false).state_view()["mode"]
 	assert_eq(m["rule"], MatchRules.TEAM)
 	assert_eq(m["teams"], [0, 1, 0, 1])
+
+
+func test_getup_attack_passes_through_teammates() -> void:
+	var w := _world(false)
+	var c := w.config
+	var f := w.fighters[0]
+	f.pos = Vector3.ZERO
+	f.set_state(Fighter.State.GETUP)
+	f.getup_kind = Getup.Kind.ATTACK
+	var attack := Getup.attack_of(c)
+	while not attack.is_active(f.getup_ticks):
+		f.getup_ticks += 1
+	w.fighters[2].pos = Vector3(0.5, 0, 0)
+	w.fighters[1].pos = Vector3(-0.5, 0, 0)
+	w.fighters[3].pos = Vector3(0, 0, 8)
+	var targets: Array = Getup.contacts(w.fighters, c).map(func(h: Dictionary) -> int: return (h["target"] as Fighter).id)
+	assert_true(targets.has(1), "the enemy beside P1 is hit")
+	assert_false(targets.has(2), "teammate P3 is not")

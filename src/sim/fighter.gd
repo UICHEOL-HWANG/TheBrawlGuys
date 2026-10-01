@@ -4,9 +4,10 @@ extends RefCounted
 ## views only as value copies (to_view) — never by reference (PRD §5.2, context D4).
 ## View reading: "launched" = HITSTUN and not on_ground; "respawn" = invuln_ticks > 0.
 ## New states are appended so Phase 1 values (KO = 5) never move. DODGE = a roll or air dodge
-## (combat-depth A); a broken guard is HITSTUN with guard_break_left > 0.
+## (combat-depth A); a broken guard is HITSTUN with guard_break_left > 0. KNOCKDOWN = lying after
+## a tumbling landing, GETUP = standing / rolling / attacking up from it or a tech (combat-depth C).
 
-enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD, SPECIAL, DODGE }
+enum State { IDLE, MOVE, AIR, ATTACK, HITSTUN, KO, CHARGE, GUARD, HOLDING, HELD, SPECIAL, DODGE, KNOCKDOWN, GETUP }
 
 ## "No fighter" / "no item" marker for partner_id and item_kind.
 const NONE := -1
@@ -25,6 +26,8 @@ const DATA_TYPES := {
 	"guard_break_left": TYPE_INT, "perfect_by": TYPE_INT, "dodge_kind": TYPE_INT, "dodge_ticks": TYPE_INT,
 	"dodge_total": TYPE_INT, "dodge_dir": TYPE_VECTOR3, "intangible": TYPE_BOOL, "air_dodge_used": TYPE_BOOL,
 	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT, "ally_mask": TYPE_INT,
+	"tumble": TYPE_BOOL, "di_pending": TYPE_BOOL, "tech_clock": TYPE_INT, "getup_kind": TYPE_INT,
+	"getup_ticks": TYPE_INT, "getup_dir": TYPE_VECTOR3,
 }
 
 var id: int = 0
@@ -87,6 +90,15 @@ var intangible: bool = false
 var air_dodge_used: bool = false
 var roll_streak: int = 0
 var roll_recent: int = 0
+## Knockdown (combat-depth C): launched hard enough to land lying down (cleared by acting), a
+## launch whose DI is applied when its hitstop ends, the tech press clock (Tech), and the getup
+## (Getup.Kind, ticks since it started, roll direction).
+var tumble: bool = false
+var di_pending: bool = false
+var tech_clock: int = 0
+var getup_kind: int = 0
+var getup_ticks: int = 0
+var getup_dir: Vector3 = Vector3.ZERO
 ## Bit i set = fighter i's hits pass through (team mode teammates with friendly fire off,
 ## MatchRules.ally_mask); fixed for the match.
 var ally_mask: int = 0
@@ -110,10 +122,13 @@ func can_act() -> bool:
 	return state == State.IDLE or state == State.MOVE or state == State.AIR
 
 
+## Entering any state but HITSTUN or AIR (an attack, a dodge, a hold, landing) ends a tumble.
 func set_state(s: int) -> void:
 	if state != s:
 		state = s
 		state_ticks = 0
+		if s != State.HITSTUN and s != State.AIR:
+			tumble = false
 
 
 func to_view() -> Dictionary:

@@ -1,5 +1,5 @@
 class_name DefenseConfig
-extends ModeConfig
+extends KnockdownConfig
 ## Combat-depth track A defense tunables (PRD §4.3): rolls, air dodges, guard durability and
 ## perfect guard, split out of GameConfig to keep files short. GameConfig extends StyleConfig
 ## extends SpecialConfig extends this, so every value here is a GameConfig value: the debug panel
@@ -59,3 +59,6 @@ extends ModeConfig
 ## guarding below this guard-meter ratio (BotDefense).
 @export_range(0, 60, 1) var bot_guard_react_ticks: int = 1
 @export_range(0.0, 1.0, 0.05) var bot_guard_min_ratio: float = 0.35
+## Share of guard turns a bot reacts to the swing (usually a perfect guard); on the others it
+## raises its guard as soon as the foe closes within bot_guard_range, so the block is a plain one.
+@export_range(0.0, 1.0, 0.05) var bot_perfect_guard_chance: float = 0.35

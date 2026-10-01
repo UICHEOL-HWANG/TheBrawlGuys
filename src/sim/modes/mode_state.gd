@@ -4,7 +4,7 @@ extends RefCounted
 ## and last attacker (from the tick's "hit"/"guard_hit" events), the timed clock, sudden death and
 ## the winning team. Scoring (TIMED, outside sudden death): a ring-out is +1 for the last attacker
 ## if that hit landed within ringout_credit_time, else -1 for the victim; each change is a
-## {"type": "score", "id", "delta", "score"} event. Serialized in World snapshots (v9).
+## {"type": "score", "id", "delta", "score"} event. Serialized in World snapshots (v10).
 
 const NONE := -1
 const DATA_TYPES := {
