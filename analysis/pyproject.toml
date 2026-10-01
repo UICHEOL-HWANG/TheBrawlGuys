@@ -1,0 +1,36 @@
+[project]
+name = "brawl-analysis"
+version = "0.1.0"
+description = "TheBrawlGuys analytics -> ML (A9): win probability, balance, churn pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.8",
+    "pyarrow>=15",
+]
+
+[project.optional-dependencies]
+# Supabase export helper (plain PostgREST over HTTP).
+export = ["requests>=2.31"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/brawl_analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

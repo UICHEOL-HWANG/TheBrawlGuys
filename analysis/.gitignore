@@ -1,0 +1,9 @@
+# Generated datasets and Supabase exports stay local (regenerate with scripts/gen_dataset.gd).
+data/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+# Never commit Supabase credentials.
+.env
