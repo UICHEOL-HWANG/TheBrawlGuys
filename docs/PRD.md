@@ -295,6 +295,8 @@ _process(delta):
 - **계정**: 로그인은 Phase 4.0에서 Supabase Auth(Google OAuth + 이메일 인증코드)로 먼저 들어온다 (§5.7). 랭킹은 같은 Supabase 프로젝트에 추가하되 현재 범위 밖이다 (§8).
 - 롤백 넷코드는 하지 않는다.
 
+> **2026-10-01 결정 — P2P 방장 구조 (현재 구현)**: 전용 서버 대신 **WebRTC P2P 방장 권위**로 먼저 간다 (근거: `docs/superpowers/specs/2026-10-01-online-p2p-design.md`). 방장(피어 1)이 `World`를 돌리고 참가자와 별 모양으로 연결한다. 피어마다 데이터 채널 2개: id 0 비신뢰·순서(입력·스냅샷), id 1 신뢰·순서(제어). 방 코드(6자, A-Z·2-9에서 I/O/0/1 제외)는 Supabase `rooms`(마이그레이션 0005, RLS)로 찾고, offer/answer/ICE는 Supabase Realtime 브로드캐스트 채널 `realtime:room:<코드>`로 주고받는다(게임 서버 없음). ICE: 공개 Google STUN + 선택 TURN(`[net] turn_urls`). 웹은 브라우저 WebRTC로 바로 되고, 데스크톱·모바일은 webrtc-native GDExtension이 필요하다(없으면 "온라인 미지원" 안내). 넷코드는 `NetTransport` 인터페이스에만 의존하므로 나중에 헤드리스 서버로 바꿀 수 있다. 한계: 방장이 치트 가능(랭크 없음), TURN이 없으면 일부 네트워크는 연결 실패.
+
 ### 5.6 GDExtension 도입 기준
 
 기본은 GDScript. 아래 중 하나라도 **프로파일링으로 확인되면** 해당 모듈만 네이티브로 옮긴다.

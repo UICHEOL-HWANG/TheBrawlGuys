@@ -311,6 +311,8 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 
 **경기 방식** (combat-depth D, 근거 PRD-RULE-06): 경기장 선택과 같은 배치(제목 위, 가운데 `Panel`, 뒤로 좌하단·키 안내 우하단)에 `MenuButton` 3개(스톡 / 팀전 2:2 / 시간제)와 한 줄 설명(`caption` `ui_text_soft`) — 새 컴포넌트 없이 DS-CMP-06·07 조합. ←/→·스틱(한 번 밀 때 한 칸)·Z/Enter/Space/패드 A 확정, X/Esc/패드 B 뒤로, 클릭·탭. 팀전·시간제는 4명(봇이 채움)
 
+**온라인 로비** (Phase 6, 근거 PRD-NET-03): 온라인 메뉴는 경기 방식과 같은 배치에 `Panel` 하나 — "방 만들기"(primary) · "친구에게 받은 방 코드" + `RoomCodeInput`(DS-CMP-11) · "입장"(secondary, 6자일 때만) · 상태 한 줄(진행 `ui_text_soft`, 오류 `danger`). 로그인 안 했으면 안내 + "로그인", WebRTC가 없는 빌드(플러그인 없는 데스크톱)는 "이 플랫폼은 아직 온라인 미지원 (웹에서 플레이)". 대기실: 제목 "대기실" 아래 "방 코드" + 코드(`display_l` Jua) + "복사"(secondary), 그 아래 왼쪽에 2×2 `PlayerSlot`(DS-CMP-10: 비어 있음 · 고르는 중 · 준비 완료 · 연결 끊김 = 연결 실패, 캐릭터 이름 뒤 " · 나" / " · 방장") + 각 칸 아래 `ConnectionBadge`(DS-CMP-13), 오른쪽 `Panel`에 높이 `s8` 버튼 열 — 캐릭터(누를 때마다 다음) · 준비/준비 취소 · (방장만) 경기 방식 · 경기장(기존 선택 화면을 그대로 띄움) · 봇 채우기/빼기 · 시작(primary, 사람 2명 이상 모두 준비·연결됐을 때만, 아니면 아래 `caption`으로 이유) · 나가기, 맨 아래 알림 한 줄. 키·패드는 버튼 사이 포커스 이동, Esc/패드 B 나가기, 클릭·탭
+
 **온보딩 튜토리얼** (Phase 5 T11, 근거 PRD-UI-02): 고전 경기장에서 Barbarian(필살기가 있는 캐릭터) 대 가만히 서 있는 연습 상대(가드 미션에서만 다가와 약공격). 미션 8개 — 이동 → 점프 → 약공격 → 강공격(모아치기) → 가드 → 잡기·던지기 → 아이템(가운데 떨어지는 방망이 줍기·쓰기) → 필살기(게이지를 채워 줌). 미션마다 위쪽 `TutorialCard`(DS-CMP-19)가 한 줄 안내를, 아래 `KeyHintBar`가 지금 누를 키캡을 target 링으로 보여 준다. 성공하면 카드가 "좋아요!"로 바뀌며 통 튀고(`motion_squish`) `ui_confirm` 소리, 1.2초 뒤 다음 미션. 스톡이 줄지 않고 아이템 상자가 떨어지지 않는다. 안내 문구는 손에 든 장치를 따른다: 터치 컨트롤이 보이면 화면 버튼·스틱 이름(키 바는 숨음), 패드를 쓰면 패드 버튼(Xbox A/X/Y/B/RB, PS × □ △ ○ R1), 아니면 P1 키(InputMap에서 읽음). 건너뛰기 버튼·Esc·패드 Start → 확인창(그동안 일시정지) → 타이틀. 완료 카드 "튜토리얼 완료!" + "타이틀로". 증거 `phase-5/evidence/tutorial-*.png`(1920×1080) · `tutorial-*-phone.png`(1624×750, UI 배율 1.6, 터치)
 
 **메뉴 배경 — 궤도 디오라마** (`MenuBackdrop`, Phase 4.0, 근거 PRD-AUTH-01 · PRD-UI-02)
@@ -358,9 +360,9 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일(경기장) / 캐릭터 초상(`CharacterPortrait`: 자기 모델이 작은 잔디 무대에서 idle, 포커스·선택된 카드만 매 프레임 그림), 플레이어 색 링(선택), 커서 배지(`CardMarks`: 그 카드에 커서가 있는 플레이어의 마커+번호, 썸네일 오른쪽 위에 겹쳐 높이 0) | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
 | DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음(`ui_surface_dim`) · 선택 중 · 준비(`stroke_focus` 플레이어 색 링) · 연결 끊김(dim + 마커 흐림, Phase 6 자리) | 한 줄 머리: `PlayerMarker`(색+모양) · `P1`(`title`) · 봇 태그 · 캐릭터(`body`) · 상태(`caption`), 아래 `PromptRow`(DS-TOK-06). `radius_l`, `shadow_soft`, 최소 폭 400 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
-| DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 | 입력 · 오류 · 확인 중 | `display_l`, 글자별 둥근 칸 | 6 | PRD-NET-03 |
+| DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 (온라인 메뉴) | idle · focus(다음 칸 링) · error(모든 칸 `danger` 링) · disabled(확인 중) | `CodeInput`(DS-CMP-18)을 잇는다: 칸 6개 `code_box`, 글자 `title`. 소문자는 대문자로, `RoomCode.ALPHABET`(A-Z·2-9, I/O/0/1 제외) 밖의 글자는 버림, 붙여넣기, 모바일은 일반 키보드 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
-| DS-CMP-13 | `Toast` / `ConnectionIndicator` | 알림, 핑 | 정보 · 경고 · 오류 / 좋음 · 보통 · 나쁨 | `caption`, `grass_mid`/`petal_yellow`/`danger` | 6 | PRD-NET-02 |
+| DS-CMP-13 | `Toast` / `ConnectionIndicator` (`ConnectionBadge`) | 알림, 핑 | 정보 · 경고 · 오류 / 숨김(봇·빈 칸·방장 자신) · 연결 중(`petal_yellow`) · 연결됨 + "N ms"(≤120 `grass_mid` · <250 `petal_yellow` · 그 이상 `danger`) · 연결 실패(`danger`) | `caption` `ui_text_soft` 글자 앞 `s3` 원점. 대기실 `PlayerSlot` 바로 아래 | 6 | PRD-NET-02 |
 | DS-CMP-14 | `LoginPanel` | 첫 화면 로그인 (Google · 이메일 코드) | idle · loading(브라우저 대기) · error(재시도) / 모드: methods · email(이메일 단계 → 코드 단계) | 유리 카드(`glass_tint`, `glass_edge`, `radius_xl`), `CrestLogo`, `display_l` 흰 제목 + `text_shadow`, `MenuButton`(Google, secondary) + "G"(`google_*`), `MenuButton`(이메일, ghost), `TextField`·`CodeInput`, `motion_calm` 등장, 모드 전환 `motion_base` 페이드 | 4.0 | PRD-AUTH-01 |
 | DS-CMP-15 | `CrestLogo` | 게임 크레스트 (로고 콘셉트 C) — **엠블럼만, 글자 없음** | idle · animated(불꽃 깜빡임, `motion_base`) | 방패 `canopy_deep`/안쪽 `canopy`, 방망이 `bark` 손잡이·`dirt` 몸통(-40°), 돌 막대 `stone_shade`(+40°), 폭탄 `canopy_deep`·하이라이트 `ui_text_soft`·심지 `dirt`·불꽃 별 `fire`. 코드로 그려 크기 자유, 기본 `s8`×2 | 4.0 | PRD-AUTH-01, PRD-UI-02 |
 | DS-CMP-16 | `KeyHintBar` | 대전 중 키보드 조작 안내 (하단 반투명 키 바) — 누른 키가 색으로 켜진다 | 바: shown · hidden(칩만 남음) / 키캡: idle · pressed (+ ready 링 · target 링) | 키캡 `ui_surface` 70% + `ui_shadow` 아랫단, 바 `ui_surface` 50% `radius_l`, 누름 = 플레이어 색(P1 `p1`) 채움 + `PRESS_SQUISH`(`motion_fast`) → 뗄 때 `motion_base` 페이드·`motion_squish` 복귀, 캡션 `caption`, 칩 👁 코드 아이콘 + "키 숨기기/키 보기" | 4 | PRD-CTL-02, PRD-UI-01 |
@@ -564,7 +566,8 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | DS-CMP-06~07 | 컴포넌트 — `MenuButton`·`Panel` | PRD-UI-02 | 4.0 | ✅ |
 | DS-CMP-08 | SelectCard | PRD-UI-02 | 4, 5 | ✅ (경기장 Phase 4 T7, 캐릭터 Phase 5 T9 `phase-5/evidence/char-select-*.png`) |
 | DS-CMP-10 | PlayerSlot | PRD-LOCAL-01, PRD-NET-03 | 5, 6 | 🟨 (Phase 5 T9 로컬 상태 3종 + 연결 끊김 자리, 갤러리 등록. 온라인 연결은 Phase 6) |
-| DS-CMP-11, 13 | 컴포넌트 (나머지) | §6 표 참조 | §6 표 참조 | ⬜ |
+| DS-CMP-11 | RoomCodeInput | PRD-NET-03 | 6 | ✅ (2026-10-01 온라인 메뉴, 갤러리 등록) |
+| DS-CMP-13 | Toast / ConnectionIndicator | PRD-NET-02 | 6 | 🟨 (`ConnectionBadge` 완료·갤러리 등록, Toast 남음) |
 | DS-CMP-14 | 컴포넌트 — `LoginPanel` | PRD-AUTH-01 | 4.0 | ✅ (2026-09-30 확정, calm forest 레퍼런스 · 이메일 모드 추가 `evidence/login-email-*.png`) |
 | DS-CMP-15 | 컴포넌트 — `CrestLogo` (브랜드 PNG `assets/branding/crest-1024.png`) | PRD-AUTH-01, PRD-UI-02 | 4.0 | ✅ (2026-09-30 확정, 콘셉트 C) |
 | DS-CMP-16 | 컴포넌트 — `KeyHintBar` (키보드 조작 안내 바) | PRD-CTL-02, PRD-UI-01 | 4 | ✅ (2026-09-30, `evidence/key-hint-*.png`) |

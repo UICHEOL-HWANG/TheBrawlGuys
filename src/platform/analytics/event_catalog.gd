@@ -15,8 +15,9 @@ extends RefCounted
 ## matches.rule and match_players.team / score from migration 0004), 8 = defense and recovery
 ## counters and skill / context signals on match_ended.players[] and match_players
 ## (PLAYER_COMBAT_KEYS, migration 0004), rule_selected.focused, match_events actor_slot for
-## projectile events and target_slot for perfect_guard.
-const SCHEMA_VERSION := 8
+## projectile events and target_slot for perfect_guard, 9 = Phase 6 online lobby (online_lobby_viewed,
+## room_created / room_joined / room_left, peer_connect_failed; controller "remote" in setups).
+const SCHEMA_VERSION := 9
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null
@@ -64,6 +65,12 @@ const EVENTS: Dictionary = {
 	"tutorial_step_completed": ["step", "index", "ms_in_step", "attempts"],
 	"tutorial_skipped": ["step", "index"],
 	"tutorial_completed": ["total_ms"],
+	# Online lobby (Phase 6; never the room code)
+	"online_lobby_viewed": ["signed_in", "supported"],
+	"room_created": ["attempts", "rule", "arena"],
+	"room_joined": ["is_host", "player_count"],
+	"room_left": ["reason", "is_host", "dwell_ms"],
+	"peer_connect_failed": ["stage", "is_host"],
 	# Match
 	"match_started": ["match_id", "mode", "rule", "arena", "player_count", "bot_count", "characters", "input_device",
 		"loss_streak"],

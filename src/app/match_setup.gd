@@ -13,7 +13,9 @@ const MODE_ONLINE := "online"
 const ARENA_DEFAULT := ArenaCatalog.DEFAULT_ID
 const CONTROLLER_LOCAL := "local"
 const CONTROLLER_BOT := "bot"
-const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT]
+## Online (Phase 6): a human on another device, driven by the netcode (OnlineStart.begin).
+const CONTROLLER_REMOTE := "remote"
+const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT, CONTROLLER_REMOTE]
 const INPUT_BOT := "bot"
 const INPUT_KEYBOARD := "keyboard"
 ## Humans in a local 2-player match (PRD-LOCAL-01): P1 and P2, always the first two slots.

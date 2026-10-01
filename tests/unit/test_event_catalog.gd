@@ -8,6 +8,7 @@ const PLAN_EVENTS: Array[String] = [
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
 	"screen_viewed", "mode_selected", "rule_selected", "character_selected", "arena_selected", "select_cancelled",
 	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
+	"online_lobby_viewed", "room_created", "room_joined", "room_left", "peer_connect_failed",
 	"match_started", "match_ended", "match_abandoned", "rematch_clicked",
 	"stock_lost", "special_used", "special_hit", "gauge_full",
 	"item_picked_up", "item_used", "item_hit", "gimmick_triggered", "gimmick_ringout",
@@ -53,8 +54,13 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_defense_counters() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 8)
+func test_schema_version_is_bumped_for_the_online_lobby() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 9)
+
+
+func test_online_lobby_events_need_their_properties() -> void:
+	assert_eq(EventCatalog.validate("room_left", {"reason": "back", "is_host": true, "dwell_ms": 10}).size(), 0)
+	assert_eq(EventCatalog.validate("peer_connect_failed", {"stage": "ice"}).size(), 1, "is_host is required")
 
 
 func test_match_ended_players_need_the_defense_counters() -> void:

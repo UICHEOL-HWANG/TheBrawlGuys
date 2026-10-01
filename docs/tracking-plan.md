@@ -1,6 +1,6 @@
 # TheBrawlGuys — 트래킹 플랜
 
-> 버전 0.5 · 2026-10-01 (combat-depth A/C 방어·복귀 추적 + analytics-ml Part 1 — 슬롯 요약·`match_players`에 방어·복귀 카운터 11개와 실력·상황 신호 17개(반응 틱·회피 성공·낙법 시도·DI 각도·텀블 생존·가장자리/고% 선택·팀 어시스트, 0004), `rule_selected.focused`, 원시 행 `perfect_guard` 대상·투사체 `owner` 행위자, 웹 `session_ended`(sendBeacon)·30분 세션 분리 — `event_schema_version` 8) · 0.4 · 2026-10-01 (Phase 5 T11 온보딩 튜토리얼 퍼널 — `tutorial_*` 4종, `screen_viewed.screen`에 `tutorial` — `event_schema_version` 6) · 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
+> 버전 0.6 · 2026-10-01 (Phase 6 온라인 로비 — `online_lobby_viewed`·`room_created`·`room_joined`·`room_left`·`peer_connect_failed`, 셋업 `controller`에 `remote`, `screen_viewed.screen`에 `online` — `event_schema_version` 9) · 0.5 · 2026-10-01 (combat-depth A/C 방어·복귀 추적 + analytics-ml Part 1 — 슬롯 요약·`match_players`에 방어·복귀 카운터 11개와 실력·상황 신호 17개(반응 틱·회피 성공·낙법 시도·DI 각도·텀블 생존·가장자리/고% 선택·팀 어시스트, 0004), `rule_selected.focused`, 원시 행 `perfect_guard` 대상·투사체 `owner` 행위자, 웹 `session_ended`(sendBeacon)·30분 세션 분리 — `event_schema_version` 8) · 0.4 · 2026-10-01 (Phase 5 T11 온보딩 튜토리얼 퍼널 — `tutorial_*` 4종, `screen_viewed.screen`에 `tutorial` — `event_schema_version` 6) · 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
 > 상위: [`PRD.md`](./PRD.md) §5.8 (`PRD-DATA-03`, `PRD-DATA-04`) · 일정: [`PHASES.md`](./PHASES.md) Phase 4.0 · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떤 이벤트를, 어떤 속성으로, 어디에 보내는지**의 단일 원천(SSOT)이다.
@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 8 — 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 9 — Phase 6 온라인 로비 이벤트 5종(§3.3.2), 셋업 `controller`에 `remote`. 8 = 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -75,7 +75,7 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `login_viewed` | 로그인 화면 표시 (세션 복원 실패 포함) | `reason: enum(first_run\|no_session\|refresh_failed\|logged_out)` | — | A | 4.0 |
+| `login_viewed` | 로그인 화면 표시 (세션 복원 실패 포함) | `reason: enum(first_run\|no_session\|refresh_failed\|logged_out\|online)` (`online` = 온라인 메뉴의 로그인 안내에서 옴, 스키마 9) | — | A | 4.0 |
 | `login_started` | Google 버튼 클릭 / 이메일은 새 주소로 첫 코드 요청이 서버로 나갈 때 (재전송은 `email_code_resent`) | `provider: enum(google\|email)`, `flow: enum(web_redirect\|desktop_loopback)` | — | A | 4.0 |
 | `login_completed` | 토큰 교환 성공 / 이메일 코드 확인 성공 | `provider: enum(google\|email)`, `flow: enum(...)`, `duration_ms: int` (started → completed), `is_new_user: bool` | — | A | 4.0 |
 | `login_failed` | 교환 실패·취소·타임아웃 / 이메일 요청이 서버에서 실패 | `provider: enum(google\|email)`, `flow: enum(...)`, `reason: enum(cancelled\|timeout\|exchange_error\|network\|port_in_use\|config_missing` · 이메일: `send_rate_limited\|send_invalid_email\|send_error\|verify_wrong_code\|verify_rate_limited\|verify_error)` | `http_status: int` | A | 4.0 |
@@ -94,7 +94,7 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|rule\|character\|arena\|lobby\|match\|tutorial\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
+| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|rule\|character\|arena\|online\|lobby\|match\|tutorial\|result\|settings)` (`online` = 온라인 메뉴, `lobby` = 대기실, 스키마 9) | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
 | `rule_selected` | 경기 방식 화면에서 확정 (뒤로 왔다가 다시 고르면 다시 보냄) | `rule: enum(stock\|team\|timed)` | `browse_count: int` (확정 전 옮겨 본 횟수), `focused: list<str>` (포커스를 받은 방식, 처음 받은 순서로 중복 없이 — 기본값이 첫째, 고려한 후보 vs 선택. 스키마 8) | A | 5 (스키마 7) |
 | `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
@@ -113,6 +113,18 @@
 | `tutorial_completed` | 마지막 미션(`special`)을 성공한 순간 | `total_ms: int` (시작부터) | `step_count: int` | A | 5 (스키마 6) |
 
 퍼널: `tutorial_started` → `tutorial_step_completed` (`index` 1..8) → `tutorial_completed`, 이탈 지점 = `tutorial_skipped.step` 또는 마지막 `tutorial_step_completed` 뒤 `session_ended`. 완료·건너뛰기는 기기에 저장되어 첫 로그인 튜토리얼은 한 번만 열린다(다시 보기에서 건너뛰어도 이전 완료는 유지).
+
+#### 3.3.2 온라인 로비 (`PRD-NET-03`, Phase 6, 스키마 9)
+
+온라인은 WebRTC P2P(방장 = 피어 1, 별 구조)다. 방 코드는 Supabase `rooms`(0005)로 찾고, 시그널링은 Supabase Realtime 브로드캐스트 채널 `realtime:room:<코드>`로 한다. **방 코드는 Amplitude로 보내지 않는다.** 퍼널: `mode_selected{online}` → `online_lobby_viewed` → `room_created`(방장) / `room_joined` → (`peer_connect_failed`) → `room_left` 또는 `match_started{mode: online}`(넷코드 연결 후).
+
+| 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
+|---|---|---|---|---|---|
+| `online_lobby_viewed` | 타이틀 "온라인"으로 온라인 메뉴가 열린 순간 | `signed_in: bool`, `supported: bool` (이 빌드에서 WebRTC 가능 — 웹 true, 플러그인 없는 데스크톱 false) | — | A | 6 |
+| `room_created` | `rooms` 행 insert 성공 (방장) | `attempts: int` (코드 충돌 재시도 포함 시도 수, 1..5), `rule: enum(stock\|team\|timed)`, `arena: str` | — | A | 6 |
+| `room_joined` | Realtime 채널 join 성공 = 대기실 표시 (방장·참가자 모두) | `is_host: bool`, `player_count: int` (그 순간 대기실 사람 수, 참가자는 방장 상태를 받기 전이라 0일 수 있음) | — | A | 6 |
+| `room_left` | 대기실에서 나감 (join 뒤에만) | `reason: enum(back\|host_left\|full\|error\|started)`, `is_host: bool`, `dwell_ms: int` (대기실 체류) | — | A | 6 |
+| `peer_connect_failed` | 연결 실패 1회 | `stage: enum(signaling\|ice\|timeout)` (signaling = Realtime 소켓·join·하트비트 실패 또는 방장이 12초 안에 id를 주지 않음, ice = WebRTC 연결 실패, timeout = 20초 안에 데이터 채널이 안 열림), `is_host: bool` | `peer_id: int` | A | 6 |
 
 ### 3.4 경기
 
@@ -289,6 +301,7 @@
 |---|---|---|---|
 | Q1 | **스타일·캐릭터별 승률**이 30~70% 안인가? | `match_ended.players[]` (`character`, `style`, `result`, `is_bot`), `match_players` | `StyleData`·공격 수치 조정 (PRD-STYLE-01~04) |
 | Q2 | **경기장별 링아웃 위치·원인**이 다른가? | `stock_lost` (`zone`, `angle_deg`, `cause`), `gimmick_triggered`, `gimmick_ringout`, `match_events` `ringout`·`pos`·기믹 원시 | 기믹 강도·경기장 모양 조정 (Phase 4 완료 기준) |
+| Q3b | **온라인 퍼널**은 어디서 끊기나? TURN 없이 몇 %가 연결에 실패하나? | `online_lobby_viewed` → `room_created`/`room_joined` → `peer_connect_failed.stage` → `room_left.reason` | TURN 서버 도입(`[net] turn_urls`), 로비 UX |
 | Q3 | **로그인 퍼널**의 어디서 이탈하나? | `app_opened` → `login_viewed` → `login_started` → `login_completed` / `login_failed.reason` / `login_skipped` / `session_restored` → `screen_viewed` → `mode_selected` → `match_started` | 로그인 UI·흐름 수정, 건너뛰기 정책 |
 | Q4 | **첫 경기 완주율** ≥ 80%인가? (PRD §1.3) | `match_started` → `match_ended` vs `match_abandoned` (사용자 첫 경기) | 난이도·온보딩 조정 |
 | Q5 | **필살기 사용률·영향**은? | `gauge_full` → `special_used` (`ms_since_full`), `special_hit` (`targets_hit`, `caused_ringout`), `match_ended.players[].specials`·`special_hits`, `match_events` `special_*`·`projectile_spawn` | 게이지 증가량·필살기 위력 조정 |

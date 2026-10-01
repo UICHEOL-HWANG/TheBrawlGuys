@@ -2,9 +2,9 @@ class_name TitleScreen
 extends Control
 ## Title / mode select (platform B1, design.md DS-LAY-03): the logo on top and, in the lower
 ## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 and 로컬 2인
-## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) are live, 온라인 is shown
-## disabled ("준비 중") until Phase 6 — plus a small 로그아웃 in the top-right corner and, under the
-## modes, a secondary 튜토리얼 다시 보기 (Phase 5 T11).
+## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) and 온라인 (Phase 6,
+## OnlineFlow) are live — plus a small 로그아웃 in the top-right corner and, under the modes, a
+## secondary 튜토리얼 다시 보기 (Phase 5 T11).
 
 signal mode_chosen(mode: String)
 signal logout_requested
@@ -14,7 +14,7 @@ signal tutorial_requested
 const MODES: Array[Array] = [
 	[MatchSetup.MODE_BOT, "봇 대전", true],
 	[MatchSetup.MODE_LOCAL_2P, "로컬 2인", true],
-	[MatchSetup.MODE_ONLINE, "온라인 · 준비 중", false],
+	[MatchSetup.MODE_ONLINE, "온라인", true],
 ]
 ## Local 2-player needs a keyboard or pads: touch-only mobile shows it disabled with this label.
 const LOCAL_2P_MOBILE_TEXT := "로컬 2인 · 데스크톱 전용"
