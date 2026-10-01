@@ -16,6 +16,8 @@ const REASON_LEFT := "left"
 const RTT_SAMPLE_MS := 1000
 
 var setup: MatchSetup
+## Shared with every client in WELCOME, so host and client telemetry of one match join up.
+var match_id: String = Uuid.v4()
 var stats := NetStats.new(true)
 var roster: NetRoster
 var _t: NetTransport
@@ -131,18 +133,22 @@ func _welcome(peer: int) -> void:
 	if r == null:
 		_t.send(peer, NetTransport.CHANNEL_RELIABLE, NetProtocol.bye())  # room full
 		return
-	_t.send(peer, NetTransport.CHANNEL_RELIABLE, NetProtocol.welcome(r.slot, SetupCodec.to_dict(setup)))
+	_t.send(peer, NetTransport.CHANNEL_RELIABLE, NetProtocol.welcome(r.slot, SetupCodec.to_dict(setup, match_id)))
 	if _running:
 		_t.send(peer, NetTransport.CHANNEL_RELIABLE, NetProtocol.start(_tick))
 	client_joined.emit(peer, r.slot)
 
 
+## A BYE may arrive after the connection already dropped (graceful close): it only turns that
+## drop into "left" and hands the slot to a bot at once.
 func _on_peer_left(peer: int, reason: String) -> void:
-	var r := roster.of_peer(peer)
-	if r == null:
+	var r := roster.last_of_peer(peer)
+	if r == null or r.is_bot:
 		return
-	r.drop(_now())
-	stats.disconnects += 1
+	var was_connected := r.connected
+	if was_connected:
+		r.drop(_now())
+	stats.add_disconnect(reason, r.slot, was_connected)
 	if reason == REASON_LEFT:
 		_to_bot(r, reason)
 
@@ -158,8 +164,9 @@ func _send_state(world: World) -> void:
 	if not _events.is_empty():
 		_broadcast(NetTransport.CHANNEL_RELIABLE, NetProtocol.events(_tick, _events))
 		_events = []
-	var acks := roster.acks(_last_codes.size())
-	_broadcast(NetTransport.CHANNEL_FAST, NetProtocol.snapshot(_tick, acks, _last_codes, world.snapshot()))
+	var n := _last_codes.size()
+	_broadcast(NetTransport.CHANNEL_FAST,
+			NetProtocol.snapshot(_tick, roster.acks(n), _last_codes, world.snapshot(), roster.queued(n)))
 
 
 ## To every connected client (never to peers that have not been welcomed).

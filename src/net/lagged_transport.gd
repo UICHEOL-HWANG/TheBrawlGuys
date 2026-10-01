@@ -58,7 +58,13 @@ func rtt_ms(peer_id: int) -> float:
 	return base + 2.0 * _config.net_sim_latency_ms if base >= 0.0 else base
 
 
+## Sends everything still held back right now (a BYE when the match scene leaves).
+func flush_all() -> void:
+	_flush(INF)
+
+
 func close() -> void:
+	flush_all()
 	_inner.close()
 
 

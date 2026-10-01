@@ -22,6 +22,11 @@ var host_hashes: Dictionary = {}
 var host_positions: Dictionary = {}
 ## Inputs the host applied, one Array[InputFrame] per tick.
 var applied: Array = []
+## Client clock speed relative to the host (1.01 = 1 % fast) and whether NetClockSync steers it;
+## with both at their defaults every client steps exactly once per host tick.
+var client_rates: Array[float] = []
+var use_sync: bool = false
+var _acc: Array[float] = []
 
 
 func _init(p_config: GameConfig, players: int, remote_count: int, latency_ms: float = 0.0,
@@ -41,6 +46,8 @@ func _init(p_config: GameConfig, players: int, remote_count: int, latency_ms: fl
 		client_ts.append(t)
 		clients.append(ClientSession.new(t, config, now_ms))
 		client_worlds.append(null)
+		client_rates.append(1.0)
+		_acc.append(0.0)
 
 
 func now_ms() -> int:
@@ -64,7 +71,8 @@ func tick(host_input: InputFrame = InputFrame.neutral(), client_inputs: Array = 
 		var c := clients[i]
 		if c.running and not c.gone:
 			var own: InputFrame = client_inputs[i] if i < client_inputs.size() else InputFrame.neutral()
-			c.step(client_worlds[i], own)
+			for s: int in _client_steps(i):
+				c.step(client_worlds[i], own)
 	host.poll()
 	var inputs := host.inputs(host_world.state_view(), {0: host_input})
 	host_world.tick(inputs)
@@ -93,6 +101,16 @@ static func scripted(tick: int, slot: int) -> InputFrame:
 	var a := tick * 0.05 + slot * 2.0
 	return InputFrame.make(cos(a), sin(a), tick % 40 == slot * 3, tick % 25 == slot * 5,
 			tick % 90 == 45, (tick / 60) % 5 == 4, false)
+
+
+## Client ticks this host tick: 1, or what its (drifting, maybe synced) clock accumulated.
+func _client_steps(i: int) -> int:
+	if not use_sync and client_rates[i] == 1.0:
+		return 1
+	_acc[i] += client_rates[i] * (clients[i].tick_rate_scale() if use_sync else 1.0)
+	var steps := int(_acc[i])
+	_acc[i] -= steps
+	return steps
 
 
 func poll_clients() -> void:

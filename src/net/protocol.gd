@@ -7,9 +7,10 @@ extends RefCounted
 ##   HELLO   client -> host: join request
 ##   WELCOME host -> client: slot u8, setup dict (SetupCodec)
 ##   INPUTS  client -> host: newest client seq u32, count u8, codes (seq, seq-1, ...)
-##   SNAPSHOT host -> all: host tick u32, slots u8, per slot (acked seq u32, last input code),
-##           raw size u32, compressed World snapshot
-##   EVENTS  host -> all (reliable): host tick u32, events Array
+##   SNAPSHOT host -> all: host tick u32, slots u8, per slot (acked seq u32, last input code,
+##           inputs queued at the host u8 — NetClockSync), raw size u32, compressed World snapshot
+##   EVENTS  host -> all (reliable): host tick u32, events Array (decoded: dictionaries only, at
+##           most MAX_EVENTS)
 ##   START / END: tick u32 / winner s32 · PING / PONG: client ms u32 · BYE: leaving
 
 const VERSION := 1
@@ -17,6 +18,9 @@ enum Type { HELLO = 1, WELCOME, INPUTS, SNAPSHOT, EVENTS, START, END, PING, PONG
 const MAX_INPUTS := 32
 const MAX_SLOTS := 4
 const MAX_BLOB := 1 << 20
+const MAX_EVENTS := 256
+## Acks and seqs stay inside a PackedInt32Array.
+const MAX_SEQ := 0x7FFFFFFF
 const COMPRESSION := FileAccess.COMPRESSION_ZSTD
 
 
@@ -42,14 +46,16 @@ static func inputs(seq: int, codes: PackedInt32Array) -> PackedByteArray:
 	return b.data_array
 
 
+## queued: inputs waiting at the host per slot (0 for slots that are not remote).
 static func snapshot(tick: int, acks: PackedInt32Array, codes: PackedInt32Array,
-		world: PackedByteArray) -> PackedByteArray:
+		world: PackedByteArray, queued: PackedInt32Array = PackedInt32Array()) -> PackedByteArray:
 	var b := _begin(Type.SNAPSHOT)
 	b.put_u32(tick)
 	b.put_u8(acks.size())
 	for i: int in acks.size():
 		b.put_u32(acks[i])
 		_put_code(b, codes[i])
+		b.put_u8(clampi(queued[i], 0, 255) if i < queued.size() else 0)
 	b.put_u32(world.size())
 	_put_blob(b, world.compress(COMPRESSION))
 	return b.data_array
@@ -112,7 +118,7 @@ static func _fields(type: int, r: NetReader) -> Dictionary:
 		Type.EVENTS:
 			var tick := r.u32()
 			var list: Variant = r.variant(MAX_BLOB)
-			return {"tick": tick, "events": list} if list is Array else {}
+			return {"tick": tick, "events": _dictionaries(list)} if list is Array else {}
 		Type.START:
 			return {"tick": r.u32()}
 		Type.END:
@@ -123,7 +129,7 @@ static func _fields(type: int, r: NetReader) -> Dictionary:
 
 
 static func _read_inputs(r: NetReader) -> Dictionary:
-	var seq := r.u32()
+	var seq := mini(r.u32(), MAX_SEQ)
 	var n := r.u8()
 	if n > MAX_INPUTS:
 		return {}
@@ -140,9 +146,11 @@ static func _read_snapshot(r: NetReader) -> Dictionary:
 		return {}
 	var acks := PackedInt32Array()
 	var codes := PackedInt32Array()
+	var queued := PackedInt32Array()
 	for i: int in n:
-		acks.append(r.u32())
+		acks.append(mini(r.u32(), MAX_SEQ))
 		codes.append(r.code())
+		queued.append(r.u8())
 	var raw_size := r.u32()
 	var packed := r.blob(MAX_BLOB)
 	if not r.ok or raw_size > MAX_BLOB or packed.is_empty():
@@ -150,7 +158,16 @@ static func _read_snapshot(r: NetReader) -> Dictionary:
 	var world := packed.decompress(raw_size, COMPRESSION)
 	if world.size() != raw_size:
 		return {}
-	return {"tick": tick, "acks": acks, "codes": codes, "world": world}
+	return {"tick": tick, "acks": acks, "codes": codes, "queued": queued, "world": world}
+
+
+## Sim events are dictionaries; anything else from a peer is dropped, and so is everything past MAX_EVENTS.
+static func _dictionaries(list: Array) -> Array:
+	var out: Array = []
+	for e: Variant in list:
+		if e is Dictionary and out.size() < MAX_EVENTS:
+			out.append(e)
+	return out
 
 
 static func _begin(type: int) -> StreamPeerBuffer:

@@ -51,6 +51,14 @@ func of_peer(peer: int) -> NetRemoteSlot:
 	return null
 
 
+## The slot peer played last, connected or dropped (null when it never had one).
+func last_of_peer(peer: int) -> NetRemoteSlot:
+	for r: NetRemoteSlot in _slots.values():
+		if r.peer_id == peer:
+			return r
+	return null
+
+
 ## Binds peer to its slot (already held, assigned or first free); null when the room is full.
 func claim(peer: int) -> NetRemoteSlot:
 	var r := of_peer(peer)
@@ -82,6 +90,14 @@ func acks(player_count: int) -> PackedInt32Array:
 	var out := PackedInt32Array()
 	for i: int in player_count:
 		out.append((_slots[i] as NetRemoteSlot).applied_seq if _slots.has(i) else 0)
+	return out
+
+
+## Inputs waiting per slot (0 for slots that are not remote), for NetClockSync.
+func queued(player_count: int) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	for i: int in player_count:
+		out.append((_slots[i] as NetRemoteSlot).queued() if _slots.has(i) else 0)
 	return out
 
 

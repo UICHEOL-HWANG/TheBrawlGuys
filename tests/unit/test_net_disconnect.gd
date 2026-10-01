@@ -76,6 +76,7 @@ func test_room_full_gets_bye() -> void:
 		late.poll(null)
 	assert_true(late.gone, "no free slot: the host says BYE")
 	assert_eq(late.slot, -1)
+	assert_eq(late.stats.disconnect_reason, ClientSession.LOST_ROOM_FULL, "not mistaken for the host leaving")
 
 
 func test_host_leaving_ends_the_match_for_clients() -> void:
@@ -85,7 +86,7 @@ func test_host_leaving_ends_the_match_for_clients() -> void:
 	rig.host.close()
 	rig.poll_clients()
 	for c: ClientSession in rig.clients:
-		assert_signal_emitted(c, "host_left")
+		assert_signal_emitted_with_parameters(c, "lost", [ClientSession.LOST_HOST_LEFT])
 		assert_true(c.gone)
 
 
@@ -93,8 +94,35 @@ func test_host_transport_drop_ends_the_match_for_clients() -> void:
 	var rig := _rig()
 	watch_signals(rig.clients[0])
 	rig.hub.disconnect_peer(LoopbackHub.HOST_ID)
-	assert_signal_emitted(rig.clients[0], "host_left")
+	assert_signal_emitted_with_parameters(rig.clients[0], "lost", [ClientSession.LOST_HOST_LEFT])
 	assert_eq(rig.clients[0].stats.disconnects, 1)
+
+
+func test_bye_then_close_counts_as_leaving() -> void:
+	var rig := _rig()
+	watch_signals(rig.host)
+	rig.clients[0].leave()
+	rig.client_ts[0].close()  # graceful close: the BYE still arrives after the drop
+	rig.tick()
+	assert_true(rig.host.is_bot(1), "no grace period for a player who left")
+	assert_signal_emitted_with_parameters(rig.host, "slot_botted", [1, HostSession.REASON_LEFT])
+	assert_eq(rig.host.stats.disconnects, 1, "one disconnect, not two")
+	assert_eq(rig.host.stats.slot_reasons, {1: HostSession.REASON_LEFT})
+
+
+func test_client_without_welcome_retries_then_times_out() -> void:
+	var hub := LoopbackHub.new()
+	var host_t := hub.host()
+	var client := ClientSession.new(hub.join(), _config(), func() -> int: return int(hub.now_ms()))
+	watch_signals(client)
+	var hellos := 0
+	for t: int in 330:  # 5.5 s; the host never answers
+		client.poll(null)
+		for m: Dictionary in host_t.poll():
+			hellos += 1 if NetProtocol.decode(m["bytes"]).get("type") == NetProtocol.Type.HELLO else 0
+		hub.advance(1000.0 / 60.0)
+	assert_gt(hellos, 5, "HELLO is sent again while nobody answers")
+	assert_signal_emitted_with_parameters(client, "lost", [ClientSession.LOST_TIMEOUT])
 
 
 func test_never_joined_slot_turns_bot_after_grace() -> void:

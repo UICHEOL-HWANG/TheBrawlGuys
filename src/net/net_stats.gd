@@ -9,6 +9,11 @@ const MAX_SAMPLES := 600
 var is_host: bool = false
 var corrections: int = 0
 var disconnects: int = 0
+## Why the newest disconnect happened ("" = none): host side "timeout" (connection dropped) or
+## "left" (BYE); client side "host_left", "timeout" (no WELCOME) or "room_full".
+var disconnect_reason: String = ""
+## Host: slot -> reason its player dropped (the newest reason per slot).
+var slot_reasons: Dictionary = {}
 var _rtt: PackedFloat32Array = PackedFloat32Array()
 
 
@@ -38,6 +43,18 @@ func rtt_percentile(p: float) -> Variant:
 	return roundf(sorted[clampi(int(ceil(p * sorted.size())) - 1, 0, sorted.size() - 1)])
 
 
+## counts: false when the same disconnect only changes its reason (a BYE after the drop).
+func add_disconnect(reason: String, slot: int = -1, counts: bool = true) -> void:
+	if counts:
+		disconnects += 1
+	disconnect_reason = reason
+	if slot >= 0:
+		slot_reasons[slot] = reason
+
+
+## The match telemetry's net summary (NetSummary); slot_reasons feed match_players.
 func props() -> Dictionary:
 	return {"net_host": is_host, "rtt_p50": rtt_percentile(0.5), "rtt_p95": rtt_percentile(0.95),
-		"corrections": corrections, "disconnects": disconnects}
+		"corrections": corrections, "disconnects": disconnects,
+		"disconnect_reason": disconnect_reason if disconnect_reason != "" else null,
+		"slot_reasons": slot_reasons.duplicate()}

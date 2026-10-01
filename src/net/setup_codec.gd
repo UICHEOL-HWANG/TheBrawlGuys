@@ -5,13 +5,23 @@ extends RefCounted
 ## fails MatchSetup.validate() decode to null. for_client() re-labels the line-up from one
 ## client's point of view: its own slot is local, every other human is remote.
 
+const MAX_MATCH_ID := 64
 
-static func to_dict(setup: MatchSetup) -> Dictionary:
+
+## match_id: the host's telemetry match id, shared so every peer's events of the match join up.
+static func to_dict(setup: MatchSetup, match_id: String = "") -> Dictionary:
 	var slots: Array = []
 	for s: Dictionary in setup.slots:
 		slots.append({"slot": int(s["slot"]), "character": String(s["character"]),
 			"controller": String(s["controller"])})
-	return {"mode": setup.mode, "arena": setup.arena_id, "seed": setup.seed, "rule": setup.rule, "slots": slots}
+	return {"mode": setup.mode, "arena": setup.arena_id, "seed": setup.seed, "rule": setup.rule, "slots": slots,
+		"match_id": match_id}
+
+
+## The match id a WELCOME carried ("" when missing or not a plausible uuid-sized string).
+static func match_id_of(d: Dictionary) -> String:
+	var id: Variant = d.get("match_id")
+	return id if id is String and (id as String).length() <= MAX_MATCH_ID else ""
 
 
 static func from_dict(d: Dictionary) -> MatchSetup:

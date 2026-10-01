@@ -34,6 +34,9 @@ func test_host_and_client_scenes_play_one_match() -> void:
 	assert_true(client.net_stats().has("corrections"))
 	assert_eq(host.net_stats()["net_host"], true)
 	assert_eq(client.get_telemetry().is_active(), true, "client match tracking runs")
+	assert_eq(client.get_telemetry().match_id(), host.get_telemetry().match_id(), "one match id for all peers")
+	assert_eq(client.get_telemetry().match_id(), host.host_session().match_id)
+	assert_null(client._tracking._recorder._client, "clients never upload Supabase rows")
 
 
 func test_client_hears_when_the_host_leaves() -> void:

@@ -4,6 +4,8 @@ extends RefCounted
 ## clears `ok` and returns 0 / empty, so a truncated or hostile message decodes to {} instead of
 ## garbage. Integers are little-endian (StreamPeerBuffer).
 
+const BUTTON_BITS := InputCodec.JUMP | InputCodec.LIGHT | InputCodec.HEAVY | InputCodec.GUARD | InputCodec.GRAB
+
 var ok: bool = true
 var _b := StreamPeerBuffer.new()
 
@@ -24,14 +26,15 @@ func s32() -> int:
 	return _b.get_32() if _need(4) else 0
 
 
-## A 24-bit InputCodec code.
+## A 24-bit InputCodec code, made valid: axis bytes inside -1..1, only the five button bits.
 func code() -> int:
 	if not _need(3):
 		return 0
-	var lo := _b.get_u8()
-	var mid := _b.get_u8()
-	var hi := _b.get_u8()
-	return lo | (mid << 8) | (hi << 16)
+	var axis_max := InputCodec.AXIS_OFFSET + InputFrame.MOVE_STEPS
+	var x := mini(_b.get_u8(), axis_max)
+	var z := mini(_b.get_u8(), axis_max)
+	var buttons := _b.get_u8() & BUTTON_BITS
+	return x | (z << 8) | (buttons << 16)
 
 
 ## u32 length + that many bytes; empty (and not ok) when the length is over max_size.

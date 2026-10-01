@@ -59,10 +59,12 @@ func pop_due(now_ms: float, to: int = ANY) -> Array[Dictionary]:
 	return out
 
 
-## Forgets every message from or to peer_id (it left).
+## peer_id left: messages to it and its fast messages vanish; its reliable ones (a BYE sent just
+## before closing) still arrive, as a graceful close delivers them.
 func drop_peer(peer_id: int) -> void:
 	_queue = _queue.filter(func(m: Dictionary) -> bool:
-		return int(m["from"]) != peer_id and int(m["to"]) != peer_id)
+		var from_leaver := int(m["from"]) == peer_id
+		return int(m["to"]) != peer_id and (not from_leaver or int(m["channel"]) == NetTransport.CHANNEL_RELIABLE))
 
 
 func in_flight() -> int:

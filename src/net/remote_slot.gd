@@ -3,6 +3,11 @@ extends RefCounted
 ## Host-side state of one remote player's slot (HostSession): which peer plays it, the client
 ## inputs received but not yet applied (seq -> InputCodec code, at most buffer_max), the newest
 ## applied seq (the ack sent back in snapshots), and whether it is connected or taken over by a bot.
+## A backlog (a burst after a stall) drains: above DRAIN_ABOVE queued inputs two are applied per
+## tick, and inputs dropped on overflow hand their presses on, so no jump / attack / grab is lost.
+
+## Queued inputs above which the host applies two per tick (NetClockSync aims for ~2).
+const DRAIN_ABOVE := 4
 
 var slot: int
 var peer_id: int = 0
@@ -12,6 +17,9 @@ var last_code: int = InputCodec.NEUTRAL
 ## Clock ms when the peer dropped (-1 = connected or never joined).
 var left_at_ms: int = -1
 var is_bot: bool = false
+## Ticks the host had no input from a connected client / inputs folded into a neighbour.
+var starved: int = 0
+var merged: int = 0
 var _queue: Dictionary = {}
 var _buffer_max: int
 
@@ -49,22 +57,38 @@ func receive(seq: int, codes: PackedInt32Array) -> void:
 		if s > applied_seq and not _queue.has(s):
 			_queue[s] = codes[i]
 	while _queue.size() > _buffer_max:
+		var dropped := int(_queue[_oldest()])
 		_queue.erase(_oldest())
+		var next := _oldest()
+		_queue[next] = NetInputRepeat.add_presses(int(_queue[next]), dropped)
+		merged += 1
 
 
-## The input for this host tick: the oldest queued one, else the last one held (see NetInputRepeat).
+## The input for this host tick: the oldest queued one (two folded together while draining a
+## backlog), else the last one held (see NetInputRepeat).
 func next_code() -> int:
 	if _queue.is_empty():
+		if connected:
+			starved += 1
 		return NetInputRepeat.held_only(last_code)
-	var s := _oldest()
-	last_code = int(_queue[s])
-	_queue.erase(s)
-	applied_seq = s
+	var code := _pop_oldest()
+	if _queue.size() >= DRAIN_ABOVE:
+		code = NetInputRepeat.add_presses(_pop_oldest(), code)
+		merged += 1
+	last_code = code
 	return last_code
 
 
 func queued() -> int:
 	return _queue.size()
+
+
+func _pop_oldest() -> int:
+	var s := _oldest()
+	var code := int(_queue[s])
+	_queue.erase(s)
+	applied_seq = s
+	return code
 
 
 func _oldest() -> int:

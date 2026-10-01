@@ -9,13 +9,14 @@ extends "res://src/main/main.gd"
 ##       bots "bot"; peer_slots (optional) peer id -> slot from the lobby
 ##   join_match(transport) — the setup arrives in WELCOME; nothing runs until START
 ## No rematch online: the result offers 메뉴로 (menu_requested). Leaving the tree sends BYE; the
-## transport stays the caller's to close. connection_lost fires when the host goes away.
+## transport stays the caller's to close. connection_lost(reason) fires when the connection ends:
+## ClientSession.LOST_HOST_LEFT, LOST_ROOM_FULL or LOST_TIMEOUT (no WELCOME within 5 s).
 
 signal connection_lost(reason: String)
 
 const ROLE_HOST := "host"
 const ROLE_CLIENT := "client"
-const LOST_HOST_LEFT := "host_left"
+const LOST_HOST_LEFT := ClientSession.LOST_HOST_LEFT
 
 var _role: String = ""
 var _transport: NetTransport = null
@@ -67,8 +68,9 @@ func _ready() -> void:
 		_transport = LaggedTransport.new(_transport, config)
 	if _role == ROLE_CLIENT:
 		_client = ClientSession.new(_transport, config)
-		_client.host_left.connect(func() -> void: connection_lost.emit(LOST_HOST_LEFT))
+		_client.lost.connect(func(reason: String) -> void: connection_lost.emit(reason))
 		return  # boots in _process once WELCOME brought the setup
+	_host = HostSession.new(_transport, setup, config, Time.get_ticks_msec, _peer_slots)
 	_boot()
 
 
@@ -79,17 +81,27 @@ func _boot() -> void:
 	super._ready()
 
 
+## Telemetry shares the host's match id; only the host uploads Supabase rows (authoritative, its
+## input log replays), clients send their Amplitude events only.
+func _new_tracking() -> MatchTracking:
+	var recorder := MatchRecorder.create_default() if _role == ROLE_HOST else MatchRecorder.new(null)
+	var tracking := MatchTracking.new(Analytics.track, recorder)
+	tracking.match_id = _host.match_id if _host != null else _client.match_id
+	tracking.net_props = net_stats
+	return tracking
+
+
 ## Online there is one match per scene: restart / ui_accept after the result do nothing.
 func _start_match() -> void:
 	if _started:
 		return
 	_started = true
 	super._start_match()
-	if _role == ROLE_HOST:
-		_host = HostSession.new(_transport, setup, _config, Time.get_ticks_msec, _peer_slots)
+	if _host != null:
 		_host.start(_world)
 
 
+## Clients run their clock a little fast or slow (NetClockSync) to stay in step with the host.
 func _process(delta: float) -> void:
 	if _role == ROLE_CLIENT:
 		_client.poll(_world)
@@ -99,7 +111,8 @@ func _process(delta: float) -> void:
 			return
 		if not _client.running:
 			return
-	elif _host != null:
+		delta *= _client.tick_rate_scale()
+	elif _host != null and _started:
 		_host.poll()
 	super._process(delta)
 
@@ -134,4 +147,6 @@ func _exit_tree() -> void:
 		_host.close()
 	if _client != null:
 		_client.leave()
+	if _transport is LaggedTransport:
+		(_transport as LaggedTransport).flush_all()  # the BYE must not wait for a poll that never comes
 	super._exit_tree()

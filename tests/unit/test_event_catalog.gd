@@ -54,7 +54,7 @@ func test_null_required_value_is_an_error() -> void:
 
 
 func test_schema_version_is_bumped_for_defense_counters() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 8)
+	assert_gte(EventCatalog.SCHEMA_VERSION, 8)  # 9 = online net summary (Phase 6)
 
 
 func test_match_ended_players_need_the_defense_counters() -> void:
