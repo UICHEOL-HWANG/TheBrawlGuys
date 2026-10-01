@@ -133,3 +133,22 @@ join matches m on m.id = p.match_id
 where m.event_schema_version >= 8
 group by 1
 order by broken_per_game desc;
+
+
+-- 12. 반응 속도·방어 결과·위험 상황 선택 (스타일별, 사람만) — 실력 신호와 승률
+select p.style,
+       count(*)                                                                           as games,
+       round(sum(p.reactions)::numeric / nullif(sum(p.threats_faced), 0) * 100, 1)        as reaction_rate_pct,
+       round(avg(p.reaction_ticks_avg)::numeric / 60 * 1000)                              as reaction_ms_avg,
+       round(sum(p.roll_evades)::numeric / nullif(sum(p.dodges_roll + p.dodges_air), 0) * 100, 1) as dodge_evade_pct,
+       round(sum(p.techs)::numeric / nullif(sum(p.tech_attempts), 0) * 100, 1)             as tech_success_pct,
+       round(sum(p.tumbles_survived)::numeric / nullif(sum(p.tumbles), 0) * 100, 1)        as tumble_survival_pct,
+       round(avg(p.di_perp_avg)::numeric, 3)                                              as di_perp_avg,
+       round(sum(p.high_dmg_attack_presses)::numeric
+             / nullif(sum(p.high_dmg_attack_presses + p.high_dmg_guard_presses), 0) * 100, 1) as high_dmg_attack_share_pct,
+       round(avg((p.result = 'win')::int) * 100, 1)                                       as win_rate_pct
+from match_players p
+join matches m on m.id = p.match_id
+where not p.is_bot and m.event_schema_version >= 8
+group by 1
+order by 1;

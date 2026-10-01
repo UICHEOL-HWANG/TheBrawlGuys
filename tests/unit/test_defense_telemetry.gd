@@ -1,7 +1,7 @@
 extends GutTest
 ## Defense and recovery tracking (event schema 8): dodge / guard break / perfect guard / knockdown /
 ## tech / getup sim events become SlotStats counters on match_ended.players[] and match_players,
-## stay as raw match_events rows, and DI use is read from the launched fighter's stick.
+## stay as raw match_events rows (DI and skill signals: test_skill_features).
 
 const S := Fighter.State
 
@@ -83,23 +83,6 @@ func test_guard_break_is_credited_to_the_last_blocked_hitter() -> void:
 	assert_eq(breaks[0]["actor_slot"], 0)
 	assert_eq(breaks[0]["payload"]["attacker_slot"], 1)
 	assert_eq(breaks[1]["payload"]["attacker_slot"], -1)
-
-
-func test_di_counts_a_held_stick_on_the_first_tick_after_hitstop() -> void:
-	_tick(1, [{"type": "hit", "attacker": 0, "target": 1, "pos": Vector3.ZERO}], {1: {"state": S.HITSTUN,
-		"hitstop_ticks": 2}}, [0.0, 1.0])
-	_tick(2, [], {1: {"hitstop_ticks": 1}}, [0.0, 1.0])
-	_tick(3, [], {1: {"hitstop_ticks": 0}}, [0.0, 1.0])
-	_tick(4, [], {}, [0.0, 0.0])  # DI tick: neutral stick
-	_tick(5, [{"type": "hit", "attacker": 0, "target": 1, "pos": Vector3.ZERO}], {}, [0.0, 0.0])
-	_tick(6, [], {}, [0.0, -1.0])  # DI tick: stick held
-	_tick(7, [{"type": "hit", "attacker": 1, "target": 0, "pos": Vector3.ZERO}], {}, [0.0, 0.0])
-	_tick(8, [], {}, [1.0, 0.0])  # P1 never left IDLE in this view: no DI
-	_end()
-	assert_eq(_ended_player(1)["hits_taken"], 2)
-	assert_eq(_ended_player(1)["di_inputs"], 1)
-	assert_eq(_ended_player(0)["hits_taken"], 1)
-	assert_eq(_ended_player(0)["di_inputs"], 0)
 
 
 func test_raw_rows_name_the_actor_and_target() -> void:

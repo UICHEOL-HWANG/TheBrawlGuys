@@ -13,15 +13,22 @@ extends RefCounted
 ## (tutorial_started / tutorial_step_completed / tutorial_skipped / tutorial_completed), 7 =
 ## combat-depth D match rules (rule_selected, "rule" on match events, players[] team / score,
 ## matches.rule and match_players.team / score from migration 0004), 8 = defense and recovery
-## counters on match_ended.players[] and match_players (PLAYER_DEFENSE_KEYS, migration 0004),
-## match_events actor_slot for projectile events and target_slot for perfect_guard.
+## counters and skill / context signals on match_ended.players[] and match_players
+## (PLAYER_COMBAT_KEYS, migration 0004), rule_selected.focused, match_events actor_slot for
+## projectile events and target_slot for perfect_guard.
 const SCHEMA_VERSION := 8
 
-## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery, the
-## same names as the match_players columns).
-const PLAYER_DEFENSE_KEYS: Array[String] = [
-	"hits_taken", "di_inputs", "dodges_roll", "dodges_air", "perfect_guards", "guard_breaks",
-	"guard_breaks_caused", "knockdowns", "techs", "getups_stand", "getups_roll", "getups_attack",
+## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
+## skill and context signals; the same names as the match_players columns). Values may be null
+## (averages without samples).
+const PLAYER_COMBAT_KEYS: Array[String] = [
+	"hits_taken", "dodges_roll", "dodges_air", "perfect_guards", "guard_breaks", "guard_breaks_caused",
+	"knockdowns", "techs", "getups_stand", "getups_roll", "getups_attack",
+	"threats_faced", "reactions", "reaction_ticks_avg", "roll_evades", "tech_attempts",
+	"di_inputs", "di_perp_avg", "tumbles", "tumbles_survived",
+	"edge_guard_presses", "edge_attack_presses", "edge_dodges",
+	"high_dmg_guard_presses", "high_dmg_attack_presses", "high_dmg_dodges", "high_dmg_ticks",
+	"team_assists",
 ]
 
 const EVENTS: Dictionary = {
@@ -119,7 +126,7 @@ static func _validate_players(players: Array) -> PackedStringArray:
 		if not p is Dictionary:
 			errors.append("match_ended: players[%d] is not an object" % i)
 			continue
-		for key: String in PLAYER_DEFENSE_KEYS:
+		for key: String in PLAYER_COMBAT_KEYS:
 			if not (p as Dictionary).has(key):
 				errors.append("match_ended: players[%d] missing '%s'" % [i, key])
 	return errors

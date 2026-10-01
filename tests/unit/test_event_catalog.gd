@@ -59,7 +59,7 @@ func test_schema_version_is_bumped_for_defense_counters() -> void:
 
 func test_match_ended_players_need_the_defense_counters() -> void:
 	var player := {"slot": 0}
-	for key: String in EventCatalog.PLAYER_DEFENSE_KEYS:
+	for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
 		player[key] = 0
 	var ended := {"match_id": "m", "mode": "bot", "rule": "stock", "arena": "a", "result": "win", "winner_slot": 0,
 		"duration_s": 1.0, "players": [player]}
@@ -70,9 +70,11 @@ func test_match_ended_players_need_the_defense_counters() -> void:
 	assert_string_contains(errors[0], "techs")
 
 
-func test_defense_keys_are_slot_counters() -> void:
-	for key: String in EventCatalog.PLAYER_DEFENSE_KEYS:
-		assert_true(SlotStats.COUNTERS.has(key), "%s is counted by SlotStats" % key)
+func test_combat_keys_come_from_the_slot_summary() -> void:
+	for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
+		assert_true(SlotStats.COUNTERS.has(key) or SkillFeatures.COLUMNS.has(key), "%s is produced per slot" % key)
+	for key: String in SkillFeatures.COLUMNS:
+		assert_true(EventCatalog.PLAYER_COMBAT_KEYS.has(key), "%s is required on players[]" % key)
 
 
 func test_match_events_carry_the_rule() -> void:

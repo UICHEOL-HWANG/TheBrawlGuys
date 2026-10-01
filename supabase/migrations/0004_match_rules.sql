@@ -1,7 +1,7 @@
--- TheBrawlGuys match rules and defense counters (combat-depth C/D, docs/tracking-plan.md §3.4,
+-- TheBrawlGuys match rules, defense counters and skill signals (combat-depth C/D, docs/tracking-plan.md §3.4,
 -- event schemas 7 and 8). Run after 0003_special_hits.sql.
 -- Schema 7 sends matches.rule / match_players.team / score only for team and timed matches.
--- Schema 8 sends the defense and recovery counters on EVERY match_players row, so until this runs
+-- Schema 8 sends the defense / skill columns below on EVERY match_players row, so until this runs
 -- every match upload from a schema 8 build is rejected by PostgREST (matches row only, no
 -- players / events / inputs).
 -- Safe to re-run (IF NOT EXISTS; the checks are added only when missing).
@@ -28,6 +28,25 @@ alter table public.match_players
   add column if not exists getups_stand integer not null default 0,
   add column if not exists getups_roll integer not null default 0,
   add column if not exists getups_attack integer not null default 0;
+
+-- Skill and context signals (event schema 8, SkillFeatures; definitions in tracking-plan §3.4.1).
+alter table public.match_players
+  add column if not exists threats_faced integer not null default 0,           -- opponent swings started within 3 m
+  add column if not exists reactions integer not null default 0,               -- guard / dodge presses 1..30 ticks after a threat
+  add column if not exists reaction_ticks_avg real,                            -- null without reactions
+  add column if not exists roll_evades integer not null default 0,             -- dodged through a nearby swing that missed
+  add column if not exists tech_attempts integer not null default 0,           -- tumbles with a guard press (success = techs)
+  add column if not exists di_perp_avg real,                                   -- 0..1 stick share across the launch; null without launches
+  add column if not exists tumbles integer not null default 0,
+  add column if not exists tumbles_survived integer not null default 0,        -- tumble ended in the same life
+  add column if not exists edge_guard_presses integer not null default 0,      -- past 80 % of the arena radius
+  add column if not exists edge_attack_presses integer not null default 0,
+  add column if not exists edge_dodges integer not null default 0,
+  add column if not exists high_dmg_guard_presses integer not null default 0,  -- at 100 % damage or more
+  add column if not exists high_dmg_attack_presses integer not null default 0,
+  add column if not exists high_dmg_dodges integer not null default 0,
+  add column if not exists high_dmg_ticks integer not null default 0,
+  add column if not exists team_assists integer not null default 0;           -- team mode: teammate rang out my victim within 3 s
 
 do $$
 begin

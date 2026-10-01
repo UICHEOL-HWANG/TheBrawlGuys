@@ -57,6 +57,18 @@ func test_di_inputs_never_exceed_launches() -> void:
 		gut.p("slot %d di_inputs %d / hits_taken %d" % [row["slot"], row["di_inputs"], row["hits_taken"]])
 
 
+func test_skill_signals_are_consistent() -> void:
+	for row: Dictionary in _telemetry().player_rows():
+		assert_lte(int(row["reactions"]), int(row["threats_faced"]), "a reaction answers a threat")
+		assert_lte(int(row["techs"]), int(row["tech_attempts"]), "every tech was pressed during a tumble")
+		assert_lte(int(row["tumbles_survived"]), int(row["tumbles"]))
+		assert_eq(int(row["team_assists"]), 0, "no teams in a stock match")
+		gut.p("slot %d threats %d reactions %d avg %s evades %d tumbles %d/%d tech %d/%d di_perp %s edge g/a/d %d/%d/%d" % [
+			row["slot"], row["threats_faced"], row["reactions"], str(row["reaction_ticks_avg"]), row["roll_evades"],
+			row["tumbles_survived"], row["tumbles"], row["techs"], row["tech_attempts"], str(row["di_perp_avg"]),
+			row["edge_guard_presses"], row["edge_attack_presses"], row["edge_dodges"]])
+
+
 func test_the_match_finishes_with_knockdowns_tracked() -> void:
 	assert_true((_run["world"] as World).match_over, "seed %d ends inside %d ticks" % [SEED, MAX_TICKS])
 	var knockdowns := _telemetry().event_rows().filter(func(r: Dictionary) -> bool: return r["type"] == "knockdown")
@@ -87,5 +99,5 @@ func test_every_amplitude_event_survives_the_request_body() -> void:
 	assert_eq(sent_end.size(), 1)
 	if end_name == "match_ended":
 		for p: Dictionary in sent_end[0]["event_properties"]["players"]:
-			for key: String in EventCatalog.PLAYER_DEFENSE_KEYS:
+			for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
 				assert_true(p.has(key), "players[] carries %s" % key)

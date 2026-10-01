@@ -31,11 +31,9 @@ func previous() -> Array:
 	return _prev
 
 
-## Start of a tick: swings opened or closed since the last view, special hits whose window passed,
-## DI taken with this tick's inputs (InputFrames in slot order, empty = unknown).
-func begin_tick(fighters: Array, tick: int, inputs: Array = []) -> void:
+## Start of a tick: swings opened or closed since the last view, special hits whose window passed.
+func begin_tick(fighters: Array, tick: int) -> void:
 	_specials.begin_tick(fighters, tick)
-	_defense.begin_tick(_prev, inputs)
 	var seen := _attacks.observe(_prev, fighters)
 	for slot: int in seen["whiffs"]:
 		_count(slot, "whiffs")

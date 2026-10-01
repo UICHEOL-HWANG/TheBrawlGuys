@@ -1,6 +1,6 @@
 # TheBrawlGuys — 트래킹 플랜
 
-> 버전 0.5 · 2026-10-01 (combat-depth A/C 방어·복귀 추적 — 슬롯 요약·`match_players`에 회피·퍼펙트 가드·가드 브레이크·다운·낙법·기상·DI 카운터 12개(0004), 원시 행 `perfect_guard` 대상·투사체 `owner` 행위자, 웹 `session_ended`(sendBeacon)·30분 세션 분리 — `event_schema_version` 8) · 0.4 · 2026-10-01 (Phase 5 T11 온보딩 튜토리얼 퍼널 — `tutorial_*` 4종, `screen_viewed.screen`에 `tutorial` — `event_schema_version` 6) · 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
+> 버전 0.5 · 2026-10-01 (combat-depth A/C 방어·복귀 추적 + analytics-ml Part 1 — 슬롯 요약·`match_players`에 방어·복귀 카운터 11개와 실력·상황 신호 17개(반응 틱·회피 성공·낙법 시도·DI 각도·텀블 생존·가장자리/고% 선택·팀 어시스트, 0004), `rule_selected.focused`, 원시 행 `perfect_guard` 대상·투사체 `owner` 행위자, 웹 `session_ended`(sendBeacon)·30분 세션 분리 — `event_schema_version` 8) · 0.4 · 2026-10-01 (Phase 5 T11 온보딩 튜토리얼 퍼널 — `tutorial_*` 4종, `screen_viewed.screen`에 `tutorial` — `event_schema_version` 6) · 0.3 · 2026-10-01 (Phase 5 캐릭터 선택 — `character_selected`, 캐릭터가 sim에 전달, 슬롯 요약 `character`/`style` — `event_schema_version` 5) · 0.2 · 2026-09-30 (A7 리플레이 로그·재현 헤더, A8 행동 피처·세션/로딩/결과/성능 이벤트 — 3)
 > 상위: [`PRD.md`](./PRD.md) §5.8 (`PRD-DATA-03`, `PRD-DATA-04`) · 일정: [`PHASES.md`](./PHASES.md) Phase 4.0 · 문서 규칙: [`README.md`](./README.md)
 >
 > 이 문서는 **어떤 이벤트를, 어떤 속성으로, 어디에 보내는지**의 단일 원천(SSOT)이다.
@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 8 — 방어·복귀 카운터 12개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_DEFENSE_KEYS`)와 `match_players`(0004)에, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 8 — 방어·복귀 카운터 11개와 실력·상황 신호 17개가 `match_ended.players[]`(필수, `EventCatalog.PLAYER_COMBAT_KEYS`)와 `match_players`(0004)에, `rule_selected.focused`, `match_events` 투사체 `actor_slot` = 소유자·`perfect_guard` `target_slot` = 막은 파이터. 7 = combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -96,7 +96,7 @@
 |---|---|---|---|---|---|
 | `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|rule\|character\|arena\|lobby\|match\|tutorial\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
-| `rule_selected` | 경기 방식 화면에서 확정 (뒤로 왔다가 다시 고르면 다시 보냄) | `rule: enum(stock\|team\|timed)` | `browse_count: int` (확정 전 옮겨 본 횟수) | A | 5 (스키마 7) |
+| `rule_selected` | 경기 방식 화면에서 확정 (뒤로 왔다가 다시 고르면 다시 보냄) | `rule: enum(stock\|team\|timed)` | `browse_count: int` (확정 전 옮겨 본 횟수), `focused: list<str>` (포커스를 받은 방식, 처음 받은 순서로 중복 없이 — 기본값이 첫째, 고려한 후보 vs 선택. 스키마 8) | A | 5 (스키마 7) |
 | `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
 | `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest)` | `browse_count: int` | A | 4 |
 | `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|rule\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
@@ -142,7 +142,15 @@
 | `team` | int? | 팀전만: 0 = 팀 1(P1·P3), 1 = 팀 2(P2·P4). 다른 방식은 키 없음 (Supabase `match_players.team`, 0004) | 5 (스키마 7) |
 | `score` | int? | 시간제만: 경기 끝 점수(크레딧 링아웃 +1, 자멸 −1, sim `ModeState`). 다른 방식은 키 없음 (Supabase `match_players.score`, 0004) | 5 (스키마 7) |
 | `items_used` | int | 줍기 후 휘두름·투척 | 4.0 |
-| `hits_taken` / `di_inputs` | int | 맞은 클린 히트(`hit` 대상, 가드 제외 = 띄워짐) / 그중 DI 틱(히트스톱이 끝난 첫 틱, sim `LaunchInfluence`가 스틱을 읽는 틱)에 스틱이 중립이 아니었던 수(길이 ≥ 0.3). view에 속도가 없어 꺾인 각도는 모른다 — "DI를 시도했나"만 잰다 | 5 (스키마 8) |
+| `hits_taken` / `di_inputs` | int | 맞은 클린 히트(`hit` 대상, 가드 제외 = 띄워짐) / 그중 DI 틱(히트스톱이 끝난 첫 틱, sim `LaunchInfluence`가 스틱을 읽는 틱)에 스틱이 중립이 아니었던 수(길이 ≥ 0.3) | 5 (스키마 8) |
+| `di_perp_avg` | float? | DI 틱의 스틱이 발사 방향에 수직인 비율(0 = 나란하거나 중립, 1 = 완전히 옆 = 최대 DI)의 평균. view에 속도가 없어 발사 방향 = 그 틱의 수평 이동 방향(이미 최대 `di_max_deg`만큼 꺾인 뒤라 오차 작음). 측정한 발사가 없으면 null (`LaunchFeatures`) | 5 (스키마 8) |
+| `tumbles` / `tumbles_survived` | int | 강한 발사로 텀블한 수(view `tumbling` 시작) / 그 텀블이 같은 목숨 안에서 끝난 수 (링아웃 아님) | 5 (스키마 8) |
+| `threats_faced` / `reactions` / `reaction_ticks_avg` | int / int / float? | 상대(팀전 아군 제외)가 3 m 안에서 공격을 시작한 수(대기 중인 위협은 하나, 30틱 지나면 새 위협) / 그 뒤 1~30틱 안에 가드를 새로 누른 수(가드·회피 모두 가드 누름으로 시작) / 그 틱 수 평균(없으면 null) (`ReactionFeatures`) | 5 (스키마 8) |
+| `roll_evades` | int | 회피(state DODGE, 무적) 중 3 m 안 상대의 공격이 진행됐고 그 공격이 끝날 때까지 나를 맞히지 못한 수 — 방어 결과 4종 = `guards`(가드 성공) · `perfect_guards` · `roll_evades` · `guard_breaks` | 5 (스키마 8) |
+| `tech_attempts` | int | 텀블 중 가드를 누른 텀블 수 (성공 = `techs`) | 5 (스키마 8) |
+| `edge_guard_presses` / `edge_attack_presses` / `edge_dodges` | int | 경기장 반경 80% 밖(직전 view)에서 가드 누름 / 약·강 누름(틱당 1) / 회피 (`DangerFeatures`) | 5 (스키마 8) |
+| `high_dmg_guard_presses` / `high_dmg_attack_presses` / `high_dmg_dodges` / `high_dmg_ticks` | int | 대미지 100% 이상일 때 같은 선택 / 그 상태로 살아 있던 틱 (분모) | 5 (스키마 8) |
+| `team_assists` | int | 팀전: 내가 맞힌(`hit`·`special_hit`) 상대를 3초(`StockLoss.WINDOW_TICKS`) 안에 아군이 링아웃시킨 수 (링아웃 크레딧이 그 아군). 다른 방식은 0 (`AssistFeatures`) | 5 (스키마 8) |
 | `dodges_roll` / `dodges_air` | int | sim `dodge` `kind` 별 (구르기 / 공중 회피) | 5 (스키마 8) |
 | `perfect_guards` | int | sim `perfect_guard`의 `fighter` (막은 쪽) | 5 (스키마 8) |
 | `guard_breaks` / `guard_breaks_caused` | int | sim `guard_break` 당한 수 / 깬 수 — 깬 쪽은 피해자가 60틱 안에 마지막으로 막은 `guard_hit`의 공격자(없으면 가드를 오래 쥐고 있다 바닥난 것, 크레딧 없음). 원시 행 payload `attacker_slot`도 같은 규칙 | 5 (스키마 8) |
@@ -230,7 +238,7 @@
 |---|---|---|
 | `profiles` | `id uuid pk = auth.uid`, `display_name text`, `created_at timestamptz` | 첫 로그인 시 생성 |
 | `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) · **0004**: `rule text` (`stock`\|`team`\|`timed`, 기본 `stock` — `mode`는 조작 모드 `bot`\|`local_2p`\|`online` 그대로) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
-| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0004**: `team smallint` (팀전만), `score int` (시간제만), 방어·복귀 `int not null default 0` 12열 (`hits_taken`, `di_inputs`, `dodges_roll`, `dodges_air`, `perfect_guards`, `guard_breaks`, `guard_breaks_caused`, `knockdowns`, `techs`, `getups_stand`, `getups_roll`, `getups_attack`, §3.4.1) · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
+| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0004**: `team smallint` (팀전만), `score int` (시간제만), 방어·복귀 `int not null default 0` 11열 (`hits_taken`, `dodges_roll`, `dodges_air`, `perfect_guards`, `guard_breaks`, `guard_breaks_caused`, `knockdowns`, `techs`, `getups_stand`, `getups_roll`, `getups_attack`), 실력·상황 17열 (`threats_faced`, `reactions`, `reaction_ticks_avg real`, `roll_evades`, `tech_attempts`, `di_inputs`, `di_perp_avg real`, `tumbles`, `tumbles_survived`, `edge_*` 3, `high_dmg_*` 4, `team_assists`, §3.4.1) · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
 | `match_events` | `id bigserial pk`, `match_id uuid fk`, `tick int`, `type text`, `actor_slot int`, `target_slot int`, `payload jsonb` · 인덱스(`match_id`, `type`) | 원시 행동 로그. 경기 종료 시 500행 청크로 insert |
 | `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다. 슬롯 캐릭터는 `match_players.character`에서 읽는다(`event_schema_version` ≥ 5, 그 전 경기는 클래식으로 재생) |
 
@@ -298,9 +306,11 @@
 | Q17 | **체감 성능이 이탈에 주는 영향** | `perf_sampled` (`fps_p5`, `fps_p50`, `spike_count`, `match_id`로 경기와 조인), `load_timed`, `input_device_primary` | 품질 기본값·최적화 우선순위 |
 | Q18 | **온보딩 튜토리얼** — 어느 미션에서 오래 걸리거나 건너뛰나? 튜토리얼을 끝낸 사람이 첫 경기를 더 완주하나? | `tutorial_started.source`·`input_device`, `tutorial_step_completed` (`index`, `ms_in_step`, `attempts`), `tutorial_skipped.step`, `tutorial_completed.total_ms`, 이어서 `match_started` → `match_ended` / `match_abandoned` (Q4) | 미션 순서·문구·판정 기준(`TutorialDetector`) 조정, 어려운 미션 빼기 |
 | Q19 | **경기 방식** — 어떤 방식을 고르고, 방식별 완주율·경기 길이·재대전율은? 시간제 점수가 링아웃 크레딧으로 공정하게 갈리나(자멸 비율)? | `rule_selected`, `match_started`/`match_ended`/`match_abandoned` `rule`, `match_ended.players[].team`·`score`, `matches.rule`, `match_events` `score`·`sudden_death` | 기본 방식, `timed_duration`, `ringout_credit_time`, 팀전 아군 공격 기본값 |
-| Q20 | **방어 수단을 쓰나?** — 스타일·캐릭터·입력 장치별 회피(구르기·공중)·퍼펙트 가드 빈도, 경기 분당 사용량, 쓰는 사람의 승률 | `match_players` / `match_ended.players[]` `dodges_roll`·`dodges_air`·`perfect_guards`·`guards`·`style`·`character`·`input_device`·`result`, `match_events` `dodge`·`perfect_guard` | 회피·퍼펙트 가드 판정 창(`perfect_guard_ticks`·`roll_*`), 튜토리얼에 방어 미션 추가, 봇이 회피를 쓰게 할지 |
+| Q20 | **방어 수단을 쓰나, 통하나?** — 스타일·캐릭터·입력 장치별 회피(구르기·공중)·퍼펙트 가드 빈도, 반응 속도, 방어 결과(가드·퍼펙트·회피 성공·브레이크), 쓰는 사람의 승률 | `match_players` / `match_ended.players[]` `dodges_roll`·`dodges_air`·`perfect_guards`·`guards`·`roll_evades`·`threats_faced`·`reactions`·`reaction_ticks_avg`·`style`·`character`·`input_device`·`result`, `match_events` `dodge`·`perfect_guard` | 회피·퍼펙트 가드 판정 창(`perfect_guard_ticks`·`roll_*`), 튜토리얼에 방어 미션 추가, 봇이 회피를 쓰게 할지 |
 | Q21 | **가드 브레이크가 너무 잦거나 드문가?** 누가 깨나(잡기 대신 압박이 통하나)? | `guard_breaks`·`guard_breaks_caused`, `match_events` `guard_break` (`attacker_slot`), `guard_hit` | `guard_block_mul`·`guard_hold_drain`·`guard_break_stun_ticks` |
-| Q22 | **낙법률·기상 선택·DI 시도율** — 다운에서의 복귀 기술을 배우나(경기 수에 따라 오르나)? | `techs / (techs + knockdowns)`, `getups_*`, `di_inputs / hits_taken`, `matches.user_match_seq`, `match_events` `knockdown`·`tech`·`getup` | 낙법 입력 창, 기상 공격 위력, `di_max_deg`, 튜토리얼·힌트 |
+| Q22 | **낙법률·기상 선택·DI** — 다운에서의 복귀 기술을 배우나(경기 수에 따라 오르나)? DI가 생존을 늘리나? | `techs / (techs + knockdowns)`, `techs / tech_attempts`, `getups_*`, `di_inputs / hits_taken`, `di_perp_avg`, `tumbles_survived / tumbles`, `matches.user_match_seq`, `match_events` `knockdown`·`tech`·`getup` | 낙법 입력 창, 기상 공격 위력, `di_max_deg`, 튜토리얼·힌트 |
+| Q23 | **위험 상황의 선택·팀워크** — 가장자리·고%에서 공격하나 지키나, 그 선택이 생존·승리로 이어지나? 팀전에서 협공이 생기나? | `edge_*`·`high_dmg_*` (`high_dmg_ticks`, `edge_time_ratio`로 정규화), `stock_lost`, `team_assists`, `result` | 넉백 스케일·가장자리 기믹, 팀전 아군 공격·어시스트 보상 |
+| Q24 | **경기 방식 선택 고민** — 어떤 방식을 들여다보고 무엇을 고르나? | `rule_selected.focused`·`browse_count`·`rule` | 기본 방식·정렬, 설명 문구 |
 
 ---
 

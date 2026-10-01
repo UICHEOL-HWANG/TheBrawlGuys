@@ -6,7 +6,8 @@ extends Control
 ## panel centered, 뒤로 bottom left, key hint bottom right). ←/→ (arrows, d-pad, the stick once per
 ## push) move the focus, Z / Enter / Space / pad A confirm, X / Esc / pad B go back; a click or tap
 ## picks a button. Shown again after a later step backed out, the pick is open again. Tracks
-## rule_selected {rule, browse_count} and select_cancelled {screen, dwell_ms}.
+## rule_selected {rule, browse_count, focused} (focused: the distinct rules that had the focus, in
+## order, the default first — candidates vs the pick) and select_cancelled {screen, dwell_ms}.
 
 signal rule_chosen(rule: String)
 signal cancelled
@@ -30,6 +31,7 @@ var _buttons: Array[UiMenuButton] = []
 var _rules: Array[String] = []
 var _focus: int = 0
 var _browse: int = 0
+var _focused: Array[String] = []
 var _shown_ms: int = 0
 var _done: bool = false
 var _back: UiMenuButton
@@ -48,6 +50,7 @@ func _ready() -> void:
 	ArenaSelectLayout.apply_safe_area(_footer, get_viewport())
 	get_viewport().size_changed.connect(func() -> void: ArenaSelectLayout.apply_safe_area(_footer, get_viewport()))
 	visibility_changed.connect(_on_visibility_changed)
+	_note_focused(_focus)
 	_buttons[0].grab_focus.call_deferred()
 
 
@@ -113,7 +116,8 @@ func _choose(i: int) -> void:
 		return
 	_set_focus(i)
 	_done = true
-	track.call("rule_selected", {"rule": _rules[i], "browse_count": _browse})
+	_note_focused(i)
+	track.call("rule_selected", {"rule": _rules[i], "browse_count": _browse, "focused": _focused.duplicate()})
 	rule_chosen.emit(_rules[i])
 
 
@@ -123,6 +127,12 @@ func _set_focus(i: int) -> void:
 	if i != _focus:
 		_browse += 1
 	_focus = i
+	_note_focused(i)
+
+
+func _note_focused(i: int) -> void:
+	if i < _rules.size() and not _focused.has(_rules[i]):
+		_focused.append(_rules[i])
 
 
 ## Shown again after a pick (a later select step backed out to this one): a fresh visit.
@@ -131,6 +141,8 @@ func _on_visibility_changed() -> void:
 		return
 	_done = false
 	_browse = 0
+	_focused.clear()
+	_note_focused(_focus)
 	_stick = StickNav.new()
 	_shown_ms = int(clock_ms.call())
 	_buttons[_focus].grab_focus()
