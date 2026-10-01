@@ -5,7 +5,9 @@ extends GutTest
 ## BEHAVIOR_HASH. So adding styles and specials moved no classic fighter by a single bit.
 ## Combat-depth A deliberately changed every fighter (rolls, guard meter, perfect guard), so the
 ## constant was re-recorded then (Phase 4 value 11665018) with the v7 defense fields stripped too,
-## and again for the defense review's buffered rolls (previous value 2661913497).
+## and again for the defense review's buffered rolls (previous value 2661913497). Combat-depth D
+## (match modes, v9) only adds the "mode" state and fighter ally_mask: stripped here, the stock
+## run is bit-identical.
 
 const R := preload("res://tests/replay/test_replay.gd")
 const DEFENSE_FIELDS: Array[String] = [
@@ -26,10 +28,12 @@ func test_classic_fighters_behave_exactly_like_phase_4() -> void:
 		var s: Dictionary = bytes_to_var(w.snapshot())
 		s.erase("config_fp")
 		s.erase("projectiles")
+		s.erase("mode")
 		s["v"] = PHASE_4_SNAPSHOT_VERSION
 		for f: Dictionary in s["fighters"]:
 			f.erase("character")
 			f.erase("gauge")
+			f.erase("ally_mask")
 			for key: String in DEFENSE_FIELDS:
 				f.erase(key)
 		seq.append(hash(s))

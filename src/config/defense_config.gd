@@ -1,5 +1,5 @@
 class_name DefenseConfig
-extends Resource
+extends ModeConfig
 ## Combat-depth track A defense tunables (PRD §4.3): rolls, air dodges, guard durability and
 ## perfect guard, split out of GameConfig to keep files short. GameConfig extends StyleConfig
 ## extends SpecialConfig extends this, so every value here is a GameConfig value: the debug panel

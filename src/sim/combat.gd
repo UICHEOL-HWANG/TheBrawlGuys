@@ -61,7 +61,7 @@ static func _contacts(fighters: Array[Fighter], book: StyleBook, config: GameCon
 		var yaw := Collision.yaw_of(attacker.facing)
 		var power := attacker.charge_mul if attacker.attack_kind == AttackSet.Kind.HEAVY else 1.0
 		for target: Fighter in fighters:
-			if target == attacker or not target.is_alive() or target.untouchable():
+			if target == attacker or not target.is_alive() or target.untouchable_by(attacker.id):
 				continue
 			if attacker.hit_ids.has(target.id):
 				continue

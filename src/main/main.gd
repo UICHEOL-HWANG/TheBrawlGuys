@@ -121,7 +121,8 @@ func _start_match() -> void:
 	_stage.clear_items()
 	if _world != null and new_seed.is_valid():
 		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
-	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config), setup.characters())
+	_world = World.new(_config, setup.seed, setup.player_count(), setup.build_arena(_config), setup.characters(),
+			setup.build_rules(_config))
 	_bots.clear()
 	for slot: int in setup.bot_slots():
 		_bots.append(BotController.new(slot, _config))

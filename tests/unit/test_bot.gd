@@ -275,3 +275,14 @@ func test_recovers_toward_the_bridge_when_falling_beside_it() -> void:
 	var f := bot.sample(v)
 	assert_lt(f.move_z, 0.0)
 	assert_true(f.jump)
+
+
+func test_team_bot_never_targets_a_teammate() -> void:
+	var view := {"fighters": [
+		{"id": 0, "state": Fighter.State.IDLE, "pos": Vector3(0, 0, 0)},
+		{"id": 1, "state": Fighter.State.IDLE, "pos": Vector3(5, 0, 0)},
+		{"id": 2, "state": Fighter.State.IDLE, "pos": Vector3(1, 0, 0)},
+	], "mode": {"teams": [0, 1, 0]}}
+	assert_eq(int(BotViewQuery.nearest_foe(view, 0, Vector3.ZERO)["id"]), 1, "skips teammate P3")
+	view["mode"] = {"teams": []}
+	assert_eq(int(BotViewQuery.nearest_foe(view, 0, Vector3.ZERO)["id"]), 2, "no teams: nearest")

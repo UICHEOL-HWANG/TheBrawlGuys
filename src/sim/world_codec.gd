@@ -4,13 +4,15 @@ extends RefCounted
 ## every snapshot (context D1). v3 added the Phase 2 fighter fields, v4 the item field, v5 the
 ## arena state and burn fields (Phase 4), v6 the fighter character and special gauge and the
 ## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A), v8
-## guard_rest_ticks (perfect-guard rearm).
+## guard_rest_ticks (perfect-guard rearm), v9 the match mode state and fighter ally_mask
+## (combat-depth D).
 
-const VERSION := 8
+const VERSION := 9
 const TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,
 	"items": TYPE_DICTIONARY, "arena": TYPE_DICTIONARY, "projectiles": TYPE_DICTIONARY,
+	"mode": TYPE_DICTIONARY,
 }
 
 
@@ -22,11 +24,11 @@ static func encode(w: World, rng: RandomNumberGenerator) -> PackedByteArray:
 		"v": VERSION, "tick": w.tick_count, "rng_seed": rng.seed, "rng_state": rng.state,
 		"config_fp": w.config.fingerprint(), "match_over": w.match_over, "winner": w.winner_id,
 		"fighters": data, "items": w.items.to_data(), "arena": w.arena.to_data(),
-		"projectiles": w.projectiles.to_data(),
+		"projectiles": w.projectiles.to_data(), "mode": w.mode_state.to_data(),
 	})
 
 
-## The restored pieces {"s": raw snapshot, "fighters", "items", "arena", "projectiles"} when the
+## The restored pieces {"s": raw snapshot, "fighters", "items", "arena", "projectiles", "mode"} when the
 ## snapshot fits World w, else {} (with an error pushed).
 static func decode(w: World, data: PackedByteArray) -> Dictionary:
 	var s := _checked(w, data)
@@ -46,10 +48,14 @@ static func decode(w: World, data: PackedByteArray) -> Dictionary:
 		return _fail("invalid projectile data")
 	if not _consistent(restored, projectiles):
 		return _fail("inconsistent fighter or projectile data")
+	var mode := ModeState.from_data(s["mode"], restored.size())
+	if mode == null:
+		return _fail("invalid mode data")
 	var arena := w.arena.copy()
 	if not arena.load_data(s["arena"]):
 		return _fail("invalid arena data")
-	return {"s": s, "fighters": restored, "items": items, "arena": arena, "projectiles": projectiles}
+	return {"s": s, "fighters": restored, "items": items, "arena": arena, "projectiles": projectiles,
+		"mode": mode}
 
 
 ## The snapshot dictionary when version, keys, config and arena match w, else {}.

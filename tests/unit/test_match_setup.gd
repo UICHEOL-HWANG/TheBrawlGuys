@@ -144,3 +144,38 @@ func test_validate_rejects_unknown_characters() -> void:
 	var s := MatchSetup.vs_bots(2, 1)
 	s.slots[1] = s.slots[1].merged({"character": "wizard"}, true)
 	assert_string_contains(s.validate()[0], "character")
+
+
+func test_rule_defaults_to_stock_and_copies() -> void:
+	var s := MatchSetup.vs_bots(2, 1)
+	assert_eq(s.rule, MatchRules.STOCK)
+	s.set_rule(MatchRules.TIMED)
+	assert_eq(s.copy().rule, MatchRules.TIMED)
+
+
+func test_team_rule_fills_four_slots_with_bots() -> void:
+	var s := MatchSetup.local_versus(2, 1)
+	s.set_rule(MatchRules.TEAM)
+	assert_eq(s.player_count(), 4)
+	assert_eq(s.local_slots(), [0, 1] as Array[int], "humans keep their slots")
+	assert_eq(s.bot_slots(), [2, 3] as Array[int])
+	assert_true(s.validate().is_empty(), str(s.validate()))
+	var rules := s.build_rules(GameConfig.new())
+	assert_eq(rules.mode, MatchRules.TEAM)
+	assert_eq(rules.teams, [0, 1, 0, 1] as Array[int])
+
+
+func test_back_to_stock_shrinks_the_line_up() -> void:
+	var s := MatchSetup.vs_bots(2, 1)
+	s.set_rule(MatchRules.TEAM)
+	s.set_rule(MatchRules.STOCK)
+	assert_eq(s.player_count(), MatchSetup.DEFAULT_PLAYERS)
+	assert_eq(s.build_rules(GameConfig.new()).mode, MatchRules.STOCK)
+
+
+func test_validate_rejects_team_without_four_slots() -> void:
+	var s := MatchSetup.vs_bots(2, 1)
+	s.rule = MatchRules.TEAM
+	assert_false(s.validate().is_empty())
+	s.rule = "nope"
+	assert_string_contains(s.validate()[0], "rule")

@@ -65,8 +65,10 @@ static func clear_actions(f: Fighter) -> void:
 
 
 ## Ring-outs this tick. Each "ringout" event says which bound was crossed ("zone": "kill_y",
-## "blast" or a ring-out zone tag such as "lake" / "water").
-static func apply(fighters: Array[Fighter], config: GameConfig, arena: ArenaData) -> Array[Dictionary]:
+## "blast" or a ring-out zone tag such as "lake" / "water"). infinite_stocks (timed mode) respawns
+## without spending a stock.
+static func apply(fighters: Array[Fighter], config: GameConfig, arena: ArenaData,
+		infinite_stocks: bool = false) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	for f: Fighter in fighters:
 		if not f.is_alive():
@@ -75,7 +77,8 @@ static func apply(fighters: Array[Fighter], config: GameConfig, arena: ArenaData
 		if zone.is_empty():
 			continue
 		var at := f.pos
-		f.stocks -= 1
+		if not infinite_stocks:
+			f.stocks -= 1
 		if f.stocks > 0:
 			respawn(f, fighters.size(), config, arena)
 		else:

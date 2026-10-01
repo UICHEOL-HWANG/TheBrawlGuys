@@ -47,7 +47,7 @@ func contacts(f: Fighter, fighters: Array[Fighter], a: AttackData, c: GameConfig
 	var yaw := Collision.yaw_of(f.facing)
 	var found: Array[Dictionary] = []
 	for t: Fighter in fighters:
-		if t == f or not t.is_alive() or t.untouchable() or f.hit_ids.has(t.id):
+		if t == f or not t.is_alive() or t.untouchable_by(f.id) or f.hit_ids.has(t.id):
 			continue
 		if Collision.capsule_hits_box(t.pos, c.fighter_radius, c.fighter_height, center, yaw, a.hitbox_half):
 			found.append(SpecialHits.contact(f, t, numbers, f.facing, center))
