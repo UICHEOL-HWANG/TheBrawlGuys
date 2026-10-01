@@ -2,9 +2,10 @@ class_name App
 extends Node
 ## App shell and main scene (platform B1, PRD §6.5, design.md DS-LAY-03): the menu backdrop keeps
 ## brawling behind a screen stack — login (skipped when a stored session is restored) → title →
-## select screens (SELECT_STEPS: rule, character, arena) → match — and the app owns the
-## login gate. Each select screen (SelectScreens) fills the MatchSetup that mode select starts. Entering a match
-## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
+## select screens (SELECT_STEPS: rule, character, arena) → match, or 온라인 → OnlineFlow (Phase 6
+## lobby) — and the app owns the login gate. Each select screen (SelectScreens) fills the
+## MatchSetup that mode select starts. Entering a match swaps the backdrop out under the curtain;
+## 메뉴로 on the result banner goes back to the title.
 ## First sign-in on a device → onboarding tutorial (Phase 5 T11, also 튜토리얼 다시 보기) → title.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
@@ -128,12 +129,17 @@ func _on_mode_chosen(mode: String) -> void:
 	if _router.is_busy():
 		return  # a key press on the title while a curtain (e.g. the first-login tutorial) comes down
 	track.call("mode_selected", {"mode": mode})
+	if mode == MatchSetup.MODE_ONLINE:
+		OnlineFlow.open(self, gate, track, func(scene: Node) -> void:
+			scene.connect("menu_requested", _back_to_title)
+			_router.push(MATCH, scene, true, _detach_backdrop), _show_login.bind("online"))
+		return
 	var setup := new_setup(mode)
 	if setup != null:
 		_select_step(setup, 0)
 
 
-## A new match setup for mode with its own seed, or null (온라인: shown disabled until Phase 6).
+## A new local match setup for mode with its own seed, or null (온라인 goes through OnlineFlow).
 func new_setup(mode: String) -> MatchSetup:
 	match mode:
 		MatchSetup.MODE_BOT:

@@ -90,7 +90,7 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	var title := app.router().current() as TitleScreen
 	await wait_process_frames(1)
 	assert_false(title.mode_button(MatchSetup.MODE_LOCAL_2P).disabled, "로컬 2인 is live on desktop")
-	assert_true(title.mode_button(MatchSetup.MODE_ONLINE).disabled)
+	assert_false(title.mode_button(MatchSetup.MODE_ONLINE).disabled, "온라인 is live (Phase 6 lobby)")
 	title.mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
 	_pick_rule(app)

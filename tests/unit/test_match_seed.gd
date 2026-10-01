@@ -22,7 +22,7 @@ func test_two_setups_from_the_app_get_different_seeds() -> void:
 	assert_ne(a.seed, b.seed, "a new seed per match")
 	assert_ne(a.seed, MatchSetup.DEFAULT_SEED)
 	assert_eq(app.new_setup(MatchSetup.MODE_LOCAL_2P).mode, MatchSetup.MODE_LOCAL_2P)
-	assert_null(app.new_setup(MatchSetup.MODE_ONLINE), "online is not playable yet")
+	assert_null(app.new_setup(MatchSetup.MODE_ONLINE), "online setups come from the lobby (OnlineFlow)")
 	app.free()
 
 

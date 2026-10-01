@@ -6,6 +6,11 @@ Spec: docs/superpowers/specs/2026-10-01-online-p2p-design.md · interface: src/n
   - Measured: 4-player snapshot raw 6.8 KB → 1.3 KB zstd (≈38 KB/s per client at 30 Hz); INPUTS 31 B
   - Follow-ups (same branch): review fixes (backlog drain folds presses, hostile byte clamps, events filter/cap, BYE flush/graceful close, lost(reason) host_left|room_full|timeout, HELLO resend + 5 s join timeout); NetClockSync (host reports per-slot queue in SNAPSHOT, client scales its clock ±2 %; 1 % drift over 60 s → 0 starved / 0 folded); telemetry schema 9 (NetSummary on match_ended/abandoned + matches, players[]/match_players disconnect_reason, migration 0007_online_stats.sql); one match_id for host + clients; clients upload no Supabase rows
   - Lobby API: host `var m := NetMatch.new(); m.host_match(transport, setup, {peer_id: slot}); add_child(m)` (setup: host slot "local", humans "remote", rest "bot"); client `m.join_match(transport)` (setup comes in WELCOME). Signals: menu_requested, connection_lost("host_left"). `net_stats()` → {net_host, rtt_p50, rtt_p95, corrections, disconnects} for N2 telemetry (no schema bump yet)
-- [ ] N2 WebRTC transport + Supabase Realtime signaling + rooms migration 0005 + lobby/waiting-room UI + tracking (feat/online-lobby)
+- [x] N2 WebRTC transport + Supabase Realtime signaling + rooms migration 0005 + lobby/waiting-room UI + tracking (feat/online-lobby)
+  - src/net/webrtc (WebRtcTransport, WebRtcPeerLink, WebRtcSupport), src/net/signaling (PhoenixMessage, RealtimeChannel, WsPort, RoomSignaling), src/net/rooms (RoomCode, RoomsApi)
+  - src/app/online (LobbyModel, RoomPeers, OnlineRoom, OnlineFlow, **OnlineStart = the N3 seam: replace its body with NetMatch**), screens OnlineMenuScreen / WaitingRoomScreen, components RoomCodeInput (DS-CMP-11) / ConnectionBadge (DS-CMP-13)
+  - verified: live Realtime smoke `godot --headless --path . -s scripts/smoke_realtime.gd` PASS; real browser WebRTC (web export, two transports in one page) PASS, rtt ~22 ms
+  - known limits: Realtime join uses the access token captured at join (no mid-lobby token refresh; tokens last ~1 h); `reject` before the host is pinned is trusted (public channel, anyone with the code could kick a joining client); Toast (DS-CMP-13) not built
+  - user: run supabase/migrations/0005_rooms.sql; Realtime broadcast must be on (default). Lobby `start` broadcast carries {seed, state}; clients call OnlineStart.begin on it.
 - [ ] N3 integrate N1+N2, two-tab browser e2e on deploy
 - [ ] N4 desktop/Android webrtc-native plugin (needs download approval)

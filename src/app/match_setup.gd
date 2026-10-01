@@ -13,7 +13,7 @@ const MODE_ONLINE := "online"
 const ARENA_DEFAULT := ArenaCatalog.DEFAULT_ID
 const CONTROLLER_LOCAL := "local"
 const CONTROLLER_BOT := "bot"
-## A human on another machine (online, Phase 6): its inputs arrive over the network (src/net).
+## Online (Phase 6): a human on another device; its inputs arrive over the network (src/net).
 const CONTROLLER_REMOTE := "remote"
 const CONTROLLERS: Array[String] = [CONTROLLER_LOCAL, CONTROLLER_BOT, CONTROLLER_REMOTE]
 const INPUT_BOT := "bot"

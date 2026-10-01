@@ -10,6 +10,7 @@ Supabase CLI를 쓰지 않으므로 대시보드에서 직접 실행한다.
 2. `migrations/0001_match_telemetry.sql` 내용을 전부 붙여넣고 **Run**
 3. 같은 방법으로 `migrations/0002_replay_and_features.sql`, `migrations/0003_special_hits.sql`을 **Run** (0001 다음에, 순서대로)
    - ⚠️ **0003은 이벤트 스키마 4 빌드(필살기 트래킹)를 배포하기 전에 적용**한다 — 없으면 `special_hits` 열 때문에 `match_players` insert 전체가 실패해 경기 기록이 통째로 빠진다
+   - **0005 (`rooms`, Phase 6 온라인)**: 온라인 로비 빌드를 배포하기 전에 적용. 없으면 "방 만들기"가 실패한다. 방장만 자기 방을 쓰고, 로그인한 사용자는 열린 방을 코드로 읽는다. 만료 방 정리는 `select public.cleanup_rooms();`(pg_cron 예시는 SQL 주석). 시그널링은 Realtime 브로드캐스트 채널 `realtime:room:<코드>`(공개 채널, 기본 켜짐)를 쓴다 — 대시보드에서 Realtime을 꺼 두지 않았는지 확인
 4. **Table Editor**에서 다섯 테이블(`profiles`·`matches`·`match_players`·`match_events`·`match_inputs`)이 보이고, 각 테이블에 `RLS enabled` 표시가 있는지 확인
 5. **Authentication → Policies**에서 테이블마다 정책이 보이는지 확인
 

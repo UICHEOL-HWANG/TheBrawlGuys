@@ -44,6 +44,19 @@ func url() -> String:
 	return _url
 
 
+func anon_key() -> String:
+	return _anon_key
+
+
+func transport() -> HttpTransport:
+	return _transport
+
+
+## then(ok, status, message) once the access token is fresh (refreshed first when near expiry).
+func fresh_token(then: Callable) -> void:
+	_with_fresh_token(then)
+
+
 func exchange_pkce(auth_code: String, code_verifier: String, done: Callable) -> void:
 	_token_grant("pkce", {"auth_code": auth_code, "code_verifier": code_verifier}, done)
 

@@ -11,12 +11,17 @@ const MAX_PORT := 65535
 ## Supabase secret-key prefix (new key format); never valid in a client.
 const SECRET_KEY_PREFIX := "sb_secret_"
 const SERVICE_ROLE := "service" + "_role"
+## Online (Phase 6): public STUN always; TURN servers only when [net] turn_urls is set.
+const DEFAULT_STUN := "stun:stun.l.google.com:19302"
 
 var amplitude_api_key: String = ""
 var supabase_url: String = ""
 var supabase_anon_key: String = ""
 var redirect_web: String = ""
 var loopback_port: int = DEFAULT_LOOPBACK_PORT
+var turn_urls: PackedStringArray = PackedStringArray()
+var turn_username: String = ""
+var turn_credential: String = ""
 
 
 static func load_from(path: String = DEFAULT_PATH) -> Secrets:
@@ -43,6 +48,10 @@ static func from_config(cfg: ConfigFile) -> Secrets:
 		push_warning("Secrets: auth.loopback_port %d outside %d-%d, using %d"
 				% [s.loopback_port, MIN_PORT, MAX_PORT, DEFAULT_LOOPBACK_PORT])
 		s.loopback_port = DEFAULT_LOOPBACK_PORT
+	for url: String in _text(cfg, "net", "turn_urls").split(",", false):
+		s.turn_urls.append(url.strip_edges())
+	s.turn_username = _text(cfg, "net", "turn_username")
+	s.turn_credential = _text(cfg, "net", "turn_credential")
 	if is_service_key(s.supabase_anon_key):
 		push_error("Secrets: supabase.anon_key is a service-role/secret key — refused. Use the anon/publishable key.")
 		s.supabase_anon_key = ""

@@ -29,6 +29,8 @@ func test_validate_reports_problems() -> void:
 	s = MatchSetup.vs_bots(2, 1)
 	s.slots[1]["controller"] = "alien"
 	assert_string_contains(s.validate()[0], "controller")
+	s.slots[1]["controller"] = MatchSetup.CONTROLLER_REMOTE
+	assert_eq(s.validate().size(), 0, "online: a human on another device")
 	s = MatchSetup.vs_bots(2, 1)
 	s.slots[1]["slot"] = 5
 	assert_string_contains(s.validate()[0], "slot")

@@ -26,7 +26,7 @@ func _ready() -> void:
 	_font = load(DS.FONT_BODY_PATH) as Font
 	_field = LineEdit.new()
 	_field.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_field.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+	_field.virtual_keyboard_type = _keyboard_type()
 	_field.flat = true
 	for style: String in ["normal", "focus", "read_only"]:
 		_field.add_theme_stylebox_override(style, StyleBoxEmpty.new())
@@ -89,7 +89,7 @@ func set_preview() -> void:
 
 
 func _on_text_changed(text: String) -> void:
-	var clean := digits(text)
+	var clean := _clean(text)
 	if clean != text:
 		_field.text = clean
 		_field.caret_column = clean.length()
@@ -99,6 +99,15 @@ func _on_text_changed(text: String) -> void:
 	code_changed.emit(clean)
 	if clean.length() == LENGTH:
 		completed.emit(clean)
+
+
+## What the field keeps of typed / pasted text (RoomCodeInput keeps room-code letters).
+func _clean(text: String) -> String:
+	return digits(text)
+
+
+func _keyboard_type() -> LineEdit.VirtualKeyboardType:
+	return LineEdit.KEYBOARD_TYPE_NUMBER
 
 
 ## Focus changes never override error or disabled.

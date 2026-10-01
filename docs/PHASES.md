@@ -368,6 +368,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [ ] 재조정 비용 계측 → PRD §5.6 기준 초과 시 GDExtension 판단 `[PRD-NFR-02]` — 데스크톱 헤드리스 4인 15틱 3.1ms(기준 통과), 웹·모바일 실측 남음
 
 **6b — 로비·배포**
+- [x] (P2P 전환, 2026-10-01) WebRTC 전송 `WebRtcTransport`(협상 채널 2개, 방장 별 구조, ping rtt) + Supabase Realtime 시그널링(Phoenix 클라이언트, hello/offer/answer/ice/leave) + `rooms` 마이그레이션 0005 + 온라인 메뉴·대기실 + 로비 트래킹(스키마 9). 경기 연결은 `OnlineStart.begin` 한 곳 `[PRD-NET-03]` `[PRD-DATA-02]`
 - [ ] 방 코드 생성·입장, 최대 4인, 빈 방 자동 종료, 로비 HTTP API `[PRD-NET-03]`
 - [ ] Supabase `rooms` 테이블(코드·서버 주소·인원·만료) + 만료 방 정리, 서버·클라이언트 연동 (프로젝트 자리 확보 선행) `[PRD-DATA-02]`
 - [ ] 서버 Docker 이미지, Fly.io/VPS 배포 `[PRD-PLT-04]` (웹 빌드 Vercel 배포는 Phase 4.0으로 이동)
@@ -375,15 +376,16 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 
 ### 🎨 DS 트랙
 
-- [ ] `RoomCodeInput` (대문자 6자리, 붙여넣기, 모바일 키패드) `[DS-CMP-11]`
-- [ ] `PlayerSlot` 온라인 상태 (대기 · 준비 · 연결 끊김) `[DS-CMP-10]`
-- [ ] `Toast` / 연결 상태 인디케이터 (핑 표시) `[DS-CMP-13]`
+- [x] `RoomCodeInput` (대문자 6자리, 붙여넣기, 모바일 키보드) `[DS-CMP-11]`
+- [x] `PlayerSlot` 온라인 상태 (대기 · 준비 · 연결 끊김) `[DS-CMP-10]`
+- [ ] `Toast` / 연결 상태 인디케이터 (핑 표시) `[DS-CMP-13]` — `ConnectionBadge`(연결 중 · 연결됨+ping · 실패) 완료, Toast 남음
 - [ ] 설정 화면: 화면 흔들림 강도, 진동, 터치 버튼 크기·위치 편집, 색각 모드 — `user://settings.cfg`에 저장 `[DS-A11Y-01~03]` `[PRD-DATA-01]`
 - [ ] DS v1.0 동결: 토큰·컴포넌트 목록 확정, design.md 추적표 갱신 `[DS-GOV-03]`
 
 ### 테스트
 
 - 단위: 프로토콜 인코드/디코드 라운드트립
+- 단위(6b 로비): Phoenix 프레임·하트비트, 시그널링 상태 기계, 방 코드, 로비 모델·대기실, 가짜 피어로 WebRTC 채널 매핑 (`test_realtime_channel` · `test_room_signaling` · `test_rooms_api` · `test_lobby_model` · `test_online_room` · `test_online_screens` · `test_webrtc_transport`) · 실서버 스모크 `scripts/smoke_realtime.gd`
 - 통합: 헤드리스 서버 + 헤드리스 클라이언트 2개, 스크립트 입력 → 서버와 클라이언트 최종 상태 일치
 - 네트워크: RTT 150ms / 손실 5% 시뮬레이션에서 재조정 오차 측정
 
