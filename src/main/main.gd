@@ -1,14 +1,11 @@
 extends Node
-## Match scene: fixed 60 Hz sim loop + interpolated rendering (docs/PRD.md §5.4) for the MatchSetup
-## it is given (platform B1; rule = stock/team/timed) — local keyboard/touch/pad (up to two humans,
-## PRD-LOCAL-01) or a bot per slot, items, HUD, result, restart and telemetry; camera, feel and sound
-## live in MatchPresentation. The app shell sets `setup` and `menu_available` before adding it.
+## Match scene (PRD §5.4, platform B1): fixed 60 Hz sim + interpolated rendering of a MatchSetup — local
+## players (PRD-LOCAL-01) or bots, items, HUD, result, restart, telemetry; camera, feel and sound live in
+## MatchPresentation; NetMatch (src/net) extends it online. The app sets `setup` and `menu_available`.
 
 signal menu_requested
 
 const CONFIG_PATH := "res://src/config/default_config.tres"
-const SEED := MatchSetup.DEFAULT_SEED
-const PLAYER_COUNT := MatchSetup.DEFAULT_PLAYERS
 ## Default setup slots; debug scenes that extend this script address fighters by them.
 const LOCAL_PLAYER := 0
 const BOT_PLAYER := 1
@@ -16,8 +13,7 @@ const BOT_PLAYER := 1
 var setup: MatchSetup = null
 ## Shows "메뉴로" on the result banner (only when an app shell can take the player back).
 var menu_available: bool = false
-## Seed for each rematch (the App passes MatchSeed.fresh); empty = rematches replay setup.seed
-## (perf / debug scenes, main.tscn alone).
+## Seed for each rematch (App: MatchSeed.fresh); empty = rematches replay setup.seed (debug scenes).
 var new_seed: Callable = Callable()
 
 var _config: GameConfig
@@ -49,7 +45,7 @@ func _ready() -> void:
 		set_process(false)
 		return
 	if setup == null:
-		setup = MatchSetup.vs_bots(_player_count(), SEED)
+		setup = MatchSetup.vs_bots(_player_count(), MatchSetup.DEFAULT_SEED)
 	InputBindings.apply()
 	_ticker = FixedTicker.new(_config.max_ticks_per_frame)
 	_config.changed.connect(func() -> void: _ticker.max_ticks_per_frame = _config.max_ticks_per_frame)
@@ -95,7 +91,7 @@ func _new_tracking() -> MatchTracking:
 
 ## Fighter count of the default setup; scenes that extend main override it (perf_match uses four).
 func _player_count() -> int:
-	return PLAYER_COUNT
+	return MatchSetup.DEFAULT_PLAYERS
 
 
 func get_world() -> World:
@@ -155,10 +151,7 @@ func _process(delta: float) -> void:
 	for i: int in ticks:
 		_prev_state = _curr_state
 		var inputs := _gather_inputs()
-		var started := Time.get_ticks_usec()
-		_world.tick(inputs)
-		_stats.add_sim_cost(Time.get_ticks_usec() - started)
-		_curr_state = _world.state_view()
+		_step(inputs)
 		var tick_view_events := ViewEvents.detect(_prev_state["fighters"], _curr_state["fighters"], _config)
 		events.append_array(_curr_state["events"])
 		view_events.append_array(tick_view_events)
@@ -180,6 +173,14 @@ func _process(delta: float) -> void:
 	_tracking.on_frame_time(delta)
 	if _panel != null:
 		_panel.set_info(_stats.info(_world.tick_count, _alpha))
+
+
+## One sim tick on the gathered inputs, leaving its view in _curr_state (NetMatch clients predict).
+func _step(inputs: Array[InputFrame]) -> void:
+	var started := Time.get_ticks_usec()
+	_world.tick(inputs)
+	_stats.add_sim_cost(Time.get_ticks_usec() - started)
+	_curr_state = _world.state_view()
 
 
 ## After each sim tick (_curr_state is its view); scenes that extend main hook in here.

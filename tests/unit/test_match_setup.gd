@@ -27,7 +27,7 @@ func test_validate_reports_problems() -> void:
 	var s := MatchSetup.new()
 	assert_gt(s.validate().size(), 0, "no slots")
 	s = MatchSetup.vs_bots(2, 1)
-	s.slots[1]["controller"] = "remote"
+	s.slots[1]["controller"] = "alien"
 	assert_string_contains(s.validate()[0], "controller")
 	s = MatchSetup.vs_bots(2, 1)
 	s.slots[1]["slot"] = 5
