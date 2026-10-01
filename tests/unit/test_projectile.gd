@@ -74,8 +74,9 @@ func test_bolt_expires_at_the_end_of_its_range() -> void:
 	assert_eq(_of(events, "projectile_expire").size(), 1)
 	assert_eq(_of(events, "projectile_hit").size(), 0)
 	var expire := _of(events, "projectile_expire")[0]
-	var flown := (expire["pos"] as Vector3).x - (-2.0)
-	assert_almost_eq(flown, w.config.bolt_range, 0.8, "flies about bolt_range")
+	var spawn := _of(events, "projectile_spawn")[0]
+	var flown := (expire["pos"] as Vector3).x - (spawn["pos"] as Vector3).x
+	assert_almost_eq(flown, w.config.bolt_range, w.config.bolt_speed * SimTime.TICK_DT, "flies bolt_range from where it spawned")
 
 
 func test_heavy_fires_a_heavy_bolt_after_the_charge() -> void:

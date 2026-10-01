@@ -12,10 +12,10 @@ const HALF := 1200
 const WAYPOINT_TICKS := 240
 const ARRIVED := 0.3
 const ARENA_HASHES := {
-	"lakeside_camp": 2762646038,
-	"log_bridge": 2627133268,
-	"mushroom_forest": 953529299,
-	"foggy_forest": 407990245,
+	"lakeside_camp": 3776516640,
+	"log_bridge": 519169430,
+	"mushroom_forest": 2039657915,
+	"foggy_forest": 1400172160,
 }
 const TOURS := {
 	"lakeside_camp": [Vector3(-4.0, 0, -3.5), Vector3(0, 0, 0), Vector3(8.5, 0, 0)],

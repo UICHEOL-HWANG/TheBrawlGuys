@@ -37,8 +37,8 @@ extends SpecialConfig
 @export_range(1.0, 20.0, 0.1) var ranged_move_speed: float = 5.6
 @export_range(1.0, 25.0, 0.1) var ranged_jump_velocity: float = 9.0
 @export_range(0.0, 80.0, 0.5) var ranged_air_acceleration: float = 20.0
-@export_range(0.3, 2.0, 0.05) var ranged_knockback_taken: float = 1.1
-@export_range(0.0, 30.0, 0.5) var bolt_damage: float = 3.5
+@export_range(0.3, 2.0, 0.05) var ranged_knockback_taken: float = 1.2
+@export_range(0.0, 30.0, 0.5) var bolt_damage: float = 3.0
 @export_range(0.0, 30.0, 0.1) var bolt_base_knockback: float = 2.5
 @export_range(0.0, 0.5, 0.005) var bolt_knockback_scaling: float = 0.04
 @export_range(0.0, 2.0, 0.05) var bolt_launch_angle_y: float = 0.4
@@ -46,7 +46,7 @@ extends SpecialConfig
 @export_range(0, 30, 1) var bolt_startup_ticks: int = 6
 @export_range(1, 60, 1) var bolt_recovery_ticks: int = 10
 @export_range(1.0, 40.0, 0.5) var bolt_speed: float = 14.0
-@export_range(1.0, 30.0, 0.5) var bolt_range: float = 7.0
+@export_range(1.0, 30.0, 0.5) var bolt_range: float = 6.0
 @export_range(0.05, 1.5, 0.05) var bolt_radius: float = 0.3
 @export_range(0.1, 3.0, 0.05) var heavy_bolt_damage_mul: float = 0.9
 @export_range(1.0, 40.0, 0.5) var heavy_bolt_speed: float = 11.0

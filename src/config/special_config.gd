@@ -54,7 +54,7 @@ extends DefenseConfig
 
 @export_group("SpecialFireball")
 ## Mage "big fireball": a slow projectile that explodes on contact or at the end of its range.
-@export_range(0.0, 40.0, 0.5) var fireball_damage: float = 16.0
+@export_range(0.0, 40.0, 0.5) var fireball_damage: float = 13.0
 @export_range(0.0, 30.0, 0.1) var fireball_base_knockback: float = 8.0
 @export_range(0.0, 0.5, 0.005) var fireball_knockback_scaling: float = 0.11
 @export_range(0.0, 3.0, 0.05) var fireball_launch_angle_y: float = 0.7
