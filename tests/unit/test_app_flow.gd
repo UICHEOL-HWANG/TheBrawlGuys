@@ -63,6 +63,14 @@ func _props(event_name: String) -> Array[Dictionary]:
 	return out
 
 
+## The rule select step (combat-depth D): picks rule (stock by default) and returns the screen.
+func _pick_rule(app: App, rule: String = MatchRules.STOCK) -> RuleSelectScreen:
+	assert_eq(app.router().current_id(), App.RULE, "after the mode: the match rule")
+	var screen := app.router().current() as RuleSelectScreen
+	screen.buttons()[screen.rule_ids().find(rule)].pressed.emit()
+	return screen
+
+
 func test_the_app_is_the_main_scene() -> void:
 	assert_eq(ProjectSettings.get_setting("application/run/main_scene"), "res://src/app/app.tscn")
 
@@ -85,7 +93,9 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	assert_true(title.mode_button(MatchSetup.MODE_ONLINE).disabled)
 	title.mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_BOT)
-	assert_eq(app.router().current_id(), App.CHARACTER, "bot match: pick a character first")
+	_pick_rule(app)
+	assert_eq(_props("rule_selected")[0]["rule"], MatchRules.STOCK)
+	assert_eq(app.router().current_id(), App.CHARACTER, "bot match: then pick a character")
 	var chars := app.router().current() as CharacterSelectScreen
 	await wait_process_frames(1)
 	chars.view().cards[2].press()
@@ -132,9 +142,10 @@ func test_backing_out_walks_the_select_steps_back_to_the_title() -> void:
 	await wait_process_frames(2)
 	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
 	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
+	var rules := _pick_rule(app)
 	assert_eq(app.router().current_id(), App.CHARACTER)
 	var viewed := _props("screen_viewed").back() as Dictionary
-	assert_eq([viewed["screen"], viewed["from_screen"]], [App.CHARACTER, App.TITLE])
+	assert_eq([viewed["screen"], viewed["from_screen"]], [App.CHARACTER, App.RULE])
 	var chars := app.router().current() as CharacterSelectScreen
 	await wait_process_frames(1)
 	chars.confirm(0, "keyboard")
@@ -143,9 +154,11 @@ func test_backing_out_walks_the_select_steps_back_to_the_title() -> void:
 	assert_eq(app.router().current_id(), App.CHARACTER, "back from the arena: the character select again")
 	assert_eq(chars.model().state(0), CharacterSelectModel.CHOOSING, "and the pick is open again")
 	chars.cancel(0)
-	assert_eq(app.router().current_id(), App.TITLE, "cancel while choosing leaves")
+	assert_eq(app.router().current_id(), App.RULE, "cancel while choosing goes back to the rule")
+	rules.back()
+	assert_eq(app.router().current_id(), App.TITLE, "and back again leaves")
 	var screens: Array = _props("select_cancelled").map(func(p: Dictionary) -> String: return p["screen"])
-	assert_eq(screens, [App.ARENA, App.CHARACTER])
+	assert_eq(screens, [App.ARENA, App.CHARACTER, App.RULE])
 	assert_true(app.backdrop().is_inside_tree(), "the backdrop never left")
 
 
@@ -157,6 +170,7 @@ func test_local_2p_picks_characters_and_an_arena_then_starts_two_humans() -> voi
 	await wait_process_frames(1)
 	title.mode_button(MatchSetup.MODE_LOCAL_2P).pressed.emit()
 	assert_eq(_props("mode_selected")[0]["mode"], MatchSetup.MODE_LOCAL_2P)
+	_pick_rule(app)
 	assert_eq(app.router().current_id(), App.CHARACTER, "local 2P: both pick a character")
 	var chars := app.router().current() as CharacterSelectScreen
 	await wait_process_frames(1)
@@ -228,3 +242,23 @@ class LoopbackStub extends LoopbackServer:
 
 	func stop() -> void:
 		pass
+
+
+func test_team_rule_starts_a_four_fighter_team_match() -> void:
+	var app := _app(false)
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
+	_pick_rule(app, MatchRules.TEAM)
+	var chars := app.router().current() as CharacterSelectScreen
+	await wait_process_frames(1)
+	chars.confirm(0, "keyboard")
+	assert_eq(_props("character_selected").size(), 4, "team: the human and three bots")
+	await wait_process_frames(1)
+	(app.router().current() as ArenaSelectScreen).cards()[0].press()
+	assert_eq(app.router().current_id(), App.MATCH)
+	var world: World = app.router().current().call("get_world")
+	assert_eq(world.fighters.size(), 4)
+	assert_eq(world.mode_state.rules.mode, MatchRules.TEAM)
+	assert_eq(world.fighters[0].ally_mask, 1 << 2, "P3 is P1's teammate")
+	assert_eq((app.router().current().get("setup") as MatchSetup).rule, MatchRules.TEAM)

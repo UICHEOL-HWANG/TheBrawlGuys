@@ -2,8 +2,8 @@ class_name App
 extends Node
 ## App shell and main scene (platform B1, PRD §6.5, design.md DS-LAY-03): the menu backdrop keeps
 ## brawling behind a screen stack — login (skipped when a stored session is restored) → title →
-## select screens (SELECT_STEPS: character, arena) → match — and the app owns the
-## login gate. Each select screen fills the MatchSetup that mode select starts. Entering a match
+## select screens (SELECT_STEPS: rule, character, arena) → match — and the app owns the
+## login gate. Each select screen (SelectScreens) fills the MatchSetup that mode select starts. Entering a match
 ## swaps the backdrop out under the curtain; 메뉴로 on the result banner goes back to the title.
 ## First sign-in on a device → onboarding tutorial (Phase 5 T11, also 튜토리얼 다시 보기) → title.
 
@@ -15,9 +15,10 @@ const TITLE := "title"
 const MATCH := "match"
 const ARENA := "arena"
 const CHARACTER := "character"
+const RULE := "rule"
 const TUTORIAL := "tutorial"
 ## Select screens between mode select and the match, in order.
-const SELECT_STEPS: Array[String] = [CHARACTER, ARENA]
+const SELECT_STEPS: Array[String] = [RULE, CHARACTER, ARENA]
 
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
@@ -153,22 +154,8 @@ func _select_step(setup: MatchSetup, step: int) -> void:
 
 ## The select screen for a step; `next` continues the flow once it has filled setup.
 func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Control:
-	if step_id == CHARACTER:
-		var chars := CharacterSelectScreen.new()
-		chars.track = track
-		chars.config = _backdrop.config()
-		chars.setup = setup
-		chars.characters_chosen.connect(next)
-		chars.cancelled.connect(func() -> void: _router.pop())
-		return chars
-	assert(step_id == ARENA, "App: no select screen for step '%s'" % step_id)
-	var screen := ArenaSelectScreen.new()
-	screen.track = track
-	screen.config = _backdrop.config()
-	screen.arena_chosen.connect(func(arena_id: String) -> void:
-		setup.arena_id = arena_id
-		next.call())
-	screen.cancelled.connect(func() -> void: _router.pop())
+	var screen := SelectScreens.build(step_id, setup, next, _backdrop.config(), track)
+	screen.connect("cancelled", func() -> void: _router.pop())
 	return screen
 
 

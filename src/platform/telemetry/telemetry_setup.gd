@@ -15,7 +15,7 @@ const CONTEXT_KEYS: Array[String] = ["session_id", "user_match_seq", "loss_strea
 ## config: the match's GameConfig (null leaves config-derived fields null).
 static func from_match_setup(setup: MatchSetup, config: GameConfig = null, context: Dictionary = {}) -> Dictionary:
 	var out := {
-		"match_id": Uuid.v4(), "mode": setup.mode, "arena": setup.arena_id, "seed": setup.seed,
+		"match_id": Uuid.v4(), "mode": setup.mode, "rule": setup.rule, "arena": setup.arena_id, "seed": setup.seed,
 		"local_slot": setup.local_slot(), "started_at": Time.get_datetime_string_from_system(true) + "Z",
 		"build_version": PlatformEnv.app_version(), "platform": PlatformEnv.kind(),
 		"slots": _slots(setup, config),

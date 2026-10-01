@@ -7,13 +7,29 @@ const SECONDS_STEP := 0.01
 const VICTIM_KEYS: Array[String] = ["target", "fighter", "victim"]
 
 
-## "win" | "loss" | "draw" | "abandoned" for one slot. winner is a slot or null.
-static func result(slot: int, over: bool, winner: Variant) -> String:
+## "win" | "loss" | "draw" | "abandoned" for one slot. winner is a slot or null. teams (team
+## mode, view["mode"]["teams"]): the winner's teammates win too.
+static func result(slot: int, over: bool, winner: Variant, teams: Array = []) -> String:
 	if not over:
 		return "abandoned"
 	if winner == null:
 		return "draw"
-	return "win" if int(winner) == slot else "loss"
+	if int(winner) == slot:
+		return "win"
+	var same_team: bool = slot < teams.size() and int(winner) < teams.size() and teams[slot] == teams[int(winner)]
+	return "win" if same_team else "loss"
+
+
+## Per-slot mode fields for match_ended.players[] / match_players: team (team mode) and score
+## (timed); {} in stock so stock rows keep the pre-0004 shape.
+static func mode_fields(view: Dictionary, slot: int) -> Dictionary:
+	var mode: Dictionary = view.get("mode", {})
+	match String(mode.get("rule", MatchRules.STOCK)):
+		MatchRules.TEAM:
+			return {"team": int((mode["teams"] as Array)[slot])}
+		MatchRules.TIMED:
+			return {"score": int((mode["scores"] as Array)[slot])}
+	return {}
 
 
 static func seconds(ticks: int) -> float:

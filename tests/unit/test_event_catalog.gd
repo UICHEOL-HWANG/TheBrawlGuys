@@ -6,7 +6,7 @@ const PLAN_EVENTS: Array[String] = [
 	"session_started", "session_ended", "load_timed", "result_viewed",
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
-	"screen_viewed", "mode_selected", "character_selected", "arena_selected", "select_cancelled",
+	"screen_viewed", "mode_selected", "rule_selected", "character_selected", "arena_selected", "select_cancelled",
 	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
 	"match_started", "match_ended", "match_abandoned", "rematch_clicked",
 	"stock_lost", "special_used", "special_hit", "gauge_full",
@@ -53,8 +53,14 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_the_phase5_tutorial() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 6)
+func test_schema_version_is_bumped_for_match_rules() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 7)
+
+
+func test_match_events_carry_the_rule() -> void:
+	for name: String in ["match_started", "match_ended", "match_abandoned"]:
+		assert_true((EventCatalog.EVENTS[name] as Array).has("rule"), name)
+	assert_eq(EventCatalog.validate("rule_selected", {"rule": "team"}).size(), 0)
 
 
 func test_tutorial_events_carry_the_funnel_step() -> void:
@@ -91,7 +97,7 @@ func test_a8_events_require_their_context() -> void:
 	assert_eq(EventCatalog.validate("session_ended", {"duration_s": 1.0, "matches": 0, "last_screen": ""}).size(), 0)
 	assert_eq(EventCatalog.validate("load_timed", {"stage": "match_load"}).size(), 1, "ms missing")
 	assert_eq(EventCatalog.validate("result_viewed", {"match_id": "m", "dwell_ms": 5, "next": "menu"}).size(), 0)
-	var abandoned := {"match_id": "m", "mode": "bot", "arena": "a", "duration_s": 1.0}
+	var abandoned := {"match_id": "m", "mode": "bot", "rule": "stock", "arena": "a", "duration_s": 1.0}
 	assert_eq(EventCatalog.validate("match_abandoned", abandoned).size(), 2, "stock_diff, ms_since_last_ringout")
 	var perf := {"match_id": "m", "fps_p5": 50.0, "fps_p50": 60.0, "spike_count": 0, "frame_count": 10}
 	assert_eq(EventCatalog.validate("perf_sampled", perf).size(), 0)

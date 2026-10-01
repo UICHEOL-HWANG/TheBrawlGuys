@@ -10,8 +10,10 @@ extends RefCounted
 ## 4 = Phase 5 special events and the match_players.special_hits column, 5 = Phase 5 character
 ## select (character_selected is_bot/input_device, characters reach the sim, character ids and
 ## styles on match_players and match_ended.players[]), 6 = Phase 5 onboarding tutorial funnel
-## (tutorial_started / tutorial_step_completed / tutorial_skipped / tutorial_completed).
-const SCHEMA_VERSION := 6
+## (tutorial_started / tutorial_step_completed / tutorial_skipped / tutorial_completed), 7 =
+## combat-depth D match rules (rule_selected, "rule" on match events, players[] team / score,
+## matches.rule and match_players.team / score from migration 0004).
+const SCHEMA_VERSION := 7
 
 const EVENTS: Dictionary = {
 	# App and session
@@ -37,6 +39,7 @@ const EVENTS: Dictionary = {
 	# Menu funnel
 	"screen_viewed": ["screen"],
 	"mode_selected": ["mode"],
+	"rule_selected": ["rule"],
 	"character_selected": ["slot", "character", "style", "is_bot", "input_device"],
 	"arena_selected": ["arena"],
 	"select_cancelled": ["screen"],
@@ -46,10 +49,10 @@ const EVENTS: Dictionary = {
 	"tutorial_skipped": ["step", "index"],
 	"tutorial_completed": ["total_ms"],
 	# Match
-	"match_started": ["match_id", "mode", "arena", "player_count", "bot_count", "characters", "input_device",
+	"match_started": ["match_id", "mode", "rule", "arena", "player_count", "bot_count", "characters", "input_device",
 		"loss_streak"],
-	"match_ended": ["match_id", "mode", "arena", "result", "winner_slot", "duration_s", "players"],
-	"match_abandoned": ["match_id", "mode", "arena", "duration_s", "stock_diff", "ms_since_last_ringout"],
+	"match_ended": ["match_id", "mode", "rule", "arena", "result", "winner_slot", "duration_s", "players"],
+	"match_abandoned": ["match_id", "mode", "rule", "arena", "duration_s", "stock_diff", "ms_since_last_ringout"],
 	"result_viewed": ["match_id", "dwell_ms", "next"],
 	"rematch_clicked": ["match_id"],
 	# Combat highlights

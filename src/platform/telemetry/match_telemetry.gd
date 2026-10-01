@@ -44,7 +44,7 @@ func begin(setup: Dictionary) -> void:
 		characters.append(s["character"])
 		bots += 1 if bool(s["is_bot"]) else 0
 	var local: Dictionary = setup["slots"][int(setup.get("local_slot", 0))]
-	_emit("match_started", {"mode": setup["mode"], "arena": setup["arena"], "player_count": characters.size(),
+	_emit("match_started", {"mode": setup["mode"], "rule": setup.get("rule", MatchRules.STOCK), "arena": setup["arena"], "player_count": characters.size(),
 		"bot_count": bots, "characters": characters, "input_device": local["input_device"],
 		"loss_streak": _int_or(setup.get("loss_streak"), 0), "user_match_seq": _int_or(setup.get("user_match_seq"), 0)})
 
@@ -86,21 +86,23 @@ func end(view: Dictionary, abandoned: bool = false, final_state_hash: Variant = 
 	var over := bool(view.get("match_over", false)) and not abandoned
 	var winner: Variant = int(view["winner"]) if over and int(view["winner"]) >= 0 else null
 	var ticks := int(view["tick"])
+	var teams: Array = (view.get("mode", {}) as Dictionary).get("teams", [])
 	var players: Array = []
 	for s: SlotStats in _stats:
 		var summary := s.to_summary()
 		var slot_setup: Dictionary = _setup["slots"][s.slot]
 		summary["character"] = slot_setup["character"]
 		summary["style"] = slot_setup["style"]
-		summary["result"] = MatchSummary.result(s.slot, over, winner)
+		summary["result"] = MatchSummary.result(s.slot, over, winner, teams)
 		summary["stocks_left"] = MatchSummary.stocks_left(view, s.slot)
+		summary.merge(MatchSummary.mode_fields(view, s.slot))
 		summary.merge(_features.summary(s.slot, summary, ticks))
 		players.append(summary)
 		_player_rows.append(RawRows.player_row(match_id(), slot_setup, summary))
 	var local_slot := int(_setup.get("local_slot", 0))
-	var local_result := MatchSummary.result(local_slot, over, winner)
+	var local_result := MatchSummary.result(local_slot, over, winner, teams)
 	_match_row = RawRows.match_row(_setup, ticks, winner, local_result, final_state_hash)
-	var props := {"mode": _setup["mode"], "arena": _setup["arena"], "duration_s": MatchSummary.seconds(ticks)}
+	var props := {"mode": _setup["mode"], "rule": _setup.get("rule", MatchRules.STOCK), "arena": _setup["arena"], "duration_s": MatchSummary.seconds(ticks)}
 	if abandoned:
 		props.merge(_features.abandon_context(local_slot, view.get("fighters", []), ticks))
 		_emit("match_abandoned", props)

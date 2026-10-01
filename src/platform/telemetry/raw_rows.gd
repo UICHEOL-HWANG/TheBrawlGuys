@@ -45,6 +45,9 @@ static func match_row(setup: Dictionary, duration_ticks: int, winner_slot: Varia
 	for key: String in HEADER_KEYS:
 		row[key] = setup.get(key)
 	row["config_variant"] = setup.get("config_variant", VARIANT_DEFAULT)
+	var rule := String(setup.get("rule", MatchRules.STOCK))
+	if rule != MatchRules.STOCK:
+		row["rule"] = rule  # matches.rule (migration 0004); stock rows keep the 0003 shape
 	return row
 
 
