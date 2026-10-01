@@ -53,6 +53,8 @@
 | `dda_variant` | enum(on\|off) | 이 기기의 DDA A/B 그룹 (`BotSquadFactory.variant`). 사람이 봇과 붙은 경기가 끝날 때 설정 |
 | `skill_rating` | float? (0..1) | 기기 실력 점수 (`SkillRating`, 경기 끝 반영 후 값). 관측 0회면 null(미평가) |
 | `skill_matches` | int | 실력 점수에 반영된 경기 수 (프로브 단계 판단 기준) |
+| `utm_source`·`utm_medium`·`utm_campaign`·`utm_term`·`utm_content` | str | 이번 실행 웹 페이지 URL의 캠페인 파라미터 (`UtmParams.from_page`, 최대 100자). 없는 키는 보내지 않음 |
+| `initial_utm_*` | str | UTM이 붙은 첫 방문의 값. `InstallInfo.attribution`이 `user://install.cfg`에 한 번만 저장하고 이후 바뀌지 않음 |
 | `viewport_class` | enum(phone\|tablet\|desktop) | 창 짧은 변(CSS px)·터치로 분류 (design.md DS-LAY-04). `app_opened`부터 붙고 창이 바뀌면 갱신 | `event_properties` |
 | `orientation` | enum(portrait\|landscape) | 창 가로·세로 | `event_properties` |
 | `ui_scale` | float | 적용한 2D UI 배율 (`content_scale_factor`, desktop 1.0) | `event_properties` |

@@ -35,6 +35,7 @@ func _ready() -> void:
 	_install = InstallInfo.new()
 	var now_iso := Time.get_datetime_string_from_system(true) + "Z"
 	_client.set_user_properties(_install.properties(now_iso, PlatformEnv.app_version()))
+	_client.set_user_properties(_install.attribution(UtmParams.from_page()))
 	var screen := UiScale.tracking(DisplayProbe.profile())  # UiScaler keeps these current later
 	for key: String in screen:
 		_client.set_super_property(key, screen[key])

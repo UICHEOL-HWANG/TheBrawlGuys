@@ -34,6 +34,21 @@ func properties(now_iso: String, build: String) -> Dictionary:
 	return out
 
 
+## Campaign user properties: this visit's utm_* as given, plus initial_utm_* from the first visit
+## that carried any (stored once, never overwritten).
+func attribution(utm: Dictionary) -> Dictionary:
+	if not utm.is_empty() and not _cfg.has_section_key(INSTALL, "initial_utm_set"):
+		for key: String in utm:
+			_cfg.set_value(INSTALL, "initial_" + key, String(utm[key]))
+		_cfg.set_value(INSTALL, "initial_utm_set", true)
+		_save()
+	var out := utm.duplicate()
+	for key: String in UtmParams.KEYS:
+		if _cfg.has_section_key(INSTALL, "initial_" + key):
+			out["initial_" + key] = String(_cfg.get_value(INSTALL, "initial_" + key))
+	return out
+
+
 ## Counts one match on a device; returns the primary device afterwards.
 func note_device(device: String) -> String:
 	_cfg.set_value(DEVICES, device, int(_cfg.get_value(DEVICES, device, 0)) + 1)
