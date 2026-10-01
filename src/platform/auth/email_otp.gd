@@ -145,7 +145,7 @@ static func _send_failure(status: int, body: String) -> String:
 	var error_code := _error_code(body)
 	if SEND_REFUSED.has(status) and BAD_ADDRESS_ERRORS.has(error_code):
 		return RESULT_INVALID_EMAIL
-	_warn_setup("send", status, error_code)
+	_warn_failure("send", status, body)
 	return RESULT_ERROR
 
 
@@ -155,7 +155,7 @@ static func _verify_failure(status: int, body: String) -> String:
 	var error_code := _error_code(body)
 	if VERIFY_REFUSED.has(status) and not SETUP_ERRORS.has(error_code):
 		return RESULT_WRONG_CODE
-	_warn_setup("verify", status, error_code)
+	_warn_failure("verify", status, body)
 	return RESULT_ERROR
 
 
@@ -164,11 +164,18 @@ static func _error_code(body: String) -> String:
 	return String((parsed as Dictionary).get("error_code", "")) if parsed is Dictionary else ""
 
 
-## 4xx that is not about the player's input: keys, provider, SMTP or captcha settings.
-static func _warn_setup(step: String, status: int, error_code: String) -> void:
-	if status >= 400 and status < 500:
-		push_warning("EmailOtp: %s refused (%d %s) - check the Supabase Email provider, keys and SMTP"
-				% [step, status, error_code])
+## Any failure that is not about the player's input: no response (0), a 5xx, a session-less 200, or a
+## 4xx from keys, provider, SMTP, captcha or hook settings. GoTrue's message says which.
+static func _warn_failure(step: String, status: int, body: String) -> void:
+	var parsed: Variant = JsonSafe.parse(body)
+	var detail := body.left(200)
+	if parsed is Dictionary:
+		var d: Dictionary = parsed
+		var code: Variant = d.get("error_code", d.get("error", ""))
+		var message: Variant = d.get("msg", d.get("message", d.get("error_description", "")))
+		detail = "%s %s" % [code, message]
+	push_warning("EmailOtp: %s failed (%d %s) - check the Supabase Auth logs, Email provider, keys and SMTP"
+			% [step, status, detail.strip_edges()])
 
 
 static func _matches(pattern: String, text: String) -> bool:
