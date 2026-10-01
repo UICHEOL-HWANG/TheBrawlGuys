@@ -1,4 +1,4 @@
-# online — Tasks (Last Updated: 2026-10-01, N1 done)
+# online — Tasks (Last Updated: 2026-10-01, N1+N2 merged, N3 wired)
 Spec: docs/superpowers/specs/2026-10-01-online-p2p-design.md · interface: src/net/net_transport.gd
 - [x] N1 netcode: protocol, loopback transport (lat/loss), host/client session, prediction+reconciliation, interpolation, disconnect→bot (feat/netcode)
   - src/net: protocol.gd (NetProtocol v1) · net_reader · setup_codec · loopback_hub/loopback_transport/net_delay_line · lagged_transport (debug sliders) · host_session + net_roster + remote_slot · client_session + prediction + interpolation · net_stats · net_match (extends main.gd; main.gd got `_step()`)
@@ -12,5 +12,9 @@ Spec: docs/superpowers/specs/2026-10-01-online-p2p-design.md · interface: src/n
   - verified: live Realtime smoke `godot --headless --path . -s scripts/smoke_realtime.gd` PASS; real browser WebRTC (web export, two transports in one page) PASS, rtt ~22 ms
   - known limits: Realtime join uses the access token captured at join (no mid-lobby token refresh; tokens last ~1 h); `reject` before the host is pinned is trusted (public channel, anyone with the code could kick a joining client); Toast (DS-CMP-13) not built
   - user: run supabase/migrations/0005_rooms.sql; Realtime broadcast must be on (default). Lobby `start` broadcast carries {seed, state}; clients call OnlineStart.begin on it.
-- [ ] N3 integrate N1+N2, two-tab browser e2e on deploy
+- [~] N3 integrate N1+N2, two-tab browser e2e on deploy
+  - [x] OnlineStart.begin → NetMatch (host: host_match(transport, setup, slot_map minus own id); client: join_match); connection_lost → menu_requested (no toast yet)
+  - [x] host waits for every lobby player's HELLO (NetRoster.all_joined) up to net_join_wait (5 s) before START, so nobody starts behind
+  - [x] merged: lobby events = schema 10, bot tracking (feat/dda-bots) = schema 11
+  - [ ] deploy after user runs 0004–0007, then two accounts in two browser tabs play one match
 - [ ] N4 desktop/Android webrtc-native plugin (needs download approval)

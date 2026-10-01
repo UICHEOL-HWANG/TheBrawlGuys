@@ -1,7 +1,7 @@
 extends GutTest
 ## A host and a client OnlineRoom end to end (Phase 6) over an in-memory Realtime bus, fake HTTP
 ## (rooms table) and fake WebRTC peers: create → join → hello / offer / answer → connected →
-## picks → start (OnlineStart.begin, a stub for now) → the host leaves. Tracking stays in schema.
+## picks → start (OnlineStart.begin → a NetMatch scene per device) → the host leaves. Tracking stays in schema.
 
 const FakeHttp := preload("res://tests/unit/support/fake_http_transport.gd")
 const FakePeer := preload("res://tests/unit/support/fake_rtc_peer.gd")
@@ -14,6 +14,7 @@ var _rtc: Dictionary = {"host": [], "client": []}
 var _http: Dictionary = {}
 var _left: Array = []
 var _notices: Array = []
+var _scenes: Array = []
 
 
 func before_each() -> void:
@@ -21,6 +22,7 @@ func before_each() -> void:
 	_tracked.clear()
 	_left.clear()
 	_notices.clear()
+	_scenes.clear()
 	_rtc = {"host": [], "client": []}
 
 
@@ -49,6 +51,9 @@ func _room(tag: String) -> OnlineRoom:
 		return p
 	room.left.connect(func(reason: String, message: String) -> void: _left.append([tag, reason, message]))
 	room.notice.connect(func(text: String) -> void: _notices.append([tag, text]))
+	room.match_ready.connect(func(scene: Node) -> void:
+		autofree(scene)
+		_scenes.append([tag, scene]))
 	return room
 
 
@@ -85,9 +90,13 @@ func test_create_join_connect_pick_and_start() -> void:
 	host.peers.pick(CharacterData.KNIGHT, true)
 	assert_true(host.peers.model.can_start())
 	host.start_match()
-	assert_eq(_notices.size(), 2, "every device reached OnlineStart.begin (stub)")
-	assert_true(_notices.has(["host", OnlineStart.PENDING_TEXT]))
-	assert_true(_notices.has(["client", OnlineStart.PENDING_TEXT]))
+	assert_eq(_notices, [], "no device fell back to the lobby")
+	assert_eq(_scenes.size(), 2, "every device got its match scene from OnlineStart.begin")
+	for entry: Array in _scenes:
+		assert_true(entry[1] is NetMatch)
+		assert_eq((entry[1] as NetMatch).is_host(), entry[0] == "host")
+	assert_eq(host.phase(), OnlineRoom.Phase.PLAYING)
+	assert_eq(client.phase(), OnlineRoom.Phase.PLAYING)
 	assert_eq(_events("host"), ["room_created", "room_joined"])
 	assert_eq(_events("client"), ["room_joined"])
 	var patches := (_http["host"] as FakeHttp).requests.filter(func(r: Dictionary) -> bool:

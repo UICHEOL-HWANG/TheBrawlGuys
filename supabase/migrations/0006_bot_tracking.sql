@@ -1,7 +1,7 @@
 -- TheBrawlGuys bot tracking for difficulty ML (PRD-BOT-04~06, docs/tracking-plan.md §3.4.2 / §4.2,
 -- event schema 11). Run after 0004_match_rules.sql (0005 is the online rooms migration; the two
 -- are independent, either order works).
--- Schema 9 sends the columns below on EVERY matches / match_players row (null when not
+-- Schema 11 sends the columns below on EVERY matches / match_players row (null when not
 -- applicable), so until this runs every match upload from a schema 11 build is rejected by
 -- PostgREST (no matches row; players / events / inputs never follow).
 -- Safe to re-run (IF NOT EXISTS; checks added only when missing).

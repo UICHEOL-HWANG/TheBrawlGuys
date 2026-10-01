@@ -8,6 +8,9 @@ extends "res://src/main/main.gd"
 ##   host_match(transport, setup, peer_slots) — setup: host's slot "local", other humans "remote",
 ##       bots "bot"; peer_slots (optional) peer id -> slot from the lobby
 ##   join_match(transport) — the setup arrives in WELCOME; nothing runs until START
+## The host boots once every lobby player said HELLO (or after join_wait_ms, net_join_wait, or
+## when no peer is left), so nobody starts a few hundred ms behind. A client that got WELCOME but
+## no START within start_timeout_ms reports connection_lost(timeout).
 ## No rematch online: the result offers 메뉴로 (menu_requested). Leaving the tree sends BYE; the
 ## transport stays the caller's to close. connection_lost(reason) fires when the connection ends:
 ## ClientSession.LOST_HOST_LEFT, LOST_ROOM_FULL or LOST_TIMEOUT (no WELCOME within 5 s).
@@ -25,6 +28,12 @@ var _host: HostSession = null
 var _client: ClientSession = null
 var _booted: bool = false
 var _started: bool = false
+## Host: ms to wait for the lobby's players before starting without them (-1 = net_join_wait).
+var join_wait_ms: int = -1
+var _join_deadline_ms: int = 0
+## Client: ms from WELCOME to START before giving up (the host waits up to net_join_wait).
+var start_timeout_ms: int = 15_000
+var _booted_at_ms: int = 0
 
 
 func host_match(transport: NetTransport, p_setup: MatchSetup, peer_slots: Dictionary = {}) -> void:
@@ -71,11 +80,22 @@ func _ready() -> void:
 		_client.lost.connect(func(reason: String) -> void: connection_lost.emit(reason))
 		return  # boots in _process once WELCOME brought the setup
 	_host = HostSession.new(_transport, setup, config, Time.get_ticks_msec, _peer_slots)
-	_boot()
+	if join_wait_ms < 0:
+		join_wait_ms = int(config.net_join_wait * 1000.0)
+	_join_deadline_ms = Time.get_ticks_msec() + join_wait_ms
+	_boot_host_when_joined()
+
+
+## Host: WELCOMEs whoever says HELLO, then boots once all are in or the wait ran out.
+func _boot_host_when_joined() -> void:
+	_host.poll()
+	if _host.roster.all_joined() or _transport.peers().is_empty() or Time.get_ticks_msec() >= _join_deadline_ms:
+		_boot()
 
 
 func _boot() -> void:
 	_booted = true
+	_booted_at_ms = Time.get_ticks_msec()
 	if _role == ROLE_CLIENT:
 		setup = _client.setup
 	super._ready()
@@ -110,8 +130,15 @@ func _process(delta: float) -> void:
 				_boot()
 			return
 		if not _client.running:
+			if not _client.gone and Time.get_ticks_msec() - _booted_at_ms >= start_timeout_ms:
+				_client.leave()
+				_client.gone = true  # report once
+				connection_lost.emit(ClientSession.LOST_TIMEOUT)
 			return
 		delta *= _client.tick_rate_scale()
+	elif _host != null and not _booted:
+		_boot_host_when_joined()
+		return
 	elif _host != null and _started:
 		_host.poll()
 	super._process(delta)

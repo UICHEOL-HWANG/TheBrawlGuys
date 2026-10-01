@@ -77,8 +77,8 @@ func _process(_delta: float) -> void:
 		return
 	var now := int(clock_ms.call())
 	_channel.poll(now)
-	if peers == null or _phase == Phase.CLOSED:
-		return
+	if peers == null or _phase == Phase.CLOSED or _phase == Phase.PLAYING:
+		return  # in a match NetMatch polls the transport; the lobby stays quiet
 	peers.signaling.tick(now)
 	peers.transport.service()
 	peers.tick(now)
@@ -179,7 +179,7 @@ func _begin(data: Dictionary) -> void:
 		peers.locked = false
 		if is_host:
 			rooms.update(code, {"status": RoomsApi.STATUS_WAITING})
-		notice.emit(OnlineStart.PENDING_TEXT)
+		notice.emit(OnlineStart.START_FAILED_TEXT)
 		return
 	_phase = Phase.PLAYING
 	match_ready.emit(scene)

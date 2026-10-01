@@ -1,10 +1,10 @@
 # 인수인계 — 다음 세션 시작점
 
 **Last Updated:** 2026-10-01
-**main:** `e96320a` (Phase 5 T1~T11 전부 병합, 1116 테스트·check-all 통과). GitHub push 반영.
-**배포:** https://thebrawlguys.cloud — main `e96320a` 빌드(Vercel `cheorish/thebrawlguys`). 배포는 `scripts/deploy_web.sh`만. 루트 `vercel.json`이 Git 자동 배포를 끔(지우면 push마다 404 — 메모리 `vercel-git-push-overwrites-prod`)
+**main:** 2026-10-01 오후 — 방어·연출·DI/낙법·모드·분석 ML·넷코드(N1)·온라인 로비(N2)·DDA 봇 병합, N3(로비→NetMatch 연결) 커밋. 1384 테스트·check-all 통과. 이벤트 스키마 11 (9 넷 요약, 10 로비, 11 봇 트래킹).
+**배포:** https://thebrawlguys.cloud — 아직 넷코드 이전 빌드(`d8deb68`). ⚠️ 사용자가 Supabase 0004~0007을 실행한 뒤에만 배포(0006 없으면 업로드 전부 거절). 이전 기록: main `e96320a` 빌드(Vercel `cheorish/thebrawlguys`). 배포는 `scripts/deploy_web.sh`만. 루트 `vercel.json`이 Git 자동 배포를 끔(지우면 push마다 404 — 메모리 `vercel-git-push-overwrites-prod`)
 
-새 세션은 이 파일 → `dev/active/{platform,phase-5,combat-depth}/*-context.md` → `*-tasks.md` 순으로 읽고 시작한다.
+새 세션은 이 파일 → `dev/active/online/online-tasks.md`(N3 남은 것) → `dev/active/{platform,phase-5,combat-depth}/*-context.md` → `*-tasks.md` 순으로 읽고 시작한다.
 주의: 같은 main 폴더에서 다른 세션(combat-depth 등)이 동시에 작업할 수 있다 — 병합 전 `git status`와 `.git/MERGE_HEAD`를 확인하고, 남의 미커밋 변경은 사용자 확인 후 처리. 훅이 커밋 메시지를 오인하면 `git commit -F <고유 파일명>`.
 사용자 규칙: 한국어 대화, .gd ≤200줄·함수 <40줄 모듈화(메모리 `modular-short-files`), 커밋 트레일러 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, `--no-verify` 금지(pre-commit 훅이 키 문자열 차단).
 
@@ -38,6 +38,7 @@
 
 ## 4. 사용자가 해야 할 일 (Supabase / 외부)
 
+- [ ] 마이그레이션 0004 → 0005 → 0006 → 0007 실행 (`supabase/README.md`). 끝나면 배포 → 두 계정·두 탭 온라인 대전 확인
 - [x] 마이그레이션 0002·0003 실행 (2026-10-01 확인: special_hits·match_inputs 존재) — 안 하면 경기 기록 업로드 실패(`match_inputs` 테이블 없음 확인됨)
 - [ ] Authentication → URL Configuration: Site URL = `https://thebrawlguys.cloud`, Redirect URLs = `https://thebrawlguys.cloud`, `https://thebrawlguys.cloud/**`, `https://thebrawlguys.vercel.app`, `https://thebrawlguys.vercel.app/**`, `http://127.0.0.1:54321/**`
 - [ ] 이메일 로그인: Email provider 켜기 + 가입 허용, OTP 6자리·600초, Magic Link·Confirm signup 템플릿에 `{{ .Token }}`(템플릿 문구는 feat/email-otp의 platform-context.md), 커스텀 SMTP(Resend 등) — 기본 SMTP는 팀원 주소만

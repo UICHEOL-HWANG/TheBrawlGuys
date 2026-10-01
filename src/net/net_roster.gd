@@ -43,6 +43,11 @@ func connected() -> Array[NetRemoteSlot]:
 	return out
 
 
+## Every remote slot has its player (the lobby's humans all said HELLO).
+func all_joined() -> bool:
+	return _slots.values().all(func(r: NetRemoteSlot) -> bool: return r.connected)
+
+
 ## The connected slot of peer, or null.
 func of_peer(peer: int) -> NetRemoteSlot:
 	for r: NetRemoteSlot in _slots.values():

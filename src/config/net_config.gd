@@ -9,6 +9,8 @@ extends DdaConfig
 @export_range(10, 60, 1) var net_snapshot_hz: int = 30
 ## Seconds a disconnected player's slot waits for a reconnect before a bot takes it over.
 @export_range(0.0, 30.0, 0.5) var net_disconnect_grace: float = 5.0
+## Seconds the host waits for every lobby player's HELLO before the match starts without them.
+@export_range(0.0, 15.0, 0.5) var net_join_wait: float = 5.0
 ## Remote fighters are drawn this far behind the newest snapshot (ms).
 @export_range(0.0, 300.0, 5.0) var net_interp_delay_ms: float = 100.0
 ## Most unacknowledged inputs a client re-simulates after a snapshot (PRD §5.6 budget).
