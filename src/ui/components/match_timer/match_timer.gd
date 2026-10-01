@@ -1,14 +1,15 @@
 class_name MatchTimer
 extends PanelContainer
-## Timed match clock (combat-depth D, design.md DS-CMP-19): a cream pill like DamageCounter with
-## the time left as "1:59" in Jua. The final FINAL_SECONDS turn danger red and bump once per
-## second; sudden death shows "서든 데스" in danger red.
+## Timed match clock (combat-depth D, design.md DS-CMP-20): a cream pill like DamageCounter with
+## a ClockIcon and the time left as "1:59" in Jua, between the HUD strip's two card groups. The
+## final FINAL_SECONDS turn danger red and bump once per second; sudden death shows "서든 데스".
 
 const FINAL_SECONDS := 10
 const BUMP_SCALE := 1.2
 const SUDDEN_DEATH_TEXT := "서든 데스"
 
 var _label: Label
+var _icon: ClockIcon
 var _shown_seconds: int = -1
 var _sudden: bool = false
 
@@ -20,7 +21,13 @@ func _ready() -> void:
 	_label.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_L)
 	_label.add_theme_color_override("font_outline_color", DS.CANOPY_DEEP)
 	_label.add_theme_constant_override("outline_size", DS.TEXT_OUTLINE * 2)
-	add_child(_label)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", DS.S2)
+	add_child(row)
+	_icon = ClockIcon.new()
+	_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(_icon)
+	row.add_child(_label)
 	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	set_ticks_left(0)
 
@@ -34,6 +41,7 @@ func set_ticks_left(ticks_left: int, sudden: bool = false) -> void:
 	if final and seconds < _shown_seconds and is_inside_tree():
 		UiMotion.bump(self, BUMP_SCALE)
 	_shown_seconds = seconds
+	_icon.set_seconds(seconds)
 	_sudden = sudden
 	_label.text = SUDDEN_DEATH_TEXT if sudden else clock_text(seconds)
 	_label.add_theme_color_override("font_color", DS.DANGER if final or sudden else DS.UI_SURFACE)

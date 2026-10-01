@@ -5,8 +5,8 @@ extends RefCounted
 const STOPS := [0.0, 50.0, 100.0, 150.0]
 
 
-static func for_percent(p: float) -> Color:
-	var ramp: Array = DS.DAMAGE_RAMP
+## ramp: four colors at STOPS (the PlayerCard bar passes DS.DAMAGE_BAR_RAMP).
+static func for_percent(p: float, ramp: Array = DS.DAMAGE_RAMP) -> Color:
 	if p <= STOPS[0]:
 		return ramp[0]
 	for i: int in range(1, STOPS.size()):

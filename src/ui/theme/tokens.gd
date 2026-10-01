@@ -104,6 +104,11 @@ const TEAM_2 := P2
 
 ## DamageCounter color stops at 0 / 50 / 100 / 150+ percent.
 const DAMAGE_RAMP := [UI_SURFACE, PETAL_YELLOW, FIRE, DANGER]
+## PlayerCard damage bar (DS-CMP-22): green -> yellow -> red over the same 0 / 50 / 100 / 150 stops,
+## on a dim track; the thin special gauge bar under it in petal blue.
+const DAMAGE_BAR_RAMP := [GRASS_MID, PETAL_YELLOW, FIRE, DANGER]
+const BAR_TRACK := UI_SURFACE_DIM
+const GAUGE_BAR := PETAL_BLUE
 
 const PALETTE := {
 	"grass_sun": GRASS_SUN, "grass": GRASS, "grass_mid": GRASS_MID, "grass_shade": GRASS_SHADE,

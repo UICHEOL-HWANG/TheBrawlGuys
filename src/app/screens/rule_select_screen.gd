@@ -18,6 +18,8 @@ const HINT_TEXT := "← → 고르기 · Z / Enter 확정 · X / Esc 뒤로"
 const BACKDROP_FOCUS := Vector2(0.0, 0.42)
 const CONFIRM_KEYS: Array[Key] = [KEY_Z, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]
 const BACK_KEYS: Array[Key] = [KEY_X, KEY_ESCAPE]
+## Compact options (narrower than a menu button) so three fit side by side on phones.
+const OPTION_WIDTH := DS.CARD_WIDTH - DS.S5 * 2
 
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 var clock_ms: Callable = Time.get_ticks_msec
@@ -149,11 +151,14 @@ func _option(e: Dictionary) -> Control:
 	col.add_theme_constant_override("separation", DS.S2)
 	var b := UiMenuButton.new()
 	b.text = String(e["title"])
+	b.ready.connect(func() -> void: b.custom_minimum_size.x = OPTION_WIDTH)
 	b.pressed.connect(_choose.bind(i))
 	b.focus_entered.connect(_set_focus.bind(i))
 	col.add_child(b)
 	var caption := ArenaSelectLayout.hint_label(String(e["caption"]))
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caption.custom_minimum_size.x = OPTION_WIDTH
 	caption.add_theme_color_override("font_color", DS.UI_TEXT_SOFT)
 	col.add_child(caption)
 	_buttons.append(b)

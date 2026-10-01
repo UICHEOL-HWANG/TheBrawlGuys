@@ -16,6 +16,8 @@ extends RefCounted
 
 const SEARCH_ITERATIONS := 48
 const REBALANCE_PASSES := 4
+## Head room over fighter_height kept in frame: FighterIdentity's label gap plus the label itself.
+const LABEL_ROOM := 0.9
 
 
 ## Four ground anchors on a circle of radius * share: the part of the arena always kept in frame.
@@ -25,13 +27,15 @@ static func arena_anchors(radius: float, share: float) -> PackedVector3Array:
 
 
 ## The match camera's targets: the anchors of the arena in the view (its reach, state_view's
-## arena_radius; the config radius for views without one) plus every fighter still in play.
+## arena_radius; the config radius for views without one) plus every fighter still in play — its
+## feet and the top of its "P1" label (LABEL_ROOM over its height), so labels stay on screen.
 static func match_targets(view: Dictionary, config: GameConfig) -> PackedVector3Array:
 	var radius := float(view.get("arena_radius", config.arena_radius))
 	var pts := arena_anchors(radius, config.cam_arena_share)
 	for f: Dictionary in view["fighters"]:
 		if int(f["state"]) != Fighter.State.KO:
 			pts.append(f["pos"])
+			pts.append((f["pos"] as Vector3) + Vector3.UP * (config.fighter_height + LABEL_ROOM))
 	return pts
 
 

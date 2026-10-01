@@ -31,11 +31,6 @@ static func team_label(team: int) -> String:
 	return "팀 %d" % (team + 1)
 
 
-## The color a player shows as: the team color in team mode (teams[index]), else the player's.
-static func shown_color(index: int, teams: Array) -> Color:
-	return team_color(int(teams[index])) if index < teams.size() else color(index)
-
-
 static func polygon(shape_id: int, radius: float, center: Vector2 = Vector2.ZERO) -> PackedVector2Array:
 	var count := CIRCLE_SEGMENTS
 	var start := 0.0

@@ -1,7 +1,8 @@
 class_name ScoreBadge
 extends Label
-## Timed match score (combat-depth D, design.md DS-CMP-20): where StockIcons sit in stock
-## matches, "3점" in Jua with the deep-teal outline; bumps when it changes, danger red below 0.
+## Timed match score (combat-depth D, design.md DS-CMP-21): in the PlayerCard where stock
+## matches show StockIcons, "3점" in Jua with the deep-teal outline; bumps when it changes,
+## danger red below 0.
 
 const BUMP_SCALE := 1.3
 

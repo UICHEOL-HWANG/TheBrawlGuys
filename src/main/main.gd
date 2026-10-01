@@ -124,7 +124,7 @@ func _start_match() -> void:
 	_bots.clear()
 	for slot: int in setup.bot_slots():
 		_bots.append(BotController.new(slot, _config))
-	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"])
+	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
 	_result_shown = false
 	_curr_state = _world.state_view()
@@ -167,7 +167,8 @@ func _process(delta: float) -> void:
 	_alpha = _ticker.alpha()
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.on_events(events)
-	_hud.update_from(_curr_state)
+	_hud.update_from(_curr_state, events)
+	_presentation.set_hud_reserve(_hud.reserve())
 	_presentation.present(_curr_state, events, view_events, delta, setup.local_slot(), _touch)
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true

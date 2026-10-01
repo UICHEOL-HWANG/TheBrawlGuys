@@ -12,7 +12,6 @@ var _index: int = 0
 var _shown: int = -1
 var _marker: PlayerMarker
 var _label: Label
-var _tint: Variant = null
 
 
 func _ready() -> void:
@@ -29,7 +28,6 @@ func _ready() -> void:
 	_label.add_theme_constant_override("outline_size", DS.TEXT_OUTLINE * 2)
 	row.add_child(_label)
 	setup(_index)
-	_marker.set_tint(_tint)
 	set_damage(0.0)
 
 
@@ -37,13 +35,6 @@ func setup(index: int) -> void:
 	_index = index
 	if _marker != null:
 		_marker.setup(index, DS.S7)
-
-
-## Team mode: the badge in the team color (null = the player color).
-func set_tint(c: Variant) -> void:
-	_tint = c
-	if _marker != null:
-		_marker.set_tint(c)
 
 
 func set_damage(p: float) -> void:

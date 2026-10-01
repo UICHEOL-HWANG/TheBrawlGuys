@@ -5,14 +5,15 @@ extends HBoxContainer
 const LOST_POP := 1.4
 
 
-func setup(index: int, max_stocks: int) -> void:
+## diameter: marker size (the HUD PlayerCard uses smaller pips).
+func setup(index: int, max_stocks: int, diameter: float = DS.S5) -> void:
 	for child: Node in get_children():
 		child.queue_free()
 		remove_child(child)
 	add_theme_constant_override("separation", DS.S2)
 	for i: int in max_stocks:
 		var m := PlayerMarker.new()
-		m.setup(index, DS.S5)
+		m.setup(index, diameter)
 		add_child(m)
 
 

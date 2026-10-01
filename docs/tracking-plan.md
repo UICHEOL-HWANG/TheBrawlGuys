@@ -40,7 +40,7 @@
 | `locale` | str | `OS.get_locale()` (예: `ko_KR`) | 최상위 `language` |
 | `quality` | enum(low\|medium\|high) | 현재 품질 단계 | `event_properties` |
 | `input_device` | enum(keyboard\|gamepad\|touch) | P1의 마지막 입력 장치 | `event_properties` |
-| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 5 — Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
+| `event_schema_version` | int | `EventCatalog.SCHEMA_VERSION` (현재 7 — combat-depth D 경기 방식: `rule_selected`, 경기 이벤트 `rule`, `players[]` `team`·`score`, `matches.rule`·`match_players.team`·`score`(0004). 6 = 온보딩 튜토리얼. 5 = Phase 5 캐릭터 선택: `character_selected` is_bot·input_device, 캐릭터 id·스타일이 sim·슬롯 요약에 들어감. 4 = 필살기 이벤트·`special_hits` 열). 이벤트 이름·속성·Supabase 행 모양이 바뀔 때마다 올린다 (§7) | `event_properties` |
 
 **사용자 속성** (Amplitude `user_properties`, `InstallInfo`가 `user://install.cfg`에 보관, A8):
 
@@ -94,11 +94,12 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|character\|arena\|lobby\|match\|tutorial\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
+| `screen_viewed` | 화면 스택 전환 완료 | `screen: enum(login\|title\|mode\|rule\|character\|arena\|lobby\|match\|tutorial\|result\|settings)` | `from_screen: str` (이전 화면), `dwell_ms_prev: int` (이전 화면 체류 ms) — `ScreenRouter`가 항상 채운다 | A | 4.0 |
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
+| `rule_selected` | 경기 방식 화면에서 확정 (뒤로 왔다가 다시 고르면 다시 보냄) | `rule: enum(stock\|team\|timed)` | `browse_count: int` (확정 전 옮겨 본 횟수) | A | 5 (스키마 7) |
 | `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
 | `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest)` | `browse_count: int` | A | 4 |
-| `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
+| `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|rule\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
 
 #### 3.3.1 온보딩 튜토리얼 퍼널 (`PRD-UI-02`, Phase 5 T11)
 
@@ -117,9 +118,9 @@
 
 | 이벤트 | 트리거 | 필수 속성 | 선택 속성 | 목적지 | Phase |
 |---|---|---|---|---|---|
-| `match_started` | 첫 틱 진입 | `match_id: str` (uuid), `mode: enum(...)`, `arena: enum(...)`, `player_count: int`, `bot_count: int`, `characters: list<str>` (슬롯 순), `input_device: str` (로컬 슬롯), `loss_streak: int` (이 앱 세션에서 로컬 플레이어의 연속 패배 수, A8) | `user_match_seq: int` (이 설치에서 해당 유저의 n번째 경기, A7) | A + S(`matches`) | 4.0 |
-| `match_ended` | 승패 확정 (스톡 0) | `match_id: str`, `result: enum(win\|loss\|draw)` (P1 기준), `winner_slot: int`, `duration_s: float`, `duration_ticks: int`, `players: list<obj>` (§3.4.1) | `comeback: bool` (P1이 스톡 열세에서 승리) | A + S(`matches`·`match_players`) | 4.0 |
-| `match_abandoned` | 결과 전 재시작·메뉴 이탈·앱 종료 | `match_id: str`, `mode`, `arena`, `duration_s: float`, `stock_diff: int` (로컬 스톡 − 가장 많은 상대 스톡, A8), `ms_since_last_ringout: int` (마지막 링아웃 후 경과, 없으면 -1, A8) | — | A + S | 4.0 |
+| `match_started` | 첫 틱 진입 | `match_id: str` (uuid), `mode: enum(...)`, `rule: enum(stock\|team\|timed)` (스키마 7), `arena: enum(...)`, `player_count: int`, `bot_count: int`, `characters: list<str>` (슬롯 순), `input_device: str` (로컬 슬롯), `loss_streak: int` (이 앱 세션에서 로컬 플레이어의 연속 패배 수, A8) | `user_match_seq: int` (이 설치에서 해당 유저의 n번째 경기, A7) | A + S(`matches`) | 4.0 |
+| `match_ended` | 승패 확정 (스톡 0 · 팀 전멸 · 시간 종료/서든 데스) | `match_id: str`, `rule` (스키마 7), `result: enum(win\|loss\|draw)` (P1 기준, 팀전은 P1 팀이 이기면 win), `winner_slot: int`, `duration_s: float`, `duration_ticks: int`, `players: list<obj>` (§3.4.1) | `comeback: bool` (P1이 스톡 열세에서 승리) | A + S(`matches`·`match_players`) | 4.0 |
+| `match_abandoned` | 결과 전 재시작·메뉴 이탈·앱 종료 | `match_id: str`, `mode`, `rule` (스키마 7), `arena`, `duration_s: float`, `stock_diff: int` (로컬 스톡 − 가장 많은 상대 스톡, A8), `ms_since_last_ringout: int` (마지막 링아웃 후 경과, 없으면 -1, A8) | — | A + S | 4.0 |
 | `result_viewed` | 결과 배너가 닫힐 때 (결과 1회당 1번, A8) | `match_id: str`, `dwell_ms: int` (결과 표시 → 다음 행동), `next: enum(rematch\|menu\|quit)` | — | A | 4.0 (A8) |
 | `rematch_clicked` | 결과 화면 "다시" | `match_id: str` (끝난 경기) | — | A | 4.0 |
 
@@ -138,6 +139,8 @@
 | `whiffs` | int | 헛스윙 (view `attack_kind` 전이 중 hit 없음) | 4.0 |
 | `jumps` | int | `ViewEvents` `jumped` 수 | 4.0 |
 | `ringouts_scored` / `self_destructs` | int | 마지막 가격자로서의 링아웃 / 가격자 없는 낙사 | 4.0 |
+| `team` | int? | 팀전만: 0 = 팀 1(P1·P3), 1 = 팀 2(P2·P4). 다른 방식은 키 없음 (Supabase `match_players.team`, 0004) | 5 (스키마 7) |
+| `score` | int? | 시간제만: 경기 끝 점수(크레딧 링아웃 +1, 자멸 −1, sim `ModeState`). 다른 방식은 키 없음 (Supabase `match_players.score`, 0004) | 5 (스키마 7) |
 | `items_used` | int | 줍기 후 휘두름·투척 | 4.0 |
 | `falls_by_gimmick` | int | 기믹이 원인인 스톡 소모 | 4 |
 | `specials` / `special_hits` | int | 필살기 발동 수 (`special_start`) / 필살기 적중 수 (`special_hit` 원시 이벤트 수 = 대상 × 타수, 돌진 연타의 다단 히트는 한 타마다 센다) | 5 |
@@ -213,15 +216,15 @@
 
 ## 4. Supabase 원시 테이블 (`PRD-DATA-04`)
 
-마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` → `0003_special_hits.sql` (순서대로). 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
+마이그레이션: `supabase/migrations/0001_match_telemetry.sql` → `0002_replay_and_features.sql` → `0003_special_hits.sql` → `0004_match_rules.sql` (순서대로). 0004 전에는 스톡 경기만 올라간다 — 팀전·시간제 행은 `rule`·`team`·`score` 열을 보내서 PostgREST가 거절한다(스톡 행은 0003 모양 그대로 보냄). 모든 테이블은 RLS로 **본인 `user_id` 행만** insert/select 하고 anon은 막는다.
 
 ### 4.1 테이블
 
 | 테이블 | 열 | 설명 |
 |---|---|---|
 | `profiles` | `id uuid pk = auth.uid`, `display_name text`, `created_at timestamptz` | 첫 로그인 시 생성 |
-| `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
-| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
+| `matches` | `id uuid pk`, `user_id uuid`, `mode text`, `arena text`, `player_count int`, `seed bigint`, `started_at timestamptz`, `duration_ticks int`, `winner_slot int`, `result text`, `build_version text`, `platform text` · **재현 헤더 (0002)**: `config_fingerprint bigint` (sim 그룹 `GameConfig.fingerprint()`), `sim_version smallint` (`World.SNAPSHOT_VERSION`), `event_schema_version smallint` (`EventCatalog.SCHEMA_VERSION`), `final_state_hash bigint` (추적 종료 시 `World.state_hash()`), `session_id bigint` (Amplitude 세션), `user_match_seq int` (이 설치에서 해당 유저의 n번째 경기), `config_variant text` (기본 `control`) · **0004**: `rule text` (`stock`\|`team`\|`timed`, 기본 `stock` — `mode`는 조작 모드 `bot`\|`local_2p`\|`online` 그대로) | 경기 1행. 경기 종료(`match_ended`/`match_abandoned`) 후 insert |
+| `match_players` | `match_id uuid fk`, `slot int`, `is_bot bool`, `character text`, `style text`, `input_device text`, `result text`, `stocks_left int`, `damage_dealt real`, `damage_taken real`, `hits int`, `guards int`, `grabs int`, `jumps int`, `whiffs int`, `ringouts_scored int`, `falls int`, `falls_by_gimmick int`, `specials int`, `items_used int` · **0003**: `special_hits int` · **0004**: `team smallint` (팀전만), `score int` (시간제만) · **0002**: `controller text` (`local`\|`bot`\|`remote`), `bot_difficulty text` (봇만, 기본 `normal`), `bot_params_hash bigint` (봇만, Bot 설정 그룹 해시) · **A8 행동 피처 열** (§3.4.1 표, `item_hold_ticks`는 jsonb) · pk(`match_id`, `slot`) | §3.4.1 요약의 저장 형태 |
 | `match_events` | `id bigserial pk`, `match_id uuid fk`, `tick int`, `type text`, `actor_slot int`, `target_slot int`, `payload jsonb` · 인덱스(`match_id`, `type`) | 원시 행동 로그. 경기 종료 시 500행 청크로 insert |
 | `match_inputs` (0002) | `match_id uuid fk`, `slot smallint`, `encoding text`, `frames text`, `frame_count int` · pk(`match_id`, `slot`) | **리플레이 로그(L0)**. 슬롯(사람·봇 모두)의 틱별 `InputFrame`을 변화 시점만(런렝스) 바이너리로 묶어 gzip → base64. `encoding = bgil1+gzip+base64`. `scripts/replay_verify.gd`가 재생해 `final_state_hash`와 대조한다. 슬롯 캐릭터는 `match_players.character`에서 읽는다(`event_schema_version` ≥ 5, 그 전 경기는 클래식으로 재생) |
 
@@ -236,6 +239,7 @@
 | sim | `hit` | attacker / target | `pos`, `knockback`, `power`, `hitstop_ticks`, `attack_kind` (공격자 view의 `AttackSet.Kind` 이름, 텔레메트리가 추가) | 4.0 |
 | sim | `guard_hit` | attacker / target | `pos`, `knockback`, `attack_kind` | 4.0 |
 | sim | `ringout` | id / — | `pos`, `stocks_left`, `cause`, `attacker_slot` (`stock_lost`와 같은 분류, 텔레메트리가 추가) | 4.0 |
+| sim (combat-depth D) | `score` · `sudden_death` | 점수 받은 파이터 / — | `delta` (+1 크레딧 링아웃, −1 자멸), `score` (누계), `victim` · `ids` (서든 데스 동점자) | 5 (스키마 7) |
 | sim | `grab` · `grab_release` | holder / target | `pos` (release는 던짐 방향 포함) | 4.0 |
 | sim | `item_spawn` · `item_pickup` · `item_drop` · `item_throw` · `item_land` · `item_break` | 파이터 / — | `item`, `pos` | 4.0 |
 | sim | `explosion` | 던진 파이터 / — | `pos`, 반경 | 4.0 |
@@ -283,6 +287,7 @@
 | Q16 | **재현 가능한 경기만 분석하고 있나?** (L0 무결성) | `matches` 재현 헤더 (`config_fingerprint`, `sim_version`, `final_state_hash`), `match_inputs`, `scripts/replay_verify.gd` | 불일치 경기 제외, sim 변경 시 버전 관리 |
 | Q17 | **체감 성능이 이탈에 주는 영향** | `perf_sampled` (`fps_p5`, `fps_p50`, `spike_count`, `match_id`로 경기와 조인), `load_timed`, `input_device_primary` | 품질 기본값·최적화 우선순위 |
 | Q18 | **온보딩 튜토리얼** — 어느 미션에서 오래 걸리거나 건너뛰나? 튜토리얼을 끝낸 사람이 첫 경기를 더 완주하나? | `tutorial_started.source`·`input_device`, `tutorial_step_completed` (`index`, `ms_in_step`, `attempts`), `tutorial_skipped.step`, `tutorial_completed.total_ms`, 이어서 `match_started` → `match_ended` / `match_abandoned` (Q4) | 미션 순서·문구·판정 기준(`TutorialDetector`) 조정, 어려운 미션 빼기 |
+| Q19 | **경기 방식** — 어떤 방식을 고르고, 방식별 완주율·경기 길이·재대전율은? 시간제 점수가 링아웃 크레딧으로 공정하게 갈리나(자멸 비율)? | `rule_selected`, `match_started`/`match_ended`/`match_abandoned` `rule`, `match_ended.players[].team`·`score`, `matches.rule`, `match_events` `score`·`sudden_death` | 기본 방식, `timed_duration`, `ringout_credit_time`, 팀전 아군 공격 기본값 |
 
 ---
 

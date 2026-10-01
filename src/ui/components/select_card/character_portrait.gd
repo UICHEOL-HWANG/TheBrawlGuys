@@ -12,6 +12,9 @@ const CAMERA_AT := Vector3(0.0, 0.95, 0.0)
 ## Short (compact) portraits frame the head and chest so the character stays readable.
 const CLOSE_FROM := Vector3(0.5, 1.25, 2.2)
 const CLOSE_AT := Vector3(0.0, 1.05, 0.0)
+## HUD player cards (DS-CMP-22) frame the head only.
+const HEAD_FROM := Vector3(0.35, 1.2, 1.7)
+const HEAD_AT := Vector3(0.0, 1.1, 0.0)
 const CAMERA_FOV := 34.0
 const STAGE_RADIUS := 0.9
 const STAGE_HEIGHT := 0.12
@@ -22,6 +25,8 @@ const IDLE_VIEW := {"state": Fighter.State.IDLE, "on_ground": true, "attack_kind
 
 ## Set before setup: the head-and-chest framing for short portraits.
 var close_up: bool = false
+## Set before setup: the head-only framing of the HUD player cards.
+var head_shot: bool = false
 var _vp: SubViewport
 var _cam: Camera3D = null
 var _model: CharacterModel = null
@@ -59,7 +64,9 @@ func set_live(on: bool) -> void:
 ## Short cards (compact phones) frame the head and chest; call again when the layout flips.
 func set_close_up(on: bool) -> void:
 	close_up = on
-	if _cam != null:
+	if _cam != null and head_shot:
+		_cam.look_at_from_position(HEAD_FROM, HEAD_AT, Vector3.UP)
+	elif _cam != null:
 		_cam.look_at_from_position(CLOSE_FROM if on else CAMERA_FROM, CLOSE_AT if on else CAMERA_AT, Vector3.UP)
 	_redraw()
 

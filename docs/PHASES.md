@@ -434,4 +434,4 @@ PRD의 모든 요구사항 ID는 적어도 한 Phase에 배정되어야 한다. 
 | PRD-NFR-05 | 3 | PRD-NFR-06~07 | 0 (이후 상시) |
 | PRD-DATA-01 | 6 (설정 화면 로컬 저장) | PRD-DATA-02 | 6 |
 | PRD-DATA-03 | 4.0 (기반), 4, 5 (기능별 이벤트) | PRD-DATA-04 | 4.0 (기반), 4, 5 (원시 이벤트) |
-| PRD-AUTH-01 | 4.0 | | |
+| PRD-AUTH-01 | 4.0 | PRD-RULE-06 | 5 (combat-depth D) |
