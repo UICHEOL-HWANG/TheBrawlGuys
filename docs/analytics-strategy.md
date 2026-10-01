@@ -94,7 +94,8 @@
                                        │     ├─ 모델: scikit-learn HistGradientBoosting (M1·M2·M5), 군집(M4)
                                        │     └─ 평가·기록: skore
 ```
-- Python 스택은 `data-science-python-stack` 규칙을 따른다. **데이터프레임 라이브러리(pandas / polars)와 플롯 형태는 분석 워크스페이스를 만들 때 사용자에게 물어서 정한다** (지금은 미정).
+- Python 스택은 `data-science-python-stack` 규칙을 따른다. **결정됨 (2026-10-01)**: pandas + pyarrow, matplotlib(정적 PNG), uv. 평가·기록은 skore 대신 우선 마크다운 리포트(`analysis/reports/`)로 한다.
+- **구현 상태 (A9, 2026-10-01)** — [`analysis/README.md`](../analysis/README.md). 합성 데이터: `scripts/gen_dataset.gd`가 봇 경기를 게임 텔레메트리 코드 그대로 통과시켜 Supabase 테이블 모양 CSV + 1Hz `timeline.csv`를 만든다. 모델: M2 승률(GroupKFold), M5 밸런스(Wilson CI·로지스틱·링아웃 원인), M1 이탈(파이프라인만, 실사용자 필요). 실데이터의 타임라인은 아직 없음 — `match_inputs` 재생 추출기가 다음 단계.
 - 재생 피처 추출기는 게임 코드(sim)를 그대로 쓰는 헤드리스 Godot 스크립트 → 학습 데이터와 게임 로직이 절대 어긋나지 않는다.
 
 ## 6. 개인정보·거버넌스
@@ -105,5 +106,5 @@
 ## 7. 구현 순서 (제안)
 1. **A7** — L0 `match_inputs` + 재현 메타데이터 + `final_state_hash` + 오프라인 재생 검증 스크립트 (마이그레이션 0002). `match_timeline` 1Hz 압축은 용량이 필요해질 때까지 보류 (§4)
 2. **A8** — §3.1 헤더·슬롯 컬럼, §3.2 행동 피처 컬럼, §3.3~3.5 세션·좌절·성능 이벤트 (EventCatalog·tracking-plan 갱신)
-3. **A9** — `analysis/` 워크스페이스: 재생 피처 추출 + 첫 분석 노트(캐릭터·경기장 밸런스, 초기 이탈 퍼널). 라이브러리 선택 질문 선행
+3. **A9** — `analysis/` 워크스페이스: 재생 피처 추출 + 첫 분석 노트(캐릭터·경기장 밸런스, 초기 이탈 퍼널). ✅ 1차 완료 (2026-10-01): 합성 600경기로 M2·M5 리포트, M1 파이프라인(스텁). 남은 것: `match_inputs` 재생 → 실데이터 타임라인, 실사용자 데이터로 M1·M5 재실행
 4. Phase 6 진입 시 §3.5 네트워크 지표
