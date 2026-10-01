@@ -49,6 +49,8 @@ func test_keyboard_moves_and_confirms() -> void:
 	assert_eq(_chosen, [MatchRules.TIMED])
 	assert_eq(_tracked.back()[0], "rule_selected")
 	assert_eq(int(_tracked.back()[1]["browse_count"]), 2)
+	assert_eq(_tracked.back()[1]["focused"], [MatchRules.STOCK, MatchRules.TEAM, MatchRules.TIMED] as Array[String],
+			"candidates in focus order, the default first")
 
 
 func test_stick_steps_once_per_push_and_wraps() -> void:

@@ -53,8 +53,28 @@ func test_null_required_value_is_an_error() -> void:
 	assert_eq(EventCatalog.validate("screen_viewed", {"screen": null}).size(), 1)
 
 
-func test_schema_version_is_bumped_for_match_rules() -> void:
-	assert_eq(EventCatalog.SCHEMA_VERSION, 7)
+func test_schema_version_is_bumped_for_defense_counters() -> void:
+	assert_eq(EventCatalog.SCHEMA_VERSION, 8)
+
+
+func test_match_ended_players_need_the_defense_counters() -> void:
+	var player := {"slot": 0}
+	for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
+		player[key] = 0
+	var ended := {"match_id": "m", "mode": "bot", "rule": "stock", "arena": "a", "result": "win", "winner_slot": 0,
+		"duration_s": 1.0, "players": [player]}
+	assert_eq(EventCatalog.validate("match_ended", ended).size(), 0)
+	player.erase("techs")
+	var errors := EventCatalog.validate("match_ended", ended)
+	assert_eq(errors.size(), 1)
+	assert_string_contains(errors[0], "techs")
+
+
+func test_combat_keys_come_from_the_slot_summary() -> void:
+	for key: String in EventCatalog.PLAYER_COMBAT_KEYS:
+		assert_true(SlotStats.COUNTERS.has(key) or SkillFeatures.COLUMNS.has(key), "%s is produced per slot" % key)
+	for key: String in SkillFeatures.COLUMNS:
+		assert_true(EventCatalog.PLAYER_COMBAT_KEYS.has(key), "%s is required on players[]" % key)
 
 
 func test_match_events_carry_the_rule() -> void:

@@ -68,7 +68,8 @@ func on_frame(events: Array, view_events: Array, view: Dictionary, inputs: Array
 			_rows.append(RawRows.event_row(match_id(), tick, e))
 		if e["type"] == "jumped":
 			_stat(int(e["id"])).add("jumps")
-	_features.observe(tick, enriched, _combat.previous(), fighters, radius, inputs)
+	_features.observe(tick, enriched, _combat.previous(), fighters, radius, inputs,
+			(view.get("mode", {}) as Dictionary).get("teams", []))
 	_combat.end_tick(fighters)
 	if tick % SAMPLE_EVERY_TICKS == 0:
 		for f: Dictionary in fighters:

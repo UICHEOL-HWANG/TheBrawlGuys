@@ -2,7 +2,8 @@ class_name MatchFeatures
 extends RefCounted
 ## Per-slot behaviour features of one match (platform A8, analytics-strategy §3.2): input habits
 ## (InputFeatures), spatial habits (SpatialFeatures) and match flow (FlowFeatures), plus rates from
-## the SlotStats summary. summary() keys are match_players columns (COLUMNS, migration 0002) and
+## the SlotStats summary, plus skill and context signals (SkillFeatures, schema 8). summary() keys
+## are match_players columns (COLUMNS migration 0002, SkillFeatures.COLUMNS migration 0004) and
 ## ride along in match_ended.players.
 
 const RATIO_STEP := 0.001
@@ -19,20 +20,25 @@ const COLUMNS: Array[String] = [
 var _inputs: InputFeatures
 var _spatial: SpatialFeatures
 var _flow: FlowFeatures
+var _skill: SkillFeatures
 
 
 func _init(slot_count: int) -> void:
 	_inputs = InputFeatures.new(slot_count)
 	_spatial = SpatialFeatures.new(slot_count)
 	_flow = FlowFeatures.new(slot_count)
+	_skill = SkillFeatures.new(slot_count)
 
 
-## One tick: enriched sim events, last and current fighter views, and the inputs (may be empty).
-func observe(tick: int, events: Array, prev: Array, fighters: Array, arena_radius: float, inputs: Array) -> void:
+## One tick: enriched sim events, last and current fighter views, the inputs (may be empty) and
+## the teams (slot -> team in team mode, else empty).
+func observe(tick: int, events: Array, prev: Array, fighters: Array, arena_radius: float, inputs: Array,
+		teams: Array = []) -> void:
 	if not inputs.is_empty():
 		_inputs.observe(inputs)
 	_spatial.observe(prev, fighters, arena_radius)
 	_flow.observe(tick, events, prev, fighters)
+	_skill.observe(tick, events, prev, fighters, arena_radius, inputs, teams)
 
 
 ## base: the SlotStats summary with "result" (hits, whiffs, damage_dealt are read).
@@ -40,6 +46,7 @@ func summary(slot: int, base: Dictionary, ticks: int) -> Dictionary:
 	var out := _inputs.summary(slot)
 	out.merge(_spatial.summary(slot))
 	out.merge(_flow.summary(slot, String(base.get("result", ""))))
+	out.merge(_skill.summary(slot))
 	var swings := int(base.get("hits", 0)) + int(base.get("whiffs", 0))
 	out["hit_accuracy"] = snappedf(float(base["hits"]) / swings, RATIO_STEP) if swings > 0 else null
 	var minutes := maxf(ticks / TICKS_PER_MINUTE, 1.0 / TICKS_PER_MINUTE)
