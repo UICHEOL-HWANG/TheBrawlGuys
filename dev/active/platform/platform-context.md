@@ -35,7 +35,7 @@
 - [ ] Amplitude MCP 커넥터 인증 (검증용, 선택)
 - [ ] (B6 이메일 로그인) Supabase → Authentication → Sign In / Providers → **Email** 켜기 + "Allow new users to sign up" 켜기 (첫 인증 때 계정 생성). Email OTP Length **6**, Email OTP Expiration 600초 권장
 - [ ] (B6) Authentication → Emails → Templates: **Magic Link**와 **Confirm signup** 두 템플릿 모두 `{{ .Token }}`을 넣는다 (기존 사용자는 Magic Link, 처음 오는 주소는 Confirm signup 메일을 받는다). 링크(`{{ .ConfirmationURL }}`)는 빼기 권장 — 메일 보안 스캐너가 링크를 먼저 열면 코드가 소모될 수 있음. 붙여넣을 본문은 아래 "B6" 절
-- [ ] (B6) Authentication → Emails → SMTP Settings → **커스텀 SMTP** (예: Resend `smtp.resend.com` 465, user `resend`, password = Resend API 키, 보내는 주소는 인증한 도메인 예 `login@thebrawlguys.cloud`). 기본 SMTP는 **프로젝트 팀원 주소로만** 보내고 시간당 몇 통뿐이라 실제 플레이어에게는 안 간다. 커스텀 SMTP 뒤 Authentication → Rate Limits의 이메일 발송 한도를 올린다
+- [x] (B6, 2026-10-01 Resend 연동·도메인 Verified, DNS는 Vercel) Authentication → Emails → SMTP Settings → **커스텀 SMTP** (예: Resend `smtp.resend.com` 465, user `resend`, password = Resend API 키, 보내는 주소는 인증한 도메인 예 `login@thebrawlguys.cloud`). 기본 SMTP는 **프로젝트 팀원 주소로만** 보내고 시간당 몇 통뿐이라 실제 플레이어에게는 안 간다. 커스텀 SMTP 뒤 Authentication → Rate Limits의 이메일 발송 한도를 올린다
 
 ## 배포 시점 결정 (2026-09-30)
 - 사용자 선택 C: Vercel 프로젝트 생성·도메인 연결·배포는 **Phase 4·5 전부 끝난 뒤** 한 번에 (D1을 맨 마지막으로)
@@ -64,7 +64,7 @@
 - UI: 카드의 ghost "이메일로 계속하기" → `EmailLoginView`(TextField DS-CMP-17 → CodeInput DS-CMP-18), `LoginEmailFlow`가 게이트와 연결. Enter 제출, Esc 뒤로. 증거 `evidence/login-email-{methods,step,code,error}.png` (1280×720, `scripts/capture_login_email.gd`)
 - 결과 매핑: send 429 → rate_limited(쿨다운도 시작), 400/422 → invalid_email (단 `email_provider_disabled`·`otp_disabled`·`signup_disabled`·`email_address_not_authorized`는 설정 문제라 error + 경고 로그), 그 밖 → error. verify 4xx → wrong_code, 429 → rate_limited, 그 밖 → error. 4xx는 `net_error`로 보내지 않음
 - 트래킹: `login_started/completed/failed {provider: email}`, `email_code_requested {result}`, `email_code_resent`, `email_code_verified {attempts}` — 이메일·코드 없음(테스트로 강제)
-- 템플릿 본문 (Magic Link · Confirm signup 둘 다, 제목 `The Brawl Guys 로그인 코드: {{ .Token }}`):
+- 템플릿 본문: **`supabase/email/login_code.html`이 현재 원본** (2026-10-01, 6칸 코드 박스·단계 안내, Resend SMTP 적용·Confirm sign up / Magic link or OTP 둘 다 저장). 붙여넣기 `tail -n +6 supabase/email/login_code.html | pbcopy`. 회사 메일(ainuri.kr)은 새 템플릿을 걸러냄(Resend Delivered, 받은편지함 X) — 필요하면 링크 버튼·이모지 제거판. 아래는 이전 단순판:
   ```html
   <div style="font-family:sans-serif;max-width:420px;margin:0 auto;padding:24px;color:#17525A">
     <h2 style="margin:0 0 12px">The Brawl Guys 로그인 코드</h2>

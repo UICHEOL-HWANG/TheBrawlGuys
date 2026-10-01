@@ -1,0 +1,94 @@
+<!-- Supabase Auth email template: Magic Link AND Confirm signup (email OTP login, platform B6).
+     Subject: The Brawl Guys 로그인 코드: {{ .Token }}
+     Paste everything below this comment into both templates. Table layout + inline styles only
+     (Gmail / Outlook / Naver mail strip <style> and flexbox). Palette: docs/design.md.
+     Digit boxes use Go template `slice`, so Email OTP Length must be 6. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#DAD9CB;padding:32px 12px;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:440px;background:#FFFDF6;border-radius:20px;overflow:hidden;border:1px solid #B9C9B0;">
+        <tr>
+          <td style="background:#2E8C86;background-image:linear-gradient(160deg,#3E8A6A 0%,#2E8C86 55%,#17525A 100%);padding:28px 28px 22px;text-align:left;">
+            <div style="font-size:12px;letter-spacing:3px;color:#D6EE7C;font-weight:bold;margin:0 0 6px;">LOG IN</div>
+            <div style="font-size:26px;line-height:1.2;color:#FFFDF6;font-weight:800;margin:0;">The Brawl Guys</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="height:6px;background:#A5D65A;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:30px 28px 4px;color:#17525A;text-align:center;">
+            <div style="display:inline-block;background:#FFF3C4;color:#17525A;font-size:12px;font-weight:bold;border-radius:999px;padding:5px 12px;margin:0 0 14px;">🔑 이메일 로그인</div>
+            <div style="font-size:22px;line-height:1.35;font-weight:800;margin:0 0 8px;">로그인 코드가 도착했어요</div>
+            <div style="font-size:14px;line-height:1.7;color:#3F7470;margin:0;">아래 <b style="color:#17525A;">6자리 숫자</b>를 게임 화면에 입력하면<br>바로 싸움터로 들어갈 수 있어요.</div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:22px 20px 4px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 0 1 }}</td>
+                <td style="width:8px;font-size:0;">&nbsp;</td>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 1 2 }}</td>
+                <td style="width:8px;font-size:0;">&nbsp;</td>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 2 3 }}</td>
+                <td style="width:8px;font-size:0;">&nbsp;</td>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 3 4 }}</td>
+                <td style="width:8px;font-size:0;">&nbsp;</td>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 4 5 }}</td>
+                <td style="width:8px;font-size:0;">&nbsp;</td>
+                <td style="width:46px;height:58px;background:#EAF2DC;border:2px solid #A5D65A;border-radius:12px;text-align:center;vertical-align:middle;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:30px;font-weight:bold;color:#17525A;">{{ slice .Token 5 6 }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:8px 28px 0;font-size:12px;color:#3F7470;">복사용: <span style="font-family:'SF Mono',Menlo,Consolas,monospace;font-weight:bold;color:#17525A;letter-spacing:2px;">{{ .Token }}</span></td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:12px 28px 18px;">
+            <span style="display:inline-block;background:#17525A;color:#FFFDF6;font-size:12px;font-weight:bold;border-radius:999px;padding:5px 12px;">⏱ 10분 동안 유효</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 28px 4px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F4F7EE;border:1px solid #EAF2DC;border-radius:14px;">
+              <tr><td style="padding:16px 18px 4px;font-size:12px;letter-spacing:2px;font-weight:bold;color:#2E8C86;">이렇게 입력해요</td></tr>
+              <tr><td style="padding:8px 18px 4px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="34" valign="top" style="padding:0 0 12px;"><div style="width:26px;height:26px;line-height:26px;border-radius:13px;background:#3E8A6A;color:#FFFDF6;font-size:13px;font-weight:bold;text-align:center;">1</div></td>
+                  <td valign="top" style="padding:2px 0 12px;font-size:13px;line-height:1.55;color:#3F7470;"><b style="color:#17525A;">코드를 요청한 화면으로 돌아가기</b><br>게임에서 &lsquo;이메일로 계속하기&rsquo;를 누른 그 화면이에요.</td>
+                </tr>
+                <tr>
+                  <td width="34" valign="top" style="padding:0 0 12px;"><div style="width:26px;height:26px;line-height:26px;border-radius:13px;background:#2E8C86;color:#FFFDF6;font-size:13px;font-weight:bold;text-align:center;">2</div></td>
+                  <td valign="top" style="padding:2px 0 12px;font-size:13px;line-height:1.55;color:#3F7470;"><b style="color:#17525A;">6자리 입력</b><br>한 칸씩 입력하거나, 복사한 코드를 붙여넣어도 돼요.</td>
+                </tr>
+                <tr>
+                  <td width="34" valign="top" style="padding:0 0 12px;"><div style="width:26px;height:26px;line-height:26px;border-radius:13px;background:#FF9A2E;color:#FFFDF6;font-size:13px;font-weight:bold;text-align:center;">3</div></td>
+                  <td valign="top" style="padding:2px 0 12px;font-size:13px;line-height:1.55;color:#3F7470;"><b style="color:#17525A;">로그인 완료</b><br>자동으로 넘어가요. 이제 한 판 붙어볼까요?</td>
+                </tr>
+              </table>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 28px 6px;">
+            <a href="https://thebrawlguys.cloud" style="display:inline-block;background:#FF9A2E;color:#FFFDF6;font-size:15px;font-weight:bold;text-decoration:none;border-radius:12px;padding:13px 28px;border-bottom:3px solid #D9741A;">게임 열기 &rarr;</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:18px 28px 26px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFF6F4;border-left:4px solid #F0584A;border-radius:10px;">
+              <tr><td style="padding:12px 14px;font-size:12px;line-height:1.6;color:#6C5A66;">
+                <b style="color:#B8382C;">혹시 직접 요청하지 않았나요?</b><br>이 메일은 무시해도 괜찮아요. 코드는 <b>누구에게도</b> 알려주지 마세요 &mdash; 운영진도 코드를 묻지 않아요.
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <div style="font-size:11px;line-height:1.6;color:#3F7470;margin-top:14px;">The Brawl Guys &middot; <a href="https://thebrawlguys.cloud" style="color:#2E8C86;text-decoration:none;">thebrawlguys.cloud</a><br>로그인을 요청해서 받은 자동 발송 메일이에요.</div>
+    </td>
+  </tr>
+</table>
