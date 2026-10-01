@@ -19,8 +19,8 @@ const KIND_NAMES := {Kind.ROLL: "roll", Kind.AIR: "air"}
 ## roll_buffer_ticks old (made while the fighter could not act) still dodges when guard and a
 ## direction are held now.
 static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool:
-	if f.guard_press_age > config.roll_buffer_ticks or not input.guard or input.heavy:
-		return false
+	if f.guard_press_age > config.roll_buffer_ticks or not input.guard or input.heavy or f.tumble:
+		return false  # a tumbling fighter's guard press is a tech (Tech), not an air dodge
 	var dir := Vector3(input.move_x, 0.0, input.move_z)
 	dir = dir.normalized() if dir.length_squared() > 0.0 else Vector3.ZERO
 	if f.guard_press_age > 0 and dir == Vector3.ZERO:

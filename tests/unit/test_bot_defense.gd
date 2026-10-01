@@ -17,6 +17,13 @@ func _view(me_pos: Vector3, foe_pos: Vector3, foe_state: int = Fighter.State.IDL
 	}
 
 
+## Every guard turn reacts in time (the anticipating turns are BotGetup's tests, test_bot_getup).
+func _cfg() -> GameConfig:
+	var c := GameConfig.new()
+	c.bot_perfect_guard_chance = 1.0
+	return c
+
+
 ## Samples `view` until the reaction delay has passed; returns the first reacting frame.
 func _react(bot: BotController, view: Dictionary, c: GameConfig) -> InputFrame:
 	for i: int in c.bot_guard_react_ticks:
@@ -32,7 +39,7 @@ func _spend_guard_turn(bot: BotController, c: GameConfig) -> void:
 
 
 func test_guards_a_threat_after_the_reaction_delay() -> void:
-	var c := GameConfig.new()
+	var c := _cfg()
 	var bot := BotController.new(1, c)
 	var attacking := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0), Fighter.State.ATTACK)
 	assert_false(bot.sample(attacking).guard, "not a frame-perfect reaction")
@@ -44,14 +51,14 @@ func test_guards_a_threat_after_the_reaction_delay() -> void:
 
 
 func test_stops_guarding_when_the_meter_is_low() -> void:
-	var c := GameConfig.new()
+	var c := _cfg()
 	var bot := BotController.new(1, c)
 	var low := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0), Fighter.State.ATTACK, c.bot_guard_min_ratio - 0.05)
 	assert_false(_react(bot, low, c).guard)
 
 
 func test_rolls_away_from_a_charging_foe_on_the_unguarded_turn() -> void:
-	var c := GameConfig.new()
+	var c := _cfg()
 	var bot := BotController.new(1, c)
 	_spend_guard_turn(bot, c)
 	var f := _react(bot, _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0), Fighter.State.CHARGE), c)
@@ -61,7 +68,7 @@ func test_rolls_away_from_a_charging_foe_on_the_unguarded_turn() -> void:
 
 
 func test_does_not_roll_from_a_plain_attack_in_the_open() -> void:
-	var c := GameConfig.new()
+	var c := _cfg()
 	var bot := BotController.new(1, c)
 	_spend_guard_turn(bot, c)
 	var f := _react(bot, _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0), Fighter.State.ATTACK), c)
@@ -69,7 +76,7 @@ func test_does_not_roll_from_a_plain_attack_in_the_open() -> void:
 
 
 func test_rolls_toward_the_middle_when_threatened_on_the_edge() -> void:
-	var c := GameConfig.new()
+	var c := _cfg()
 	var bot := BotController.new(1, c)
 	_spend_guard_turn(bot, c)
 	var f := _react(bot, _view(Vector3(9.0, 0, 0), Vector3(9.0, 0, 1.0), Fighter.State.ATTACK), c)

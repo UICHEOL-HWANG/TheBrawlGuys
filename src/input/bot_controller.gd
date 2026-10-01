@@ -11,6 +11,7 @@ extends RefCounted
 ## Styles (Phase 5, BotStyleSense): swing range scales with the style's reach, ranged bots keep
 ## their distance and shoot, and a full gauge fires the special (heavy+guard) once a foe is in reach.
 ## Defense (combat-depth A, BotDefense): guards after a reaction delay, rolls on the other turns.
+## Knockdowns (combat-depth C, BotGetup): varied getup options, sometimes a tech.
 
 ## Pick up when the item is this deep inside the pickup radius (a margin against rounding).
 const PICKUP_REACH_RATIO := 0.8
@@ -21,12 +22,14 @@ var _arena: ArenaData = null
 var _cooldown: int = 0
 var _combo_left: int = 0
 var _defense: BotDefense
+var _getup: BotGetup
 
 
 func _init(p_self_id: int, p_config: GameConfig) -> void:
 	_self_id = p_self_id
 	_config = p_config
-	_defense = BotDefense.new(p_config)
+	_defense = BotDefense.new(p_self_id, p_config)
+	_getup = BotGetup.new(p_self_id, p_config)
 
 
 ## Light presses after the first swing so hits 2 and 3 land inside the combo buffer.
@@ -56,9 +59,13 @@ func _sample(view: Dictionary) -> InputFrame:
 	var foe := BotViewQuery.nearest_foe(view, _self_id, my_pos)
 	var safe := BotViewQuery.flat(my_pos, ArenaFloor.safe_point(arena, my_pos, _config.bot_edge_ratio)).normalized()
 	# Decided every tick (even during recovery/edge/holding) so the every-other toggle never goes stale.
-	var defense := _defense.decide(me, foe, safe)
+	var tick := int(view.get("tick", 0))
+	var defense := _defense.decide(me, foe, safe, _closing(me, foe), tick)
+	var getup := _getup.decide(me, foe, tick, arena)
 	if not bool(me["on_ground"]) and my_pos.y < 0.0 and not ArenaFloor.over_floor(arena, my_pos):
 		return InputFrame.make(safe.x, safe.y, int(me["jumps_left"]) > 0)
+	if getup != null:
+		return getup
 	if int(me["state"]) == Fighter.State.HOLDING:
 		var out := ArenaFloor.outward(arena, my_pos)
 		return InputFrame.make(out.x, out.y, false, false, false, false, true)
@@ -90,6 +97,14 @@ func _act(view: Dictionary, me: Dictionary, foe: Dictionary, arena: ArenaData) -
 				return InputFrame.make(0, 0, false, false, false, false, true)
 			return _walk(to_item.normalized(), my_pos, arena)
 	return _fight(me, foe, item_kind, arena)
+
+
+## A melee bot with no combo running and no special to fire, the foe not yet within its own
+## swing range: the moment an early guard turn may raise its guard as the foe closes (BotDefense).
+func _closing(me: Dictionary, foe: Dictionary) -> bool:
+	if foe.is_empty() or _combo_left > 0 or BotStyleSense.is_ranged(me) or BotStyleSense.special_ready(me, foe, _config):
+		return false
+	return BotViewQuery.flat(me["pos"], foe["pos"]).length() > BotStyleSense.melee_range(me, _self_id, _config)
 
 
 ## The view's arena (built once per id from ArenaCatalog), with its floors set from the view.

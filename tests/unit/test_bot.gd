@@ -86,6 +86,7 @@ func test_bot_drives_a_real_world_into_combat() -> void:
 
 func test_guards_every_other_attack_that_starts_in_range() -> void:
 	var c := GameConfig.new()
+	c.bot_perfect_guard_chance = 1.0  # every guard turn reacts in time (see test_bot_getup)
 	var bot := BotController.new(1, c)
 	var v := _view(Vector3(1.5, 0, 0), Vector3(0, 0, 0))
 	bot.sample(v)  # the bot swings first and starts its cooldown; ignore

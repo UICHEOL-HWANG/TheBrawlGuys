@@ -1,9 +1,10 @@
 class_name WorldStep
 extends RefCounted
 ## One World tick's step order (split out of World). StyleBook.build -> PressBuffer.apply ->
-## GuardMeter.track_presses -> ItemActions.pre_step -> SpecialRunner.try_start -> Motion.step per
-## fighter -> separate -> Dodge.started_events -> ProjectileMotion.fire -> SpecialRunner.advance -> Grab.step -> Grab.resolve ->
-## SpecialRunner.contacts -> Combat.resolve -> SpecialRunner.apply -> ProjectileMotion.step -> ItemMotion.step -> GimmickRunner.step ->
+## GuardMeter.track_presses -> Tech.track -> ItemActions.pre_step -> SpecialRunner.try_start -> Motion.step per
+## fighter -> separate -> Dodge.started_events -> Knockdown.started_events -> ProjectileMotion.fire -> SpecialRunner.advance ->
+## Grab.step -> Grab.resolve -> SpecialRunner.contacts -> Getup.contacts -> Combat.resolve -> SpecialRunner.apply ->
+## Getup.apply -> ProjectileMotion.step -> ItemMotion.step -> GimmickRunner.step ->
 ## ItemField.spawn_step -> GuardMeter.step -> SpecialGauge.apply -> Rules.apply -> Grab.cleanup ->
 ## ItemActions.drop_from_disabled. Fire/advance only see fighters that advanced (not frozen).
 
@@ -16,6 +17,7 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 	var events: Array[Dictionary] = []
 	PressBuffer.apply(w.fighters, frame)
 	GuardMeter.track_presses(w.fighters, frame)
+	Tech.track(w.fighters, c)
 	events.append_array(ItemActions.pre_step(w.fighters, frame, w.items, c))
 	events.append_array(SpecialRunner.try_start(w.fighters, frame, book, c))
 	var advanced: Array[Fighter] = []
@@ -24,13 +26,16 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 			advanced.append(f)
 	Motion.separate(w.fighters, c)
 	events.append_array(Dodge.started_events(advanced))
+	events.append_array(Knockdown.started_events(advanced))
 	events.append_array(ProjectileMotion.fire(advanced, book, w.projectiles, c))
 	events.append_array(SpecialRunner.advance(advanced, book, w.projectiles, c))
 	events.append_array(Grab.step(w.fighters, frame, book, c))
 	events.append_array(Grab.resolve(w.fighters, book, c))
 	var special_contacts := SpecialRunner.contacts(w.fighters, book, c)
+	var getup_contacts := Getup.contacts(w.fighters, c)
 	events.append_array(Combat.resolve(w.fighters, book, c))
 	events.append_array(SpecialRunner.apply(special_contacts, c))
+	events.append_array(Getup.apply(getup_contacts, c))
 	events.append_array(ProjectileMotion.step(w.projectiles, w.fighters, book, c))
 	events.append_array(ItemMotion.step(w.items, w.fighters, book, c, w.arena))
 	events.append_array(GimmickRunner.step(w.arena, w.fighters, c, w.tick_count, events))

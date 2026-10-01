@@ -4,9 +4,9 @@ extends RefCounted
 ## every snapshot (context D1). v3 added the Phase 2 fighter fields, v4 the item field, v5 the
 ## arena state and burn fields (Phase 4), v6 the fighter character and special gauge and the
 ## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A), v8
-## guard_rest_ticks (perfect-guard rearm).
+## guard_rest_ticks (perfect-guard rearm), v9 the knockdown / getup / tech / DI fields (combat-depth C).
 
-const VERSION := 8
+const VERSION := 9
 const TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,
@@ -86,7 +86,8 @@ static func _consistent(fighters: Array[Fighter], projectiles: ProjectileField) 
 
 static func _defense_ok(f: Fighter, count: int) -> bool:
 	return f.guard_hp >= 0.0 and f.guard_hp <= GuardMeter.MAX and _in_enum(f.dodge_kind, Dodge.Kind) \
-			and f.perfect_by >= Fighter.NONE and f.perfect_by < count
+			and f.perfect_by >= Fighter.NONE and f.perfect_by < count and _in_enum(f.getup_kind, Getup.Kind) \
+			and f.tech_clock >= 0
 
 
 static func _in_enum(value: int, e: Dictionary) -> bool:

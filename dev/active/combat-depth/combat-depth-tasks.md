@@ -6,5 +6,5 @@
 - [ ] 다음: DI, 기상 선택·낙법, 팀전 2:2, 시간제 FFA
 
 ## 2차 (2026-10-01 사용자 "나머지 고고")
-- [ ] C: DI + 다운/기상 선택/낙법 + hitstop_heavy 0.13 + 봇 저스트 가드 완화 (feat/di-tech)
+- [x] C: DI + 다운/기상 선택/낙법 + hitstop_heavy 0.13 + 봇 저스트 가드 완화 (feat/di-tech) — sim `LaunchInfluence`/`Knockdown`/`Getup`/`Tech`, 튜닝 `KnockdownConfig`(DI·Knockdown·Tech·BotGetup), 봇 `BotGetup` + `BotDefense` 저스트 가드 상한(`bot_perfect_guard_chance` 0.35), 애니 LIE/GETUP/ROLL, 낙법 링 DS-VFX-14, 스냅샷 v9, 골든 해시 갱신
 - [ ] D: 팀전 2:2 + 시간제 FFA + 근접 카메라 HUD 겹침 확인 (feat/modes)

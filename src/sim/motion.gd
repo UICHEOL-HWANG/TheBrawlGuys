@@ -3,7 +3,9 @@ extends RefCounted
 ## Per-tick fighter movement (PRD §4): input -> state, gravity, landing, walking off the edge,
 ## and capsule separation. Hitstop freezes a fighter completely (PRD §4.2). Floors come from the
 ## arena (ArenaFloor.ground_top), which also owns the landing tolerance. Run speed, jump and air
-## control come from the fighter's style (StyleBook, Phase 5).
+## control come from the fighter's style (StyleBook, Phase 5). Combat-depth C: the first tick after
+## a hit's hitstop applies DI (LaunchInfluence); a tumbling fighter touching down is knocked down
+## or techs (Knockdown), then gets up (Getup).
 
 
 ## Returns true when the fighter advanced this tick (alive and not frozen in hitstop).
@@ -16,6 +18,18 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, book: StyleB
 	if f.invuln_ticks > 0:
 		f.invuln_ticks -= 1
 	Dodge.cool(f)
+	LaunchInfluence.apply(f, input, config)
+	_step_state(f, input, config, book)
+	var tumbling := f.tumble and not f.on_ground
+	if f.state != Fighter.State.HELD:
+		_integrate(f, config, arena)
+	if tumbling and f.on_ground:
+		Knockdown.land(f, input, config)
+	f.state_ticks += 1
+	return true
+
+
+static func _step_state(f: Fighter, input: InputFrame, config: GameConfig, book: StyleBook) -> void:
 	match f.state:
 		Fighter.State.HITSTUN:
 			_step_hitstun(f, config)
@@ -29,15 +43,15 @@ static func step(f: Fighter, input: InputFrame, config: GameConfig, book: StyleB
 			SpecialRunner.step(f, config, book)
 		Fighter.State.DODGE:
 			Dodge.step(f, config)
+		Fighter.State.KNOCKDOWN:
+			Knockdown.step(f, input, config)
+		Fighter.State.GETUP:
+			Getup.step(f, config)
 		Fighter.State.HOLDING, Fighter.State.HELD:
 			pass  # Grab.step drives holds; the held fighter's position comes from the holder
 		_:
 			if not Actions.try_start(f, input, config):
 				_step_control(f, input, config, book.kit(f.id).style)
-	if f.state != Fighter.State.HELD:
-		_integrate(f, config, arena)
-	f.state_ticks += 1
-	return true
 
 
 static func separate(fighters: Array[Fighter], config: GameConfig) -> void:
@@ -60,6 +74,7 @@ static func _step_control(f: Fighter, input: InputFrame, config: GameConfig, sty
 		f.vel.y = style.jump_velocity
 		f.jumps_left -= 1
 		f.on_ground = false
+		f.tumble = false  # jumping out of a tumble lands on the feet
 	var target := Vector2(dir.x, dir.z) * style.move_speed
 	if f.on_ground:
 		f.vel.x = target.x

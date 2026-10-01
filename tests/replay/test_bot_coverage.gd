@@ -1,13 +1,15 @@
 extends GutTest
 ## Bot-vs-bot coverage (context E11). No golden hash (bot changes must not break it). Asserts:
 ## 1. two runs with the same seed produce the same hash sequence (determinism);
-## 2. one seed-21 bot match, played to its end, produces every event type in REQUIRED_EVENTS
+## 2. one seed-23 bot match, played to its end, produces every event type in REQUIRED_EVENTS
 ##    (ring-out, item spawn/land/pickup/throw/drop, guard hit, grab, hit) and a KO (match over);
 ## 3. restoring a mid-match snapshot into a fresh World and replaying the recorded inputs
 ##    reproduces the original per-tick state hashes (item-use paths included).
 ## Covers the Phase 1 carry-over "replay never asserts ring-out/KO".
 
-const SEED := 21
+## Combat-depth C (knockdowns, the bot perfect-guard cap) changed how bot matches play out; seed
+## 21 no longer had anyone drop an item, 23 covers every required event.
+const SEED := 23
 const MAX_TICKS := 60 * 60 * 4
 
 
