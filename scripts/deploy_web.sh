@@ -27,6 +27,8 @@ rm -f "$OUT"/*.import
 cp "$ROOT/deploy/vercel.json" "$OUT/vercel.json"
 cp "$ROOT/deploy/vercelignore" "$OUT/.vercelignore"
 cp "$ROOT/deploy/share/og-image.png" "$OUT/og-image.png"
+cp "$ROOT/deploy/manifest.webmanifest" "$OUT/manifest.webmanifest"
+cp "$ROOT/assets/branding/app-icon.png" "$OUT/app-icon.png"
 
 cd "$OUT"
 if [ ! -f .vercel/project.json ]; then

@@ -6,6 +6,13 @@
 		<title>The Brawl Guys</title>
 		<meta name="description" content="치고, 날리고, 끝까지 버티기 — 브라우저에서 바로 하는 3D 난투 게임">
 		<meta name="theme-color" content="#17525A">
+		<!-- Home-screen app (phones): opens without the browser's address and tab bars, which in
+		     landscape leave the game only ~280 CSS px of height. -->
+		<link rel="manifest" href="manifest.webmanifest">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-title" content="Brawl Guys">
 		<!-- Link previews: the card is rendered by scripts/capture_share_card.gd, copied in by deploy_web.sh -->
 		<meta property="og:type" content="website">
 		<meta property="og:site_name" content="The Brawl Guys">
@@ -123,6 +130,25 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+/* iPhone/iPad Safari tab: suggest "홈 화면에 추가" (no fullscreen API there). Tap to close. */
+#home-hint {
+	position: absolute;
+	left: 50%;
+	bottom: 12px;
+	transform: translateX(-50%);
+	max-width: calc(100% - 32px);
+	box-sizing: border-box;
+	background-color: #FFFDF6; /* ui_surface */
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	color: #17525A; /* canopy_deep */
+	font: 13px/1.4 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+	padding: 8px 14px;
+	text-align: center;
+	z-index: 2;
+	display: none;
+}
 		</style>
 		$GODOT_HEAD_INCLUDE
 	</head>
@@ -144,11 +170,28 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+		<div id="home-hint" role="status">공유 버튼 → <b>홈 화면에 추가</b>로 열면 전체 화면으로 할 수 있어요 ✕</div>
+
 		<script src="$GODOT_URL"></script>
 		<script>
 const GODOT_CONFIG = $GODOT_CONFIG;
 const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
 const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const ua = navigator.userAgent;
+	const ios = /iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+	const standalone = window.navigator.standalone === true
+		|| window.matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+	if (!ios || standalone) {
+		return;
+	}
+	const hint = document.getElementById('home-hint');
+	const hide = () => hint.remove();
+	hint.style.display = 'block';
+	hint.addEventListener('click', hide);
+	setTimeout(hide, 12000);
+}());
 
 (function () {
 	const statusOverlay = document.getElementById('status');

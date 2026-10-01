@@ -1,0 +1,16 @@
+{
+  "name": "The Brawl Guys",
+  "short_name": "Brawl Guys",
+  "description": "치고, 날리고, 끝까지 버티기 — 브라우저에서 바로 하는 3D 난투 게임",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#17525A",
+  "theme_color": "#17525A",
+  "icons": [
+    { "src": "/app-icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

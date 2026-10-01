@@ -15,6 +15,10 @@ const LANDSCAPE := "landscape"
 const BASE_SIZE := Vector2(1920, 1080)
 ## Factors are rounded up to 1/STEPS (0.05) so tiny resizes do not re-layout every frame.
 const STEPS := 20.0
+## Layout height (1920x1080 px units) the menus are built to fit. A very short window — a phone
+## in landscape with the browser's address and tab bars showing (~280 CSS px) — gets a smaller
+## factor rather than menus cut off at the bottom: captions drop below the class minimum there.
+const MIN_LAYOUT_HEIGHT := 640.0
 
 
 ## phone: the short side is below DS.PHONE_MAX_SHORT_CSS (any input). tablet: a touch screen
@@ -47,7 +51,8 @@ static func factor(css: Vector2, touch: bool) -> float:
 	var need := caption_min / (DS.SIZE_CAPTION * s)
 	if touch:
 		need = maxf(need, DS.TOUCH_TARGET_MIN_CSS / (DS.TOUCH_TARGET_BASE_MIN * s))
-	return clampf(ceilf(need * STEPS - 0.001) / STEPS, 1.0, DS.UI_SCALE_MAX)
+	var fits := floorf(css.y / (s * MIN_LAYOUT_HEIGHT) * STEPS + 0.001) / STEPS
+	return clampf(minf(ceilf(need * STEPS - 0.001) / STEPS, fits), 1.0, DS.UI_SCALE_MAX)
 
 
 ## Everything the applier and analytics need: viewport_class, orientation, ui_scale and

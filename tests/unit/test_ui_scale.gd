@@ -41,6 +41,15 @@ func test_phone_layout_keeps_room_for_the_menus() -> void:
 	assert_gt(size.x, 1300.0)
 
 
+func test_a_very_short_phone_window_still_fits_the_menus() -> void:
+	# iPhone landscape in Safari with the address and tab bars: only ~280 CSS px tall.
+	var css := Vector2(760, 282)
+	var f := UiScale.factor(css, true)
+	assert_eq(f, 1.65)
+	assert_gte(UiScale.layout_size(css, f).y, UiScale.MIN_LAYOUT_HEIGHT, "nothing cut off at the bottom")
+	assert_gt(f, 1.0, "still enlarged as far as it fits")
+
+
 func test_small_desktop_window_scales_like_a_phone() -> void:
 	assert_eq(UiScale.classify(Vector2(812, 375), false), UiScale.PHONE)
 	assert_gt(UiScale.factor(Vector2(812, 375), false), 1.0)

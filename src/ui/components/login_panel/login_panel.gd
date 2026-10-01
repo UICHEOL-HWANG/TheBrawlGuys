@@ -18,6 +18,8 @@ enum State { IDLE, LOADING, ERROR }
 enum Mode { METHODS, EMAIL }
 
 const PREVIEW_SIZE := Vector2(1280, 720)
+## Below this layout height (phones in landscape, DS-LAY-04) the crest is left out so the card fits.
+const CREST_MIN_HEIGHT := 800.0
 
 var _state: int = State.IDLE
 var _mode: int = Mode.METHODS
@@ -44,6 +46,8 @@ func _ready() -> void:
 	skip_button().visible = false
 	crest().set_state(CrestLogo.State.ANIMATED)
 	_apply_texts()
+	resized.connect(_fit_height)
+	_fit_height()
 
 
 func set_state(s: int, message: String = "") -> void:
@@ -160,6 +164,10 @@ func crest() -> CrestLogo:
 
 func set_preview() -> void:
 	custom_minimum_size = PREVIEW_SIZE
+
+
+func _fit_height() -> void:
+	crest().visible = size.y <= 0.0 or size.y >= CREST_MIN_HEIGHT
 
 
 func _apply_texts() -> void:
