@@ -19,6 +19,7 @@ static func build(root: Control, title: String, cards: Control, back: Control, h
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.add_child(cards)
 	root.add_child(center)
+	WidthFit.watch(center, cards)  # four cards on a narrow phone shrink instead of running off
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	margin.grow_vertical = Control.GROW_DIRECTION_BEGIN

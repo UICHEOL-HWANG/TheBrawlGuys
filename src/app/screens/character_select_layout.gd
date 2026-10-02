@@ -4,7 +4,9 @@ extends RefCounted
 ## the character cards, the PlayerSlot row — in a FitCenter above the footer (뒤로 bottom left,
 ## hint bottom right, inside the safe area; ArenaSelectLayout's footer parts). On short screens
 ## (phones after UI scaling) the column goes compact: shorter portraits and one-line captions,
-## and anything still too tall scrolls instead of running under the footer. Text never shrinks.
+## and anything still too tall scrolls instead of running under the footer. Text never shrinks,
+## except on screens too narrow for the four cards side by side (an iPhone SE in landscape, about
+## 1200 logical px): there it shrinks by exactly the missing share (WidthFit).
 
 ## Logical heights below this use the compact column (812x375 at scale 1.6 is about 673).
 const COMPACT_BELOW := 900.0
@@ -56,7 +58,7 @@ static func apply_safe_area(parts: Dictionary, viewport: Viewport) -> void:
 	ArenaSelectLayout.apply_safe_area(footer, viewport)
 	var vp := viewport.get_visible_rect()
 	var bottom_inset := vp.end.y - SafeArea.rect(viewport).end.y
-	(parts["fit"] as FitCenter).offset_bottom = -(FOOTER_RESERVE + bottom_inset)
+	WidthFit.watch(parts["fit"] as Control, parts["column"] as Control, FOOTER_RESERVE + bottom_inset)
 
 
 static func is_compact(viewport: Viewport) -> bool:
