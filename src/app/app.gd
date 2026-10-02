@@ -100,6 +100,7 @@ func _show_title() -> void:
 	screen.mode_chosen.connect(_on_mode_chosen)
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
+	screen.nickname_edit_requested.connect(func() -> void: NicknameEdit.open(_router, profile, track))
 	if _router.depth() == 0:
 		_router.push(TITLE, screen)
 	else:

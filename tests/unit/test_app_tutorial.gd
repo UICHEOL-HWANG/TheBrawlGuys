@@ -149,6 +149,38 @@ func test_the_title_greets_by_nickname() -> void:
 	assert_eq(title.greeting_text(), "브롤왕님, 반가워요")
 
 
+func test_the_title_changes_the_nickname() -> void:
+	_progress().mark(TutorialProgress.COMPLETED)
+	ProfileStore.new(SettingsStore.new(TUTORIAL_PATH)).save("브롤왕")
+	var app := _signed_in_app()
+	await wait_process_frames(2)
+	var title := app.router().current() as TitleScreen
+	assert_eq(title.nickname_link().text, TitleScreen.CHANGE_TEXT)
+	title.nickname_link().pressed.emit()
+	var nick := app.router().current() as NicknameScreen
+	assert_not_null(nick, "the nickname screen opens over the title")
+	assert_eq(nick.field().text, "브롤왕", "starts from the current name")
+	nick.field().text = "새이름"
+	nick.submit()
+	assert_eq(app.router().current_id(), App.TITLE, "back on the title")
+	assert_eq(app.profile.nickname(), "새이름")
+	assert_eq(title.greeting_text(), "새이름님, 반가워요", "the greeting follows")
+	assert_eq(_props("nickname_set").back(), {"length": 3, "prefilled": true, "changed": true})
+
+
+func test_a_title_without_a_nickname_offers_to_set_one() -> void:
+	_progress().mark(TutorialProgress.COMPLETED)
+	var app := _signed_in_app()
+	await wait_process_frames(2)
+	var title := app.router().current() as TitleScreen
+	assert_eq(title.greeting_text(), "")
+	assert_eq(title.nickname_link().text, TitleScreen.SET_TEXT)
+	title.nickname_link().pressed.emit()
+	(app.router().current() as NicknameScreen).back()
+	assert_eq(app.router().current_id(), App.TITLE, "뒤로 leaves it unset")
+	assert_eq(app.profile.nickname(), "")
+
+
 func test_the_title_replays_the_tutorial() -> void:
 	_progress().mark(TutorialProgress.COMPLETED)
 	var app := _signed_in_app()

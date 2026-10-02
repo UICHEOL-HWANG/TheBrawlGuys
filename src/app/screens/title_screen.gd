@@ -5,11 +5,13 @@ extends Control
 ## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) and 온라인 (Phase 6,
 ## OnlineFlow) are live — plus a small 로그아웃 in the top-right corner and, under the modes, a
 ## secondary 튜토리얼 다시 보기 (Phase 5 T11). Under the logo, "브롤왕님, 반가워요" once the player
-## has a nickname (it follows ProfileStore.changed, e.g. right after onboarding).
+## has a nickname (it follows ProfileStore.changed, e.g. right after onboarding), with a small
+## "변경" link next to it ("닉네임 정하기" alone without one) that asks for the nickname screen.
 
 signal mode_chosen(mode: String)
 signal logout_requested
 signal tutorial_requested
+signal nickname_edit_requested
 
 ## [mode, label, enabled]
 const MODES: Array[Array] = [
@@ -23,6 +25,8 @@ const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
 const TUTORIAL_TEXT := "튜토리얼 다시 보기"
 const GREETING_TEXT := "%s님, 반가워요"
+const CHANGE_TEXT := "변경"
+const SET_TEXT := "닉네임 정하기"
 const PANEL_POP_FROM := 0.9
 const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
@@ -32,6 +36,7 @@ var _tutorial: UiMenuButton
 var _panel: UiPanel
 var _greeting: Label
 var _greeting_gap: Control
+var _nickname_link: LinkButton
 ## The player's profile (null = no greeting); the greeting follows its changes.
 var profile: ProfileStore = null
 
@@ -51,11 +56,20 @@ func _ready() -> void:
 	_panel = UiPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_greeting = LoginLayout.caption(false)
+	_greeting.autowrap_mode = TextServer.AUTOWRAP_OFF  # one line beside its link (a wrapping label in a row has no width)
 	_greeting_gap = _gap(DS.S2)
+	_nickname_link = LoginLayout.link()
+	_nickname_link.pressed.connect(func() -> void: nickname_edit_requested.emit())
+	var greeting_row := HBoxContainer.new()
+	greeting_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	greeting_row.add_theme_constant_override("separation", DS.S2)
+	greeting_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	greeting_row.add_child(_greeting)
+	greeting_row.add_child(_nickname_link)
 	_refresh_greeting()
 	if profile != null:
 		profile.changed.connect(_refresh_greeting)
-	for c: Control in [_gap(DS.S6), logo, _greeting_gap, _greeting, fill, _panel, _gap(DS.S7)]:
+	for c: Control in [_gap(DS.S6), logo, _greeting_gap, greeting_row, fill, _panel, _gap(DS.S7)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", DS.S4)
@@ -75,6 +89,10 @@ func _ready() -> void:
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)
 
 
+func nickname_link() -> LinkButton:
+	return _nickname_link
+
+
 func greeting_text() -> String:
 	return _greeting.text if _greeting.visible else ""
 
@@ -83,7 +101,7 @@ func _refresh_greeting() -> void:
 	var nick := profile.nickname() if profile != null else ""
 	_greeting.text = GREETING_TEXT % nick
 	_greeting.visible = not nick.is_empty()
-	_greeting_gap.visible = _greeting.visible  # no stray gap under the logo without a greeting
+	_nickname_link.text = CHANGE_TEXT if _greeting.visible else SET_TEXT
 
 
 func mode_button(mode: String) -> UiMenuButton:
