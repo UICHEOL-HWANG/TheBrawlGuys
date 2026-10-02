@@ -6,6 +6,12 @@
 		<title>The Brawl Guys</title>
 		<meta name="description" content="치고, 날리고, 끝까지 버티기 — 브라우저에서 바로 하는 3D 난투 게임">
 		<meta name="theme-color" content="#17525A">
+		<!-- Home screen install (deploy/pwa): runs without the browser bars; iOS has no other way -->
+		<link rel="manifest" href="manifest.webmanifest">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-title" content="Brawl Guys">
 		<!-- Link previews: the card is rendered by scripts/capture_share_card.gd, copied in by deploy_web.sh -->
 		<meta property="og:type" content="website">
 		<meta property="og:site_name" content="The Brawl Guys">
@@ -123,6 +129,49 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+/* iPhone/iPad Safari only: Safari keeps its bars over the game and cannot go fullscreen, so
+   point at "홈 화면에 추가" once. Above the canvas, never blocking it beyond its own pill. */
+#install-hint {
+	position: fixed;
+	top: max(12px, env(safe-area-inset-top));
+	left: 50%;
+	transform: translateX(-50%);
+	max-width: calc(100vw - 32px);
+	box-sizing: border-box;
+	display: none;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 10px 10px 16px;
+	background-color: #FFFDF6; /* ui_surface */
+	border-radius: 999px;
+	box-shadow: 0 4px 16px rgba(23, 82, 90, 0.25);
+	color: #17525A; /* canopy_deep */
+	font: 600 14px/1.3 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+	z-index: 10;
+	touch-action: manipulation;
+}
+
+#install-hint.shown {
+	display: flex;
+}
+
+#install-hint svg {
+	flex: none;
+	vertical-align: -3px;
+}
+
+#install-hint button {
+	flex: none;
+	width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 50%;
+	background-color: #E7EFE3;
+	color: #17525A;
+	font: 600 16px/1 -apple-system, sans-serif;
+	cursor: pointer;
+}
 		</style>
 		$GODOT_HEAD_INCLUDE
 	</head>
@@ -144,11 +193,47 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+		<div id="install-hint" role="status">
+			<span>꽉 찬 화면으로 하려면 공유
+				<svg width="16" height="18" viewBox="0 0 16 18" aria-label="공유"><path d="M8 1v11M4 5l4-4 4 4M2 9v7h12V9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				→ 홈 화면에 추가</span>
+			<button type="button" aria-label="닫기">✕</button>
+		</div>
+
 		<script src="$GODOT_URL"></script>
 		<script>
 const GODOT_CONFIG = $GODOT_CONFIG;
 const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
 const engine = new Engine(GODOT_CONFIG);
+
+// iOS Safari outside the home screen app: show the install hint once (until dismissed).
+function showInstallHint() {
+	const ua = navigator.userAgent;
+	const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+	const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//.test(ua);
+	const installed = navigator.standalone === true || window.matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+	let dismissed = false;
+	try {
+		dismissed = localStorage.getItem('install-hint-dismissed') === '1';
+	} catch (e) {
+		dismissed = false;
+	}
+	if (!ios || inApp || installed || dismissed) {
+		return;
+	}
+	const hint = document.getElementById('install-hint');
+	hint.classList.add('shown');
+	const close = () => hint.classList.remove('shown');
+	hint.querySelector('button').addEventListener('click', () => {
+		close();
+		try {
+			localStorage.setItem('install-hint-dismissed', '1');
+		} catch (e) {
+			// private mode: it simply shows again next visit
+		}
+	});
+	setTimeout(close, 12000);
+}
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -253,6 +338,7 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			showInstallHint();
 		}, displayFailureNotice);
 	}
 }());

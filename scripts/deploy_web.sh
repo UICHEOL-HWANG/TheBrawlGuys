@@ -27,6 +27,8 @@ rm -f "$OUT"/*.import
 cp "$ROOT/deploy/vercel.json" "$OUT/vercel.json"
 cp "$ROOT/deploy/vercelignore" "$OUT/.vercelignore"
 cp "$ROOT/deploy/share/og-image.png" "$OUT/og-image.png"
+# Install to the home screen (PWA): no browser bars; Android also locks landscape.
+cp "$ROOT/deploy/pwa/manifest.webmanifest" "$ROOT/deploy/pwa/icon-192.png" "$ROOT/deploy/pwa/icon-512.png" "$OUT/"
 
 cd "$OUT"
 if [ ! -f .vercel/project.json ]; then
