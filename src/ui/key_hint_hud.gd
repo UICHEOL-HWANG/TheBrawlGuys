@@ -1,13 +1,10 @@
 class_name KeyHintHud
 extends Control
-## Places the KeyHintBars (design.md DS-CMP-16) along the bottom of the match HUD, inside the
-## safe area with the s5 margin (DS-LAY-02: info top, controls bottom), and drives them: one bar
-## per local player (centered alone; local 2-player: P1 bottom-left, P2 bottom-right like the HUD
-## counters, each tagged and in its player color), caps follow that player's InputMap actions
-## every frame, the special cap rings while that player's gauge is full, F2 or the chip hides /
-## shows every bar, the choice lives in SettingsStore [hud] key_hints and each change tracks
-## settings_changed. Two bars that do not fit the width (DS-LAY-04 phone scale) go compact.
-## Everything steps aside while touch controls are active.
+## Places the KeyHintBars (design.md DS-CMP-16) on the HUD edge inside the s5 safe area (DS-LAY-02)
+## and drives them: one bar per local player (alone centered; 2P: P1 left, P2 right, tagged, in
+## player colors), caps follow InputMap every frame, the special cap rings on a full gauge, F2 or the
+## chip hides / shows every bar ([hud] key_hints, tracked settings_changed). Too wide: compact, then
+## shrink as a row (KeyHintFit). Everything steps aside while touch controls are active.
 
 const BAR_SCENE := preload("res://src/ui/components/key_hint_bar/key_hint_bar.tscn")
 const TOGGLE_ACTION := "hud_key_hints"
@@ -17,6 +14,9 @@ const TRACK_KEY := "hud.key_hints"
 
 var _margin: MarginContainer
 var _edge_top: bool = false
+## Safe-area pads in screen px {left, right, top, bottom} and the row's current fit scale.
+var _pads: Dictionary = {}
+var _fit_scale: float = 1.0
 var _row: HBoxContainer
 ## One per player: {bar: KeyHintBar, caps: Array[Dictionary], slot: int}
 var _entries: Array[Dictionary] = []
@@ -78,9 +78,24 @@ func bars() -> Array[KeyHintBar]:
 func fit_to(width: float) -> void:
 	for b: KeyHintBar in bars():
 		b.set_compact(false)
-	if _entries.size() > 1 and needed_width() > width:
-		for b: KeyHintBar in bars():
-			b.set_compact(true)
+	var full := needed_width()
+	if _entries.size() > 1 and full > width:
+		_set_compact(true)
+		if needed_width() > width:  # compact is not enough: shrink the full layout, gaps in proportion
+			_set_compact(false)
+	_fit_scale = KeyHintFit.scale_for(needed_width(), width)
+	if _margin != null:
+		KeyHintFit.apply(_margin, _pads, _fit_scale, _edge_top, get_viewport().get_visible_rect().size.x)
+
+
+func _set_compact(on: bool) -> void:
+	for b: KeyHintBar in bars():
+		b.set_compact(on)
+
+
+## 1 at full size, below 1 while the row is shrunk to fit (KeyHintFit).
+func fit_scale() -> float:
+	return _fit_scale
 
 
 ## Minimum width of the bars side by side (gaps included).
@@ -174,17 +189,12 @@ func _spacer() -> Control:
 
 ## Bottom, left and right margins: s5 inside the device safe area (DS-LAY-02).
 func _apply_safe_area() -> void:
-	var vp := get_viewport().get_visible_rect()
-	var safe := SafeArea.rect(get_viewport())
-	_margin.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
-	_margin.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
-	_margin.add_theme_constant_override("margin_bottom", 0 if _edge_top else int(vp.end.y - safe.end.y) + DS.S5)
-	_margin.add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5 if _edge_top else 0)
+	_pads = KeyHintFit.pads(get_viewport(), _edge_top)
+	KeyHintFit.apply(_margin, _pads, _fit_scale, _edge_top, get_viewport().get_visible_rect().size.x)
 	if not _entries.is_empty():
 		_fit()
 
 
 ## Hidden bars keep their room (KeyHintBar), so they fit the same shown or hidden.
 func _fit() -> void:
-	var vp := get_viewport().get_visible_rect()
-	fit_to(vp.size.x - _margin.get_theme_constant("margin_left") - _margin.get_theme_constant("margin_right"))
+	fit_to(get_viewport().get_visible_rect().size.x - float(_pads["left"]) - float(_pads["right"]))

@@ -274,3 +274,21 @@ func test_bars_hidden_at_start_fit_again_when_shown() -> void:
 	h.toggle()
 	assert_true(h.is_shown())
 	assert_lte(h.needed_width(), vp_width - DS.S5 * 2, "shown bars fit the screen (compact if needed)")
+
+
+func test_two_bars_too_wide_even_compact_shrink_to_fit() -> void:
+	var h := KeyHintHud.new()
+	add_child_autofree(h)
+	var players: Array[Dictionary] = [
+		{"prefix": "p1", "slot": 0, "accent": DS.P1}, {"prefix": "p2", "slot": 1, "accent": DS.P2}]
+	h.setup_players(players, func() -> bool: return false, SettingsStore.new(PATH),
+			func(_n: String, _p: Dictionary) -> void: pass)
+	await wait_process_frames(2)
+	h.fit_to(2000.0)
+	assert_eq(h.fit_scale(), 1.0, "room to spare: full size")
+	h.fit_to(900.0)
+	assert_false(h.bar().is_compact(), "shrunk at full gaps, not compact and shrunk")
+	assert_lt(h.fit_scale(), 1.0, "compact is not enough: the row shrinks")
+	assert_lte(h.needed_width() * h.fit_scale(), 900.0 + 0.5, "never clipped")
+	h.fit_to(2000.0)
+	assert_eq(h.fit_scale(), 1.0, "back to full size when the screen grows")

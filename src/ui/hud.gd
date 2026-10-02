@@ -128,7 +128,7 @@ func key_hints_bottom() -> float:
 	if _key_hints != null:
 		for b: KeyHintBar in _key_hints.bars():
 			if b.is_visible_in_tree():
-				bottom = maxf(bottom, b.get_global_rect().end.y)
+				bottom = maxf(bottom, (b.get_global_transform() * Rect2(Vector2.ZERO, b.size)).end.y)  # drawn size (KeyHintFit)
 	return bottom
 
 
