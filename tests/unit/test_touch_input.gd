@@ -60,8 +60,24 @@ func test_stick_and_attack_work_at_the_same_time() -> void:
 
 
 func test_fourth_finger_is_ignored() -> void:
+	for i: int in 3:
+		_touch._unhandled_input(_touch_event(i, Vector2(5 + i, 5), true))
 	_touch._unhandled_input(_touch_event(3, _touch.jump_center(), true))
-	assert_false(_local.sample().jump, "index 3 belongs to the debug panel gesture")
+	assert_false(_local.sample().jump, "a fourth finger belongs to the debug panel gesture")
+
+
+## iOS Safari reports Touch.identifier (Godot's index) as large arbitrary numbers, not 0, 1, 2.
+func test_ios_touch_ids_still_drive_the_stick_and_buttons() -> void:
+	var start := _touch.stick_zone_point()
+	var stick_id := 2593871023 % 2147483647
+	_touch._unhandled_input(_touch_event(stick_id, start, true))
+	_touch._unhandled_input(_drag_event(stick_id, start + Vector2(140, 0)))
+	_touch._unhandled_input(_touch_event(48213, _touch.jump_center(), true))
+	var f := _local.sample()
+	assert_gt(f.move_x, 0.9, "the stick follows a big touch id")
+	assert_true(f.jump, "a second big touch id presses jump")
+	_touch._unhandled_input(_touch_event(stick_id, start + Vector2(140, 0), false))
+	assert_eq(_local.sample().move_x, 0.0, "released by the same id")
 
 
 func test_hold_attack_becomes_heavy_and_release_ends_it() -> void:

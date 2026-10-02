@@ -4,7 +4,8 @@ extends CanvasLayer
 ## the safe area, four buttons bottom-right in the layout chosen by config.touch_layout (E9).
 ## Attack: tap = light on release, hold = heavy charge (AttackButtonModel). Jump and grab fire on
 ## press; guard holds while touched. Canceled touches and focus loss release everything without
-## firing a tap. Finger index >= 3 (four-finger tap) belongs to the debug panel. Debug builds
+## firing a tap. Raw touch ids map to fingers 0..2 on press (iOS Safari reports big arbitrary
+## Touch.identifier values, Android 0, 1, 2); a fourth finger belongs to the debug panel. Debug builds
 ## without a touchscreen accept the left mouse button as finger 0 for desktop testing.
 
 signal button_pressed(name: String)
@@ -39,6 +40,8 @@ var _enabled: bool = true
 var _suppressed: bool = false
 var _shown_before: bool = false
 var _grab_highlight: bool = false
+## Raw touch id (InputEvent index) -> finger 0..MAX_FINGERS-1, from press to release.
+var _fingers: Dictionary = {}
 
 
 func setup(local: LocalInput, config: GameConfig) -> void:
@@ -153,14 +156,17 @@ func _notification(what: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var t := event as InputEventScreenTouch
-		if t.index < MAX_FINGERS:
-			if t.pressed:
-				_down(t.index, t.position)
-			else:
-				_up(t.index, t.canceled)
+		if t.pressed:
+			var finger := _claim_finger(t.index)
+			if finger != NO_FINGER:
+				_down(finger, t.position)
+		elif _fingers.has(t.index):
+			_up(int(_fingers[t.index]), t.canceled)
+			_fingers.erase(t.index)
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
-		_drag(d.index, d.position)
+		if _fingers.has(d.index):
+			_drag(int(_fingers[d.index]), d.position)
 	elif _mouse_as_finger() and event is InputEventMouseButton:
 		var m := event as InputEventMouseButton
 		if m.button_index == MOUSE_BUTTON_LEFT:
@@ -172,6 +178,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mm := event as InputEventMouseMotion
 		if mm.button_mask & MOUSE_BUTTON_MASK_LEFT:
 			_drag(MOUSE_FINGER, mm.position)
+
+
+## The finger a raw touch id presses with: its own if already down, else the lowest free one
+## (NO_FINGER when all are taken).
+func _claim_finger(id: int) -> int:
+	if _fingers.has(id):
+		return int(_fingers[id])
+	for f: int in MAX_FINGERS:
+		if not _fingers.values().has(f):
+			_fingers[id] = f
+			return f
+	return NO_FINGER
 
 
 func _layout() -> void:
@@ -228,6 +246,7 @@ func _release_all() -> void:
 		fingers.append(_stick_finger)
 	for index: int in fingers:
 		_up(index, true)
+	_fingers.clear()
 	# Latches keep a released press for one tick so quick taps survive; after focus loss nothing
 	# may still fire, so drop them.
 	_local.reset()
