@@ -1,14 +1,10 @@
 class_name SfxDirector
 extends Node
 ## Sim and view events -> sound effects (design.md DS-SFX-01). A fixed pool of players; the
-## oldest voice is stolen when all are busy. Hit pitch and loudness follow the knockback.
+## oldest voice is stolen when all are busy. Hits sound like the weapon that landed them (HitSounds).
 
 const VOICES := 12
-const LIGHT_HIT_VOLUME_DB := -4.0
 const LAND_QUIET_DB := -14.0
-const MIN_PITCH := 0.7
-const MAX_PITCH := 1.2
-const BASE_PITCH := 1.15
 
 var _config: GameConfig
 var _players: Array[AudioStreamPlayer] = []
@@ -24,23 +20,28 @@ func setup(config: GameConfig) -> void:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_players.append(p)
-	for name: String in SfxRecipes.RECIPES:
-		var path := SfxRecipes.path(name)
+	for name: String in sound_names():
+		var path := SfxRecipes.stream_path(name)
 		if ResourceLoader.exists(path):
 			_streams[name] = load(path)
 
 
+## Every playable sound: the recipes plus the designed weapon hits, each once.
+static func sound_names() -> Array[String]:
+	var names: Array[String] = []
+	for name: String in SfxRecipes.RECIPES.keys() + HitSounds.NAMES:
+		if not names.has(name):
+			names.append(name)
+	return names
+
+
 ## decor_lake: the arena has the classic meadow lake (ring-outs over it splash).
-static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = false) -> Dictionary:
+## attacker_style: the hitter's style id ("" = unknown), which picks the weapon's hit sound.
+static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = false,
+		attacker_style: String = "") -> Dictionary:
 	match String(event["type"]):
 		"hit":
-			if int(event.get("attack_kind", -1)) == AttackSet.Kind.HAMMER:
-				return {"name": "squeak", "pitch": 1.0, "volume_db": 0.0}  # the toy hammer always squeaks
-			var k := float(event["knockback"])
-			var heavy := k >= config.spark_large_threshold
-			return {"name": "hit_heavy" if heavy else "hit_light",
-				"pitch": clampf(BASE_PITCH - k * config.sfx_pitch_per_knockback, MIN_PITCH, MAX_PITCH),
-				"volume_db": 0.0 if heavy else LIGHT_HIT_VOLUME_DB}
+			return HitSounds.for_hit(event, attacker_style, config)
 		"guard_hit":
 			return {"name": "guard", "pitch": 1.0, "volume_db": 0.0}
 		"ringout":
@@ -62,9 +63,19 @@ func set_arena(arena_id: String) -> void:
 	_decor_lake = ArenaDressings.has_decor_lake(arena_id)
 
 
-func on_events(events: Array) -> void:
+## The style id of fighter `id` in the view's fighters, or "" (unknown, e.g. no owner).
+static func style_of(id: int, fighters: Array) -> String:
+	for f: Dictionary in fighters:
+		if int(f.get("id", -1)) == id:
+			return String(f.get("style", ""))
+	return ""
+
+
+## fighters: the view's fighter dictionaries, so hits sound like the attacker's weapon.
+func on_events(events: Array, fighters: Array = []) -> void:
 	for e: Dictionary in events:
-		var s := sound_for(e, _config, _decor_lake)
+		var style := style_of(int(e.get("attacker", -1)), fighters) if String(e["type"]) == "hit" else ""
+		var s := sound_for(e, _config, _decor_lake, style)
 		if not s.is_empty():
 			play(String(s["name"]), float(s["pitch"]), float(s["volume_db"]))
 

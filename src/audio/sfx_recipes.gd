@@ -24,5 +24,12 @@ const RECIPES := {
 }
 
 
+## Where scripts/bake_sfx.gd writes the recipe's placeholder.
 static func path(name: String) -> String:
 	return "res://assets/sfx/%s.wav" % name
+
+
+## What to load: a designed .ogg (scripts/music/hits.py) wins over the baked .wav placeholder.
+static func stream_path(name: String) -> String:
+	var ogg := "res://assets/sfx/%s.ogg" % name
+	return ogg if ResourceLoader.exists(ogg) else path(name)

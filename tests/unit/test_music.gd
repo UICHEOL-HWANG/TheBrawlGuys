@@ -55,3 +55,11 @@ func test_files_are_baked_and_director_switches_layers() -> void:
 	d.update_from({"match_over": false, "fighters": [{"state": Fighter.State.IDLE, "stocks": 1}]})
 	assert_true(d.is_intense())
 	assert_eq(d.intense_target_db(), 0.0)
+
+
+func test_the_battle_theme_loads_the_designed_ogg_loops() -> void:
+	for name: String in ["battle_base", "battle_intense"]:
+		assert_eq(MusicDirector.path_for(name), "res://assets/music/%s.ogg" % name, "scripts/music/compose.py output wins")
+	var base: AudioStream = load(MusicDirector.path_for("battle_base"))
+	var layer: AudioStream = load(MusicDirector.path_for("battle_intense"))
+	assert_almost_eq(base.get_length(), layer.get_length(), 0.01, "the layers play in sync, so they share one length")

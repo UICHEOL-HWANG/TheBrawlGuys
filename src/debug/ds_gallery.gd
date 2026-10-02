@@ -373,7 +373,7 @@ func _play_charge() -> void:
 func _audio_preview() -> Control:
 	var box := VBoxContainer.new()
 	var grid := HFlowContainer.new()
-	for name: String in SfxRecipes.RECIPES:
+	for name: String in SfxDirector.sound_names():
 		var recipe := name
 		grid.add_child(_button(recipe, "sfx_" + recipe, func() -> void: _sfx.play(recipe)))
 	box.add_child(grid)

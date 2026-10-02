@@ -76,7 +76,7 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 	_follow_arena(String(view.get("arena", ArenaCatalog.DEFAULT_ID)))
 	_feel.on_events(events, view.get("fighters", []))
 	_feel.on_view_events(view_events)
-	_sfx.on_events(events)
+	_sfx.on_events(events, view.get("fighters", []))
 	_sfx.on_events(view_events)
 	LocalHints.update(view, local_slot, _config, touch, _grab_hint)
 	_cutin.present(view, events, delta)
