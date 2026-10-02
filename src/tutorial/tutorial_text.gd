@@ -40,7 +40,7 @@ const TOUCH_LINES := {
 	TutorialSteps.G_THROW: "잡은 채로 스틱으로 방향을 정하고 잡기 버튼을 한 번 더!",
 	TutorialSteps.G_PICKUP: "가운데 떨어진 방망이 옆에서 잡기 버튼으로 주워요",
 	TutorialSteps.G_ITEM_USE: "공격 버튼으로 휘두르거나 잡기 버튼으로 던져 보세요",
-	TutorialSteps.G_SPECIAL: "게이지가 가득! 공격 버튼을 길게 누른 채 가드 버튼을 함께 눌러 보세요",
+	TutorialSteps.G_SPECIAL: "게이지가 가득! 공격을 길게 누른 채 가드도 눌러 보세요",
 }
 
 

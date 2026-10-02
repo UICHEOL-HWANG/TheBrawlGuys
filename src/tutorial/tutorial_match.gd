@@ -139,7 +139,7 @@ func _refresh_hints() -> void:
 	var hints := _hud.key_hints()
 	if hints != null:
 		hints.bar().set_highlight(_director.keys_to_press())
-	_overlay.set_top_inset(_hud.key_hints_bottom())
+	_overlay.set_top_inset(_hud.top_bottom())
 	var device := "|".join(_device())
 	if device != _shown_device:
 		_shown_device = device

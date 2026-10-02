@@ -121,6 +121,14 @@ func reserve() -> Dictionary:
 	return {"top": key_hints_bottom() / height, "bottom": (height - r.position.y) / height}
 
 
+## Lowest edge of whatever the HUD shows along the top: the strip while touch moves it up (phones),
+## else the key hint bars. Overlays (the tutorial card) start below it.
+func top_bottom() -> float:
+	if _strip != null and _strip.is_edge_top():
+		return _strip.get_global_rect().end.y
+	return key_hints_bottom()
+
+
 ## Lowest edge of the key hint bars on the top edge (0 when there are none). Hidden keys keep
 ## their room and the chip to show them again, so the bottom stays put (nothing covers the chip).
 func key_hints_bottom() -> float:
