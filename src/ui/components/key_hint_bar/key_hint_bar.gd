@@ -3,7 +3,8 @@ extends HBoxContainer
 ## Keyboard key hints along the bottom of a match (design.md DS-CMP-16): a translucent cream
 ## strip (ui_surface 50%, radius_l) of KeyCaps — the arrow cluster, then one cap per action with
 ## a caption under it, ending with the special chord cap — plus a hide/show chip at its right
-## edge. States shown · hidden (only the chip is left). Caps light from set_pressed(); the special
+## edge. States shown · hidden (the keys fade out but keep their room, so the chip stays where it
+## was and nothing laid out below the bar moves). Caps light from set_pressed(); the special
 ## cap rings from set_ready() while the gauge is full; the tutorial rings the caps to press now
 ## from set_highlight() (Phase 5 T11); the bar never reads input itself. Local
 ## 2-player bars start with a "P1"/"P2" tag (set_tag) and only the last one keeps the chip; when
@@ -148,13 +149,16 @@ func set_state(s: int, animate: bool = true) -> void:
 	if s == State.HIDDEN:
 		for id: String in _caps:
 			set_pressed(id, false)
-	if not (animate and is_inside_tree()):
-		_panel.visible = s == State.SHOWN
-		_panel.modulate.a = 1.0
-	elif s == State.SHOWN:
-		UiMotion.fade_in(_panel, UiMotion.Token.BASE)
+	var alpha := 1.0 if s == State.SHOWN else 0.0
+	if animate and is_inside_tree():
+		UiMotion.fade_to(_panel, alpha)
 	else:
-		UiMotion.fade_out(_panel)
+		UiMotion.set_alpha(_panel, alpha)
+
+
+## Whether the keys show (false once a hide has faded them out).
+func keys_visible() -> bool:
+	return _panel.modulate.a > 0.0
 
 
 func state() -> int:

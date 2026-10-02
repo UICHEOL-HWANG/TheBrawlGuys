@@ -120,6 +120,23 @@ func test_toggle_hides_persists_and_tracks() -> void:
 	assert_true(EventCatalog.validate("settings_changed", _tracked[0]["props"]).is_empty())
 
 
+func test_hiding_keeps_the_chip_where_it_was() -> void:
+	var h := _hud()
+	await wait_process_frames(3)
+	var chip_at := h.bar().chip().get_global_rect()
+	var bar_at := h.bar().get_global_rect()
+	h.toggle()
+	await wait_seconds(DS.MOTION_BASE + 0.1)  # the keys fade out
+	await wait_process_frames(2)
+	assert_false(h.bar().keys_visible(), "the keys are gone")
+	assert_eq(h.bar().chip().get_global_rect(), chip_at, "the toggle stays under the cursor")
+	assert_eq(h.bar().get_global_rect(), bar_at, "the bar keeps its place, so nothing below moves")
+	h.toggle()
+	await wait_seconds(DS.MOTION_BASE + 0.1)
+	assert_true(h.bar().keys_visible())
+	assert_eq(h.bar().chip().get_global_rect(), chip_at)
+
+
 func test_hidden_choice_is_restored_by_a_new_hud() -> void:
 	SettingsStore.new(PATH).set_value("hud", "key_hints", false)
 	var h := _hud()

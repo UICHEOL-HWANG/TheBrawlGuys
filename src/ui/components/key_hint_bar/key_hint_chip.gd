@@ -53,8 +53,9 @@ func _set_hover(on: bool) -> void:
 
 func _fit() -> void:
 	var w := ICON_W + PAD * 3.0
-	if _font != null:
-		w += _font.get_string_size(text(), HORIZONTAL_ALIGNMENT_LEFT, -1, DS.SIZE_CAPTION).x
+	if _font != null:  # sized for the longer label, so the chip never resizes when it toggles
+		w += maxf(_font.get_string_size(HIDE_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, DS.SIZE_CAPTION).x,
+				_font.get_string_size(SHOW_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, DS.SIZE_CAPTION).x)
 	custom_minimum_size = Vector2(w, HEIGHT)
 	queue_redraw()
 

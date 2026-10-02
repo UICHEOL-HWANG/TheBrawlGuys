@@ -46,7 +46,7 @@ func setup_players(players: Array[Dictionary], touch_active: Callable, store: Se
 			_row.add_child(_spacer())
 		_entries.append(_add_bar(players[i], players.size() > 1, i == players.size() - 1))
 	_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	_apply_safe_area()  # fits while every bar is still shown (a hidden panel measures 0 wide)
+	_apply_safe_area()
 	for e: Dictionary in _entries:
 		(e["bar"] as KeyHintBar).set_state(KeyHintBar.State.SHOWN if shown else KeyHintBar.State.HIDDEN, false)
 	get_viewport().size_changed.connect(_apply_safe_area)
@@ -100,8 +100,6 @@ func toggle() -> void:
 	var old := is_shown()
 	for b: KeyHintBar in bars():
 		b.set_state(KeyHintBar.State.HIDDEN if old else KeyHintBar.State.SHOWN)
-	if not old:
-		_fit()  # the screen may have changed while the bars were hidden
 	_store.set_value(SECTION, KEY, not old)
 	_track.call("settings_changed", {"key": TRACK_KEY, "old": str(old), "new": str(not old)})
 
@@ -186,9 +184,7 @@ func _apply_safe_area() -> void:
 		_fit()
 
 
-## Hidden bars measure 0 wide, so the fit waits until they are shown again (toggle).
+## Hidden bars keep their room (KeyHintBar), so they fit the same shown or hidden.
 func _fit() -> void:
-	if not is_shown():
-		return
 	var vp := get_viewport().get_visible_rect()
 	fit_to(vp.size.x - _margin.get_theme_constant("margin_left") - _margin.get_theme_constant("margin_right"))

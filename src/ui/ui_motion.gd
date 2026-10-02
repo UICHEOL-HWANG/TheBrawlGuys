@@ -56,6 +56,21 @@ static func fade_out(node: CanvasItem) -> Tween:
 	return tw
 
 
+## Fades to `alpha` and stays visible, keeping its room in the layout (a later fade replaces it).
+static func fade_to(node: CanvasItem, alpha: float, token: int = Token.BASE) -> Tween:
+	_cancel_fade(node)
+	var tw := node.create_tween()
+	step(tw, node, "modulate:a", alpha, token)
+	node.set_meta(FADE_META, tw)
+	return tw
+
+
+## Sets the alpha at once, stopping a running fade.
+static func set_alpha(node: CanvasItem, alpha: float) -> void:
+	_cancel_fade(node)
+	node.modulate.a = alpha
+
+
 static func bump(node: Control, from_scale: float) -> Tween:
 	node.pivot_offset = node.size * 0.5
 	node.scale = Vector2.ONE * from_scale
