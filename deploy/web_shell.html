@@ -241,6 +241,9 @@ const engine = new Engine(GODOT_CONFIG);
 				if (current > 0 && total > 0) {
 					const pct = Math.min(100, Math.round((current / total) * 100));
 					statusFill.classList.remove('indeterminate');
+					// At 100 % the engine starts booting and blocks the main thread, which would freeze
+					// the width transition part-way; snap the last step so the pill is visibly full.
+					statusFill.style.transition = pct === 100 ? 'none' : '';
 					statusFill.style.width = pct + '%';
 					statusLabel.textContent = '불러오는 중… ' + pct + '%';
 				} else {
