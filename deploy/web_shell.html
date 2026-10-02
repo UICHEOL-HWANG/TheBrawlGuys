@@ -2,7 +2,7 @@
 <html lang="ko">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
 		<title>The Brawl Guys</title>
 		<meta name="description" content="치고, 날리고, 끝까지 버티기 — 브라우저에서 바로 하는 3D 난투 게임">
 		<meta name="theme-color" content="#17525A">
@@ -10,7 +10,7 @@
 		<link rel="manifest" href="manifest.webmanifest">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="Brawl Guys">
 		<!-- Link previews: the card is rendered by scripts/capture_share_card.gd, copied in by deploy_web.sh -->
 		<meta property="og:type" content="website">
@@ -32,6 +32,25 @@ html, body, #canvas {
 	margin: 0;
 	padding: 0;
 	border: 0;
+}
+
+/* The page covers the whole screen (viewport-fit=cover; the game keeps clear of notches through
+   #safe-probe / SafeArea) and is pinned: a page that can scroll makes iOS rubber-band on a drag
+   and cancel the touch, which kills the movement stick in the home screen app. */
+html, body {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+}
+
+#safe-probe {
+	position: fixed;
+	visibility: hidden;
+	pointer-events: none;
+	padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 body {
@@ -192,6 +211,8 @@ body {
 			</div>
 			<div id="status-notice"></div>
 		</div>
+
+		<div id="safe-probe"></div>
 
 		<div id="install-hint" role="status">
 			<span>꽉 찬 화면으로 하려면 공유
