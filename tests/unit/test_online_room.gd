@@ -37,6 +37,7 @@ func _room(tag: String) -> OnlineRoom:
 	room.rooms = RoomsApi.new(client)
 	room.rooms.new_code = func() -> String: return CODE
 	room.access_token = "jwt-" + tag
+	room.nickname = {"host": "방장님", "client": "브롤왕"}.get(tag, "")
 	room.clock_ms = func() -> int: return 5_000
 	room.track = func(event_name: String, props: Dictionary) -> void:
 		assert_eq(EventCatalog.validate(event_name, props), PackedStringArray(), event_name)
@@ -85,6 +86,7 @@ func test_create_join_connect_pick_and_start() -> void:
 	assert_eq(host.peers.model.slots[1]["conn"], LobbyModel.CONN_CONNECTED)
 	assert_eq(client.peers.model.human_count(), 2, "the client mirrors the host's lobby")
 	assert_eq(client.peers.model.arena, "log_bridge")
+	assert_eq(client.peers.model.names(), {0: "방장님", 1: "브롤왕"}, "both nicknames reached the client")
 	client.peers.pick(CharacterData.MAGE, true)
 	assert_false(host.peers.model.can_start(), "the host is not ready yet")
 	host.peers.pick(CharacterData.KNIGHT, true)
@@ -94,6 +96,7 @@ func test_create_join_connect_pick_and_start() -> void:
 	assert_eq(_scenes.size(), 2, "every device got its match scene from OnlineStart.begin")
 	for entry: Array in _scenes:
 		assert_true(entry[1] is NetMatch)
+		assert_eq((entry[1] as NetMatch).names, {0: "방장님", 1: "브롤왕"}, "names travel with the scene")
 		assert_eq((entry[1] as NetMatch).is_host(), entry[0] == "host")
 	assert_eq(host.phase(), OnlineRoom.Phase.PLAYING)
 	assert_eq(client.phase(), OnlineRoom.Phase.PLAYING)

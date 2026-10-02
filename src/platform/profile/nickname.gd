@@ -47,6 +47,11 @@ static func is_valid(text: String) -> bool:
 	return error(text).is_empty()
 
 
+## A name received from another device (untrusted): cleaned when usable, else "".
+static func sanitize(text: Variant) -> String:
+	return clean(text) if text is String and is_valid(text) else ""
+
+
 ## A starting value from an account display name (OAuth full name): cleaned and cut to MAX_LEN;
 ## "" when it would not be valid.
 static func prefill(display_name: String) -> String:

@@ -57,7 +57,7 @@ func _ready() -> void:
 	_code_label.text = code
 	(head["copy"] as UiMenuButton).pressed.connect(copy_code)
 	var parts := WaitingRoomLayout.body(self, head["root"])
-	_cells = WaitingRoomLayout.slot_grid(parts["slots"], LobbyModel.MAX_SLOTS)
+	_cells = WaitingRoomLayout.slot_grid(parts["slots"], LobbyModel.MAX_SLOTS, WaitingRoomLayout.columns_for(get_viewport()))
 	_build_controls(parts["controls"])
 	(_buttons["ready"] as Control).grab_focus.call_deferred()
 
@@ -84,10 +84,12 @@ func refresh(model: LobbyModel, local_id: int) -> void:
 	button("bots").text = BOTS_OFF_TEXT if _bots else BOTS_ON_TEXT
 	WaitingRoomLayout.set_enabled(button("start"), model.can_start())
 	_block.text = model.start_block()
+	_block.visible = is_host and not _block.text.is_empty()  # an empty line would pad the panel
 
 
 func show_notice(text: String) -> void:
 	_notice.text = text
+	_notice.visible = not text.is_empty()
 
 
 func notice_text() -> String:
@@ -147,6 +149,7 @@ func _build_controls(box: Container) -> void:
 	box.add_child(_block)
 	_add_button(box, "leave", UiMenuButton.Kind.SECONDARY, func() -> void: leave_requested.emit()).text = LEAVE_TEXT
 	_notice = WaitingRoomLayout.caption("")
+	_notice.visible = false
 	box.add_child(_notice)
 
 
@@ -169,7 +172,9 @@ func _show_slot(cell: Dictionary, s: Dictionary, local_id: int) -> void:
 	var peer := int(s["peer"])
 	view.set_bot(peer == LobbyModel.BOT)
 	var title := "" if peer == LobbyModel.EMPTY else CharacterCards.title_of(String(s["character"]))
-	if peer == local_id and peer > 0:
+	if not String(s.get("name", "")).is_empty():
+		title = "%s · %s" % [s["name"], title]  # the nickname says who; it ends in "…" when long
+	elif peer == local_id and peer > 0:
 		title += ME_SUFFIX
 	elif peer == LobbyModel.HOST_ID:
 		title += HOST_SUFFIX

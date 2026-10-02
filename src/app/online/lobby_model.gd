@@ -1,8 +1,8 @@
 class_name LobbyModel
 extends RefCounted
 ## The online waiting room's state (Phase 6, PRD-NET-03): up to MAX_SLOTS slots, each a human
-## peer (peer id ≥ 1, the host is 1), a bot (BOT) or empty (EMPTY), with character, ready and the
-## connection status + rtt. The host owns it and broadcasts to_state(); clients mirror it with
+## peer (peer id ≥ 1, the host is 1), a bot (BOT) or empty (EMPTY), with character, ready, the
+## connection status + rtt and the player's nickname (Nickname.sanitize; "" = none). The host owns it and broadcasts to_state(); clients mirror it with
 ## from_state(). build_setup / slot_map are what OnlineStart.begin receives.
 
 const MAX_SLOTS := 4
@@ -40,6 +40,13 @@ func add_human(peer_id: int) -> int:
 			slots[i]["conn"] = CONN_CONNECTED if peer_id == HOST_ID else CONN_CONNECTING
 			return i
 	return -1
+
+
+## A seated peer's nickname as it said hello (cleaned; unusable names become "").
+func set_name(peer_id: int, nick: Variant) -> void:
+	var at := slot_of(peer_id)
+	if at >= 0:
+		slots[at]["name"] = Nickname.sanitize(nick)
 
 
 func remove_peer(peer_id: int) -> int:
@@ -127,39 +134,19 @@ func from_state(state: Dictionary) -> void:
 		arena = String(state["arena"])
 
 
-## The match line-up: occupied slots in order (team rule: bots fill up to four).
+## The match line-up for this device (LobbyLineup): occupied slots in order.
 func build_setup(local_peer: int, seed: int) -> MatchSetup:
-	var setup := MatchSetup.new()
-	setup.mode = MatchSetup.MODE_ONLINE
-	setup.seed = seed
-	setup.rule = rule
-	setup.arena_id = arena
-	for s: Dictionary in slots:
-		var peer := int(s["peer"])
-		if peer == EMPTY:
-			continue
-		var controller := MatchSetup.CONTROLLER_BOT if peer == BOT else (
-				MatchSetup.CONTROLLER_LOCAL if peer == local_peer else MatchSetup.CONTROLLER_REMOTE)
-		var entry := MatchSetup.slot_entry(setup.slots.size(), controller,
-				PlatformEnv.default_input_device() if peer == local_peer else MatchSetup.INPUT_BOT)
-		entry["character"] = String(s["character"])
-		setup.slots.append(entry)
-	while rule == MatchRules.TEAM and setup.slots.size() < MatchRules.TEAM_PLAYERS:
-		setup.slots.append(MatchSetup.slot_entry(setup.slots.size(), MatchSetup.CONTROLLER_BOT, MatchSetup.INPUT_BOT))
-	return setup
+	return LobbyLineup.setup(slots, rule, arena, local_peer, seed)
 
 
 ## peer id -> slot index in build_setup's line-up, humans only.
 func slot_map() -> Dictionary:
-	var out := {}
-	var index := 0
-	for s: Dictionary in slots:
-		var peer := int(s["peer"])
-		if peer >= HOST_ID:
-			out[peer] = index
-		if peer != EMPTY:
-			index += 1
-	return out
+	return LobbyLineup.slot_map(slots)
+
+
+## Match slot index -> nickname, for humans that have one.
+func names() -> Dictionary:
+	return LobbyLineup.names(slots)
 
 
 func _count(pred: Callable) -> int:
@@ -171,7 +158,8 @@ func _count(pred: Callable) -> int:
 
 
 static func _slot(peer: int) -> Dictionary:
-	return {"peer": peer, "character": CharacterData.IDS[0], "ready": peer == BOT, "conn": CONN_NONE, "rtt": -1}
+	return {"peer": peer, "character": CharacterData.IDS[0], "ready": peer == BOT, "conn": CONN_NONE, "rtt": -1,
+		"name": ""}
 
 
 static func _sanitized(s: Variant) -> Dictionary:
@@ -184,4 +172,5 @@ static func _sanitized(s: Variant) -> Dictionary:
 	out["ready"] = bool(d.get("ready", false))
 	out["conn"] = String(d.get("conn", "")) if CONNS.has(String(d.get("conn", ""))) else CONN_NONE
 	out["rtt"] = int(d.get("rtt", -1))
+	out["name"] = Nickname.sanitize(d.get("name", ""))
 	return out

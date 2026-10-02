@@ -21,6 +21,8 @@ const ROLE_HOST := "host"
 const ROLE_CLIENT := "client"
 const LOST_HOST_LEFT := ClientSession.LOST_HOST_LEFT
 
+## Match slot -> nickname from the lobby (OnlineStart): shown on every player's HUD card.
+var names: Dictionary = {}
 var _role: String = ""
 var _transport: NetTransport = null
 var _peer_slots: Dictionary = {}
@@ -117,6 +119,8 @@ func _start_match() -> void:
 		return
 	_started = true
 	super._start_match()
+	for slot: Variant in names:
+		_hud.show_name(int(slot), String(names[slot]))
 	if _host != null:
 		_host.start(_world)
 

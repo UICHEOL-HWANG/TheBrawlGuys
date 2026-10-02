@@ -127,7 +127,7 @@ func _start_match() -> void:
 	_squad = BotSquadFactory.for_setup(setup, _config)
 	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
-	_hud.show_local_name(setup.local_slot(), nickname if setup.local_slots().size() == 1 else "")
+	_hud.show_name(setup.local_slot(), nickname if setup.local_slots().size() == 1 else "")
 	_result_shown = false
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state

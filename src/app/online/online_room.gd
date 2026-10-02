@@ -1,9 +1,7 @@
 class_name OnlineRoom
 extends Node
-## One online room's lifecycle (Phase 6, PRD-NET-03): create (rooms row + Realtime channel) or
-## join (look the code up, then the channel), the lobby (RoomPeers), start (OnlineStart.begin on
-## every device) and leave (closes the row when hosting). Polls the channel, signaling and
-## transport in _process. Tracks room_created / room_joined / room_left / peer_connect_failed.
+## One online room (Phase 6, PRD-NET-03): create or join (rooms row + channel), the lobby (RoomPeers;
+## nicknames said in hello), start (OnlineStart.begin), leave. Polls in _process; tracks room events.
 
 signal opened(code: String)
 signal changed
@@ -30,6 +28,7 @@ var rooms: RoomsApi
 var socket_url: String = ""
 var access_token: String = ""
 var ice: Dictionary = {}
+var nickname: String = ""  # said in hello / seated as the host (LobbyModel name)
 
 var code: String = ""
 var is_host: bool = false
@@ -154,9 +153,10 @@ func _on_joined() -> void:
 	_phase = Phase.LOBBY
 	_opened_ms = int(clock_ms.call())
 	if is_host:
+		peers.model.set_name(LobbyModel.HOST_ID, nickname)
 		peers.share()
 	else:
-		peers.signaling.hello({"name": ""}, _opened_ms)
+		peers.signaling.hello({"name": nickname}, _opened_ms)
 	track.call("room_joined", {"is_host": is_host, "player_count": peers.model.human_count()})
 	opened.emit(code)
 
@@ -174,7 +174,7 @@ func _begin(data: Dictionary) -> void:
 		peers.model.from_state(data["state"])
 	var setup := peers.model.build_setup(peers.local_id(), int(data.get("seed", 1)))
 	peers.locked = true
-	var scene := OnlineStart.begin(peers.transport, is_host, setup, peers.model.slot_map())
+	var scene := OnlineStart.begin(peers.transport, is_host, setup, peers.model.slot_map(), peers.model.names())
 	if scene == null:  # back to the lobby
 		peers.locked = false
 		if is_host:

@@ -45,6 +45,8 @@ func _init() -> void:
 	head.add_child(_bot)
 	_character = _label(DS.FONT_BODY_PATH, DS.SIZE_BODY, DS.UI_TEXT)
 	_character.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_character.clip_text = true  # a long nickname ends in "…" instead of widening the card
+	_character.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	head.add_child(_character)
 	_status = _label(DS.FONT_CAPTION_PATH, DS.SIZE_CAPTION, DS.UI_TEXT_SOFT)
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

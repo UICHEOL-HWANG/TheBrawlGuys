@@ -22,6 +22,8 @@ var push_match: Callable = func(_scene: Node) -> void: pass
 var show_login: Callable = func() -> void: pass
 ## () -> OnlineRoom, or null when Supabase is not available.
 var room_factory: Callable = OnlineFlow.default_room
+## This player's nickname (ProfileStore), told to the room so every peer can show it.
+var nickname: String = ""
 var supported: bool = WebRtcSupport.available()
 
 var _menu: OnlineMenuScreen
@@ -35,6 +37,7 @@ static func open(app: App, gate: LoginGate, track_fn: Callable, push_fn: Callabl
 	flow.router = app.router()
 	flow.config = app.backdrop().config()
 	flow.track = track_fn
+	flow.nickname = app.profile.nickname()
 	flow.signed_in = gate.is_signed_in
 	flow.push_match = push_fn
 	flow.show_login = login_fn
@@ -102,6 +105,7 @@ func _new_room() -> bool:
 	if _room == null:
 		_menu.show_error(OFFLINE_TEXT)
 		return false
+	_room.nickname = nickname
 	add_child(_room)
 	_room.opened.connect(_show_lobby)
 	_room.left.connect(_on_left)

@@ -25,10 +25,13 @@ extends RefCounted
 const START_FAILED_TEXT := "온라인 대전을 시작하지 못했어요 — 다시 시도해 주세요"
 
 
-static func begin(transport: NetTransport, is_host: bool, setup: MatchSetup, slot_map: Dictionary) -> Node:
+## names: match slot -> nickname from the lobby (LobbyModel.names), shown on the HUD cards.
+static func begin(transport: NetTransport, is_host: bool, setup: MatchSetup, slot_map: Dictionary,
+		names: Dictionary = {}) -> Node:
 	if transport == null or (is_host and setup == null):
 		return null
 	var scene := NetMatch.new()
+	scene.names = names
 	if is_host:
 		var peer_slots := slot_map.duplicate()
 		peer_slots.erase(transport.local_id())  # the host's own slot is "local"

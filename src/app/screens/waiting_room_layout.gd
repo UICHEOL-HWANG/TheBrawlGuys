@@ -7,8 +7,18 @@ extends RefCounted
 
 const TITLE_TEXT := "대기실"
 const GRID_COLUMNS := 2
-## Control buttons are one step shorter than menu buttons so the column fits a phone.
+## Control buttons are one step shorter than menu buttons; on short screens (a phone in landscape,
+## logical height under SHORT_HEIGHT) one step shorter again, with tighter gaps, so the whole column
+## (start and leave included) stays on screen.
 const CONTROL_HEIGHT := DS.S8
+const SHORT_CONTROL_HEIGHT := DS.S7
+const SHORT_HEIGHT := 800.0
+## 복사 only needs a short button (a menu-wide one pushed the header past narrow phones).
+const COPY_WIDTH := DS.S8 * 3
+## Panel width (a control button plus the panel's s6 padding) and the gap beside it.
+const PANEL_WIDTH := DS.BUTTON_MIN_WIDTH + DS.S6 * 2
+const ROW_GAP := DS.S6
+const GRID_GAP := DS.S4
 
 
 ## Room code header: {"root": Control, "code": Label, "copy": UiMenuButton}.
@@ -24,16 +34,24 @@ static func header(caption_text: String, copy_text: String) -> Dictionary:
 	code.add_theme_color_override("font_color", DS.UI_TEXT)
 	row.add_child(code)
 	var copy := button(copy_text, UiMenuButton.Kind.SECONDARY)
+	copy.ready.connect(func() -> void: copy.custom_minimum_size.x = COPY_WIDTH)
 	row.add_child(copy)
 	return {"root": row, "code": code, "copy": copy}
 
 
-## count slot cells: [{"slot": PlayerSlot, "conn": ConnectionBadge}].
-static func slot_grid(parent: Control, count: int) -> Array[Dictionary]:
+## Slot columns that fit beside the panel: 2 (2×2) when the width allows, else 1 (a narrow
+## phone such as an iPhone SE stacks the four slots).
+static func columns_for(viewport: Viewport) -> int:
+	var free := viewport.get_visible_rect().size.x - _margin(viewport) * 2 - PANEL_WIDTH - ROW_GAP
+	return GRID_COLUMNS if free >= PlayerSlot.MIN_WIDTH * GRID_COLUMNS + GRID_GAP else 1
+
+
+## count slot cells in `columns` columns: [{"slot": PlayerSlot, "conn": ConnectionBadge}].
+static func slot_grid(parent: Control, count: int, columns: int = GRID_COLUMNS) -> Array[Dictionary]:
 	var grid := GridContainer.new()
-	grid.columns = GRID_COLUMNS
-	grid.add_theme_constant_override("h_separation", DS.S4)
-	grid.add_theme_constant_override("v_separation", DS.S4)
+	grid.columns = columns
+	grid.add_theme_constant_override("h_separation", GRID_GAP)
+	grid.add_theme_constant_override("v_separation", GRID_GAP)
 	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(grid)
 	var cells: Array[Dictionary] = []
@@ -56,8 +74,17 @@ static func button(text: String, kind: UiMenuButton.Kind) -> UiMenuButton:
 	var b := UiMenuButton.new()
 	b.text = text
 	b.kind = kind
-	b.ready.connect(func() -> void: b.custom_minimum_size.y = CONTROL_HEIGHT)
+	b.ready.connect(func() -> void:
+		b.custom_minimum_size.y = SHORT_CONTROL_HEIGHT if is_short(b.get_viewport()) else CONTROL_HEIGHT)
 	return b
+
+
+static func _margin(viewport: Viewport) -> int:
+	return DS.S4 if is_short(viewport) else DS.S6
+
+
+static func is_short(viewport: Viewport) -> bool:
+	return viewport != null and viewport.get_visible_rect().size.y < SHORT_HEIGHT
 
 
 static func caption(text: String) -> Label:
@@ -69,36 +96,44 @@ static func caption(text: String) -> Label:
 	return l
 
 
-## The screen body: title and header on top, the slot grid and the control panel side by side.
-## Returns {"slots": Container, "controls": Container}.
+## The screen body: the title on top (left out on short screens, where the room code header
+## names the screen), then the room code header over the slot grid on the left and the control
+## panel on the right, level with the header. Returns {"slots": Container, "controls": Container}.
 static func body(root: Control, head: Control) -> Dictionary:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var short := is_short(root.get_viewport())  # a phone in landscape: tighter all round
 	for side: String in ["top", "left", "right", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, DS.S6)
+		margin.add_theme_constant_override("margin_" + side, _margin(root.get_viewport()))
 	root.add_child(margin)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_theme_constant_override("separation", DS.S5)
+	col.add_theme_constant_override("separation", DS.S4 if short else DS.S5)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(col)
-	col.add_child(LoginLayout.title_label(TITLE_TEXT))
-	col.add_child(head)
+	if not short:
+		col.add_child(LoginLayout.title_label(TITLE_TEXT))
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", DS.S6)
+	row.add_theme_constant_override("separation", ROW_GAP)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(row)
 	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", DS.S5)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(left)
+	left.add_child(head)
+	var slots := VBoxContainer.new()
+	slots.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left.add_child(slots)
 	var panel := UiPanel.new()
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(panel)
 	var controls := VBoxContainer.new()
-	controls.add_theme_constant_override("separation", DS.S3)
+	controls.add_theme_constant_override("separation", DS.S4)  # room between buttons on every screen
 	panel.add_child(controls)
-	return {"slots": left, "controls": controls}
+	return {"slots": slots, "controls": controls}
 
 
 ## Enables / disables a menu button, keeping its focus ring (no-op before it is ready).

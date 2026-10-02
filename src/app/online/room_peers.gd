@@ -85,13 +85,14 @@ func tick(now_ms: int) -> void:
 	changed.emit()
 
 
-func _on_hello(peer_id: int, _info: Dictionary) -> void:
+func _on_hello(peer_id: int, info: Dictionary) -> void:
 	if locked:
 		signaling.reject(peer_id, REJECT_STARTED)
 		return
 	if model.add_human(peer_id) < 0:
 		signaling.reject(peer_id, REJECT_FULL)
 		return
+	model.set_name(peer_id, info.get("name", ""))
 	transport.open_link(peer_id, true)
 	share()
 	changed.emit()

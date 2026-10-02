@@ -111,3 +111,25 @@ func test_team_rule_fills_four_and_gaps_compact() -> void:
 	assert_eq(setup.player_count(), MatchRules.TEAM_PLAYERS)
 	assert_eq(setup.validate().size(), 0)
 	assert_eq(_m.slot_map(), {1: 0, 3: 1}, "the empty seat is skipped")
+
+
+func test_names_ride_the_lobby_state_cleaned() -> void:
+	_two_ready_connected()
+	_m.set_name(1, "  방장   님 ")
+	_m.set_name(2, "브롤왕")
+	_m.set_bots(true)
+	var copy := LobbyModel.new()
+	copy.from_state(JSON.parse_string(JSON.stringify(_m.to_state())))
+	assert_eq(copy.slots[0]["name"], "방장 님")
+	assert_eq(copy.names(), {0: "방장 님", 1: "브롤왕"}, "match slot -> name, humans only")
+	copy.from_state({"slots": [{"peer": 1, "name": "a" + char(0x202E) + "b"}, {"peer": 2, "name": 7}]})
+	assert_eq(copy.slots[0]["name"], "", "an unusable name is dropped")
+	assert_eq(copy.slots[1]["name"], "")
+
+
+func test_a_seat_taken_again_starts_without_the_old_name() -> void:
+	_m.add_human(2)
+	_m.set_name(2, "브롤왕")
+	_m.remove_peer(2)
+	_m.add_human(3)
+	assert_eq(_m.slots[_m.slot_of(3)]["name"], "")
