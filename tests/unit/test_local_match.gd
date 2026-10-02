@@ -74,8 +74,9 @@ func test_result_names_the_winning_player_when_two_humans_play() -> void:
 	var w: World = main.call("get_world")
 	w.fighters[0].stocks = 1
 	w.fighters[0].pos = Vector3(0, w.config.kill_y - 1, 0)
-	await wait_seconds(0.2)
-	assert_true((main.call("get_hud") as Hud).result_visible())
+	var hud: Hud = main.call("get_hud")
+	await wait_until(hud.result_visible, 5.0)  # after the finishing replay
+	assert_true(hud.result_visible())
 	var banner := ResultBanner.new()
 	add_child_autofree(banner)
 	banner.show_result(1, ResultBanner.NO_LOCAL)

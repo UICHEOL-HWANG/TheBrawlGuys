@@ -72,6 +72,11 @@ func finish(view: Dictionary) -> void:
 	_recorder.record(_telemetry)
 
 
+## The banner actually appeared (after the finishing replay, GD-CAM-02): result dwell starts here.
+func on_result_shown() -> void:
+	_result_shown_ms = int(_clock.call())
+
+
 ## The result banner's 메뉴로 was pressed.
 func on_menu() -> void:
 	_close_result("menu")

@@ -21,7 +21,8 @@ var _world: World
 var _ticker: FixedTicker
 var _stage: MatchStage
 var _presentation: MatchPresentation
-var _panel: ConfigPanel
+## The finishing replay before the result banner (GD-CAM-02).
+var _finale: MatchFinale
 var _locals: LocalPlayers
 var _touch: TouchInput
 ## The match's bots: dial, probe, DDA and bot tracking (PRD-BOT-03~06).
@@ -34,7 +35,7 @@ var _tracking: MatchTracking
 var _prev_state: Dictionary = {}
 var _curr_state: Dictionary = {}
 var _alpha: float = 0.0
-var _stats := TickStats.new()
+var _debug := MatchDebugInfo.new()
 
 
 func _ready() -> void:
@@ -56,7 +57,11 @@ func _ready() -> void:
 	_presentation = MatchPresentation.new()
 	add_child(_presentation)
 	_presentation.setup(_config)
+	_finale = MatchFinale.new()
+	add_child(_finale)
 	_build_ui()
+	_finale.setup(_config, _stage, _presentation, _hud)
+	_finale.revealed.connect(func() -> void: _tracking.on_result_shown())
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
 	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
@@ -79,10 +84,8 @@ func _build_ui() -> void:
 		menu_requested.emit())
 	if not _locals.slots().is_empty():
 		_hud.show_key_hints(_locals.hint_players(), func() -> bool: return _touch.visible)
-	if OS.is_debug_build():
-		_panel = ConfigPanel.new()
-		add_child(_panel)
-		_panel.setup(_config)
+	add_child(_debug)
+	_debug.setup(_config)
 
 
 ## Match telemetry; the tutorial (extends main) swaps in a silent one (it is not a match).
@@ -115,6 +118,7 @@ func _start_match() -> void:
 	_tracking.close_for_restart(_curr_state, _result_shown)
 	_locals.reset()
 	_stage.clear_items()
+	_finale.reset()
 	if _world != null and new_seed.is_valid():
 		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
 	_world = setup.build_world(_config)
@@ -143,6 +147,9 @@ func _gather_inputs() -> Array[InputFrame]:
 
 func _process(delta: float) -> void:
 	_locals.poll()
+	if _finale.is_playing():
+		_finale.play(delta, setup.local_slot(), _touch)
+		return
 	var ticks := _ticker.advance(delta)
 	var events: Array = []
 	var view_events: Array = []
@@ -155,31 +162,32 @@ func _process(delta: float) -> void:
 		view_events.append_array(tick_view_events)
 		_tracking.on_tick(_curr_state["events"], tick_view_events, _curr_state, inputs)
 		_squad.after_tick(_curr_state, _tracking.telemetry())
+		_finale.record(_curr_state)
 		_after_tick(inputs)
 	_alpha = _ticker.alpha()
+	if bool(_curr_state["match_over"]) and not _result_shown:
+		_result_shown = true
+		_tracking.finish(_curr_state)
+		Analytics.set_user_properties(_squad.finish(_curr_state))
+		# The banner speaks for the lone human, or names the winner when two share the screen.
+		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
+		if _finale.reveal(int(_curr_state["winner"]), viewer):  # the replay presents this frame's events
+			_hud.update_from(_curr_state, events)
+			return
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)
 	_stage.on_events(events)
 	_hud.update_from(_curr_state, events)
 	_presentation.set_hud_reserve(_hud.reserve())
 	_presentation.present(_curr_state, events, view_events, delta, setup.local_slot(), _touch)
-	if bool(_curr_state["match_over"]) and not _result_shown:
-		_result_shown = true
-		# The banner speaks for the lone human, or names the winner when two share the screen.
-		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
-		_hud.show_result(int(_curr_state["winner"]), viewer)
-		_tracking.finish(_curr_state)
-		Analytics.set_user_properties(_squad.finish(_curr_state))
-	_stats.add_frame(delta, ticks)
 	_tracking.on_frame_time(delta)
-	if _panel != null:
-		_panel.set_info(_stats.info(_world.tick_count, _alpha))
+	_debug.on_frame(delta, ticks, _world.tick_count, _alpha)
 
 
 ## One sim tick on the gathered inputs, leaving its view in _curr_state (NetMatch clients predict).
 func _step(inputs: Array[InputFrame]) -> void:
 	var started := Time.get_ticks_usec()
 	_world.tick(inputs)
-	_stats.add_sim_cost(Time.get_ticks_usec() - started)
+	_debug.add_sim_cost(Time.get_ticks_usec() - started)
 	_curr_state = _world.state_view()
 
 
@@ -189,7 +197,10 @@ func _after_tick(_inputs: Array[InputFrame]) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _result_shown and event.is_action_pressed("ui_accept"):
+	if _finale.is_playing() and MatchFinale.is_skip_event(event):
+		_finale.skip()
+		get_viewport().set_input_as_handled()
+	elif _result_shown and event.is_action_pressed("ui_accept"):
 		_start_match()
 
 

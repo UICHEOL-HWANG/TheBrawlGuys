@@ -14,6 +14,9 @@ var _music: MusicDirector
 var _grab_hint: GrabHint
 var _gauges: ChargeGaugeLayer
 var _arena_id: String = ""
+## Finishing replay close shot (MatchFinale, GD-CAM-02); weight 0 leaves the cut-in's focus.
+var _finisher_at: Vector3 = Vector3.ZERO
+var _finisher_weight: float = 0.0
 
 
 func setup(config: GameConfig) -> void:
@@ -57,6 +60,12 @@ func camera_rig() -> CameraRig:
 	return _camera
 
 
+## The finishing replay's close shot: the knocked-out fighter's feet and its weight (0..1).
+func set_finisher_focus(at: Vector3, weight: float) -> void:
+	_finisher_at = at
+	_finisher_weight = weight
+
+
 func play_ui(sound: String) -> void:
 	_sfx.play_ui(sound)
 
@@ -71,6 +80,8 @@ func present(view: Dictionary, events: Array, view_events: Array, delta: float, 
 	_sfx.on_events(view_events)
 	LocalHints.update(view, local_slot, _config, touch, _grab_hint)
 	_cutin.present(view, events, delta)
+	if _finisher_weight > 0.0:
+		_camera.set_focus(_finisher_at, _finisher_weight)
 	_camera.follow(CameraFraming.match_targets(view, _config), delta)
 	_gauges.update_from(view, _config, _camera.unproject, _camera.sees)
 
