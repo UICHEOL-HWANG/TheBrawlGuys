@@ -4,9 +4,10 @@ extends RefCounted
 ## every tick so debug-panel tuning applies at once; Phase 5 styles derive their tables from this
 ## one with with_attacks (StyleCatalog). LIGHT_1/2 are link hits and LIGHT_3 is the Phase 1 light
 ## attack (context E1). SPECIAL (Phase 5, appended so older values never move) holds the
-## character's special; the classic table keeps a heavy-shaped placeholder there.
+## character's special; the classic table keeps a heavy-shaped placeholder there. HAMMER and GLOVE
+## (PRD-ITEM-05/06) are appended after it for the same reason.
 
-enum Kind { LIGHT_1, LIGHT_2, LIGHT_3, HEAVY, GRAB, THROW, BAT, ROCK, BOMB, SPECIAL }
+enum Kind { LIGHT_1, LIGHT_2, LIGHT_3, HEAVY, GRAB, THROW, BAT, ROCK, BOMB, SPECIAL, HAMMER, GLOVE }
 
 var _table: Array[AttackData] = []
 
@@ -16,6 +17,7 @@ static func from_config(config: GameConfig) -> AttackSet:
 	s._table.assign([
 		_link(config), _link(config), AttackData.light_from(config), _heavy(config), _grab(config),
 		_throw(config), _bat(config), _rock(config), _bomb(config), _heavy(config),
+		ItemAttacks.hammer(config), ItemAttacks.glove(config),
 	])
 	return s
 

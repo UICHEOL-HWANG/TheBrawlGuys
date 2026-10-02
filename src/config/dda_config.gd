@@ -1,7 +1,7 @@
 class_name DdaConfig
-extends Resource
-## Dynamic difficulty tunables (PRD-BOT-06), the base of the GameConfig chain (NetConfig extends
-## this). "DDA" is a NON_SIM group: bots live outside the sim, so these never enter the
+extends ItemExtrasConfig
+## Dynamic difficulty tunables (PRD-BOT-06), near the base of the GameConfig chain (NetConfig
+## extends this; this extends ItemExtrasConfig). "DDA" is a NON_SIM group: bots live outside the sim, so these never enter the
 ## fingerprint and never change a replay.
 
 @export_group("DDA")

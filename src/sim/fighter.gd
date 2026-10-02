@@ -27,7 +27,7 @@ const DATA_TYPES := {
 	"dodge_total": TYPE_INT, "dodge_dir": TYPE_VECTOR3, "intangible": TYPE_BOOL, "air_dodge_used": TYPE_BOOL,
 	"roll_streak": TYPE_INT, "roll_recent": TYPE_INT, "ally_mask": TYPE_INT,
 	"tumble": TYPE_BOOL, "di_pending": TYPE_BOOL, "tech_clock": TYPE_INT, "getup_kind": TYPE_INT,
-	"getup_ticks": TYPE_INT, "getup_dir": TYPE_VECTOR3,
+	"getup_ticks": TYPE_INT, "getup_dir": TYPE_VECTOR3, "light_ticks": TYPE_INT,
 }
 
 var id: int = 0
@@ -65,6 +65,8 @@ var item_uses: int = 0
 ## Ticks of burning left (campfire, Burning) and ticks since the last burn damage.
 var burn_ticks: int = 0
 var burn_clock: int = 0
+## Ticks left of feather-glove lightness (ItemStatus: more knockback taken).
+var light_ticks: int = 0
 ## PressBuffer mask of presses made during hitstop, replayed when the freeze ends.
 var held_presses: int = 0
 ## CharacterData id ("" = classic) and special gauge 0..SpecialGauge.MAX (Phase 5).

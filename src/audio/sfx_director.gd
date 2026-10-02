@@ -34,6 +34,8 @@ func setup(config: GameConfig) -> void:
 static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = false) -> Dictionary:
 	match String(event["type"]):
 		"hit":
+			if int(event.get("attack_kind", -1)) == AttackSet.Kind.HAMMER:
+				return {"name": "squeak", "pitch": 1.0, "volume_db": 0.0}  # the toy hammer always squeaks
 			var k := float(event["knockback"])
 			var heavy := k >= config.spark_large_threshold
 			return {"name": "hit_heavy" if heavy else "hit_light",
@@ -50,7 +52,7 @@ static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = 
 			return {"name": "jump", "pitch": 1.0, "volume_db": 0.0}
 		"respawned":
 			return {"name": "respawn", "pitch": 1.0, "volume_db": 0.0}
-		"item_pickup", "item_throw", "explosion":
+		"item_pickup", "item_throw", "explosion", "slip":
 			return {"name": String(event["type"]), "pitch": 1.0, "volume_db": 0.0}
 	return {}
 

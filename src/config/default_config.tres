@@ -4,3 +4,4 @@
 
 [resource]
 script = ExtResource("1")
+item_pool_extended = true

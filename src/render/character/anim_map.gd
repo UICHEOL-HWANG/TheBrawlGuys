@@ -70,7 +70,7 @@ static func _attack_anim(kind: int) -> int:
 	match kind:
 		AttackSet.Kind.HEAVY:
 			return Anim.HEAVY
-		AttackSet.Kind.BAT:
+		AttackSet.Kind.BAT, AttackSet.Kind.HAMMER:
 			return Anim.BAT
 		AttackSet.Kind.GRAB:
 			return Anim.GRAB

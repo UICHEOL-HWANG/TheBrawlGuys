@@ -10,6 +10,8 @@ extends GutTest
 ## previous value 3799200070).
 ## Combat-depth D (match modes, v10) only adds the "mode" state and fighter ally_mask: stripped
 ## here, the stock run is bit-identical to combat-depth C.
+## The second item set (PRD-ITEM-05..07, v11) adds fighter light_ticks: stripped here too, and with
+## the classic item pool the run is bit-identical to combat-depth D.
 
 const R := preload("res://tests/replay/test_replay.gd")
 const DEFENSE_FIELDS: Array[String] = [
@@ -18,6 +20,7 @@ const DEFENSE_FIELDS: Array[String] = [
 	"dodge_kind", "dodge_ticks", "dodge_total", "dodge_dir", "intangible", "air_dodge_used",
 	"roll_streak", "roll_recent",
 	"tumble", "di_pending", "tech_clock", "getup_kind", "getup_ticks", "getup_dir",
+	"light_ticks",
 ]
 const PHASE_4_BEHAVIOR_HASH := 1458846096
 const PHASE_4_SNAPSHOT_VERSION := 5

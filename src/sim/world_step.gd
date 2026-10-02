@@ -4,8 +4,8 @@ extends RefCounted
 ## GuardMeter.track_presses -> Tech.track -> ItemActions.pre_step -> SpecialRunner.try_start -> Motion.step per
 ## fighter -> separate -> Dodge.started_events -> Knockdown.started_events -> ProjectileMotion.fire -> SpecialRunner.advance ->
 ## Grab.step -> Grab.resolve -> SpecialRunner.contacts -> Getup.contacts -> Combat.resolve -> SpecialRunner.apply ->
-## Getup.apply -> ProjectileMotion.step -> ItemMotion.step -> GimmickRunner.step ->
-## ItemField.spawn_step -> GuardMeter.step -> SpecialGauge.apply -> Rules.apply -> Grab.cleanup ->
+## Getup.apply -> ProjectileMotion.step -> ItemMotion.step -> ItemTraps.step -> GimmickRunner.step ->
+## ItemField.spawn_step -> GuardMeter.step -> ItemStatus.step -> SpecialGauge.apply -> Rules.apply -> Grab.cleanup ->
 ## ItemActions.drop_from_disabled. Fire/advance only see fighters that advanced (not frozen).
 
 
@@ -38,9 +38,11 @@ static func run(w: World, frame: Array[InputFrame], rng: RandomNumberGenerator) 
 	events.append_array(Getup.apply(getup_contacts, c))
 	events.append_array(ProjectileMotion.step(w.projectiles, w.fighters, book, c))
 	events.append_array(ItemMotion.step(w.items, w.fighters, book, c, w.arena))
+	events.append_array(ItemTraps.step(w.items, w.fighters, c))
 	events.append_array(GimmickRunner.step(w.arena, w.fighters, c, w.tick_count, events))
 	events.append_array(w.items.spawn_step(w.tick_count, rng, c, w.arena.item_area))
 	events.append_array(GuardMeter.step(w.fighters, c))
+	ItemStatus.step(w.fighters)
 	events.append_array(SpecialGauge.apply(w.fighters, events, c))
 	events.append_array(Rules.apply(w.fighters, c, w.arena, w.mode_state.infinite_stocks()))
 	Grab.cleanup(w.fighters)

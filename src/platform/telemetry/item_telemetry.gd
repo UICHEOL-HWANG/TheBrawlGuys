@@ -1,11 +1,17 @@
 class_name ItemTelemetry
 extends RefCounted
 ## Item moments for Amplitude (platform A6): item_picked_up, item_used (swing / throw / explode)
-## and item_hit. Remembers who last held each item so an explosion is credited to its thrower.
+## and item_hit (a banana slip is an item_hit for its thrower). Remembers who last held each item
+## so an explosion is credited to its thrower.
 ## emit(name, props) sends; count(slot, counter) updates SlotStats.
 
 const ITEM_ATTACKS: Dictionary = {
 	AttackSet.Kind.BAT: Item.Kind.BAT, AttackSet.Kind.ROCK: Item.Kind.ROCK, AttackSet.Kind.BOMB: Item.Kind.BOMB,
+	AttackSet.Kind.HAMMER: Item.Kind.HAMMER, AttackSet.Kind.GLOVE: Item.Kind.GLOVE,
+}
+## Melee item swings, each one an item use.
+const SWINGS: Dictionary = {
+	AttackSet.Kind.BAT: Item.Kind.BAT, AttackSet.Kind.HAMMER: Item.Kind.HAMMER, AttackSet.Kind.GLOVE: Item.Kind.GLOVE,
 }
 
 var _owner: Dictionary = {}  # item id -> fighter slot
@@ -24,6 +30,10 @@ func on_event(e: Dictionary, emit: Callable, count: Callable) -> void:
 			var owner := int(_owner.get(int(e["id"]), -1))
 			if owner >= 0:
 				emit.call("item_used", {"slot": owner, "item": item_name(Item.Kind.BOMB), "action": "explode"})
+		"slip":
+			if int(e["owner"]) >= 0 and int(e["owner"]) != int(e["victim"]):  # a self-slip is no item hit
+				emit.call("item_hit", {"slot": int(e["owner"]), "target_slot": int(e["victim"]),
+					"item": item_name(Item.Kind.BANANA), "guarded": false})
 		"hit", "guard_hit":
 			var kind := int(e.get("attack_kind", -1))
 			if ITEM_ATTACKS.has(kind):
@@ -32,11 +42,11 @@ func on_event(e: Dictionary, emit: Callable, count: Callable) -> void:
 					"item": item_name(item), "guarded": e["type"] == "guard_hit"})
 
 
-## A bat swing is an item use (the sim spends one bat use per swing).
+## A melee item swing is an item use (the sim spends one use per swing).
 func on_swing(slot: int, attack_kind: int, emit: Callable, count: Callable) -> void:
-	if attack_kind == AttackSet.Kind.BAT:
+	if SWINGS.has(attack_kind):
 		count.call(slot, "items_used")
-		emit.call("item_used", {"slot": slot, "item": item_name(Item.Kind.BAT), "action": "swing"})
+		emit.call("item_used", {"slot": slot, "item": item_name(SWINGS[attack_kind]), "action": "swing"})
 
 
 static func item_name(kind: int) -> String:

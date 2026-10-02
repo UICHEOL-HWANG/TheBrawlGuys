@@ -11,6 +11,12 @@ static func create(kind: int) -> ItemModel:
 			return BombModel.new()
 		Item.Kind.ROCK:
 			return RockModel.new()
+		Item.Kind.HAMMER:
+			return HammerModel.new()
+		Item.Kind.GLOVE:
+			return GloveModel.new()
+		Item.Kind.BANANA:
+			return BananaModel.new()
 	push_error("ItemModels.create: unknown item kind %d" % kind)
 	return RockModel.new()
 
@@ -26,4 +32,10 @@ static func hold_transform(kind: int) -> Transform3D:
 			return BatModel.HOLD
 		Item.Kind.BOMB:
 			return BombModel.HOLD
+		Item.Kind.HAMMER:
+			return HammerModel.HOLD
+		Item.Kind.GLOVE:
+			return GloveModel.HOLD
+		Item.Kind.BANANA:
+			return BananaModel.HOLD
 	return RockModel.HOLD

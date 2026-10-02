@@ -3,6 +3,8 @@ extends RefCounted
 ## Loose item physics (PRD §4.4): falling boxes land on the arena floor and items that fall past
 ## kill_y are removed. Thrown rocks and bats hit the first fighter they touch (never their thrower) and break on the ground; thrown bombs stop on bodies and land (context E7).
 ## Lit bombs count down every tick and explode at zero, hitting every fighter in bomb_radius, thrower included (context E7).
+## A thrown banana flies through fighters and lies where it lands as a trap (Item.is_trap, ItemTraps);
+## its thrower's grace counts down in fuse_ticks and stops at 0.
 
 ## Floors and the landing rule come from the arena (ArenaFloor), the same as for fighters; an
 ## item lying on a floor that breaks away falls again.
@@ -15,7 +17,7 @@ static func step(field: ItemField, fighters: Array[Fighter], book: StyleBook,
 	for it: Item in field.items:
 		if it.fuse_ticks > 0:
 			it.fuse_ticks -= 1
-			if it.fuse_ticks == 0:
+			if it.fuse_ticks == 0 and it.kind == Item.Kind.BOMB:
 				events.append_array(_explode(it, fighters, book.base_attacks().get_attack(AttackSet.Kind.BOMB), config))
 				continue
 		if _advance(it, fighters, book, config, arena, events):
@@ -51,7 +53,7 @@ static func _advance(it: Item, fighters: Array[Fighter], book: StyleBook, config
 	var prev_y := it.pos.y
 	it.vel.y += config.gravity * SimTime.TICK_DT
 	it.pos += it.vel * SimTime.TICK_DT
-	if it.state == Item.State.THROWN:
+	if it.state == Item.State.THROWN and it.kind != Item.Kind.BANANA:
 		var target := _first_hit(it, fighters, config)
 		if target != null:
 			if it.kind == Item.Kind.BOMB:
@@ -62,7 +64,9 @@ static func _advance(it: Item, fighters: Array[Fighter], book: StyleBook, config
 				return false
 	var top := _landing_top(it, prev_y, arena)
 	if top != ArenaFloor.NO_GROUND:
-		if it.state == Item.State.THROWN and it.kind != Item.Kind.BOMB:
+		if it.state == Item.State.THROWN and it.kind == Item.Kind.BANANA:
+			it.fuse_ticks = SimTime.to_ticks(config.banana_grace_time)  # laid: now a trap
+		elif it.state == Item.State.THROWN and it.kind != Item.Kind.BOMB:
 			events.append({"type": "item_break", "id": it.id, "kind": it.kind, "pos": it.pos})
 			return false
 		it.pos.y = top

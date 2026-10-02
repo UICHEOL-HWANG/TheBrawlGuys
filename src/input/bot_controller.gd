@@ -121,7 +121,7 @@ func _act(view: Dictionary, me: Dictionary, foe: Dictionary, arena: ArenaData) -
 	var item_kind := int(me.get("item_kind", Fighter.NONE))
 	if _skill.hesitating(_self_id, _tick):
 		return _log.say("hesitate", InputFrame.neutral())
-	if item_kind == Item.Kind.BOMB or item_kind == Item.Kind.ROCK:
+	if item_kind != Fighter.NONE and not Item.is_melee(item_kind):  # bomb, rock, banana
 		return _use_throwable(foe, my_pos, arena)
 	if item_kind == Fighter.NONE:
 		var it := BotViewQuery.nearest_item(view, my_pos, arena, _config)
@@ -172,7 +172,7 @@ func _fight(me: Dictionary, foe: Dictionary, item_kind: int, arena: ArenaData) -
 		if BotStyleSense.has_special(me) and not BotStyleSense.aimed(me, delta):
 			return _log.say("approach", InputFrame.make(dir.x, dir.y))  # an attack starts along the facing: turn first
 		_cooldown = _skill.cooldown_ticks
-		if item_kind != Item.Kind.BAT:
+		if not Item.is_melee(item_kind):
 			_combo_left = combo_mash_ticks(_config)
 		return _log.say("attack", InputFrame.make(dir.x, dir.y, false, true))
 	return _log.say("approach", _nav.walk(dir, my_pos, arena))

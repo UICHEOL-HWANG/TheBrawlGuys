@@ -15,6 +15,8 @@ const RECIPES := {
 	"respawn": {"wave": "triangle", "freq_start": 440.0, "freq_end": 990.0, "freq_curve": 0.6, "attack": 0.02, "sustain": 0.2, "decay": 0.25, "vibrato_depth": 0.03, "vibrato_hz": 7.0, "volume": 0.5, "seed": 18},
 	"item_pickup": {"wave": "sine", "freq_start": 660.0, "freq_end": 1320.0, "freq_curve": 0.3, "attack": 0.003, "sustain": 0.04, "decay": 0.08, "volume": 0.55, "seed": 19},
 	"item_throw": {"wave": "noise", "attack": 0.01, "sustain": 0.08, "decay": 0.1, "lowpass": 0.45, "volume": 0.45, "seed": 20},
+	"squeak": {"wave": "sine", "freq_start": 1500.0, "freq_end": 900.0, "freq_curve": 0.6, "attack": 0.003, "sustain": 0.06, "decay": 0.12, "vibrato_depth": 0.08, "vibrato_hz": 24.0, "volume": 0.6, "seed": 25},
+	"slip": {"wave": "triangle", "freq_start": 820.0, "freq_end": 160.0, "freq_curve": 1.2, "attack": 0.004, "sustain": 0.14, "decay": 0.18, "vibrato_depth": 0.04, "vibrato_hz": 11.0, "volume": 0.55, "seed": 26},
 	"explosion": {"wave": "noise", "attack": 0.003, "sustain": 0.12, "decay": 0.6, "lowpass": 0.18, "sustain_level": 0.6, "volume": 0.95, "seed": 21},
 	"ui_click": {"wave": "sine", "freq_start": 1200.0, "freq_end": 900.0, "attack": 0.001, "sustain": 0.01, "decay": 0.04, "volume": 0.45, "seed": 22},
 	"ui_confirm": {"wave": "triangle", "freq_start": 660.0, "freq_end": 990.0, "freq_curve": 0.5, "attack": 0.003, "sustain": 0.05, "decay": 0.12, "volume": 0.5, "seed": 23},

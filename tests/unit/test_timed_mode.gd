@@ -130,5 +130,5 @@ func test_snapshot_round_trip_keeps_mode_state() -> void:
 
 
 func test_snapshot_version_bumped_for_modes() -> void:
-	assert_eq(WorldCodec.VERSION, 10, "v10 = knockdown fields (v9) + match mode state")
+	assert_gte(WorldCodec.VERSION, 10, "v10 = knockdown fields (v9) + match mode state (v11: light_ticks)")
 	assert_true(Fighter.DATA_TYPES.has("ally_mask"))

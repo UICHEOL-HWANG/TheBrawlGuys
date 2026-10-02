@@ -163,6 +163,7 @@ Phase 6  온라인 대전                    🎨 로비 컴포넌트 · 설정/
 - [x] 잡기 → 던지기 (방향 입력 반영) `[PRD-CMB-04]`
 - [x] `items.gd`: 상자 낙하 스포너 (10~15초, 시드 RNG), 줍기·들기·던지기 `[PRD-ITEM-01]` `[PRD-ARCH-05]`
 - [x] 아이템 3종 — 방망이(5회), 폭탄(2초 후 범위 폭발), 돌멩이(투사체) `[PRD-ITEM-02~04]`
+- [x] (2026-10-02 추가) 뿅망치 · 깃털 장갑 · 바나나 껍질 `[PRD-ITEM-05]` `[PRD-ITEM-06]` `[PRD-ITEM-07]` — `dev/active/new-weapons/`
 
 **input**
 - [x] 터치 4버튼: 공격 탭/홀드 해석(`touch_hold_threshold`), 가드, 잡기 `[PRD-CTL-03]`
@@ -418,7 +419,7 @@ PRD의 모든 요구사항 ID는 적어도 한 Phase에 배정되어야 한다. 
 
 | PRD ID | Phase | PRD ID | Phase |
 |---|---|---|---|
-| PRD-CORE-01 | 전 Phase (판단 기준) | PRD-ITEM-01~04 | 2 |
+| PRD-CORE-01 | 전 Phase (판단 기준) | PRD-ITEM-01~07 | 2 (05~07: 2026-10-02 무기 추가) |
 | PRD-PLT-01 | 0 (Android), 3 (iOS) | PRD-CFG-01 | 0, 1, 6 |
 | PRD-PLT-02 | 0 | PRD-ARCH-01~02 | 0, 1 |
 | PRD-PLT-03 | 0, 4.0 (Vercel) | PRD-ARCH-03 | 4, 5 |

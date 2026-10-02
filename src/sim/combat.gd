@@ -3,7 +3,8 @@ extends RefCounted
 ## Hit resolution (PRD §4.2): active hitboxes vs fighter capsules, damage %, knockback formula,
 ## hitstun and hitstop. Damage is added before knockback is computed (context D7).
 ## All hit sources share apply_hit, which also handles guard (context E4) and the target style's
-## knockback_taken (Phase 5). Melee numbers come from each attacker's style (StyleBook).
+## knockback_taken (Phase 5) and feather-glove lightness (ItemStatus). Melee numbers come from each
+## attacker's style (StyleBook).
 
 
 static func knockback(attack: AttackData, target_damage: float, config: GameConfig) -> float:
@@ -39,6 +40,7 @@ static func resolve(fighters: Array[Fighter], book: StyleBook, config: GameConfi
 		attacker.hit_ids.append(target.id)
 		var e := apply_hit(target, attack, h["facing"], h["power"], config, h["center"], attacker.id)
 		e["attack_kind"] = h["kind"]
+		ItemStatus.on_melee_hit(target, int(h["kind"]), e, config)
 		events.append(e)
 		for f: Fighter in [attacker, target]:
 			freeze[f] = maxi(int(freeze.get(f, 0)), attack.hitstop_ticks)
@@ -84,7 +86,8 @@ static func apply_hit(target: Fighter, attack: AttackData, dir: Vector3, power: 
 	var dealt := attack.damage * power * (0.0 if perfect else config.guard_damage_mul if guarded else 1.0)
 	target.damage += dealt
 	var kb := knockback(attack, target.damage, config) * power * StyleCatalog.knockback_taken(
-			CharacterData.style_of(target.character), config) * Knockdown.hit_mul(target, config)
+			CharacterData.style_of(target.character), config) * Knockdown.hit_mul(target, config) \
+			* ItemStatus.knockback_mul(target, config)
 	target.hitstop_ticks = attack.hitstop_ticks
 	var event := {
 		"type": "hit", "attacker": source_id, "target": target.id, "pos": at, "damage": dealt,
@@ -111,7 +114,7 @@ static func _launch(target: Fighter, attack: AttackData, flat_dir: Vector3, kb: 
 	if target.vel.y > 0.0:
 		target.on_ground = false
 	target.hitstun_ticks = maxi(hitstun_ticks(kb, config), attack.min_hitstun_ticks)
-	_interrupt(target)
+	interrupt(target)
 	# a weak hit on a fighter already tumbling (still in the air) keeps the tumble
 	target.tumble = (target.tumble and not target.on_ground) or Knockdown.tumbles(kb, target.vel, was_lying, config)
 	target.di_pending = true
@@ -125,8 +128,9 @@ static func _guard_push(target: Fighter, flat_dir: Vector3, kb: float, event: Di
 	event["knockback"] = kb
 
 
-## A clean hit ends whatever the target was doing (attack, charge, dodge, guard-break stun).
-static func _interrupt(target: Fighter) -> void:
+## A clean hit (or a banana slip, ItemTraps) ends whatever the target was doing (attack, charge,
+## dodge, guard-break stun).
+static func interrupt(target: Fighter) -> void:
 	target.attack_ticks = 0
 	target.hit_ids.clear()
 	target.combo_queued = false

@@ -2,7 +2,8 @@ class_name ItemField
 extends RefCounted
 ## Loose items plus the box spawner (PRD §4.4, context E6/E8). The spawner is the only user of
 ## the World RNG and always draws in the same order: next spawn tick, angle, radius, kind. When
-## the field is full the drop is skipped but the next one is still scheduled.
+## the field is full the drop is skipped but the next one is still scheduled. The kind is one draw
+## over the classic three or, with item_pool_extended, all six (PRD-ITEM-05..07).
 
 const NOT_SCHEDULED := -1
 
@@ -20,11 +21,12 @@ func spawn_step(tick: int, rng: RandomNumberGenerator, config: GameConfig, area:
 	if tick < next_spawn_tick:
 		return events
 	next_spawn_tick = tick + _interval(rng, config)
-	if items.size() >= config.item_max_on_field:
+	if _loose_count() >= config.item_max_on_field:
 		return events
 	var u1 := rng.randf()
 	var u2 := rng.randf()
-	var kind := rng.randi_range(0, Item.KIND_COUNT - 1)
+	var pool := Item.KIND_COUNT if config.item_pool_extended else Item.CLASSIC_KIND_COUNT
+	var kind := rng.randi_range(0, pool - 1)
 	var at := area.sample_point(u1, u2, config.item_spawn_radius_ratio, config.item_drop_height)
 	var it := add(kind, at, Item.State.FALLING, config)
 	events.append({"type": "item_spawn", "id": it.id, "kind": kind, "pos": it.pos})
@@ -38,9 +40,19 @@ func add(kind: int, pos: Vector3, state: int, config: GameConfig) -> Item:
 	it.kind = kind
 	it.state = state
 	it.pos = pos
-	it.uses = config.bat_uses if kind == Item.Kind.BAT else 1
+	it.uses = Item.uses_for(kind, config)
 	items.append(it)
 	return it
+
+
+## Items that count toward item_max_on_field: everything but laid banana traps (they wait for a
+## foot, so they must not stop the drops).
+func _loose_count() -> int:
+	var n := 0
+	for it: Item in items:
+		if not it.is_trap():
+			n += 1
+	return n
 
 
 func remove(it: Item) -> void:

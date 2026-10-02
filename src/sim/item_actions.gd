@@ -2,7 +2,7 @@ class_name ItemActions
 extends RefCounted
 ## Item handling before movement (PRD §4.4, context E6). A fighter that can act and presses grab
 ## on the ground next to a pickable item picks it up. With an item in hand, grab throws it and
-## light uses it: bats swing (Actions.try_start), bombs and rocks are thrown. Buttons spent here
+## light uses it: melee items (bat, hammer, glove) swing (Actions.try_start), the rest are thrown. Buttons spent here
 ## are cleared from that fighter's input copy so Actions does not act on them too.
 
 ## Items are held and thrown from this fraction of the fighter height.
@@ -17,7 +17,7 @@ static func pre_step(fighters: Array[Fighter], inputs: Array[InputFrame], field:
 			continue
 		var input := inputs[f.id]
 		if f.item_kind != Fighter.NONE:
-			if input.grab or (input.light and f.item_kind != Item.Kind.BAT):
+			if input.grab or (input.light and not Item.is_melee(f.item_kind)):
 				events.append(_throw(f, input, field, config))
 				input.grab = false
 				input.light = false
@@ -40,12 +40,17 @@ static func drop_from_disabled(fighters: Array[Fighter], field: ItemField, confi
 			continue
 		if f.state != Fighter.State.HITSTUN and f.state != Fighter.State.HELD:
 			continue
-		var it := field.add(f.item_kind, _hand(f, config), Item.State.FALLING, config)
-		it.uses = f.item_uses
-		f.item_kind = Fighter.NONE
-		f.item_uses = 0
-		events.append({"type": "item_drop", "id": it.id, "kind": it.kind, "fighter": f.id, "pos": it.pos})
+		events.append(drop(f, field, config))
 	return events
+
+
+## Lets go of the carried item where the fighter stands (it falls, keeping its uses).
+static func drop(f: Fighter, field: ItemField, config: GameConfig) -> Dictionary:
+	var it := field.add(f.item_kind, _hand(f, config), Item.State.FALLING, config)
+	it.uses = f.item_uses
+	f.item_kind = Fighter.NONE
+	f.item_uses = 0
+	return {"type": "item_drop", "id": it.id, "kind": it.kind, "fighter": f.id, "pos": it.pos}
 
 
 static func nearest_pickable(field: ItemField, pos: Vector3, radius: float) -> Item:

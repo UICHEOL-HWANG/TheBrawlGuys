@@ -6,7 +6,7 @@ extends RefCounted
 
 const WHIFF_KINDS: Array[int] = [
 	AttackSet.Kind.LIGHT_1, AttackSet.Kind.LIGHT_2, AttackSet.Kind.LIGHT_3, AttackSet.Kind.HEAVY,
-	AttackSet.Kind.BAT,
+	AttackSet.Kind.BAT, AttackSet.Kind.HAMMER, AttackSet.Kind.GLOVE,
 ]
 
 var _open: Dictionary = {}  # slot -> {"kind": int, "hit": bool}

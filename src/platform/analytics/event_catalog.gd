@@ -22,8 +22,9 @@ extends RefCounted
 ## peer_connect_failed; controller "remote" in setups), 11 = difficulty dial / probe / DDA bot
 ## tracking (BOT_TRACKING_KEYS on match_ended.players[] and match_players, matches.dda_variant,
 ## match_events probe_stage / dda_adjusted / bot_intent; migration 0006), 12 = first sign-in
-## onboarding (nickname_set, onboarding_choice; screen_viewed welcome / nickname / onboarding_choice).
-const SCHEMA_VERSION := 12
+## onboarding (nickname_set, onboarding_choice; screen_viewed welcome / nickname / onboarding_choice),
+## 13 = second item set (item enum hammer / glove / banana, match_events slip, hit made_light).
+const SCHEMA_VERSION := 13
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null

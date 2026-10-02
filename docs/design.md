@@ -392,7 +392,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 - 키캡: 방향키는 역T자 묶음 + 캡션 "이동", 그다음 Space "점프" · Z "약공격" · X "강공격" · C "가드 · 구르기"(2026-10-02: "가드 · +방향 구르기 · 착지 직전 낙법"이 길어 X–C–V 사이만 벌어져서 줄임. 방향+가드 = 구르기) · V "잡기" · X+C "필살기". 필살기는 동시 입력 키캡(여러 액션, 모두 눌렸을 때만 켜짐, 2026-09-30 Phase 5 T7)
 - 필살기 준비: 그 플레이어의 게이지가 가득 차면(view `gauge` ≥ 100, 필살기 있는 캐릭터만) 필살기 키캡 둘레에 `fire` 링(굵기 `s1`, 캡에서 `s1` 띄움). 누름 색과 함께 보일 수 있다
 - 로컬 2인(PRD-LOCAL-01): 플레이어마다 바 하나 — P1 왼쪽 아래, P2 오른쪽 아래(상단 대미지 카운터와 같은 순서), 바 앞에 플레이어 색 "P1"/"P2" 태그(`body` Jua + `ui_surface` 외곽선), 키캡 누름 색도 각자 플레이어 색. P2 키캡은 W/A S D 역T자 · Q · F · G · H · J · G+H. 칩은 마지막(P2) 바에 하나만, 숨기기/보이기는 두 바 함께. 이동 묶음 키캡은 글자여도 화살표 크기(`s6`+`s1`)라 두 바 높이가 같다
-- 좁을 때(compact): 두 바가 한 줄에 안 들어가면(DS-LAY-04 폰 배율 1.6 = 논리 폭 약 1458) 묶음 간격 `s4`→`s2`, 바 좌우 여백 `s5`→`s3`. 글자 크기는 줄이지 않는다. 증거 `phase-5/evidence/key-hint-{lit,ready,special,hidden}-1080.png`, `key-hint-2p{,-hidden}-{1080,phone}.png`
+- 좁을 때(compact): 두 바가 한 줄에 안 들어가면(DS-LAY-04 폰 배율 1.6 = 논리 폭 약 1458) 묶음 간격 `s4`→`s2`, 바 좌우 여백 `s5`→`s3`. 글자 크기는 줄이지 않는다. 2026-10-02: compact로도 안 들어가면(작은 브라우저 창 + 큰 UI 배율, 예: 1280×720 창 = 논리 폭 약 1164) compact를 풀고 원래 간격의 막대 줄 전체를 모자란 만큼만 축소한다(`KeyHintFit`, 최소 0.5배) — 간격 비율이 유지되고 화면 밖으로 잘리지 않음. 안전 영역 여백은 화면 기준 `s5` 그대로. 증거 `dev/active/new-weapons/evidence/key-hint-2p-1280.png` 증거 `phase-5/evidence/key-hint-{lit,ready,special,hidden}-1080.png`, `key-hint-2p{,-hidden}-{1080,phone}.png`
 - 키 글자와 눌림은 그 플레이어의 InputMap 액션(`p1_*` / `p2_*`)에서 읽는다 — 재지정하면 키캡 글자도 바뀐다
 - 키보드 플레이어에게만: 터치 컨트롤이 보이면 바 전체가 숨는다 (터치와 겹치지 않음). 게임패드 글리프는 Phase 5 T9(버튼 프롬프트). 메뉴 배경 난투에는 없다 (HUD 없음)
 - target 링 (Phase 5 T11 튜토리얼 "지금 누를 키"): `set_highlight(ids)`로 켠 키캡 둘레에 플레이어 색(`accent`) 링(`stroke_focus`, ready 링 바깥), 알파가 `motion_slow`로 숨 쉬듯 0.35↔1. `petal_yellow` 포커스 링은 크림 바 위에서 안 보여서 플레이어 색을 쓴다. 이동 묶음은 네 키캡 링이 겹쳐 묶음 전체 테두리처럼 보인다. 튜토리얼은 숨긴 바도 저장 없이 다시 보인다
@@ -465,6 +465,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 
 - 아이템은 포인트 색(`berry`, `petal_*`) 단순 실루엣 + 은은한 `glow` 림 → 연두 바닥에서 바로 보임 (레퍼런스의 보라 열매처럼)
 - 상자 낙하 1초 전 바닥에 부드러운 원형 그림자 예고 (쟁탈 시작 신호)
+- 2026-10-02 둘째 세트 (PRD-ITEM-05~07): **뿅망치** — `petal_blue` 손잡이 + 가로로 누운 굵은 `petal_pink` 북 머리 + 양끝 `petal_yellow` 범퍼(나무 방망이와 달리 장난감으로 읽힘), 맞히면 `squeak` 소리. **깃털 장갑** — 몽실한 `stone_cream` 손 + 엄지 + `petal_blue` 소맷부리 + `glow` 깃털 장식. 맞아 가벼워진 파이터 주위로 `glow` 깃털 4개가 천천히 돌며 오르내린다(DS-VIS-04 상태 표시, `LightFeathers`, KO면 숨김). **바나나** — 짧은 원통 4마디를 호로 이은 `petal_yellow` 바나나 + `bark` 꼭지. 던져 깔린 함정은 바닥에 납작하게 펼친 껍질 3장 + 꼭지로 바뀌어 줍는 바나나와 구분된다. 밟으면 `slip` 소리 + 먼지. 사용 횟수 점은 근접 아이템(방망이·뿅망치·장갑) 모두에 표시되고 개수와 상관없이 머리 위 가운데 정렬. 증거 `dev/active/new-weapons/evidence/`
 - 아이템을 든 캐릭터는 손 위치에 아이템 표시, 남은 사용 횟수는 작은 점
 - 정식 모델 (Phase 4 T8, 🖼 캡처 제출 — 사용자 확인 대기): 코드로 만드는 저폴리 소프트 툰 모델, 아이템당 1파일(`src/render/props/items/`), 모든 파트에 `glow` 림. 상자 = `bark` 속 + `dirt` 판자 + `stone_shade` 금속 띠 / 방망이 = `dirt` 몸통 + `petal_pink` 그립 테이프·`berry` 감개, 남은 횟수에 따라 균열 3단계 / 폭탄 = `berry` 몸통 + `petal_pink` 하이라이트 + `stone_shade` 뚜껑 + `dirt` 심지, 불붙으면 `fire`·`glow` 불꽃이 심지를 타고 내려가며 폭발 직전 점점 빠르게 깜빡임 / 돌멩이 = `stone_cream` 깎은 정이십면체 + `stone_shade` 조각, 던지면 회전. 든 아이템은 KayKit `handslot.r` 뼈에 붙고 종류별 손 오프셋(`HOLD`)을 쓴다
 
@@ -584,7 +585,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | DS-VIS-02 | 형태 언어·캐릭터 룩 | PRD-FX-01, PRD-STYLE-01~03 | 0 (식생 모듈), 3 🖼, 5 🖼 | 🟨 (KayKit 4종 적용 · Phase 5 🖼 스타일 룩 A 장비 승인·적용 2026-10-01 `silhouette-final*.png` · Phase 3 🖼 T7 대기) |
 | DS-VIS-03 | 플레이어 식별 | PRD-UI-01, PRD-LOCAL-01 | 1, 4, 5 | ✅ (안개 실루엣 Phase 4, 모양 링 P1~P4 Phase 5 T9 — 흑백 캡처 `phase-5/evidence/player-ids-gray.png`) |
 | DS-VIS-04 | 경기장 가독성 | PRD-RULE-02, PRD-ARENA-01~04 | 1, 4 | ✅ (Phase 4 T6 위험 표시·장식 가림) |
-| DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~04 | 2, 4 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |
+| DS-VIS-05 | 아이템·소품 | PRD-ITEM-01~07 | 2, 4, 2026-10-02 | ✅ (Phase 4 T8 정식 모델, 🖼 확인 대기) |
 | DS-VFX-01 | 코믹 임팩트 버스트 (v2) | PRD-FX-02, PRD-RULE-05 | 1 (v1), 3, 5 (v2) | ✅ (v2 2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
 | DS-VFX-02 | 가드 버블·잡기 표시 | PRD-CMB-03, PRD-CMB-04 | 2 | ✅ |
 | DS-VFX-03~06 | 이펙트 (나머지) | PRD-FX-02, PRD-RULE-05 | 3 | ✅ |

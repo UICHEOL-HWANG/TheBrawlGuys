@@ -4,7 +4,7 @@ extends RefCounted
 ## "style", "special" (ids, "" = none) and "gauge" (0..SpecialGauge.MAX); a special in progress
 ## is state SPECIAL with attack_kind SPECIAL and attack_ticks counting from its start.
 ## Combat-depth A adds "is_dodging" (intangible right now), "guard_hp_ratio" (0..1) and
-## "guard_broken" (stunned by a guard break).
+## "guard_broken" (stunned by a guard break). "light" = feather-glove lightness (PRD-ITEM-06).
 
 
 static func of(f: Fighter) -> Dictionary:
@@ -19,4 +19,5 @@ static func of(f: Fighter) -> Dictionary:
 		"is_dodging": f.intangible, "guard_hp_ratio": f.guard_hp / GuardMeter.MAX,
 		"guard_broken": f.guard_break_left > 0,
 		"tumbling": f.tumble, "knocked_down": f.state == Fighter.State.KNOCKDOWN, "getup": Getup.name_of(f),
+		"light": f.light_ticks > 0,
 	}

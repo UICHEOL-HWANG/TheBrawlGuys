@@ -6,11 +6,13 @@ extends SceneTree
 ## Usage (windowed, NOT headless; keep the window on top on macOS):
 ##   godot --path . --resolution 1280x720 --always-on-top -s res://scripts/capture_items.gd -- \
 ##       --out-dir=/abs/dir [--tag=SUFFIX]
-## Writes <out-dir>/items-lineup<tag>.png and <out-dir>/items-held<tag>.png.
+## Writes <out-dir>/items-lineup<tag>.png and <out-dir>/items-held<tag>.png. --set=new shows only
+## the second item set (hammer, glove, banana; PRD-ITEM-05..07).
 
 const SETTLE_FRAMES := 20
 const HELD_FRAMES := 45
-const HELD_KINDS: Array[int] = [Item.Kind.BAT, Item.Kind.BOMB, Item.Kind.ROCK]
+const CLASSIC_KINDS: Array[int] = [Item.Kind.BAT, Item.Kind.BOMB, Item.Kind.ROCK]
+const NEW_KINDS: Array[int] = [Item.Kind.HAMMER, Item.Kind.GLOVE, Item.Kind.BANANA]
 const HELD_SPACING := 1.6
 
 var _out: String = ""
@@ -19,12 +21,15 @@ var _frame: int = 0
 var _stage: Node3D
 var _views: Array[FighterView] = []
 var _config := GameConfig.new()
+var _kinds: Array[int] = CLASSIC_KINDS
 
 
 func _init() -> void:
 	var args := CaptureArgs.parse(OS.get_cmdline_user_args())
 	_out = String(args.get("out-dir", ""))
 	_tag = String(args.get("tag", ""))
+	if String(args.get("set", "")) == "new":
+		_kinds = NEW_KINDS
 	if _out.is_empty():
 		push_error("capture_items: usage: -- --out-dir=/abs/dir [--tag=SUFFIX]")
 		quit(1)
@@ -49,19 +54,19 @@ func _lineup() -> void:
 	_stage = CaptureArgs.grass_stage(root)
 	var lineup := ItemLineup.new()
 	_stage.add_child(lineup)
-	lineup.setup(_config)
+	lineup.setup(_config, [] if _kinds == CLASSIC_KINDS else _kinds)
 	CaptureArgs.camera(_stage, Vector3(0, 2.6, 7.4), Vector3(0, 0.55, 0), 42.0)
 
 
 func _held() -> void:
 	_stage.queue_free()
 	_stage = CaptureArgs.grass_stage(root)
-	for i: int in HELD_KINDS.size():
+	for i: int in _kinds.size():
 		var v := FighterView.new()
 		_stage.add_child(v)
 		v.setup(i, _config)
 		v.set_identity_visible(false)
-		var d := _idle_view(i, HELD_KINDS[i])
+		var d := _idle_view(i, _kinds[i])
 		v.apply(d, d, 1.0, 0)
 		_views.append(v)
 	CaptureArgs.camera(_stage, Vector3(0.6, 1.9, 4.2), Vector3(0, 0.9, 0), 40.0)
@@ -75,4 +80,4 @@ func _idle_view(i: int, kind: int) -> Dictionary:
 
 func _idle(v: FighterView) -> Dictionary:
 	var i := _views.find(v)
-	return _idle_view(i, HELD_KINDS[i])
+	return _idle_view(i, _kinds[i])

@@ -58,6 +58,10 @@ func on_events(events: Array, fighters: Array = []) -> void:
 				_shake.add(float(e["knockback"]), _hold(e))
 			"guard_hit":
 				_guarded(e, fighters, perfect.has(int(e["target"])))
+			"slip":  # a banana peel: a puff where the feet went out
+				var puff := DustPuff.new()
+				add_child(puff)
+				puff.play(e["pos"], 1.0, Quality.particle_scale(_config))
 			"explosion":
 				_spark(e["pos"], true)
 				_shake.add(_full_shake_knockback() * EXPLOSION_SHAKE_RATIO, 0.0)

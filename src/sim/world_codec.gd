@@ -5,9 +5,10 @@ extends RefCounted
 ## arena state and burn fields (Phase 4), v6 the fighter character and special gauge and the
 ## projectile field (Phase 5), v7 the fighter dodge and guard-meter fields (combat-depth A), v8
 ## guard_rest_ticks (perfect-guard rearm), v9 the knockdown / getup / tech / DI fields (combat-depth C),
-## v10 the match mode state and fighter ally_mask (combat-depth D).
+## v10 the match mode state and fighter ally_mask (combat-depth D), v11 fighter light_ticks
+## (feather glove, PRD-ITEM-06).
 
-const VERSION := 10
+const VERSION := 11
 const TYPES := {
 	"tick": TYPE_INT, "rng_seed": TYPE_INT, "rng_state": TYPE_INT, "config_fp": TYPE_INT,
 	"match_over": TYPE_BOOL, "winner": TYPE_INT, "fighters": TYPE_ARRAY,

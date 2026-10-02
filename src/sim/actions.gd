@@ -26,8 +26,8 @@ static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool
 			stop_horizontal(f)
 		return true
 	if input.light:
-		if f.item_kind == Item.Kind.BAT:
-			start_attack(f, AttackSet.Kind.BAT)
+		if Item.is_melee(f.item_kind):
+			start_attack(f, Item.MELEE_ATTACKS[f.item_kind])
 			f.item_uses -= 1
 			if f.item_uses <= 0:
 				f.item_kind = Fighter.NONE

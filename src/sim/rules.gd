@@ -41,8 +41,8 @@ static func respawn(f: Fighter, count: int, config: GameConfig, arena: ArenaData
 	f.set_state(Fighter.State.AIR)
 
 
-## Resets attack, charge, combo and grab bookkeeping, the carried item, burning, dodges and the
-## guard meter (respawn and KO).
+## Resets attack, charge, combo and grab bookkeeping, the carried item, burning, lightness, dodges
+## and the guard meter (respawn and KO).
 static func clear_actions(f: Fighter) -> void:
 	f.hitstun_ticks = 0
 	f.hitstop_ticks = 0
@@ -57,6 +57,7 @@ static func clear_actions(f: Fighter) -> void:
 	f.item_uses = 0
 	f.burn_ticks = 0
 	f.burn_clock = 0
+	f.light_ticks = 0
 	f.held_presses = 0
 	f.roll_streak = 0
 	f.roll_recent = 0
