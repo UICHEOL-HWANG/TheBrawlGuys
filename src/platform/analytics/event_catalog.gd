@@ -21,8 +21,9 @@ extends RefCounted
 ## 10 = Phase 6 online lobby (online_lobby_viewed, room_created / room_joined / room_left,
 ## peer_connect_failed; controller "remote" in setups), 11 = difficulty dial / probe / DDA bot
 ## tracking (BOT_TRACKING_KEYS on match_ended.players[] and match_players, matches.dda_variant,
-## match_events probe_stage / dda_adjusted / bot_intent; migration 0006).
-const SCHEMA_VERSION := 11
+## match_events probe_stage / dda_adjusted / bot_intent; migration 0006), 12 = first sign-in
+## onboarding (nickname_set, onboarding_choice; screen_viewed welcome / nickname / onboarding_choice).
+const SCHEMA_VERSION := 12
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null
@@ -80,6 +81,9 @@ const EVENTS: Dictionary = {
 	"tutorial_step_completed": ["step", "index", "ms_in_step", "attempts"],
 	"tutorial_skipped": ["step", "index"],
 	"tutorial_completed": ["total_ms"],
+	# First sign-in onboarding (never the nickname itself)
+	"nickname_set": ["length", "prefilled", "changed"],
+	"onboarding_choice": ["choice"],
 	# Online lobby (Phase 6; never the room code)
 	"online_lobby_viewed": ["signed_in", "supported"],
 	"room_created": ["attempts", "rule", "arena"],

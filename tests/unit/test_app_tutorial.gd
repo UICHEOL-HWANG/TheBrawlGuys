@@ -1,7 +1,8 @@
 extends GutTest
-## Onboarding tutorial in the app shell (Phase 5 T11): the first sign-in on a device goes on into
-## the tutorial over the title, skipping lands on the title and is remembered, and the title's
-## 튜토리얼 다시 보기 replays it. Transitions off, auth faked (a stored session restores).
+## Onboarding in the app shell (Phase 5 T11 + DS-LAY-03 온보딩): the first sign-in on a device walks
+## 환영 → 닉네임 → 캐릭터 → 시작 방식 over the title, then the tutorial (as the picked character) or
+## a bot match; skipping lands on the title and is remembered, and the title's 튜토리얼 다시 보기
+## replays it. Transitions off, auth faked (a stored session restores).
 
 const APP_SCENE := preload("res://src/app/app.tscn")
 const FakeHttp := preload("res://tests/unit/support/fake_http_transport.gd")
@@ -54,6 +55,7 @@ func _signed_in_app() -> App:
 	app.gate = gate
 	app.track = spy
 	app.tutorial = _progress()
+	app.profile = ProfileStore.new(SettingsStore.new(TUTORIAL_PATH))
 	add_child_autofree(app)
 	return app
 
@@ -66,11 +68,29 @@ func _props(event_name: String) -> Array[Dictionary]:
 	return out
 
 
-func test_the_first_sign_in_goes_on_into_the_tutorial() -> void:
+## Walks the onboarding screens: start, nickname, the first character, then `choice`.
+func _onboard(app: App, choice: String) -> void:
+	assert_eq(app.router().current_id(), OnboardingFlow.WELCOME)
+	(app.router().current() as WelcomeScreen).start()
+	var nick := app.router().current() as NicknameScreen
+	nick.field().text = "브롤왕"
+	nick.submit()
+	assert_eq(app.router().current_id(), App.CHARACTER)
+	(app.router().current() as CharacterSelectScreen).confirm(0, MatchSetup.INPUT_KEYBOARD)
+	assert_eq(app.router().current_id(), OnboardingFlow.CHOICE)
+	(app.router().current() as OnboardingChoiceScreen).choose(choice)
+
+
+func test_the_first_sign_in_onboards_then_plays_the_tutorial() -> void:
 	var app := _signed_in_app()
 	await wait_process_frames(2)
+	assert_eq(app.router().current_id(), OnboardingFlow.WELCOME, "not straight into the tutorial")
+	_onboard(app, OnboardingChoiceScreen.CHOICE_TUTORIAL)
 	assert_eq(app.router().current_id(), App.TUTORIAL)
-	assert_eq(app.router().depth(), 2, "the title waits underneath")
+	assert_eq(app.router().depth(), 6, "title, the four onboarding steps, then the tutorial")
+	assert_eq(app.profile.nickname(), "브롤왕")
+	assert_eq(_props("nickname_set")[0], {"length": 3, "prefilled": false, "changed": false})
+	assert_eq(_props("onboarding_choice")[0]["choice"], OnboardingChoiceScreen.CHOICE_TUTORIAL)
 	assert_false(app.backdrop().is_inside_tree(), "the menu backdrop stops like for a match")
 	assert_eq(_props("tutorial_started")[0]["source"], TutorialFlow.SOURCE_FIRST_LOGIN)
 	assert_eq(_props("screen_viewed").back()["screen"], App.TUTORIAL)
@@ -80,6 +100,7 @@ func test_the_first_sign_in_goes_on_into_the_tutorial() -> void:
 func test_skipping_lands_on_the_title_and_is_not_offered_again() -> void:
 	var app := _signed_in_app()
 	await wait_process_frames(2)
+	_onboard(app, OnboardingChoiceScreen.CHOICE_TUTORIAL)
 	var scene := app.router().current()
 	var overlay: TutorialOverlay = scene.call("overlay")
 	overlay.card().skip_button().pressed.emit()
@@ -96,6 +117,36 @@ func test_skipping_lands_on_the_title_and_is_not_offered_again() -> void:
 	await wait_process_frames(2)
 	assert_eq(again.router().current_id(), App.TITLE, "a returning player goes straight to the title")
 	assert_eq(_props("tutorial_started").size(), 0)
+
+
+func test_choosing_a_bot_match_starts_it_with_the_pick() -> void:
+	var app := _signed_in_app()
+	await wait_process_frames(2)
+	_onboard(app, OnboardingChoiceScreen.CHOICE_BOT)
+	assert_eq(app.router().current_id(), App.MATCH)
+	var setup: MatchSetup = app.router().current().get("setup")
+	assert_ne(setup.characters()[setup.local_slot()], CharacterData.DEFAULT, "the picked character plays")
+	assert_eq(_progress().status(), TutorialProgress.SKIPPED, "not offered again on this device")
+	assert_eq(_props("tutorial_started").size(), 0)
+
+
+func test_back_walks_the_onboarding_steps() -> void:
+	var app := _signed_in_app()
+	await wait_process_frames(2)
+	(app.router().current() as WelcomeScreen).start()
+	(app.router().current() as NicknameScreen).back()
+	assert_eq(app.router().current_id(), OnboardingFlow.WELCOME)
+	(app.router().current() as WelcomeScreen).start()
+	assert_eq(app.router().current_id(), OnboardingFlow.NICKNAME, "the welcome works again")
+
+
+func test_the_title_greets_by_nickname() -> void:
+	_progress().mark(TutorialProgress.COMPLETED)
+	ProfileStore.new(SettingsStore.new(TUTORIAL_PATH)).save("브롤왕")
+	var app := _signed_in_app()
+	await wait_process_frames(2)
+	var title := app.router().current() as TitleScreen
+	assert_eq(title.greeting_text(), "브롤왕님, 반가워요")
 
 
 func test_the_title_replays_the_tutorial() -> void:

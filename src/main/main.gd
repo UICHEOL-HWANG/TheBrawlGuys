@@ -13,6 +13,8 @@ const BOT_PLAYER := 1
 var setup: MatchSetup = null
 ## Shows "메뉴로" on the result banner (only when an app shell can take the player back).
 var menu_available: bool = false
+## The signed-in player's nickname (App: ProfileStore); shown on their card when they play alone.
+var nickname: String = ""
 ## Seed for each rematch (App: MatchSeed.fresh); empty = rematches replay setup.seed (debug scenes).
 var new_seed: Callable = Callable()
 
@@ -125,6 +127,7 @@ func _start_match() -> void:
 	_squad = BotSquadFactory.for_setup(setup, _config)
 	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
+	_hud.show_local_name(setup.local_slot(), nickname if setup.local_slots().size() == 1 else "")
 	_result_shown = false
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state

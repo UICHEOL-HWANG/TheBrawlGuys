@@ -19,6 +19,7 @@ const OVERLAP := DS.S4
 const COMBO_OUT := DS.S3
 
 var _index: int = 0
+var _character: String = ""
 var _mirrored: bool = false
 var _bar: CardBar
 var _gauge: CardBar
@@ -34,6 +35,7 @@ var _combo: ComboBadge
 ## (GameConfig, null = no 3D head), compact (bool).
 func setup(index: int, character: String, opts: Dictionary) -> void:
 	_index = index
+	_character = character
 	_mirrored = bool(opts.get("mirrored", false))
 	var tint: Variant = opts.get("tint")
 	add_theme_constant_override("separation", -OVERLAP)
@@ -74,6 +76,7 @@ func _line(index: int, character: String, opts: Dictionary, tint: Variant) -> HB
 	line.add_theme_constant_override("separation", DS.S2)
 	_name = _text(DS.FONT_BODY_PATH, "%s %s" % [PlayerStyle.label(index), CharacterCards.title_of(character)])
 	_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS  # a long nickname never pushes the stocks
 	line.add_child(_name)
 	if bool(opts.get("timed", false)):
 		_score = ScoreBadge.new()
@@ -92,6 +95,16 @@ func _line(index: int, character: String, opts: Dictionary, tint: Variant) -> HB
 			line.move_child(line.get_child(line.get_child_count() - 1), i)
 		_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	return line
+
+
+## The local player's nickname in place of "P1": "브롤왕 · 바바리안" ("" restores the slot label).
+func set_player_name(nick: String) -> void:
+	var who := nick if not nick.is_empty() else PlayerStyle.label(_index)
+	_name.text = ("%s · %s" if not nick.is_empty() else "%s %s") % [who, CharacterCards.title_of(_character)]
+
+
+func player_name_text() -> String:
+	return _name.text
 
 
 static func _text(font: String, text: String) -> Label:

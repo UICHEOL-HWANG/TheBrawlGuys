@@ -6,7 +6,7 @@ extends Node
 ## lobby) — and the app owns the login gate. Each select screen (SelectScreens) fills the
 ## MatchSetup that mode select starts. Entering a match swaps the backdrop out under the curtain;
 ## 메뉴로 on the result banner goes back to the title.
-## First sign-in on a device → onboarding tutorial (Phase 5 T11, also 튜토리얼 다시 보기) → title.
+## First sign-in on a device → OnboardingFlow over the title; 튜토리얼 다시 보기 replays the tutorial.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
 const MATCH_SCENE := preload("res://src/main/main.tscn")
@@ -27,6 +27,8 @@ var animate: bool = true
 var gate: LoginGate = null
 ## Tests point it at their own settings file.
 var tutorial: TutorialProgress = TutorialProgress.new()
+## Nickname (device + account); null = ProfileStore.create_default(), tests set their own.
+var profile: ProfileStore = null
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 ## Seed for each new match (tests pin it); the sim never draws its own.
 var new_seed: Callable = MatchSeed.fresh
@@ -34,12 +36,15 @@ var new_seed: Callable = MatchSeed.fresh
 var _backdrop: MenuBackdrop
 var _router: ScreenRouter
 var _restore: AppRestore
+var _onboarding: OnboardingFlow
 
 
 func _ready() -> void:
 	# The display title, not config/name (which also names the desktop user:// folder). Deferred:
 	# the engine sets the title from config/name after the main scene is ready.
 	DisplayServer.window_set_title.call_deferred(LoginText.TITLE)
+	if profile == null:
+		profile = ProfileStore.create_default()
 	_backdrop = BACKDROP_SCENE.instantiate() as MenuBackdrop
 	add_child(_backdrop)
 	var ui := CanvasLayer.new()
@@ -91,6 +96,7 @@ func _show_login(reason: String, restoring: bool = false) -> void:
 
 func _show_title() -> void:
 	var screen := TitleScreen.new()
+	screen.nickname = profile.nickname
 	screen.mode_chosen.connect(_on_mode_chosen)
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
@@ -113,7 +119,9 @@ func _on_signed_in() -> void:
 	if _router.depth() == 0 or _router.current_id() == LOGIN:
 		_show_title()
 		if tutorial.is_pending():
-			_start_tutorial(TutorialFlow.SOURCE_FIRST_LOGIN)
+			_onboarding = OnboardingFlow.new(_router, profile, tutorial, track, _backdrop.config(),
+					_start_tutorial, _start_match)
+			_onboarding.start(int(new_seed.call()))
 
 
 func _on_mode_chosen(mode: String) -> void:
@@ -132,12 +140,7 @@ func _on_mode_chosen(mode: String) -> void:
 
 ## A new local match setup for mode with its own seed, or null (온라인 goes through OnlineFlow).
 func new_setup(mode: String) -> MatchSetup:
-	match mode:
-		MatchSetup.MODE_BOT:
-			return MatchSetup.vs_bots(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
-		MatchSetup.MODE_LOCAL_2P:  # both humans pick characters
-			return MatchSetup.local_versus(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
-	return null
+	return SelectScreens.new_setup(mode, new_seed)
 
 
 ## Runs the select screens (SELECT_STEPS) in order, each filling setup, then starts the match.
@@ -161,14 +164,16 @@ func _start_match(setup: MatchSetup) -> void:
 	match_scene.set("setup", setup)
 	match_scene.set("menu_available", true)
 	match_scene.set("new_seed", new_seed)
+	match_scene.set("nickname", profile.nickname())
 	match_scene.connect("menu_requested", _back_to_title)
 	_router.push(MATCH, match_scene, true, _detach_backdrop)
 
 
-func _start_tutorial(source: String) -> void:
+## character: the onboarding pick ("" = the tutorial's default).
+func _start_tutorial(source: String, character: String = "") -> void:
 	if _router.is_busy() or _router.current_id() == TUTORIAL:
 		return
-	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title), true, _detach_backdrop)
+	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title, character), true, _detach_backdrop)
 
 
 func _back_to_title() -> void:
@@ -177,6 +182,7 @@ func _back_to_title() -> void:
 
 func _on_logout() -> void:
 	gate.sign_out()
+	profile.forget()  # the next account on this device must not inherit the nickname
 	_show_login("logged_out")
 
 

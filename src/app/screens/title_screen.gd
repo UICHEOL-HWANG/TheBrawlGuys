@@ -4,7 +4,8 @@ extends Control
 ## third, a Panel of MenuButtons (the backdrop fight stays visible in between) — 봇 대전 and 로컬 2인
 ## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) and 온라인 (Phase 6,
 ## OnlineFlow) are live — plus a small 로그아웃 in the top-right corner and, under the modes, a
-## secondary 튜토리얼 다시 보기 (Phase 5 T11).
+## secondary 튜토리얼 다시 보기 (Phase 5 T11). Under the logo, "브롤왕님, 반가워요" once the player
+## has a nickname (read again whenever the title shows, e.g. right after onboarding).
 
 signal mode_chosen(mode: String)
 signal logout_requested
@@ -21,6 +22,7 @@ const LOCAL_2P_MOBILE_TEXT := "로컬 2인 · 데스크톱 전용"
 const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
 const TUTORIAL_TEXT := "튜토리얼 다시 보기"
+const GREETING_TEXT := "%s님, 반가워요"
 const PANEL_POP_FROM := 0.9
 const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
@@ -28,6 +30,10 @@ var _buttons: Dictionary = {}
 var _logout: UiMenuButton
 var _tutorial: UiMenuButton
 var _panel: UiPanel
+var _greeting: Label
+var _greeting_gap: Control
+## () -> String: the player's nickname ("" = no greeting). The App passes ProfileStore.nickname.
+var nickname: Callable = func() -> String: return ""
 
 
 func _ready() -> void:
@@ -44,7 +50,11 @@ func _ready() -> void:
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel = UiPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	for c: Control in [_gap(DS.S6), logo, fill, _panel, _gap(DS.S7)]:
+	_greeting = LoginLayout.caption(false)
+	_greeting_gap = _gap(DS.S2)
+	_refresh_greeting()
+	visibility_changed.connect(_refresh_greeting)
+	for c: Control in [_gap(DS.S6), logo, _greeting_gap, _greeting, fill, _panel, _gap(DS.S7)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", DS.S4)
@@ -62,6 +72,17 @@ func _ready() -> void:
 	_add_logout()
 	(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred()
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)
+
+
+func greeting_text() -> String:
+	return _greeting.text if _greeting.visible else ""
+
+
+func _refresh_greeting() -> void:
+	var nick := String(nickname.call())
+	_greeting.text = GREETING_TEXT % nick
+	_greeting.visible = not nick.is_empty()
+	_greeting_gap.visible = _greeting.visible  # no stray gap under the logo without a greeting
 
 
 func mode_button(mode: String) -> UiMenuButton:

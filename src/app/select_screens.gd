@@ -5,6 +5,16 @@ extends RefCounted
 ## calls `next` once it has filled the setup and emits `cancelled` when backed out (App pops it).
 
 
+## A new local match setup for mode, seeded from new_seed(), or null (온라인 goes through OnlineFlow).
+static func new_setup(mode: String, new_seed: Callable) -> MatchSetup:
+	match mode:
+		MatchSetup.MODE_BOT:
+			return MatchSetup.vs_bots(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
+		MatchSetup.MODE_LOCAL_2P:  # both humans pick characters
+			return MatchSetup.local_versus(MatchSetup.DEFAULT_PLAYERS, int(new_seed.call()))
+	return null
+
+
 static func build(step_id: String, setup: MatchSetup, next: Callable, config: GameConfig,
 		track: Callable) -> Control:
 	match step_id:

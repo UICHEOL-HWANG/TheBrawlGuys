@@ -65,6 +65,13 @@ func menu_button() -> UiMenuButton:
 	return _banner.menu_button()
 
 
+## The local player's card shows their nickname (onboarding); "" or a bad slot changes nothing.
+func show_local_name(slot: int, nick: String) -> void:
+	if nick.is_empty() or _strip == null or slot < 0 or slot >= _strip.cards.size():
+		return
+	(_strip.cards[slot] as PlayerCard).set_player_name(nick)
+
+
 ## Keyboard key bars (DS-CMP-16), one per local player {prefix, slot, accent}
 ## (LocalPlayers.hint_players()); hidden while touch is active, which also moves the strip up.
 func show_key_hints(players: Array[Dictionary], touch_active: Callable) -> void:

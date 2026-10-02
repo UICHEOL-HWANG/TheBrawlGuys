@@ -8,6 +8,7 @@ const PLAN_EVENTS: Array[String] = [
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
 	"screen_viewed", "mode_selected", "rule_selected", "character_selected", "arena_selected", "select_cancelled",
 	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
+	"nickname_set", "onboarding_choice",
 	"online_lobby_viewed", "room_created", "room_joined", "room_left", "peer_connect_failed",
 	"match_started", "match_ended", "match_abandoned", "rematch_clicked",
 	"stock_lost", "special_used", "special_hit", "gauge_full",
@@ -65,6 +66,13 @@ func test_online_lobby_events_need_their_properties() -> void:
 
 func test_schema_version_is_bumped_for_bot_tracking() -> void:
 	assert_gte(EventCatalog.SCHEMA_VERSION, 11)  # 11 = difficulty dial / probe / DDA bot tracking
+
+
+func test_onboarding_events_carry_no_nickname() -> void:
+	assert_gte(EventCatalog.SCHEMA_VERSION, 12)  # 12 = first sign-in onboarding
+	assert_true(EventCatalog.validate("nickname_set", {"length": 3, "prefilled": false, "changed": false}).is_empty())
+	assert_true(EventCatalog.validate("onboarding_choice", {"choice": "bot"}).is_empty())
+	assert_false("nickname" in EventCatalog.EVENTS["nickname_set"], "the name itself is never tracked")
 
 
 func test_match_ended_players_need_the_defense_counters() -> void:
