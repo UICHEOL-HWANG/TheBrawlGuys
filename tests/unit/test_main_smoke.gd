@@ -48,8 +48,13 @@ func test_a_ring_out_finish_replays_slowly_before_the_result() -> void:
 	accept.pressed = true
 	Input.parse_input_event(accept)
 	await wait_physics_frames(2)
-	assert_true(hud.result_visible(), "accept skips to the banner")
+	assert_false(hud.result_visible(), "accept skips the replay to the winner's cheer")
 	assert_eq(Engine.time_scale, 1.0, "normal speed again")
+	assert_eq(main.get("_stage").call("cheering"), [0], "P1 cheers")
+	Input.parse_input_event(accept)
+	await wait_physics_frames(2)
+	assert_true(hud.result_visible(), "a second accept skips the cheer to the banner")
+	assert_eq(main.get("_stage").call("cheering"), [0], "still cheering above the banner")
 
 
 func test_telemetry_follows_the_match() -> void:
