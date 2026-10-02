@@ -7,6 +7,6 @@
 - [x] 6 Captures desktop + phone (spacing fixed: width 496, copy line breaks, hint row height, item gap s3)
 - [x] Review fixes: logout forgets nickname, HUD name only solo, Main.nickname injected by App,
       save failure warns, invisible/bidi chars refused, other spaces collapse
-- [ ] Open: nickname not refetched for a different account on a device whose onboarding is done
-      (title greeting empty until they set one); online opponent names; nickname edit in settings
-- [ ] Commit (awaiting user)
+- [x] Returning account on a device without a nickname: restored from profiles.display_name on sign-in
+- [ ] Open: online opponent names; nickname edit in settings
+- [x] Commit

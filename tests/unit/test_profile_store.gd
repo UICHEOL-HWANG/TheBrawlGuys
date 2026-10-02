@@ -97,3 +97,29 @@ func test_forget_clears_the_device_nickname_only() -> void:
 	p.forget()
 	assert_eq(p.nickname(), "", "the next account on this device starts clean")
 	assert_eq(_http.requests.size(), sent, "the account keeps its name")
+
+
+func test_a_signed_in_account_without_a_device_nickname_restores_its_name() -> void:
+	var p := _store()
+	watch_signals(p)
+	p.restore_from_account()
+	_http.respond(200, "[{\"display_name\": \"  브롤왕 \"}]")
+	assert_eq(p.nickname(), "브롤왕", "cleaned, cached on the device")
+	assert_signal_emitted(p, "changed")
+	assert_eq(_http.requests.size(), 1, "nothing written back to the account")
+
+
+func test_restore_keeps_an_existing_device_nickname() -> void:
+	var p := _store()
+	p.save("내이름")
+	var sent := _http.requests.size()
+	p.restore_from_account()
+	assert_eq(_http.requests.size(), sent, "no fetch")
+	assert_eq(p.nickname(), "내이름")
+
+
+func test_restore_ignores_an_unusable_account_name() -> void:
+	var p := _store()
+	p.restore_from_account()
+	_http.respond(200, "[{\"display_name\": \"x\"}]")
+	assert_eq(p.nickname(), "")

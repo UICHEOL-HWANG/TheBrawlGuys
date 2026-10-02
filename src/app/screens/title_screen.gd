@@ -5,7 +5,7 @@ extends Control
 ## (PRD-LOCAL-01, one keyboard and/or pads; off on touch-only mobile) and 온라인 (Phase 6,
 ## OnlineFlow) are live — plus a small 로그아웃 in the top-right corner and, under the modes, a
 ## secondary 튜토리얼 다시 보기 (Phase 5 T11). Under the logo, "브롤왕님, 반가워요" once the player
-## has a nickname (read again whenever the title shows, e.g. right after onboarding).
+## has a nickname (it follows ProfileStore.changed, e.g. right after onboarding).
 
 signal mode_chosen(mode: String)
 signal logout_requested
@@ -32,8 +32,8 @@ var _tutorial: UiMenuButton
 var _panel: UiPanel
 var _greeting: Label
 var _greeting_gap: Control
-## () -> String: the player's nickname ("" = no greeting). The App passes ProfileStore.nickname.
-var nickname: Callable = func() -> String: return ""
+## The player's profile (null = no greeting); the greeting follows its changes.
+var profile: ProfileStore = null
 
 
 func _ready() -> void:
@@ -53,7 +53,8 @@ func _ready() -> void:
 	_greeting = LoginLayout.caption(false)
 	_greeting_gap = _gap(DS.S2)
 	_refresh_greeting()
-	visibility_changed.connect(_refresh_greeting)
+	if profile != null:
+		profile.changed.connect(_refresh_greeting)
 	for c: Control in [_gap(DS.S6), logo, _greeting_gap, _greeting, fill, _panel, _gap(DS.S7)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
@@ -79,7 +80,7 @@ func greeting_text() -> String:
 
 
 func _refresh_greeting() -> void:
-	var nick := String(nickname.call())
+	var nick := profile.nickname() if profile != null else ""
 	_greeting.text = GREETING_TEXT % nick
 	_greeting.visible = not nick.is_empty()
 	_greeting_gap.visible = _greeting.visible  # no stray gap under the logo without a greeting

@@ -4,6 +4,9 @@ extends RefCounted
 ## the HUD and title can show it at once, and saved to the account (ProfileApi) so it follows the
 ## player. Remote calls are fire-and-forget; offline (no api) everything stays local.
 
+## The device nickname changed (saved, forgotten or restored from the account).
+signal changed
+
 const SECTION := "profile"
 const KEY := "nickname"
 
@@ -31,6 +34,7 @@ func nickname() -> String:
 ## Keeps a (valid) nickname on the device and sends it to the account.
 func save(nick: String) -> void:
 	_store.set_value(SECTION, KEY, nick)
+	changed.emit()
 	if _api != null:
 		_api.save(nick, func(ok: bool, _name: String) -> void:
 			if not ok:  # kept on the device; the account keeps its old name until the next save
@@ -40,6 +44,19 @@ func save(nick: String) -> void:
 ## Logout: the next account on this device starts without this nickname.
 func forget() -> void:
 	_store.set_value(SECTION, KEY, "")
+	changed.emit()
+
+
+## Sign-in on a device without a nickname (another account, a new device after onboarding): take
+## the account's name as the device nickname when it is usable. Never writes to the account.
+func restore_from_account() -> void:
+	if not nickname().is_empty():
+		return
+	fetch_remote(func(display_name: String) -> void:
+		var nick := Nickname.prefill(display_name)
+		if not nick.is_empty() and nickname().is_empty():
+			_store.set_value(SECTION, KEY, nick)
+			changed.emit())
 
 
 ## done(display_name: String): the account's display name ("" offline, signed out or on failure).

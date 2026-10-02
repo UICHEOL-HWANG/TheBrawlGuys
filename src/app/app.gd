@@ -96,7 +96,7 @@ func _show_login(reason: String, restoring: bool = false) -> void:
 
 func _show_title() -> void:
 	var screen := TitleScreen.new()
-	screen.nickname = profile.nickname
+	screen.profile = profile
 	screen.mode_chosen.connect(_on_mode_chosen)
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
@@ -122,6 +122,8 @@ func _on_signed_in() -> void:
 			_onboarding = OnboardingFlow.new(_router, profile, tutorial, track, _backdrop.config(),
 					_start_tutorial, _start_match)
 			_onboarding.start(int(new_seed.call()))
+		else:
+			profile.restore_from_account()
 
 
 func _on_mode_chosen(mode: String) -> void:
