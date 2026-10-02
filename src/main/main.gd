@@ -121,6 +121,7 @@ func _start_match() -> void:
 	_locals.reset()
 	_stage.clear_items()
 	_finale.reset()
+	_touch.set_suppressed(false)
 	if _world != null and new_seed.is_valid():
 		setup.seed = int(new_seed.call())  # rematch: same line-up, new randomness
 	_world = setup.build_world(_config)
@@ -174,7 +175,8 @@ func _process(delta: float) -> void:
 		Analytics.set_user_properties(_squad.finish(_curr_state))
 		# The banner speaks for the lone human, or names the winner when two share the screen.
 		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL
-		if _finale.reveal(int(_curr_state["winner"]), viewer):  # the replay presents this frame's events
+		_touch.set_suppressed(true)  # nothing to steer; the banner owns the bottom
+		if _finale.reveal(int(_curr_state["winner"]), viewer, _curr_state):  # the replay/cheer presents this frame
 			_hud.update_from(_curr_state, events)
 			return
 	_stage.draw(_prev_state, _curr_state, _alpha, delta)

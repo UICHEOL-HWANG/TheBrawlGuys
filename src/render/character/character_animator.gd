@@ -15,6 +15,8 @@ var _default_clips: Dictionary = {}
 var _player: AnimationPlayer
 var _current: int = -1
 var _last_kind: int = -1
+## A state played regardless of the sim view (force()); -1 follows the view.
+var _forced: int = -1
 
 
 func setup(player: AnimationPlayer, config: GameConfig) -> void:
@@ -45,12 +47,18 @@ func setup(player: AnimationPlayer, config: GameConfig) -> void:
 
 
 func apply(view: Dictionary, delta: float) -> void:
-	var anim := AnimMap.anim_for(view)
+	var anim := _forced if _forced >= 0 else AnimMap.anim_for(view)
 	var kind := int(view["attack_kind"])
 	if anim != _current or (AnimMap.is_timed(anim) and kind != _last_kind):
 		_enter(anim)
 	_last_kind = kind
-	_tree.advance(0.0 if int(view["hitstop_ticks"]) > 0 else delta)
+	var frozen := _forced < 0 and int(view["hitstop_ticks"]) > 0  # a frozen final hit still cheers
+	_tree.advance(0.0 if frozen else delta)
+
+
+## Plays anim whatever the sim view says (the victory cheer); -1 follows the view again.
+func force(anim: int) -> void:
+	_forced = anim
 
 
 func current_anim() -> int:

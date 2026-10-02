@@ -18,6 +18,9 @@ var _main: Node
 var _frame: int = 0
 var _shots: int = 0
 var _replay_frames: int = 0
+## Frames since the banner came up (it pops in, then the shot is taken).
+var _result_frames: int = 0
+const RESULT_SETTLE_FRAMES := 30
 
 
 func _init() -> void:
@@ -55,6 +58,9 @@ func _on_frame() -> void:
 			CaptureArgs.save(root, "%s/finisher-%02d.png" % [_out, _shots])
 		_replay_frames += 1
 	elif hud.call("result_visible") and _replay_frames > 0:
+		_result_frames += 1
+		if _result_frames < RESULT_SETTLE_FRAMES:
+			return
 		CaptureArgs.save(root, "%s/finisher-result.png" % _out)
 		print("capture_finisher: %d replay frames" % _replay_frames)
 		quit(0)

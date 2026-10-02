@@ -49,3 +49,15 @@ func test_frame_keeps_the_s5_margin_inside_the_safe_area() -> void:
 	# desktop: the safe area is the whole viewport, so the margin is exactly s5
 	assert_eq(_hud.frame_margin("left"), DS.S5)
 	assert_eq(_hud.frame_margin("bottom"), HudStrip.EDGE, "the strip sits on the bottom edge (DS-LAY-02 v2)")
+
+
+func test_result_banner_docks_at_the_bottom_and_the_strip_steps_aside() -> void:
+	_hud.show_result(0, 0)
+	await wait_seconds(DS.MOTION_BASE + 0.1)
+	var screen := _hud.get_viewport().get_visible_rect()
+	var r := _hud.banner().get_global_rect()
+	assert_gt(r.get_center().y, screen.get_center().y, "the banner sits in the lower half")
+	assert_almost_eq(r.get_center().x, screen.get_center().x, 2.0, "centered across")
+	assert_false(_hud.strip().visible, "the strip fades out under the banner")
+	_hud.hide_result()
+	assert_true(_hud.strip().visible)

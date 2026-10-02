@@ -21,6 +21,7 @@ var _defense: Array[DefenseFx] = []
 var _reactions: Array[HitReaction] = []
 var _items: ItemLayer
 var _teams: Array = []
+var _victory := VictoryPose.new()
 
 
 ## characters[i]: slot i's CharacterData id, which picks its model ("" / missing = slot model).
@@ -91,6 +92,7 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 		_views[i].animate(now_all[i], delta)
 		_defense[i].apply(now_all[i], delta)
 		_hazards[i].apply(now_all[i], _views[i].position, fog)
+	_victory.apply(_views, delta)
 	_items.sync(prev["items"], curr["items"], alpha, tick)
 
 
@@ -146,6 +148,15 @@ func _sync_teams(teams: Array) -> void:
 	_teams = teams.duplicate()
 	for i: int in _views.size():
 		_views[i].identity().set_team_color(PlayerStyle.team_color(int(teams[i])) if i < teams.size() else null)
+
+
+## The winners (slots) cheer toward the camera until set_cheering([]) (VictoryCeremony).
+func set_cheering(slots: Array[int]) -> void:
+	_victory.start(_views, slots)
+
+
+func cheering() -> Array:
+	return _victory.slots()
 
 
 func views() -> Array[FighterView]:

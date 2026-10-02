@@ -35,6 +35,9 @@ var _owner: Dictionary = {}
 var _stick_finger: int = NO_FINGER
 var _heavy_sent: bool = false
 var _enabled: bool = true
+## Hidden while the result is up (set_suppressed); a touch does not bring them back meanwhile.
+var _suppressed: bool = false
+var _shown_before: bool = false
 var _grab_highlight: bool = false
 
 
@@ -103,6 +106,17 @@ func set_enabled(on: bool) -> void:
 		_release_all()
 	for name: String in TouchLayout.BUTTONS:
 		_refresh_idle(name)
+
+
+## Hides (and releases) the controls while the result is up; false restores how they were.
+func set_suppressed(on: bool) -> void:
+	if on == _suppressed:
+		return
+	_suppressed = on
+	if on:
+		_shown_before = visible
+		_release_all()
+	visible = _shown_before and not on
 
 
 ## Resting look of a button nobody is touching: disabled, highlighted (grab) or idle.
@@ -175,6 +189,8 @@ func _layout() -> void:
 
 
 func _down(index: int, pos: Vector2) -> void:
+	if _suppressed:
+		return
 	visible = true
 	if not _enabled:
 		return

@@ -3,7 +3,7 @@ extends GutTest
 ## stretched to the sim length, frozen during hitstop, combo hits restart the clip.
 
 const CLIPS := ["Idle", "Running_A", "Jump_Idle", "Unarmed_Melee_Attack_Punch_A", "Unarmed_Melee_Attack_Kick",
-	"Hit_A", "Hit_B", "Blocking", "Death_A"]
+	"Hit_A", "Hit_B", "Blocking", "Death_A", "Cheer"]
 
 
 func _player() -> AnimationPlayer:
@@ -76,3 +76,18 @@ func test_next_combo_hit_restarts_the_clip() -> void:
 	var mid := a.play_position()
 	a.apply(_v(Fighter.State.ATTACK, true, AttackSet.Kind.LIGHT_2), 0.0)
 	assert_lt(a.play_position(), mid, "LIGHT_2 starts the punch again")
+
+
+func test_forced_cheer_overrides_the_view_and_ignores_a_frozen_hitstop() -> void:
+	var a := _animator()
+	a.force(AnimMap.Anim.CHEER)
+	for i: int in 3:  # travel settles into the new state over a couple of frames
+		a.apply(_v(Fighter.State.ATTACK, true, AttackSet.Kind.LIGHT_1, 5), 0.05)
+	assert_eq(a.current_anim(), AnimMap.Anim.CHEER)
+	assert_eq(a.clip_for(AnimMap.Anim.CHEER), "Cheer")
+	var before := a.play_position()
+	a.apply(_v(Fighter.State.ATTACK, true, AttackSet.Kind.LIGHT_1, 5), 0.05)
+	assert_gt(a.play_position(), before, "the match froze mid-hitstop, the cheer still plays")
+	a.force(-1)
+	a.apply(_v(Fighter.State.MOVE), 0.016)
+	assert_eq(a.current_anim(), AnimMap.Anim.RUN, "back on the sim view")

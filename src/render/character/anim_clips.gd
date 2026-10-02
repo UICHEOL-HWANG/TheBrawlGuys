@@ -30,11 +30,13 @@ const CANDIDATES := {
 	AnimMap.Anim.LIE: ["Lie_Idle", "Lie_Pose", "Death_B_Pose"],
 	AnimMap.Anim.GETUP: ["Lie_StandUp", "Jump_Land", "Idle"],
 	AnimMap.Anim.ROLL: ["Dodge_Forward", "Running_A"],
+	# the winners' victory cheer (VictoryCeremony); never picked from a sim view
+	AnimMap.Anim.CHEER: ["Cheer", "Jump_Full_Short"],
 }
 const LOOPING: Array[int] = [
 	AnimMap.Anim.IDLE, AnimMap.Anim.RUN, AnimMap.Anim.FALL, AnimMap.Anim.CHARGE, AnimMap.Anim.HOLD,
 	AnimMap.Anim.HELD, AnimMap.Anim.GUARD, AnimMap.Anim.LAUNCHED, AnimMap.Anim.JUMP,
-	AnimMap.Anim.RUSH, AnimMap.Anim.SPIN, AnimMap.Anim.LIE,
+	AnimMap.Anim.RUSH, AnimMap.Anim.SPIN, AnimMap.Anim.LIE, AnimMap.Anim.CHEER,
 ]
 
 

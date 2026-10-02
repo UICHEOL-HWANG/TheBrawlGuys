@@ -2,7 +2,8 @@ class_name Hud
 extends CanvasLayer
 ## In-match HUD (design.md DS-LAY-02 v2, combat-depth D): the HudStrip of PlayerCards — P1 + P3
 ## on the left, P2 + P4 on the right, the clock between them in timed matches — along the bottom
-## edge (GetAmped-style layout), the result banner in the center and the local players' key hints
+## edge (GetAmped-style layout), the result banner docked at the bottom (the strip steps aside for
+## it, the winners cheer above it) and the local players' key hints
 ## (DS-CMP-16) along the top. While touch controls are shown they own the bottom of the screen
 ## (stick bottom-left, buttons bottom-right), so the strip moves to the top edge instead.
 
@@ -14,6 +15,7 @@ const LAYER := 5
 
 var _strip: HudStrip = null
 var _banner: ResultBanner
+var _dock: MarginContainer
 var _mode: Dictionary = {}
 var _key_hints: KeyHintHud = null
 var _touch_active: Callable = func() -> bool: return false
@@ -51,10 +53,15 @@ func update_from(view: Dictionary, events: Array = []) -> void:
 
 func show_result(winner_id: int, local_id: int) -> void:
 	_banner.show_outcome(winner_id, local_id, _mode)
+	if _strip != null:
+		UiMotion.fade_out(_strip)
 
 
 func hide_result() -> void:
 	_banner.hide_result()
+	if _strip != null:
+		UiMotion.set_alpha(_strip, 1.0)
+		_strip.visible = true
 
 
 func set_menu_available(on: bool) -> void:
@@ -154,14 +161,27 @@ func _follow_touch() -> void:
 
 
 func _build_frame() -> void:
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(center)
+	_dock = MarginContainer.new()
+	_dock.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_dock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_dock)
 	_banner = RESULT_BANNER_SCENE.instantiate() as ResultBanner
-	center.add_child(_banner)
+	_banner.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_banner.size_flags_vertical = Control.SIZE_SHRINK_END
+	_dock.add_child(_banner)
+	_dock_to_safe_area()
 	_banner.restart_requested.connect(func() -> void: restart_requested.emit())
 	_banner.menu_requested.connect(func() -> void: menu_requested.emit())
 	get_viewport().size_changed.connect(func() -> void:
+		_dock_to_safe_area()
 		if _strip != null:
 			_strip.apply_safe_area(get_viewport()))
+
+
+## The banner sits one gap above the bottom of the safe area (home indicator, notches).
+func _dock_to_safe_area() -> void:
+	var vp := get_viewport().get_visible_rect()
+	var safe := SafeArea.rect(get_viewport())
+	_dock.add_theme_constant_override("margin_bottom", int(vp.end.y - safe.end.y) + DS.S5)
+	_dock.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
+	_dock.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
