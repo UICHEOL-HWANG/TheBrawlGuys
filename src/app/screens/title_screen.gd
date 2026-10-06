@@ -12,6 +12,7 @@ signal mode_chosen(mode: String)
 signal logout_requested
 signal tutorial_requested
 signal nickname_edit_requested
+signal settings_requested
 
 ## [mode, label, enabled]
 const MODES: Array[Array] = [
@@ -23,6 +24,7 @@ const MODES: Array[Array] = [
 const LOCAL_2P_MOBILE_TEXT := "로컬 2인 · 데스크톱 전용"
 const LOGO_TEXT := LoginText.TITLE
 const LOGOUT_TEXT := "로그아웃"
+const SETTINGS_TEXT := "설정"
 const TUTORIAL_TEXT := "튜토리얼 다시 보기"
 const GREETING_TEXT := "%s님, 반가워요"
 const CHANGE_TEXT := "변경"
@@ -32,6 +34,7 @@ const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
 var _buttons: Dictionary = {}
 var _logout: UiMenuButton
+var _settings: UiMenuButton
 var _tutorial: UiMenuButton
 var _panel: UiPanel
 var _greeting: Label
@@ -86,6 +89,9 @@ func _ready() -> void:
 	list.add_child(_tutorial)
 	_add_logout()
 	(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred()
+	visibility_changed.connect(func() -> void:  # back from 설정 / 닉네임: the router hid us, focus was dropped
+		if visible:
+			(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred())
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)
 
 
@@ -116,6 +122,10 @@ func logout_button() -> UiMenuButton:
 	return _logout
 
 
+func settings_button() -> UiMenuButton:
+	return _settings
+
+
 ## Logo on top, mode panel in the lower third: the backdrop fight plays in between.
 func backdrop_focus() -> Vector2:
 	return BACKDROP_FOCUS
@@ -140,15 +150,23 @@ func _mode_button(mode: String, label: String, enabled: bool) -> UiMenuButton:
 
 
 func _add_logout() -> void:
-	var corner := MarginContainer.new()
-	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	for side: String in ["top", "right"]:
-		corner.add_theme_constant_override("margin_" + side, DS.S5)
-	add_child(corner)
-	_logout = UiMenuButton.new()
-	_logout.text = LOGOUT_TEXT
-	_logout.kind = UiMenuButton.Kind.SECONDARY
-	corner.add_child(_logout)
-	_logout.custom_minimum_size = Vector2(0, DS.S8)
+	_logout = _corner_button(LOGOUT_TEXT, true)
 	_logout.pressed.connect(func() -> void: logout_requested.emit())
+	_settings = _corner_button(SETTINGS_TEXT, false)
+	_settings.pressed.connect(func() -> void: settings_requested.emit())
+
+
+## A small secondary button tucked into the top-right (or top-left) corner.
+func _corner_button(label: String, right: bool) -> UiMenuButton:
+	var corner := MarginContainer.new()
+	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT if right else Control.PRESET_TOP_LEFT)
+	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN if right else Control.GROW_DIRECTION_END
+	corner.add_theme_constant_override("margin_top", DS.S5)
+	corner.add_theme_constant_override("margin_right" if right else "margin_left", DS.S5)
+	add_child(corner)
+	var b := UiMenuButton.new()
+	b.text = label
+	b.kind = UiMenuButton.Kind.SECONDARY
+	corner.add_child(b)
+	b.custom_minimum_size = Vector2(0, DS.S8)
+	return b

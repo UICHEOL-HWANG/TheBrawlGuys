@@ -7,10 +7,21 @@ const MUSIC := "Music"
 const UI := "UI"
 
 
-static func ensure(config: GameConfig) -> void:
-	_bus(SFX, config.sfx_volume_db)
-	_bus(MUSIC, config.music_volume_db)
-	_bus(UI, config.ui_volume_db)
+## store: the player's settings; their sound and music volumes lower the buses (null = as designed).
+## UI clicks follow the sound volume.
+static func ensure(config: GameConfig, store: SettingsStore = null) -> void:
+	if store == null:
+		apply(config, UserVolume.FULL, UserVolume.FULL)
+	else:
+		apply(config, UserVolume.percent(store, UserVolume.SFX), UserVolume.percent(store, UserVolume.MUSIC))
+
+
+## The buses at the config levels lowered by the player's sound and music percents (no disk).
+static func apply(config: GameConfig, sfx_percent: int, music_percent: int) -> void:
+	var sfx_db := UserVolume.db(sfx_percent)
+	_bus(SFX, maxf(config.sfx_volume_db + sfx_db, UserVolume.MUTE_DB))
+	_bus(MUSIC, maxf(config.music_volume_db + UserVolume.db(music_percent), UserVolume.MUTE_DB))
+	_bus(UI, maxf(config.ui_volume_db + sfx_db, UserVolume.MUTE_DB))
 
 
 static func _bus(name: String, volume_db: float) -> void:

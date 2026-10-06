@@ -32,7 +32,7 @@ static func wants_intense(view: Dictionary) -> bool:
 
 func setup(config: GameConfig) -> void:
 	_config = config
-	AudioBuses.ensure(config)
+	AudioBuses.ensure(config, SettingsStore.new())
 	_player = AudioStreamPlayer.new()
 	_player.bus = AudioBuses.MUSIC
 	add_child(_player)

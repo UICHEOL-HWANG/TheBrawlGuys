@@ -101,10 +101,8 @@ func _show_title() -> void:
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
 	screen.nickname_edit_requested.connect(func() -> void: NicknameEdit.open(_router, profile, track))
-	if _router.depth() == 0:
-		_router.push(TITLE, screen)
-	else:
-		_router.replace(TITLE, screen)
+	screen.settings_requested.connect(func() -> void: SettingsFlow.open(_router, _backdrop.config()))
+	_router.push(TITLE, screen) if _router.depth() == 0 else _router.replace(TITLE, screen)
 
 
 ## Menu screens say where they leave room; the backdrop slides its fight there.

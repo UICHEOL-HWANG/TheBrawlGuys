@@ -66,7 +66,7 @@ func _ready() -> void:
 	_finale.revealed.connect(func() -> void: _tracking.on_result_shown())
 	LookPreset.apply(_config.look_preset)
 	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
-	_config.changed.connect(func() -> void: AudioBuses.ensure(_config))
+	_config.changed.connect(func() -> void: AudioBuses.ensure(_config, SettingsStore.new()))
 	_start_match()
 
 

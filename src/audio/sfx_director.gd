@@ -15,7 +15,7 @@ var _decor_lake: bool = ArenaDressings.has_decor_lake(ArenaCatalog.DEFAULT_ID)
 
 func setup(config: GameConfig) -> void:
 	_config = config
-	AudioBuses.ensure(config)
+	AudioBuses.ensure(config, SettingsStore.new())
 	for i: int in VOICES:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
