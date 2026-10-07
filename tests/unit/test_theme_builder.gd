@@ -3,12 +3,13 @@ extends GutTest
 const THEME_PATH := "res://src/ui/theme/forest_theme.tres"
 
 
-func test_panel_uses_surface_and_large_radius() -> void:
+func test_panel_is_a_dim_sticker_with_large_radius() -> void:
 	var sb := ThemeBuilder.build().get_stylebox("panel", "PanelContainer") as StyleBoxFlat
 	assert_not_null(sb)
-	assert_eq(sb.bg_color, DS.UI_SURFACE)
+	assert_eq(sb.bg_color, DS.UI_SURFACE_DIM)
 	assert_eq(sb.corner_radius_top_left, DS.RADIUS_L)
-	assert_eq(sb.shadow_color, DS.UI_SHADOW)
+	assert_eq(sb.border_color, Sticker.OUTLINE)
+	assert_eq(sb.border_width_bottom, Sticker.EDGE + Sticker.DEPTH)
 
 
 func test_button_states() -> void:
@@ -16,8 +17,8 @@ func test_button_states() -> void:
 	var normal := t.get_stylebox("normal", "Button") as StyleBoxFlat
 	var pressed := t.get_stylebox("pressed", "Button") as StyleBoxFlat
 	var focus := t.get_stylebox("focus", "Button") as StyleBoxFlat
-	assert_eq(normal.shadow_offset, DS.SHADOW_SOFT_OFFSET)
-	assert_eq(pressed.shadow_offset, DS.SHADOW_PRESSED_OFFSET)
+	assert_eq(normal.border_width_bottom, Sticker.EDGE + Sticker.DEPTH_PRESSED, "sticker key edge")
+	assert_eq(pressed.border_width_bottom, Sticker.EDGE, "pressed key sits flat")
 	assert_eq(focus.border_color, DS.PETAL_YELLOW)
 	assert_eq(focus.border_width_top, DS.STROKE_FOCUS)
 	assert_false(focus.draw_center)

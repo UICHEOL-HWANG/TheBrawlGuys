@@ -4,6 +4,9 @@ extends RefCounted
 ## centered on screen, and a footer inside the safe area with 뒤로 at the bottom left and the key
 ## hint at the bottom right. Containers only, spacing from DS tokens, so it follows UI scaling.
 
+## 뒤로 on the menu footers: a short key, not a full-width menu button.
+const BACK_WIDTH := 200
+
 
 ## Adds the title, the centered cards and the footer to root; returns the footer margin
 ## (apply_safe_area keeps it clear of notches and gesture bars).
@@ -50,6 +53,7 @@ static func back_button(text: String) -> UiMenuButton:
 	b.text = text
 	b.kind = UiMenuButton.Kind.SECONDARY
 	b.focus_mode = Control.FOCUS_NONE
+	b.ready.connect(func() -> void: b.custom_minimum_size.x = BACK_WIDTH)
 	return b
 
 

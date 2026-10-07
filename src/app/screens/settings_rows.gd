@@ -46,7 +46,7 @@ static func slider_row(name: String, out: Dictionary) -> VBoxContainer:
 
 
 static func style_slider(slider: HSlider) -> void:
-	var track := _bar(DS.UI_SURFACE_DIM)
+	var track := _bar(DS.UI_SURFACE)  # cream groove on the dim sticker panel
 	var fill := _bar(DS.UI_ACCENT)
 	slider.add_theme_stylebox_override("slider", track)
 	slider.add_theme_stylebox_override("grabber_area", fill)

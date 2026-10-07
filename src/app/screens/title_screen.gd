@@ -75,7 +75,7 @@ func _ready() -> void:
 	for c: Control in [_gap(DS.S6), logo, _greeting_gap, greeting_row, fill, _panel, _gap(DS.S7)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", DS.S4)
+	list.add_theme_constant_override("separation", DS.S3)
 	_panel.add_child(list)
 	for m: Array in MODES:
 		var mode := String(m[0])

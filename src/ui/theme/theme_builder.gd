@@ -8,14 +8,14 @@ static func build() -> Theme:
 	theme.default_font = load(DS.FONT_BODY_PATH) as Font
 	theme.default_font_size = DS.SIZE_BODY
 
-	var panel := _surface(DS.RADIUS_L, DS.SHADOW_SOFT_OFFSET, DS.SHADOW_SOFT_SIZE)
+	var panel := _sticker(DS.UI_SURFACE_DIM, DS.RADIUS_L, Sticker.DEPTH)
 	theme.set_stylebox("panel", "PanelContainer", panel)
 	theme.set_stylebox("panel", "Panel", panel)
 
-	var normal := _surface(DS.RADIUS_PILL, DS.SHADOW_SOFT_OFFSET, DS.SHADOW_SOFT_SIZE)
+	var normal := _sticker(DS.UI_SURFACE, DS.RADIUS_PILL, Sticker.DEPTH_PRESSED)
 	theme.set_stylebox("normal", "Button", normal)
 	theme.set_stylebox("hover", "Button", normal)
-	theme.set_stylebox("pressed", "Button", _surface(DS.RADIUS_PILL, DS.SHADOW_PRESSED_OFFSET, DS.SHADOW_PRESSED_SIZE))
+	theme.set_stylebox("pressed", "Button", _sticker(DS.UI_SURFACE, DS.RADIUS_PILL, 0))
 	theme.set_stylebox("disabled", "Button", _flat(DS.UI_SURFACE_DIM, DS.RADIUS_PILL))
 	theme.set_stylebox("focus", "Button", _focus_ring())
 
@@ -28,11 +28,11 @@ static func build() -> Theme:
 	return theme
 
 
-static func _surface(radius: int, shadow_offset: Vector2, shadow_size: int) -> StyleBoxFlat:
-	var sb := _flat(DS.UI_SURFACE, radius)
-	sb.shadow_color = DS.UI_SHADOW
-	sb.shadow_offset = shadow_offset
-	sb.shadow_size = shadow_size
+## DS-CMP-06/07 v2 comic sticker look for the stock controls (toggles, plain panels).
+static func _sticker(bg: Color, radius: int, depth: int) -> StyleBoxFlat:
+	var sb := Sticker.box(bg, radius, depth)
+	sb.set_content_margin_all(DS.S4)
+	sb.content_margin_bottom = DS.S4 + depth  # text centered on the face, above the key edge
 	return sb
 
 

@@ -1,9 +1,10 @@
 class_name UiMenuButton
 extends Button
-## Menu button (design.md DS-CMP-06): a pill in the campfire accent (primary), cream surface
-## (secondary) or a light outline with white text for glass cards (ghost). States idle · focus
-## (petal-yellow ring, also on hover) · pressed (squish + pressed shadow) · disabled (dim surface,
-## soft text). Named UiMenuButton because Godot already has a MenuButton class.
+## Menu button (design.md DS-CMP-06 v2): a comic sticker key — cream face in a deep-teal outline
+## with a thick bottom edge (primary), a flatter key with soft text (secondary), or a light
+## outline with white text for glass cards (ghost). States idle · focus (petal-yellow face, key
+## lifted, also on hover) · pressed (campfire face, key pushed down + squish) · disabled (dim
+## face, flat). Named UiMenuButton because Godot already has a MenuButton class.
 
 enum State { IDLE, FOCUS, PRESSED, DISABLED }
 enum Kind { PRIMARY, SECONDARY, GHOST }
@@ -77,29 +78,51 @@ func _apply() -> void:
 	for color: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color",
 			"font_hover_pressed_color"]:
 		add_theme_color_override(color, DS.UI_SURFACE if ghost else DS.UI_TEXT)
+	if kind == Kind.SECONDARY:  # quieter until focused (focus / press turn the face bright)
+		add_theme_color_override("font_color", DS.UI_TEXT_SOFT if _state == State.IDLE else DS.UI_TEXT)
 	add_theme_color_override("font_disabled_color", DS.UI_SURFACE_50 if ghost else DS.UI_TEXT_SOFT)
 
 
 func _box(s: int) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.set_corner_radius_all(DS.RADIUS_PILL)
-	sb.content_margin_left = DS.S6
-	sb.content_margin_right = DS.S6
-	sb.content_margin_top = DS.S3
-	sb.content_margin_bottom = DS.S3
-	sb.bg_color = DS.UI_ACCENT if kind == Kind.PRIMARY else DS.UI_SURFACE
 	if kind == Kind.GHOST:
-		return _ghost(sb, s)
-	if s == State.DISABLED:
-		sb.bg_color = DS.UI_SURFACE_DIM
-		return sb
-	sb.shadow_color = DS.UI_SHADOW
-	var pressed := s == State.PRESSED
-	sb.shadow_offset = DS.SHADOW_PRESSED_OFFSET if pressed else DS.SHADOW_SOFT_OFFSET
-	sb.shadow_size = DS.SHADOW_PRESSED_SIZE if pressed else DS.SHADOW_SOFT_SIZE
-	if s == State.FOCUS:
-		sb.border_color = DS.PETAL_YELLOW
-		sb.set_border_width_all(DS.STROKE_FOCUS)
+		return _ghost(_margins(StyleBoxFlat.new(), 0, 0), s)
+	var depth := _depth(s)
+	var sb := Sticker.box(_face(s), DS.RADIUS_M, depth)
+	return _margins(sb, depth - _depth(State.IDLE), depth)
+
+
+## Bottom key edge: lifted on focus, pushed down when pressed, flat when disabled.
+func _depth(s: int) -> int:
+	match s:
+		State.FOCUS:
+			return Sticker.DEPTH_FOCUS
+		State.PRESSED:
+			return Sticker.DEPTH_PRESSED
+		State.DISABLED:
+			return 0
+	return Sticker.DEPTH if kind == Kind.PRIMARY else Sticker.DEPTH_PRESSED
+
+
+func _face(s: int) -> Color:
+	match s:
+		State.FOCUS:
+			return DS.PETAL_YELLOW
+		State.PRESSED:
+			return DS.UI_ACCENT
+		State.DISABLED:
+			return DS.UI_SURFACE_DIM
+	return DS.UI_SURFACE
+
+
+## The face moves `lift` px up (negative = down) and the label stays centered on the face (above
+## the `depth` key edge); the control rect stays put so containers never re-sort.
+func _margins(sb: StyleBoxFlat, lift: int, depth: int) -> StyleBoxFlat:
+	sb.expand_margin_top = lift
+	sb.content_margin_left = DS.S5
+	sb.content_margin_right = DS.S5
+	sb.content_margin_top = Sticker.EDGE + DS.S2 - lift
+	sb.content_margin_bottom = Sticker.EDGE + DS.S2 + depth
+	sb.set_corner_radius_all(DS.RADIUS_M)
 	return sb
 
 
