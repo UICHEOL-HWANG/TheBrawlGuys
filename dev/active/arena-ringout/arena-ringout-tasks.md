@@ -1,0 +1,7 @@
+- [x] worktree + evidence capture (before)
+- [ ] A1 kill_y -2 + tests
+- [ ] A2 fall pose (Anim.FALL) + tests
+- [ ] A3 after capture
+- [ ] B frozen pond (subagent, worktree) -> merge
+- [ ] test.sh + check-all + code review
+- [ ] ask user: merge to main / deploy
