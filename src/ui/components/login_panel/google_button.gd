@@ -19,9 +19,10 @@ func _box(s: int) -> StyleBoxFlat:
 
 
 func _draw() -> void:
-	var sb := get_theme_stylebox("normal")
+	var sb := _box(state())  # the face (and its label) lifts / sinks with the state
 	var text_width := get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1,
 			get_theme_font_size("font_size")).x
 	var content_left := (size.x - text_width - sb.content_margin_right + sb.content_margin_left) * 0.5
-	var center := Vector2(content_left - G_GAP - G_SIZE * 0.5, size.y * 0.5)
+	var face_mid := (sb.content_margin_top + size.y - sb.content_margin_bottom) * 0.5
+	var center := Vector2(content_left - G_GAP - G_SIZE * 0.5, face_mid)
 	LoginIcon.draw_google_g(self, center, G_SIZE * 0.5)

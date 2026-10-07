@@ -11,7 +11,7 @@ static func build(entries: Array[Dictionary], width: float, buttons: Array[UiMen
 		on_pick: Callable, on_focus: Callable) -> UiPanel:
 	var panel := UiPanel.new()
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", DS.S5)
+	row.add_theme_constant_override("separation", DS.S4)
 	panel.add_child(row)
 	for e: Dictionary in entries:
 		row.add_child(_option(e, width, buttons, on_pick, on_focus))

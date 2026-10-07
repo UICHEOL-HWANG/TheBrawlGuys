@@ -156,7 +156,7 @@ const PRESS_SQUISH := Vector2(1.04, 0.92)
 
 # --- Menu layout sizes (DS-TOK-03 menu sizes), at 1920x1080 ---
 const BUTTON_MIN_WIDTH := 400
-const BUTTON_HEIGHT := 80
+const BUTTON_HEIGHT := 64
 ## Frosted login card (DS-CMP-14): width and the extra-large corner radius.
 const LOGIN_CARD_WIDTH := 560
 const RADIUS_XL := 40
