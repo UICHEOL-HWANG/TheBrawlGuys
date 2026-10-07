@@ -49,6 +49,14 @@ const TRIES := {
 	G_ITEM_USE: ["light", "grab"], G_SPECIAL: ["special"],
 }
 
+## Goal -> TouchInput buttons the touch tutorial rings (the stick has none; the special is a long
+## attack press plus guard).
+const TOUCH := {
+	G_JUMP: ["jump"], G_LIGHT_HIT: ["attack"], G_CHARGED_HIT: ["attack"], G_GUARD: ["guard"],
+	G_GRAB: ["grab"], G_THROW: ["grab"], G_PICKUP: ["grab"], G_ITEM_USE: ["attack", "grab"],
+	G_SPECIAL: ["attack", "guard"],
+}
+
 
 static func count() -> int:
 	return ORDER.size()
@@ -72,3 +80,7 @@ static func keys(goal: String) -> Array:
 
 static func tries(goal: String) -> Array:
 	return TRIES.get(goal, [])
+
+
+static func touch_buttons(goal: String) -> Array:
+	return TOUCH.get(goal, [])

@@ -62,6 +62,11 @@ func keys_to_press() -> Array:
 	return TutorialSteps.keys(flow.goal()) if flow.phase() == TutorialFlow.Phase.RUNNING else []
 
 
+## TouchInput buttons to ring now (none between missions).
+func touch_buttons_to_press() -> Array:
+	return TutorialSteps.touch_buttons(flow.goal()) if flow.phase() == TutorialFlow.Phase.RUNNING else []
+
+
 func _maintain() -> void:
 	if _world != null and flow.phase() == TutorialFlow.Phase.RUNNING:
 		TutorialStaging.maintain(_world, flow.goal(), PLAYER_SLOT, _config)

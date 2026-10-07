@@ -2,26 +2,29 @@ extends SceneTree
 ## Phase 5 T11 evidence: the onboarding tutorial scene. Warms up, then shoots
 ##   mission   first mission (이동): card + ringed arrow caps
 ##   success   the move mission cleared: "좋아요!"
+##   jump      the jump mission (ringed jump cap; on touch the ringed jump button)
 ##   grab      the grab & throw mission (ringed V cap)
 ##   special   the special mission: full gauge (fire ring) + ringed X+C
 ##   skip      the skip dialog over the paused scene
 ##   complete  every mission done: "튜토리얼 완료!" + 타이틀로
 ## Missions are cleared by completing their goals directly (evidence, not gameplay); progress is
-## kept in a scratch settings file. --touch=1 shows the touch controls (touch instruction lines),
-## --ui-scale=F forces the 2D canvas scale (DS-LAY-04 phone = 1.6).
+## kept in a scratch settings file. --touch=1 shows the touch controls (touch instruction lines and
+## ringed buttons), --still=1 turns reduce motion on (still rings), --ui-scale=F forces the 2D
+## canvas scale (DS-LAY-04 phone = 1.6).
 ##
 ## Usage (windowed, NOT headless; keep the window on top):
 ##   godot --path . --resolution 1920x1080 --always-on-top -s res://scripts/capture_tutorial.gd -- \
-##       --out-dir=/abs/dir [--tag=-phone] [--touch=1] [--ui-scale=1.6]
+##       --out-dir=/abs/dir [--tag=-phone] [--touch=1] [--still=1] [--ui-scale=1.6]
 ## Writes <out-dir>/tutorial-<shot><tag>.png.
 
 const SCENE := "res://src/tutorial/tutorial_match.tscn"
 const PROGRESS_PATH := "user://capture_tutorial.cfg"
+const SETTINGS_PATH := "user://capture_tutorial_settings.cfg"
 const WARMUP_S := 2.5
 const STEP_S := 0.7
-const SHOTS: Array[String] = ["mission", "success", "grab", "special", "skip", "complete"]
+const SHOTS: Array[String] = ["mission", "success", "jump", "grab", "special", "skip", "complete"]
 ## Mission index each shot opens on (-1 = no change).
-const SHOT_STEP := {"grab": 5, "special": 7}
+const SHOT_STEP := {"jump": 1, "grab": 5, "special": 7}
 
 var _scene: Node
 var _args: Dictionary = {}
@@ -33,7 +36,7 @@ var _shot_ms: int = 0
 func _init() -> void:
 	_args = CaptureArgs.parse(OS.get_cmdline_user_args())
 	if String(_args.get("out-dir", "")).is_empty():
-		push_error("capture_tutorial: usage: -- --out-dir=/abs/dir [--tag=S] [--touch=1] [--ui-scale=F]")
+		push_error("capture_tutorial: usage: -- --out-dir=/abs/dir [--tag=S] [--touch=1] [--still=1] [--ui-scale=F]")
 		quit(1)
 		return
 	process_frame.connect(_on_frame)
@@ -45,6 +48,11 @@ func _on_frame() -> void:
 		_scene = (load(SCENE) as PackedScene).instantiate()
 		_scene.set("progress", TutorialProgress.new(SettingsStore.new(PROGRESS_PATH)))
 		_scene.set("track", func(_n: String, _p: Dictionary) -> void: pass)
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SETTINGS_PATH))
+		var settings := SettingsStore.new(SETTINGS_PATH)
+		settings.set_value(SpecialCutInDirector.SETTINGS_SECTION, SpecialCutInDirector.SETTINGS_KEY,
+				String(_args.get("still", "")) == "1")
+		_scene.set("settings", settings)
 		root.add_child(_scene)
 		_boot_ms = Time.get_ticks_msec()
 		return
