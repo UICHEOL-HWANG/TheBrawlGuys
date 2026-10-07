@@ -15,10 +15,11 @@ const FAMILIES := {
 	StyleCatalog.RANGED: ["hit_magic_light", "hit_magic_heavy"],
 }
 const FISTS: Array[String] = ["hit_light", "hit_heavy"]
-## Item and grab attacks sound the same whoever swings them.
+## Item and grab attacks sound the same whoever swings them; a throw is a thud and a toss
+## (CombatSfxRecipes, baked by bake_sfx.gd).
 const ITEMS := {
 	AttackSet.Kind.BAT: "hit_bat", AttackSet.Kind.ROCK: "hit_rock", AttackSet.Kind.GLOVE: "hit_feather",
-	AttackSet.Kind.THROW: "hit_heavy", AttackSet.Kind.BOMB: "hit_heavy",
+	AttackSet.Kind.THROW: "toss", AttackSet.Kind.BOMB: "hit_heavy",
 }
 const NAMES: Array[String] = [
 	"hit_light", "hit_heavy", "hit_sword_light", "hit_sword_heavy", "hit_magic_light", "hit_magic_heavy",
