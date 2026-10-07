@@ -2,9 +2,10 @@ class_name PlayerSlot
 extends PanelContainer
 ## A participant (design.md DS-CMP-10, DS-VIS-03): one header row — the player's marker (color +
 ## shape), number ("P1"), a 봇 tag for bots, the character it plays and the status — over the
-## button prompts of the device that player uses (PromptRow, DS-TOK-06). States: empty (dim, "비어 있음") · choosing
-## · ready (a stroke_focus ring in the player color) · disconnected (dim, marker dimmed —
-## the Phase 6 online placeholder).
+## button prompts of the device that player uses (PromptRow, DS-TOK-06) — or, for a bot beside
+## players with prompts, a note line at the prompt row's height so the slots stay even.
+## States: empty (dim, "비어 있음") · choosing · ready (a stroke_focus ring in the player color) ·
+## disconnected (dim, marker dimmed — the Phase 6 online placeholder).
 
 enum State { EMPTY, CHOOSING, READY, DISCONNECTED }
 
@@ -24,6 +25,7 @@ var _status: Label
 var _bot: Label
 var _character: Label
 var _prompts: PromptRow
+var _note: Label
 
 
 func _init() -> void:
@@ -53,6 +55,10 @@ func _init() -> void:
 	head.add_child(_status)
 	_prompts = PromptRow.new()
 	col.add_child(_prompts)
+	_note = _label(DS.FONT_CAPTION_PATH, DS.SIZE_CAPTION, DS.UI_TEXT_SOFT)
+	_note.custom_minimum_size.y = KeyCap.ARROW_SIZE  # a prompt row's cap height
+	_note.visible = false
+	col.add_child(_note)
 
 
 func _ready() -> void:
@@ -88,6 +94,25 @@ func set_bot(on: bool) -> void:
 
 func set_prompts(rows: Array[Dictionary]) -> void:
 	_prompts.set_rows(rows)
+	_show_note()
+
+
+## A line in the prompt row's place while there are no prompts ("" = none).
+func set_note(text: String) -> void:
+	_note.text = text
+	_show_note()
+
+
+func note_text() -> String:
+	return _note.text if _note.visible else ""
+
+
+func note_label() -> Label:
+	return _note
+
+
+func _show_note() -> void:
+	_note.visible = not _note.text.is_empty() and not _prompts.visible
 
 
 func number_text() -> String:

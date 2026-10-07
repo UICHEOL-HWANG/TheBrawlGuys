@@ -74,6 +74,7 @@ func _start_match() -> void:
 	flow.step_completed.connect(_on_step_completed)
 	flow.finished.connect(_on_finished)
 	_director.begin(_world, _device()[0])
+	_hud.set_unlimited_stocks()  # TutorialStaging keeps everyone at 99: show "∞", not the config's 3
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 

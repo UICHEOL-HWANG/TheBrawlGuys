@@ -10,6 +10,8 @@ extends RefCounted
 const CARD_SCENE := preload("res://src/ui/components/select_card/select_card.tscn")
 const SLOT_SCENE := preload("res://src/ui/components/player_slot/player_slot.tscn")
 const BOT_CHARACTER_TEXT := "자동 선택"
+## A bot slot's second line while the humans' slots show prompts (no empty band under its header).
+const BOT_NOTE := "시작할 때 캐릭터를 골라요"
 
 var cards: Array[SelectCard] = []
 var portraits: Array[CharacterPortrait] = []
@@ -63,16 +65,22 @@ func build_slots(setup: MatchSetup) -> HBoxContainer:
 func refresh(model: CharacterSelectModel, prompts_for: Callable) -> void:
 	for i: int in cards.size():
 		_refresh_card(i, model)
+	var bots: Array[PlayerSlot] = []
+	var prompted := false
 	for i: int in slots.size():
 		var seat := model.seat_of_slot(i)
 		if seat < 0:
 			slots[i].set_character(BOT_CHARACTER_TEXT)
 			slots[i].set_state(PlayerSlot.State.READY)
+			bots.append(slots[i])
 			continue
 		var ready := model.state(seat) == CharacterSelectModel.READY
 		slots[i].set_state(PlayerSlot.State.READY if ready else PlayerSlot.State.CHOOSING)
 		slots[i].set_character(CharacterCards.title_of(ids[model.focus(seat)]))
 		slots[i].set_prompts(prompts_for.call(seat))
+		prompted = prompted or slots[i].prompt_row().visible
+	for b: PlayerSlot in bots:
+		b.set_note(BOT_NOTE if prompted else "")  # touch players have no prompt line, nor do bots
 
 
 func _refresh_card(i: int, model: CharacterSelectModel) -> void:
