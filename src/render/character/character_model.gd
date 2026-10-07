@@ -12,6 +12,11 @@ const HAND_BONE := "handslot.r"
 var _root: Node3D
 var _player: AnimationPlayer
 var _character_id: String = ""
+## The glb's fitted transform (scale and foot offset); set_tumble turns it about the body center.
+var _rest: Transform3D = Transform3D.IDENTITY
+var _pivot: Vector3 = Vector3.ZERO
+var _tumble: float = 0.0
+var _spawn_id: int = -1
 
 
 func setup(entry: Dictionary, config: GameConfig) -> bool:
@@ -34,6 +39,8 @@ func setup(entry: Dictionary, config: GameConfig) -> bool:
 		else:
 			apply_toon(mesh)
 	_fit(config.fighter_height)
+	_rest = _root.transform
+	_pivot = body_center()
 	return true
 
 
@@ -64,6 +71,36 @@ func bone_slot(bone: String) -> Node3D:
 ## Uniform scale applied to fit the glb to the fighter height.
 func model_scale() -> float:
 	return _root.scale.x if _root != null else 1.0
+
+
+## Flips the body while the view's launch tumbles and rights it after (TumbleSpin), every frame.
+## Hitstop freezes the flip with the rest of the body; a respawn starts upright.
+func follow_tumble(view: Dictionary, delta: float) -> void:
+	var spin := TumbleSpin.spinning(view)
+	var spawn := int(view.get("spawn_id", _spawn_id))
+	if spawn != _spawn_id:
+		_spawn_id = spawn
+		_tumble = 0.0
+		set_tumble(0.0)
+		return
+	if _tumble == 0.0 and not spin:
+		return
+	_tumble = TumbleSpin.step(_tumble, spin, 0.0 if int(view.get("hitstop_ticks", 0)) > 0 else delta)
+	set_tumble(_tumble)
+
+
+## Turns the drawn body by angle (rad) about its local x axis through the rest body center.
+func set_tumble(angle: float) -> void:
+	if _root == null:
+		return
+	var turn := Transform3D(Basis(Vector3.RIGHT, angle), Vector3.ZERO)
+	_root.transform = Transform3D(Basis.IDENTITY, _pivot) * turn * Transform3D(Basis.IDENTITY, -_pivot) * _rest
+
+
+## Middle of the drawn body in this node's space (TumbleSpin keeps it in place).
+func body_center() -> Vector3:
+	var b := _bounds()
+	return b.position + b.size * 0.5
 
 
 func visible_height() -> float:

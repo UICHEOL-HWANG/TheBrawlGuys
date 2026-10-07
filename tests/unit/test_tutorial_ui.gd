@@ -27,10 +27,12 @@ func _remove() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(PATH))
 
 
-func _scene() -> Node:
+func _scene(settings: SettingsStore = null) -> Node:
 	var track := func(n: String, p: Dictionary) -> void: _tracked.append([n, p])
 	var scene := TutorialLauncher.scene(TutorialFlow.SOURCE_REPLAY, TutorialProgress.new(SettingsStore.new(PATH)),
 			track, func() -> void: _left += 1)
+	if settings != null:
+		scene.set("settings", settings)
 	add_child_autofree(scene)
 	return scene
 

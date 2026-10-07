@@ -3,7 +3,8 @@ extends Control
 ## Touch action button v2 (design.md DS-CMP-04): idle, pressed, highlight (context: petal-yellow
 ## ring with a soft pulse), disabled and charging (an arc filling from petal yellow to campfire
 ## orange, glowing when full). Circle hit-test, cream 70% fill (50% when dim_when_idle), press
-## squish, icon plus a small label.
+## squish, icon plus a small label. The tutorial adds a breathing target ring on top
+## (TouchTargetRing, set_target) in any state.
 
 enum State { IDLE, PRESSED, HIGHLIGHT, DISABLED, CHARGING }
 
@@ -28,6 +29,7 @@ var _charge: float = 0.0
 var _font: Font
 var _pulse_time: float = 0.0
 var _release_tween: Tween
+var _target_ring: TouchTargetRing
 
 
 func _ready() -> void:
@@ -63,6 +65,24 @@ func set_state(s: int) -> void:
 
 func state() -> int:
 	return _state
+
+
+## The tutorial's "press this now" ring; still = reduce motion (no breathing).
+func set_target(on: bool, still: bool = false) -> void:
+	if _target_ring == null:
+		if not on:
+			return
+		_target_ring = TouchTargetRing.new()
+		add_child(_target_ring)
+	_target_ring.set_active(on, still)
+
+
+func is_target() -> bool:
+	return _target_ring != null and _target_ring.is_active()
+
+
+func target_ring() -> TouchTargetRing:
+	return _target_ring
 
 
 func set_charge(value: float) -> void:

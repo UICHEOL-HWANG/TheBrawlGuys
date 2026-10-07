@@ -80,6 +80,8 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 func animate(curr: Dictionary, delta: float) -> void:
 	if _animator != null and int(curr["state"]) != Fighter.State.KO:
 		_animator.apply(curr, delta)
+	if _model != null:
+		_model.follow_tumble(curr, delta)
 
 
 func animator() -> CharacterAnimator:

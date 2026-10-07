@@ -1,7 +1,8 @@
 class_name ViewEvents
 extends RefCounted
 ## Presentation events read from one tick's view difference (context F8): landing (dust),
-## respawn (light pillar) and fast launched motion (knockback trail). The sim emits nothing new.
+## respawn (light pillar), fast launched motion (knockback trail) and melee swings (whoosh,
+## SwingEvents). The sim emits nothing new.
 
 
 static func detect(prev: Array, curr: Array, config: GameConfig) -> Array[Dictionary]:
@@ -22,6 +23,9 @@ static func detect(prev: Array, curr: Array, config: GameConfig) -> Array[Dictio
 			var dust := dust_intensity((from.y - pos.y) / SimTime.TICK_DT, config)
 			if dust > 0.0:
 				out.append({"type": "landed", "id": id, "pos": pos, "intensity": dust})
+		var swing := SwingEvents.detect(a, b, config)
+		if not swing.is_empty():
+			out.append(swing)
 		if int(b["state"]) == Fighter.State.HITSTUN:
 			var trail := trail_intensity(from.distance_to(pos) / SimTime.TICK_DT, config)
 			if trail > 0.0:

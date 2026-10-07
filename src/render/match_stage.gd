@@ -115,19 +115,10 @@ func on_events(events: Array) -> void:
 					_views[id].wobble()
 			"hit":
 				HitReaction.react(e, _views, _reactions, _config)
-				_toss(e)
 			"perfect_guard", "tech":  # a tech flashes the same white ring (DS-VFX-14)
 				if int(e["fighter"]) < _defense.size():
 					_defense[int(e["fighter"])].perfect_flash()
 	_arena_view.on_events(events)
-
-
-## A throw hit: the thrower's toss plays even when the frozen frame is not drawn.
-func _toss(e: Dictionary) -> void:
-	var by := int(e.get("attacker", -1))
-	if int(e.get("attack_kind", -1)) == AttackSet.Kind.THROW and by >= 0 and by < _views.size() \
-			and _views[by].animator() != null:
-		_views[by].animator().toss()
 
 
 func reactions() -> Array[HitReaction]:

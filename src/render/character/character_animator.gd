@@ -12,8 +12,6 @@ const XFADE_SECONDS := 0.08
 const SWING_IN_SECONDS := 0.05
 const SWING_OUT_SECONDS := 0.14
 const ALT_SUFFIX := "_B"
-## View states a toss may play over (anything else, e.g. getting hit, cuts it short).
-const STANDING: Array[int] = [AnimMap.Anim.IDLE, AnimMap.Anim.RUN, AnimMap.Anim.JUMP]
 
 var _tree: AnimationTree
 var _machine: AnimationNodeStateMachine
@@ -26,8 +24,7 @@ var _last_kind: int = -1
 ## A state played regardless of the sim view (force()); -1 follows the view.
 var _forced: int = -1
 var _driver: SwingDriver
-## The sim's throw hit was seen (toss()); used up by the next apply().
-var _toss_asked: bool = false
+var _cues := ReactionCues.new()
 ## Machine node playing the current seek-driven state ("" while a plain clip plays).
 var _seek_state: String = ""
 
@@ -62,11 +59,16 @@ func setup(player: AnimationPlayer, config: GameConfig) -> void:
 
 func apply(view: Dictionary, delta: float) -> void:
 	var anim := _forced if _forced >= 0 else AnimMap.anim_for(view)
-	if _forced < 0 and _tossing(anim, view):
+	if _forced < 0 and _cues.tossing(anim, _current, int(view["hitstop_ticks"]), _driver.done()):
 		anim = AnimMap.Anim.THROW
 	var kind := int(view["attack_kind"])
+	var flinched := _cues.take_flinch(anim)  # used up every frame: never a stale restart later
+	if flinched and anim == AnimMap.Anim.HIT and _player.has_animation(_cues.flinch_clip()):
+		set_clip(AnimMap.Anim.HIT, _cues.flinch_clip())
 	if anim != _current or (AnimMap.is_timed(anim) and (kind != _last_kind or _driver.restarts(view))):
 		_enter(anim, view)
+	elif flinched:
+		_playback.start(AnimMap.anim_name(anim), true)  # a fresh flinch per hit (an impact snaps)
 	_last_kind = kind
 	var frozen := _forced < 0 and int(view["hitstop_ticks"]) > 0  # a frozen final hit still cheers
 	if _seek_state.is_empty():
@@ -82,22 +84,14 @@ static func seeks(anim: int) -> bool:
 	return AnimMap.is_timed(anim) or SwingClips.POSES.has(anim) or anim == AnimMap.Anim.THROW
 
 
-## The sim throws in one tick (HOLDING -> standing, frozen in the throw's hitstop): the toss
-## plays from the throw event (toss()), or from that frozen frame if the event was missed, until
-## its follow-through ends or the fighter does something else.
-func _tossing(anim: int, view: Dictionary) -> bool:
-	var asked := _toss_asked
-	_toss_asked = false
-	if not STANDING.has(anim):
-		return false
-	if asked or (_current == AnimMap.Anim.HOLD and int(view["hitstop_ticks"]) > 0):
-		return _current != AnimMap.Anim.THROW or _driver.done()
-	return _current == AnimMap.Anim.THROW and not _driver.done()
-
-
 ## This fighter just threw someone (the sim's "hit" with attack_kind THROW): toss on the next frame.
 func toss() -> void:
-	_toss_asked = true
+	_cues.toss()
+
+
+## This fighter was just hit: replay the flinch (heavy: the big rock back) on the next frame.
+func flinch(heavy: bool) -> void:
+	_cues.flinch(heavy)
 
 
 func force(anim: int) -> void:

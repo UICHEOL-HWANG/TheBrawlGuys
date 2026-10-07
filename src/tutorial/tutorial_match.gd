@@ -2,7 +2,8 @@ extends "res://src/main/main.gd"
 ## Onboarding tutorial scene (Phase 5 T11, PRD-UI-02): the match scene on the classic arena with
 ## the player (Barbarian, so there is a special) against a TutorialDummy, run by a
 ## TutorialDirector. The TutorialOverlay card tells the current mission for the device in hand,
-## the KeyHintBar rings the keys to press (shown even if the player hid it, without saving that),
+## the KeyHintBar rings the keys to press (shown even if the player hid it, without saving that)
+## and, on touch, TouchInput rings the buttons to press (still with reduce motion),
 ## a success pauses on "좋아요!" for FEEDBACK_S, then the next mission. 건너뛰기 / Esc / Start →
 ## confirm → menu_requested (the app goes back to the title); finishing shows "튜토리얼 완료!"
 ## with 타이틀로. The skip dialog pauses the sim. Not a match: no match telemetry, no upload.
@@ -17,6 +18,8 @@ const STICK_THRESHOLD := 0.5
 var source: String = TutorialFlow.SOURCE_REPLAY
 var progress: TutorialProgress = null
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
+## Where the reduce-motion setting is read (null: the player's settings file).
+var settings: SettingsStore = null
 
 var _director: TutorialDirector
 var _overlay: TutorialOverlay
@@ -26,6 +29,8 @@ var _last_device: String = ""
 var _shown_device: String = ""
 ## Set once the player leaves (skip or 타이틀로): later presses during the curtain do nothing.
 var _leaving: bool = false
+## Reduce motion: the touch target rings hold still.
+var _still_rings: bool = false
 
 
 func _ready() -> void:
@@ -68,12 +73,14 @@ func _start_match() -> void:
 	if _director != null:
 		return
 	super._start_match()
+	_still_rings = SpecialCutInDirector.reduce_motion_setting(settings if settings != null else SettingsStore.new())
 	var flow := TutorialFlow.new(track, progress, source)
 	_director = TutorialDirector.new(_config, flow)
 	flow.goal_changed.connect(_on_goal)
 	flow.step_completed.connect(_on_step_completed)
 	flow.finished.connect(_on_finished)
 	_director.begin(_world, _device()[0])
+	_hud.set_unlimited_stocks()  # TutorialStaging keeps everyone at 99: show "∞", not the config's 3
 	_curr_state = _world.state_view()
 	_prev_state = _curr_state
 
@@ -139,6 +146,8 @@ func _refresh_hints() -> void:
 	var hints := _hud.key_hints()
 	if hints != null:
 		hints.bar().set_highlight(_director.keys_to_press())
+	if _touch != null:  # keyboard and pad play keep the (hidden) touch buttons as they are
+		_touch.set_targets(_director.touch_buttons_to_press() if _touch.visible else [], _still_rings)
 	_overlay.set_top_inset(_hud.top_bottom())
 	var device := "|".join(_device())
 	if device != _shown_device:

@@ -64,6 +64,15 @@ func hide_result() -> void:
 		_strip.visible = true
 
 
+## Every card shows one marker and "∞" (the tutorial's practice arena never runs out of stocks).
+func set_unlimited_stocks() -> void:
+	if _strip == null:
+		return
+	for c: PlayerCard in _strip.cards:
+		if c.stock_icons() != null:
+			c.stock_icons().set_unlimited(true)
+
+
 func set_menu_available(on: bool) -> void:
 	_banner.set_menu_available(on)
 

@@ -44,3 +44,17 @@ func test_character_bot_tag_and_prompts() -> void:
 	assert_eq(s.prompt_row().row_count(), 3)
 	s.set_prompts([])
 	assert_false(s.prompt_row().visible, "no prompts, no row")
+
+
+func test_a_note_takes_the_prompt_line_at_its_height() -> void:
+	var s := _slot(1)
+	assert_eq(s.note_text(), "", "no note by default")
+	s.set_note("시작할 때 골라요")
+	assert_eq(s.note_text(), "시작할 때 골라요")
+	assert_eq(s.note_label().custom_minimum_size.y, float(KeyCap.ARROW_SIZE), "as tall as a prompt row")
+	s.set_prompts(SelectPrompts.for_player("p1", SelectPrompts.DEVICE_KEYBOARD))
+	assert_false(s.note_label().visible, "prompts win the line")
+	s.set_prompts([])
+	assert_true(s.note_label().visible)
+	s.set_note("")
+	assert_false(s.note_label().visible)

@@ -89,36 +89,6 @@ func test_holding_a_fighter_holds_the_reaching_pose() -> void:
 		assert_almost_eq(a.play_position(), 0.72, 0.05, "arms stay out, only a small sway")
 
 
-func test_a_throw_out_of_a_hold_plays_the_throw_then_returns_to_the_view() -> void:
-	var a := _animator()
-	for i: int in 10:  # a hold lasts a while (the blend into it is over)
-		a.apply(_v(Fighter.State.HOLDING), 0.016)
-	a.apply(_v(Fighter.State.IDLE, true, 0, 6), 0.016)  # the sim drops straight to idle, frozen
-	assert_eq(a.current_anim(), AnimMap.Anim.THROW, "the toss shows")
-	assert_eq(a.seek_clip(), "Throw")
-	assert_almost_eq(a.play_position(), float(SwingClips.THROW["contact"]), 0.001, "release pose through hitstop")
-	for i: int in 30:
-		a.apply(_v(Fighter.State.IDLE), 0.016)
-	assert_eq(a.current_anim(), AnimMap.Anim.IDLE, "back to the view after the follow-through")
-
-
-func test_the_throw_event_plays_the_toss_even_if_the_frozen_frame_was_skipped() -> void:
-	var a := _animator()
-	for i: int in 10:
-		a.apply(_v(Fighter.State.HOLDING), 0.016)
-	a.toss()  # the sim's throw hit, seen this frame
-	a.apply(_v(Fighter.State.MOVE), 0.016)  # the render caught up past the hitstop
-	assert_eq(a.current_anim(), AnimMap.Anim.THROW)
-
-
-func test_a_toss_request_is_dropped_if_the_fighter_is_busy() -> void:
-	var a := _animator()
-	a.toss()
-	a.apply(_v(Fighter.State.HITSTUN), 0.016)
-	a.apply(_v(Fighter.State.IDLE), 0.016)
-	assert_eq(a.current_anim(), AnimMap.Anim.IDLE, "a stale toss never plays later")
-
-
 func test_the_getup_attack_spins_on_the_sim_getup_ticks() -> void:
 	var c := GameConfig.new()
 	var a := _animator(c)
@@ -130,13 +100,6 @@ func test_the_getup_attack_spins_on_the_sim_getup_ticks() -> void:
 	v["getup_ticks"] = Getup.attack_of(c).startup_ticks + 1
 	a.apply(v, 0.0)
 	assert_almost_eq(a.play_position(), float(SwingClips.GETUP_SWEEP["contact"]), 0.001, "on the active tick")
-
-
-func test_letting_go_without_a_throw_just_stands() -> void:
-	var a := _animator()
-	a.apply(_v(Fighter.State.HOLDING), 0.016)
-	a.apply(_v(Fighter.State.IDLE), 0.016)
-	assert_eq(a.current_anim(), AnimMap.Anim.IDLE, "a timed-out hold has no hitstop: no toss")
 
 
 func test_a_rollback_rewinding_a_few_ticks_does_not_restart_the_swing() -> void:

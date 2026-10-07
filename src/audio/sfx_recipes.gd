@@ -24,6 +24,11 @@ const RECIPES := {
 }
 
 
+## Every recipe bake_sfx.gd renders: these plus the layered combat sounds (CombatSfxRecipes).
+static func all() -> Dictionary:
+	return RECIPES.merged(CombatSfxRecipes.RECIPES)
+
+
 ## Where scripts/bake_sfx.gd writes the recipe's placeholder.
 static func path(name: String) -> String:
 	return "res://assets/sfx/%s.wav" % name
