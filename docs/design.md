@@ -596,7 +596,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | DS-VFX-07~09 | 가드 클랭·피격 플래시·대미지 숫자 | PRD-FX-02, PRD-RULE-05 | 5 | ✅ (2026-09-30, `dev/active/combat-depth/evidence/hit-*.png`) |
 | DS-VFX-10~13 | 방어 연출 (회피 잔상·내구도 버블·브레이크 별·저스트 가드 링) | PRD-CMB-03 | combat-depth A | ✅ (2026-09-30, 증거 `dev/active/combat-depth/evidence/defense-sheet.png`) |
 | DS-VFX-14 | 낙법 링 | PRD-CMB-03 | combat-depth C | ✅ (2026-10-01, `PerfectRing` 재사용) |
-| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
+| DS-SFX-01 | 사운드 | PRD-FX-02 | 3 | 🟨 (타격·점프·착지·링아웃·아이템·UI 합성 SFX 구현. 전투 SFX: 마법탄 발사(zap)·화염구 굉음/폭발, 필살기 차지, 잡기·놓기, 던지기(toss), 근접 휘두르기 휙(검·아이템 swish, 맨손 바람) — SfxLimiter로 간격·동시 발음 제한. 새소리·바람·물 앰비언스 미구현, `ui_cancel` 정의만 있고 사용처 없음) |
 | DS-SFX-02 | BGM | PRD-FX-02, PRD-CORE-01 | 3 | 🟨 (임시곡, 본곡 대기) |
 | GD-FEEL-01~03 | 타격감 (hitstop·흔들림·깜빡임) | PRD-RULE-05, PRD-CORE-01 | 1 | ✅ |
 | GD-FEEL-04 | 넉백 궤적 강도 | PRD-RULE-05, PRD-CORE-01 | 3 | ✅ |

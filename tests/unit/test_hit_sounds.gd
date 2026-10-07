@@ -24,7 +24,7 @@ func test_items_override_the_style() -> void:
 	var c := GameConfig.new()
 	for pair: Array in [[AttackSet.Kind.BAT, "hit_bat"], [AttackSet.Kind.ROCK, "hit_rock"],
 			[AttackSet.Kind.GLOVE, "hit_feather"], [AttackSet.Kind.HAMMER, "squeak"],
-			[AttackSet.Kind.THROW, "hit_heavy"], [AttackSet.Kind.BOMB, "hit_heavy"]]:
+			[AttackSet.Kind.THROW, "toss"], [AttackSet.Kind.BOMB, "hit_heavy"]]:
 		assert_eq(HitSounds.for_hit(_hit(int(pair[0]), 2.0), StyleCatalog.WEAPON, c)["name"], pair[1], str(pair[0]))
 
 

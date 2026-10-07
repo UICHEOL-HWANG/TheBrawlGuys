@@ -44,7 +44,7 @@ func test_view_events_and_items_have_sounds() -> void:
 			["item_pickup", "item_pickup"], ["item_throw", "item_throw"], ["explosion", "explosion"]]:
 		var e := {"type": pair[0], "pos": Vector3.ZERO, "id": 0, "intensity": 1.0, "knockback": 0.0}
 		assert_eq(SfxDirector.sound_for(e, c).get("name", ""), pair[1], String(pair[0]))
-	assert_true(SfxDirector.sound_for({"type": "grab", "pos": Vector3.ZERO}, c).is_empty(), "silent events map to {}")
+	assert_true(SfxDirector.sound_for({"type": "item_land", "pos": Vector3.ZERO}, c).is_empty(), "silent events map to {}")
 
 
 func test_director_plays_through_a_voice_pool() -> void:

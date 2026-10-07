@@ -1,7 +1,8 @@
 class_name SfxDirector
 extends Node
 ## Sim and view events -> sound effects (design.md DS-SFX-01). A fixed pool of players; the
-## oldest voice is stolen when all are busy. Hits sound like the weapon that landed them (HitSounds).
+## oldest voice is stolen when all are busy. Hits sound like the weapon that landed them (HitSounds);
+## projectiles, specials, grabs and swings use CombatSounds, spaced and voice-capped by SfxLimiter.
 
 const VOICES := 12
 const LAND_QUIET_DB := -14.0
@@ -11,6 +12,7 @@ var _players: Array[AudioStreamPlayer] = []
 var _next: int = 0
 var _streams: Dictionary = {}
 var _decor_lake: bool = ArenaDressings.has_decor_lake(ArenaCatalog.DEFAULT_ID)
+var _limiter := SfxLimiter.new()
 
 
 func setup(config: GameConfig) -> void:
@@ -29,7 +31,7 @@ func setup(config: GameConfig) -> void:
 ## Every playable sound: the recipes plus the designed weapon hits, each once.
 static func sound_names() -> Array[String]:
 	var names: Array[String] = []
-	for name: String in SfxRecipes.RECIPES.keys() + HitSounds.NAMES:
+	for name: String in SfxRecipes.all().keys() + HitSounds.NAMES:
 		if not names.has(name):
 			names.append(name)
 	return names
@@ -55,7 +57,7 @@ static func sound_for(event: Dictionary, config: GameConfig, decor_lake: bool = 
 			return {"name": "respawn", "pitch": 1.0, "volume_db": 0.0}
 		"item_pickup", "item_throw", "explosion", "slip":
 			return {"name": String(event["type"]), "pitch": 1.0, "volume_db": 0.0}
-	return {}
+	return CombatSounds.for_event(event)
 
 
 ## The arena being played (ring-outs splash only where there is water).
@@ -77,7 +79,28 @@ func on_events(events: Array, fighters: Array = []) -> void:
 		var style := style_of(int(e.get("attacker", -1)), fighters) if String(e["type"]) == "hit" else ""
 		var s := sound_for(e, _config, _decor_lake, style)
 		if not s.is_empty():
-			play(String(s["name"]), float(s["pitch"]), float(s["volume_db"]))
+			_play_limited(s, _limit_key(e, String(s["name"])))
+
+
+## Swings are spaced per fighter (one whoosh each, even when a rollback re-reads it); the rest
+## per sound.
+static func _limit_key(event: Dictionary, name: String) -> String:
+	return "%s:%d" % [name, int(event.get("id", -1))] if String(event["type"]) == "swing" else name
+
+
+func _play_limited(s: Dictionary, key: String) -> void:
+	var name := String(s["name"])
+	if _streams.has(name) and _limiter.allow(name, key, Time.get_ticks_msec(), _playing(_streams[name])):
+		play(name, float(s["pitch"]), float(s["volume_db"]))
+
+
+## Voices sounding `stream` right now.
+func _playing(stream: AudioStream) -> int:
+	var n := 0
+	for p: AudioStreamPlayer in _players:
+		if p.playing and p.stream == stream:
+			n += 1
+	return n
 
 
 func play(name: String, pitch: float = 1.0, volume_db: float = 0.0, bus: String = AudioBuses.SFX) -> void:
