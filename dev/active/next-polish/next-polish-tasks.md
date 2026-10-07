@@ -4,4 +4,5 @@
 - [x] 5 analysis arenas (feat/analysis-frozen 9d81aed, merged)
 - [x] 6 ds_gallery split (5623971), game_config split (b3ebf2c)
 - [x] merged check-all 1666/1666
-- [ ] code review -> fixes -> main
+- [x] code review (no high) -> fixes (latch per fall, fresh dodge press, old habit) 1668/1668
+- [ ] main merge / deploy: ask user

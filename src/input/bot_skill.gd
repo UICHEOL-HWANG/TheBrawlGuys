@@ -93,7 +93,7 @@ func di_frame(id: int, tick: int, my_pos: Vector3) -> InputFrame:
 	return InputFrame.make(home.x, home.y)
 
 
-## Per WINDOW_TICKS window, so one fall is played one way throughout.
+## Rolled by BotRecover once per fall (the first off-floor tick), so a fall is played one way.
 func recovers(id: int, tick: int) -> bool:
 	return recover_chance >= 1.0 or roll(id, tick / WINDOW_TICKS, RECOVER_SALT) < recover_chance
 

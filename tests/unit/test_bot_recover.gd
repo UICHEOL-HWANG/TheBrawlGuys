@@ -48,7 +48,7 @@ func test_jumps_at_the_apex_not_while_still_rising() -> void:
 
 func test_air_dodges_home_once_the_jump_is_spent_and_the_floor_is_in_reach() -> void:
 	var gap := _c.air_dodge_distance * 0.5
-	var f := _decide(1.2, _me(_c.arena_radius + gap, 1.0, 0))
+	var f := BotRecover.new(_c).decide(_me(_c.arena_radius + gap, 1.0, 0), _arena, Vector2(-1, 0), BotSkill.from_config(_c), 0)
 	assert_true(f.guard, "air dodge")
 	assert_lt(f.move_x, 0.0, "toward the floor")
 
@@ -62,12 +62,35 @@ func test_no_dodge_out_of_reach_spent_or_under_the_lip() -> void:
 	assert_false(low.guard, "a hover under the floor top can never land")
 
 
-func test_a_weak_bot_still_waits_until_it_drops_under_the_floor() -> void:
+func test_a_weak_bot_keeps_the_old_habit() -> void:
 	var weak := BotSkill.from_config(_c)
 	weak.recover_chance = 0.0
-	assert_false(_decide(1.2, _me(11.0, 1.0), weak).jump, "old habit: no jump above the floor")
+	assert_null(_decide(1.2, _me(11.0, 1.0), weak), "above the floor: left to the other logic, as before")
 	assert_true(_decide(0.0, _me(11.0, -0.3), weak).jump, "jumps once under it")
-	assert_false(_decide(1.2, _me(_c.arena_radius + 0.5, 1.0, 0), weak).guard, "never air dodges")
+	var stunned := _me(11.0, -0.3, 1, false, Fighter.State.HITSTUN)
+	assert_true(_decide(0.0, stunned, weak).jump, "in any state, as before")
+
+
+func test_the_recovery_roll_holds_for_the_whole_fall() -> void:
+	var half := BotSkill.from_config(_c)
+	half.recover_chance = 0.5
+	var r := BotRecover.new(_c)
+	var first := r.decide(_me(11.0, 1.0), _arena, Vector2(-1, 0), half, 0)
+	for t: int in range(1, 200):
+		var f := r.decide(_me(11.0, 1.0 - t * 0.001), _arena, Vector2(-1, 0), half, t)
+		assert_eq(f == null, first == null, "tick %d plays the fall the same way" % t)
+
+
+func test_the_air_dodge_press_is_fresh_every_other_tick() -> void:
+	var r := BotRecover.new(_c)
+	var me := _me(_c.arena_radius + 0.5, 1.0, 0)
+	var s := BotSkill.from_config(_c)
+	var a := r.decide(me, _arena, Vector2(-1, 0), s, 0)
+	var b := r.decide(me, _arena, Vector2(-1, 0), s, 1)
+	var c := r.decide(me, _arena, Vector2(-1, 0), s, 2)
+	assert_true(a.guard)
+	assert_false(b.guard, "let go, so the next press is new (a held guard never dodges)")
+	assert_true(c.guard)
 
 
 func test_the_dial_moves_recovery_skill() -> void:
