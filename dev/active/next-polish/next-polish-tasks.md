@@ -1,7 +1,7 @@
-- [ ] 1 bot self walk-off
-- [ ] 2 ice attack slide
-- [ ] 3 team UI (agent)
-- [ ] 4 dda toggle (agent)
-- [ ] 5 analysis arenas (agent)
-- [ ] 6 file debt
-- [ ] merge/test/review/main
+- [x] 1 bot recovery (95a18e1) — diagnosis: ring-outs were launches, not walk-offs
+- [x] 2 ice attack slide (e8b94b6)
+- [x] 3 team UI + 4 dda toggle (feat/team-ui-dda 7f52fad, merged)
+- [x] 5 analysis arenas (feat/analysis-frozen 9d81aed, merged)
+- [x] 6 ds_gallery split (5623971), game_config split (b3ebf2c)
+- [x] merged check-all 1666/1666
+- [ ] code review -> fixes -> main

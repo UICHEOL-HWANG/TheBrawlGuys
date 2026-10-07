@@ -1,8 +1,11 @@
 # 인수인계 — 다음 세션 시작점
 
-**Last Updated:** 2026-10-01
-**main:** 2026-10-01 오후 — 방어·연출·DI/낙법·모드·분석 ML·넷코드(N1)·온라인 로비(N2)·DDA 봇 병합, N3(로비→NetMatch 연결) 커밋. 1384 테스트·check-all 통과. 이벤트 스키마 11 (9 넷 요약, 10 로비, 11 봇 트래킹).
-**배포:** https://thebrawlguys.cloud — 아직 넷코드 이전 빌드(`d8deb68`). ⚠️ 사용자가 Supabase 0004~0007을 실행한 뒤에만 배포(0006 없으면 업로드 전부 거절). 이전 기록: main `e96320a` 빌드(Vercel `cheorish/thebrawlguys`). 배포는 `scripts/deploy_web.sh`만. 루트 `vercel.json`이 Git 자동 배포를 끔(지우면 push마다 404 — 메모리 `vercel-git-push-overwrites-prod`)
+**Last Updated:** 2026-10-08
+**main:** 2026-10-08 — polish-pass(승리 포즈·피격 플린치·공중제비·효과음·튜토리얼 터치 링), arena-ringout(낙하 모션·kill_y -2·얼음 연못 맵), next-polish(봇 복귀·얼음 미끄럼 공격·팀 나누기·DDA 설정·분석 frozen_pond·ds_gallery/game_config 분리) 병합. 1666 테스트·check-all 통과. 이벤트 스키마 14.
+**배포:** https://thebrawlguys.cloud — 2026-10-07 `16b71d6` 빌드(arena-ringout까지). 배포는 `scripts/deploy_web.sh`만. 루트 `vercel.json`이 Git 자동 배포를 끔(지우면 push마다 404 — 메모리 `vercel-git-push-overwrites-prod`)
+
+**남은 것 (2026-10-08 기준):** 온라인 대기실 팀 선택 없음(기본 P1·P3), `src/main/main.gd` 216줄, `analysis/reports/balance.md`는 frozen_pond 없음(데이터 재생성 필요), 통나무 다리 봇 복귀 개선 없음(다리 밖이 전부 물), 사용자 실기 확인(결승 리플레이·새 무기 밸런스·얼음 손맛), Supabase 0004~0007 실행 여부 확인 → 온라인 실대전.
+아래 §1~§5는 2026-10-01 기록(일부 완료됨: 설정 화면·모션 줄이기·터치 강조 링·튜토리얼 목숨 표시).
 
 새 세션은 이 파일 → `dev/active/online/online-tasks.md`(N3 남은 것) → `dev/active/{platform,phase-5,combat-depth}/*-context.md` → `*-tasks.md` 순으로 읽고 시작한다.
 주의: 같은 main 폴더에서 다른 세션(combat-depth 등)이 동시에 작업할 수 있다 — 병합 전 `git status`와 `.git/MERGE_HEAD`를 확인하고, 남의 미커밋 변경은 사용자 확인 후 처리. 훅이 커밋 메시지를 오인하면 `git commit -F <고유 파일명>`.
