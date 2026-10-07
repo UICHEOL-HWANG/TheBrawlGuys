@@ -142,3 +142,13 @@ func test_team_color_tints_the_ring_and_keeps_the_shape() -> void:
 	v.identity().set_team_color(null)
 	mat = v.identity().ring().material_override as ShaderMaterial
 	assert_eq(mat.get_shader_parameter("albedo"), DS.P3, "no team: the player color again")
+
+
+func test_a_held_fighter_is_lifted_off_its_feet_and_set_back_down() -> void:
+	var lift := 0.0
+	for i: int in GrabLift.FRAMES:
+		lift = GrabLift.step(lift, true)
+	assert_almost_eq(lift, GrabLift.HEIGHT, 0.0001, "dangling in the holder's hands")
+	for i: int in GrabLift.FRAMES:
+		lift = GrabLift.step(lift, false)
+	assert_almost_eq(lift, 0.0, 0.0001, "back on the ground once let go")

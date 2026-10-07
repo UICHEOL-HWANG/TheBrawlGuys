@@ -11,6 +11,9 @@ extends RefCounted
 ## ends ~1.7 m up beside the head; the staff steepens but keeps its orb out under the hat brim.
 const TILT_DEGREES := {StyleGearCatalog.Gear.SWORD: Vector2(20.0, 40.0), StyleGearCatalog.Gear.STAFF: Vector2(0.0, 30.0)}
 const SWORD_GROW := 1.15
+## While swinging (combat-motion A2) the sword / staff drop that tilt and follow the hand, so a
+## slash or thrust points the blade where the arm swings; frames to blend in / out.
+const UNTILT_FRAMES := 4
 const HANDS: Array[String] = ["handslot.l", "handslot.r"]
 
 var _model: CharacterModel
@@ -24,6 +27,8 @@ var _rest: Dictionary = {}  # revealed hand mesh -> its KayKit transform
 var _built: Array[Node3D] = []
 var _hand: Array[Node3D] = []
 var _hands_busy: bool = false
+var _tilts: Dictionary = {}  # hand mesh -> [ready (tilted) transform, swing (straight) transform]
+var _untilt: float = 0.0
 
 
 func _init(model: CharacterModel, animator: CharacterAnimator) -> void:
@@ -44,6 +49,7 @@ func follow(view: Dictionary) -> void:
 		if character == _model.character_id():
 			_dress(character, style)
 	_set_hands_busy(int(view.get("item_kind", Fighter.NONE)) != Fighter.NONE)
+	_follow_swing(int(view.get("state", Fighter.State.IDLE)))
 
 
 ## The character id whose gear is worn, or "" (default look).
@@ -87,6 +93,8 @@ func _undress() -> void:
 		_animator.reset_clip(AnimMap.Anim.IDLE)
 	_revealed.clear()
 	_rest.clear()
+	_tilts.clear()
+	_untilt = 0.0
 	_built.clear()
 	_hand.clear()
 	_worn = ""
@@ -98,6 +106,17 @@ func _set_hands_busy(busy: bool) -> void:
 	_hands_busy = busy
 	for node: Node3D in _hand:
 		node.visible = not busy
+
+
+func _follow_swing(state: int) -> void:
+	var swinging := state == Fighter.State.ATTACK or state == Fighter.State.SPECIAL
+	var target := 1.0 if swinging else 0.0
+	if is_equal_approx(_untilt, target):
+		return
+	_untilt = move_toward(_untilt, target, 1.0 / UNTILT_FRAMES)
+	for mesh: MeshInstance3D in _tilts:
+		var pair: Array = _tilts[mesh]
+		mesh.transform = (pair[0] as Transform3D).interpolate_with(pair[1], _untilt)
 
 
 func _gloves(radius: float) -> void:
@@ -120,6 +139,7 @@ func _hand_mesh(mesh_name: String, gear: int) -> void:
 	_rest[mesh] = mesh.transform
 	var grow := SWORD_GROW if gear == StyleGearCatalog.Gear.SWORD else 1.0
 	mesh.transform = StyleGearParts.tilted(mesh.transform, TILT_DEGREES[gear], grow)
+	_tilts[mesh] = [mesh.transform, StyleGearParts.tilted(_rest[mesh], Vector2.ZERO, grow)]
 	_hand.append(mesh)
 	if gear == StyleGearCatalog.Gear.STAFF:
 		var world_scale := mesh.global_transform.basis.get_scale().x if mesh.is_inside_tree() else _model.model_scale()

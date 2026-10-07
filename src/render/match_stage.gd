@@ -2,9 +2,9 @@ class_name MatchStage
 extends Node3D
 ## The world a match is drawn in (platform B1/B2, Phase 4 T6): the sun and sky in the arena's
 ## theme (DS-THM-02), the arena with its gimmick views, the decor around it, one FighterView plus
-## its FighterHazards (burning, fog silhouette) and DefenseFx (dodges, guard meter) per slot and the item layer, drawn from
-## interpolated sim views. Shared by the match scene and the menu backdrop so both look the same;
-## cameras, HUD, feel and sound stay with their owners.
+## its FighterHazards (burning, fog silhouette) and DefenseFx (dodges, guard meter) per slot, the
+## item layer and the combat effects (projectiles, special and grab FX), drawn from interpolated
+## sim views. Shared by the match scene and the menu backdrop; cameras, HUD, feel and sound stay out.
 
 signal arena_changed(arena_id: String)
 
@@ -20,6 +20,7 @@ var _hazards: Array[FighterHazards] = []
 var _defense: Array[DefenseFx] = []
 var _reactions: Array[HitReaction] = []
 var _items: ItemLayer
+var _fx: CombatFxLayer
 var _teams: Array = []
 var _victory := VictoryPose.new()
 
@@ -53,6 +54,8 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 	_items = ItemLayer.new()
 	add_child(_items)
 	_items.setup(config)
+	_fx = CombatFxLayer.new(config)
+	add_child(_fx)
 	apply_quality()
 	config.changed.connect(apply_quality)
 
@@ -72,6 +75,7 @@ func set_arena(arena_id: String) -> void:
 func apply_quality() -> void:
 	var level := Quality.resolve(_config.quality_level, Quality.platform())
 	_env.apply_quality(level)
+	_fx.apply_quality()
 	var blobs := bool(Quality.settings(level)["blob_shadows"])
 	for v: FighterView in _views:
 		v.set_blob_shadow(blobs)
@@ -94,11 +98,13 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 		_hazards[i].apply(now_all[i], _views[i].position, fog)
 	_victory.apply(_views, delta)
 	_items.sync(prev["items"], curr["items"], alpha, tick)
+	_fx.sync(prev, curr, alpha, delta)
 
 
-## This frame's sim events: guard wobbles, hit reactions (DS-VFX-08), perfect-guard rings and
-## arena reactions (mushroom squash).
+## This frame's sim events: guard wobbles, hit reactions (DS-VFX-08), perfect-guard rings, arena
+## reactions (mushroom squash) and combat effects.
 func on_events(events: Array) -> void:
+	_fx.on_events(events)
 	for e: Dictionary in events:
 		match String(e["type"]):
 			"guard_hit":
@@ -106,7 +112,7 @@ func on_events(events: Array) -> void:
 				if id < _views.size():
 					_views[id].wobble()
 			"hit":
-				_react(e)
+				HitReaction.react(e, _views, _reactions, _config)
 			"perfect_guard", "tech":  # a tech flashes the same white ring (DS-VFX-14)
 				if int(e["fighter"]) < _defense.size():
 					_defense[int(e["fighter"])].perfect_flash()
@@ -115,22 +121,6 @@ func on_events(events: Array) -> void:
 
 func reactions() -> Array[HitReaction]:
 	return _reactions
-
-
-## Victim flash and jolt; a melee attacker also lunges (render only).
-func _react(e: Dictionary) -> void:
-	var target := int(e["target"])
-	var attacker := int(e["attacker"])
-	if target < 0 or target >= _views.size():
-		return
-	var melee := e.has("attack_kind") and attacker >= 0 and attacker < _views.size()
-	var at: Vector3 = e["pos"]
-	var from := _views[attacker].position if melee else at
-	var dir := ImpactTier.hit_direction(_views[target].position, at, from, melee)
-	var hold := float(e["hitstop_ticks"]) / SimTime.TICK_RATE
-	_reactions[target].struck(dir, ImpactTier.of(float(e["knockback"]), _config), hold)
-	if melee and attacker != target:
-		_reactions[attacker].strike(dir, hold)
 
 
 func set_identity_visible(on: bool) -> void:
@@ -169,6 +159,7 @@ func hazards() -> Array[FighterHazards]:
 
 func clear_items() -> void:
 	_items.clear()
+	_fx.clear()
 
 
 func item_layer() -> ItemLayer:

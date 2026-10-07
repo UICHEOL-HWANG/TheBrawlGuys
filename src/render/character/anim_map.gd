@@ -9,7 +9,7 @@ enum Anim {
 	SLAM, RUSH, SPIN, CAST, LIE, GETUP, ROLL, CHEER,
 }
 
-const TIMED: Array[int] = [Anim.LIGHT, Anim.HEAVY, Anim.BAT, Anim.GRAB]
+const TIMED: Array[int] = [Anim.LIGHT, Anim.HEAVY, Anim.BAT, Anim.GRAB, Anim.SLAM, Anim.CAST]
 const SPECIAL_ANIMS := {
 	SpecialCatalog.GROUND_SLAM: Anim.SLAM, SpecialCatalog.DASH_RUSH: Anim.RUSH,
 	SpecialCatalog.SPIN_SLASH: Anim.SPIN, SpecialCatalog.BIG_FIREBALL: Anim.CAST,

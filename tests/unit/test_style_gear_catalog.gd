@@ -31,7 +31,7 @@ func test_classic_and_unknown_characters_have_no_look() -> void:
 func test_animator_clip_swap_skips_timed_states_and_resets() -> void:
 	var v := _fighter(1)
 	var anim := v.animator()
-	assert_false(anim.set_clip(AnimMap.Anim.LIGHT, "Unarmed_Pose"), "timed swings keep their clip")
+	assert_false(anim.set_clip(AnimMap.Anim.LIGHT, "Unarmed_Pose"), "swings pick their own clips")
 	assert_false(anim.set_clip(AnimMap.Anim.IDLE, "No_Such_Clip"))
 	assert_true(anim.set_clip(AnimMap.Anim.IDLE, "Unarmed_Pose"))
 	var node := anim.state_machine().get_node(AnimMap.anim_name(AnimMap.Anim.IDLE)) as AnimationNodeAnimation

@@ -44,6 +44,24 @@ func test_knight_wears_the_sword_and_helmet_tilted_back() -> void:
 	assert_eq(v.animator().clip_for(AnimMap.Anim.IDLE), "2H_Melee_Idle")
 
 
+func test_the_sword_straightens_in_the_hand_while_swinging() -> void:
+	var v := _fighter(0)
+	var rest := _mesh(v, "2H_Sword").transform
+	var idle: Dictionary = _views()[0]
+	_show(v, idle)
+	var tilted := _mesh(v, "2H_Sword").transform
+	var swing := idle.duplicate()
+	swing["state"] = Fighter.State.ATTACK
+	for i: int in StyleGear.UNTILT_FRAMES:
+		_show(v, swing)
+	var straight := _mesh(v, "2H_Sword").transform
+	assert_true(straight.basis.orthonormalized().is_equal_approx(rest.basis.orthonormalized()),
+			"the blade follows the hand, no idle tilt")
+	for i: int in StyleGear.UNTILT_FRAMES:
+		_show(v, idle)
+	assert_true(_mesh(v, "2H_Sword").transform.is_equal_approx(tilted), "back to the ready tilt")
+
+
 func test_mage_wears_the_staff_with_an_orb_and_hat() -> void:
 	var v := _fighter(2)
 	_show(v, _views()[2])

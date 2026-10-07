@@ -23,6 +23,7 @@ var _bubble: GuardBubble
 var _gear: StyleGear
 var _blob: BlobShadow
 var _blob_wanted: bool = false
+var _lift: float = 0.0
 
 
 ## character: the slot's CharacterData id — its model (Phase 5 T9); "" keeps the slot's model.
@@ -56,7 +57,8 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 		_blob.visible = false
 		return
 	visible = true
-	position = interpolate(prev, curr, alpha)
+	_lift = GrabLift.step(_lift, int(curr["state"]) == Fighter.State.HELD)
+	position = interpolate(prev, curr, alpha) + Vector3.UP * _lift
 	_blob.follow(position)
 	_blob.visible = _blob_wanted
 	var facing: Vector3 = curr["facing"]
@@ -68,7 +70,8 @@ func apply(prev: Dictionary, curr: Dictionary, alpha: float, tick: int) -> void:
 		_model.visible = shown
 	else:
 		_body.visible = shown
-	_show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
+	_held.show_item(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
+	_dots.show_uses(int(curr.get("item_kind", Fighter.NONE)), int(curr.get("item_uses", 0)))
 	_gear.follow(curr)
 	_bubble.visible = int(curr["state"]) == Fighter.State.GUARD
 
@@ -169,11 +172,6 @@ func _attach_held(config: GameConfig, hand_spot: Vector3) -> void:
 
 func held_item() -> HeldItem:
 	return _held
-
-
-func _show_item(kind: int, uses: int) -> void:
-	_held.show_item(kind, uses)
-	_dots.show_uses(kind, uses)
 
 
 func held_visible() -> bool:

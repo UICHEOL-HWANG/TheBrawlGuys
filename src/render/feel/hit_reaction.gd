@@ -47,6 +47,22 @@ func setup(target: Node3D) -> void:
 	_flash_mat.albedo_color = DS.HIT_FLASH
 
 
+## A sim hit on the stage: victim flash and jolt; a melee attacker also lunges (render only).
+static func react(e: Dictionary, views: Array[FighterView], reactions: Array[HitReaction], config: GameConfig) -> void:
+	var target := int(e["target"])
+	var attacker := int(e["attacker"])
+	if target < 0 or target >= views.size():
+		return
+	var melee := e.has("attack_kind") and attacker >= 0 and attacker < views.size()
+	var at: Vector3 = e["pos"]
+	var from := views[attacker].position if melee else at
+	var dir := ImpactTier.hit_direction(views[target].position, at, from, melee)
+	var hold := float(e["hitstop_ticks"]) / SimTime.TICK_RATE
+	reactions[target].struck(dir, ImpactTier.of(float(e["knockback"]), config), hold)
+	if melee and attacker != target:
+		reactions[attacker].strike(dir, hold)
+
+
 ## The victim side: flash + jolt along dir (world, flat), sized by the hit tier.
 func struck(dir: Vector3, tier: int, hold: float) -> void:
 	var t := clampi(tier, ImpactTier.Tier.LIGHT, ImpactTier.Tier.HEAVY)
