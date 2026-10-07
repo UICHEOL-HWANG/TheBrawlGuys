@@ -91,3 +91,16 @@ func test_exports_before_characters_reached_the_sim_replay_as_classic() -> void:
 		p["character"] = "Knight"  # schema 4 stored the slot model name; the sim ran classic
 	var result := ReplayVerifier.verify(old, GameConfig.new())
 	assert_true(result["ok"], ReplayVerifier.line(result))
+
+
+func test_team_matches_replay_with_their_chosen_teams() -> void:
+	var run := BotMatchRun.play(ARENA, 4, 9, TICKS, null, {}, [0, 0, 1, 1] as Array[int])
+	var export := MatchExport.build(run["telemetry"])
+	assert_eq(export["match"]["rule"], MatchRules.TEAM)
+	assert_eq(ReplayVerifier.teams(export), [0, 0, 1, 1] as Array[int], "match_players carries the team")
+	var result := ReplayVerifier.verify(export, GameConfig.new())
+	assert_true(result["ok"], ReplayVerifier.line(result))
+	var stripped := export.duplicate(true)
+	for p: Dictionary in stripped["players"]:
+		p.erase("team")
+	assert_eq(ReplayVerifier.teams(stripped), [] as Array[int], "no teams on the rows: the default split")

@@ -5,15 +5,19 @@ extends RefCounted
 
 
 ## config: the sim tuning (default GameConfig.new()). characters: slot -> CharacterData id (none =
-## classic fighters).
+## classic fighters). teams: a team 2v2 split (MatchSetup.set_teams; none = the setup's rule).
 static func play(arena_id: String, players: int, seed: int, max_ticks: int, config: GameConfig = null,
-		characters: Dictionary = {}) -> Dictionary:
+		characters: Dictionary = {}, teams: Array[int] = []) -> Dictionary:
 	if config == null:
 		config = GameConfig.new()
 	var setup := MatchSetup.all_bots(players, seed)
 	setup.arena_id = arena_id
 	setup.set_characters(characters)
-	var world := World.new(config, seed, players, setup.build_arena(config), setup.characters())
+	if not teams.is_empty():
+		setup.set_rule(MatchRules.TEAM)
+		setup.set_teams(teams)
+	var world := World.new(config, seed, players, setup.build_arena(config), setup.characters(),
+			setup.build_rules(config))
 	var sent: Array = []
 	var telemetry := MatchTelemetry.new(func(n: String, p: Dictionary) -> void: sent.append([n, p]))
 	telemetry.begin(TelemetrySetup.from_match_setup(setup, config, {"session_id": 1, "user_match_seq": 1}))

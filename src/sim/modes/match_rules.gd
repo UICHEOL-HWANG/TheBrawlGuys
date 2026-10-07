@@ -53,11 +53,20 @@ static func default_teams(player_count: int) -> Array[int]:
 	return out
 
 
-## The rules for a mode id with the config's defaults (unknown ids play stock).
-static func for_mode(p_mode: String, player_count: int, config: GameConfig) -> MatchRules:
+## Two teams of two (the team select only offers such splits; MatchSetup.validate checks them).
+static func is_two_vs_two(p_teams: Array[int]) -> bool:
+	return p_teams.size() == TEAM_PLAYERS and p_teams.count(0) == TEAM_PLAYERS / TEAM_COUNT \
+			and p_teams.count(1) == TEAM_PLAYERS / TEAM_COUNT
+
+
+## The rules for a mode id with the config's defaults (unknown ids play stock). p_teams: the
+## chosen team per slot (TEAM only; empty = default_teams).
+static func for_mode(p_mode: String, player_count: int, config: GameConfig,
+		p_teams: Array[int] = []) -> MatchRules:
 	match p_mode:
 		TEAM:
-			return team(default_teams(player_count), config.friendly_fire == 1)
+			var split := p_teams if not p_teams.is_empty() else default_teams(player_count)
+			return team(split, config.friendly_fire == 1)
 		TIMED:
 			return timed(SimTime.to_ticks(config.timed_duration))
 	return stock()

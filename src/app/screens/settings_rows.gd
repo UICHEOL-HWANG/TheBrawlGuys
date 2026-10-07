@@ -74,6 +74,23 @@ static func toggle_row(name: String, caption: String, toggle: CheckButton) -> HB
 	return row
 
 
+## One panel column: rows stacked DS.S5 apart, at least a slider wide (so wrapped captions keep
+## a readable width).
+static func column() -> VBoxContainer:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", DS.S5)
+	col.custom_minimum_size.x = SLIDER_MIN_WIDTH
+	return col
+
+
+## Keys and d-pad cross between columns: ↓ from `upper` lands on `lower`, ↑ from `lower` on `upper`.
+static func link_down(upper: Control, lower: Control) -> void:
+	upper.focus_neighbor_bottom = upper.get_path_to(lower)
+	lower.focus_neighbor_top = lower.get_path_to(upper)
+	upper.focus_next = upper.get_path_to(lower)
+	lower.focus_previous = lower.get_path_to(upper)
+
+
 static func _bar(color: Color) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = color

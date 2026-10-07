@@ -7,7 +7,7 @@ extends RefCounted
 static func entries(config: GameConfig) -> Array[Dictionary]:
 	return [
 		{"rule": MatchRules.STOCK, "title": "스톡", "caption": "목숨 %d개 · 끝까지 남으면 승리" % config.stocks},
-		{"rule": MatchRules.TEAM, "title": "팀전 2:2", "caption": "P1·P3 팀 대 P2·P4 팀"},
+		{"rule": MatchRules.TEAM, "title": "팀전 2:2", "caption": "두 팀 · 팀원은 다음에 고르기"},
 		{"rule": MatchRules.TIMED, "title": "시간제", "caption": "%s · 링아웃 점수" % duration_text(config.timed_duration)},
 	]
 
