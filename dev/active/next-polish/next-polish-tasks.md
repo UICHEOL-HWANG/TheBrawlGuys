@@ -1,0 +1,7 @@
+- [ ] 1 bot self walk-off
+- [ ] 2 ice attack slide
+- [ ] 3 team UI (agent)
+- [ ] 4 dda toggle (agent)
+- [ ] 5 analysis arenas (agent)
+- [ ] 6 file debt
+- [ ] merge/test/review/main
