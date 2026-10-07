@@ -18,6 +18,7 @@ const ANCHORS := {
 	"tech_chance": [0.0, 0.85, 1.0],
 	"smart_getup": [0.0, 0.9, 1.0],
 	"di_chance": [0.0, 0.9, 1.0],
+	"recover_chance": [0.2, 1.0, 1.0],
 	"cooldown_ticks": [54.0, 34.0, 1.0],
 	"aim_error_deg": [40.0, 0.0, 1.0],
 	"hesitate_chance": [0.55, 0.0, 1.0],

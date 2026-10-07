@@ -20,6 +20,6 @@ static func of(f: Fighter) -> Dictionary:
 		"is_dodging": f.intangible, "guard_hp_ratio": f.guard_hp / GuardMeter.MAX,
 		"guard_broken": f.guard_break_left > 0,
 		"tumbling": f.tumble, "knocked_down": f.state == Fighter.State.KNOCKDOWN, "getup": Getup.name_of(f),
-		"getup_ticks": f.getup_ticks,
+		"getup_ticks": f.getup_ticks, "air_dodge_used": f.air_dodge_used,
 		"light": f.light_ticks > 0,
 	}

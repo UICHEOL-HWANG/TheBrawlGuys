@@ -13,6 +13,7 @@ const AIM_SALT := 73
 const DI_SALT := 79
 const GUARD_SALT := 83
 const GETUP_SALT := 89
+const RECOVER_SALT := 97
 ## d of a skill built from config (no dial).
 const NO_DIAL := -1.0
 
@@ -27,6 +28,8 @@ var tech_chance: float = 0.35
 var smart_getup: float = 0.0
 ## Share of launches it holds DI toward the arena middle.
 var di_chance: float = 0.0
+## Share of launches it fights its way back from (BotRecover): apex jump, air dodge home.
+var recover_chance: float = 1.0
 var cooldown_ticks: int = 30
 ## Largest aim error (degrees) applied to its approach and swing direction.
 var aim_error_deg: float = 0.0
@@ -48,7 +51,7 @@ static func from_config(config: GameConfig) -> BotSkill:
 func to_dict() -> Dictionary:
 	return {"d": d, "react_ticks": react_ticks, "guard_chance": guard_chance,
 		"perfect_guard_chance": perfect_guard_chance, "tech_chance": tech_chance, "smart_getup": smart_getup,
-		"di_chance": di_chance, "cooldown_ticks": cooldown_ticks, "aim_error_deg": aim_error_deg,
+		"di_chance": di_chance, "recover_chance": recover_chance, "cooldown_ticks": cooldown_ticks, "aim_error_deg": aim_error_deg,
 		"hesitate_chance": hesitate_chance, "special_delay_ticks": special_delay_ticks}
 
 
@@ -88,6 +91,11 @@ func di_frame(id: int, tick: int, my_pos: Vector3) -> InputFrame:
 		return InputFrame.neutral()
 	var home := BotViewQuery.flat(my_pos, Vector3.ZERO).normalized()
 	return InputFrame.make(home.x, home.y)
+
+
+## Per WINDOW_TICKS window, so one fall is played one way throughout.
+func recovers(id: int, tick: int) -> bool:
+	return recover_chance >= 1.0 or roll(id, tick / WINDOW_TICKS, RECOVER_SALT) < recover_chance
 
 
 func smart_getup_now(id: int, tick: int) -> bool:

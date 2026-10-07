@@ -1,14 +1,11 @@
 class_name BotController
 extends RefCounted
-## Bot (PRD §6.4): approach, attack in range, retreat from the edge, recover; guard every other
-## threat (BotDefense), race for items, swing bats, throw rocks and bombs, mash the light combo,
-## grab a guarding foe, throw held fighters toward the nearest edge. Reads only state_view()
-## values and produces InputFrames — never touches the sim; any randomness is a deterministic hash.
-## Ground sense (Phase 4, BotNav): never walks where bot_ground_lookahead ahead has no floor.
-## Styles (Phase 5, BotStyleSense): reach-scaled swings, ranged bots keep distance and shoot, a
-## full gauge fires the special. Knockdowns (BotGetup): getup options and techs.
-## Skill (PRD-BOT-03, BotSkill / BotDifficulty): reaction, guard / tech / DI chances, cadence,
-## aim error, hesitation and special delay follow the dial d, settable every tick (DDA);
+## Bot (PRD §6.4): approach, attack in range, retreat from the edge, recover (BotRecover: apex
+## jump, air dodge home); guard every other threat (BotDefense), race for items, swing bats, throw
+## rocks and bombs, mash the light combo, grab a guarding foe, throw held fighters toward the
+## nearest edge. Reads state_view() only, never the sim; randomness is a deterministic hash.
+## BotNav never walks onto missing floor; BotStyleSense: style reach, ranged keep-away, specials;
+## BotGetup: knockdowns. Skill (PRD-BOT-03, BotSkill / BotDifficulty) follows the dial d (DDA);
 ## new(id, config) without d plays the classic config bot. A BotProbe scripts the first seconds
 ## vs a human; intent() names the last decision (bot_intent tracking).
 
@@ -26,6 +23,7 @@ var _skill: BotSkill
 var _tick: int = 0
 var _gauge_full_ticks: int = 0
 var _log := BotIntent.new()
+var _recover: BotRecover
 var probe: BotProbe = null
 
 
@@ -35,6 +33,7 @@ func _init(p_self_id: int, p_config: GameConfig, d: float = BotSkill.NO_DIAL) ->
 	_nav = BotNav.new(p_config)
 	_defense = BotDefense.new(p_self_id, p_config)
 	_getup = BotGetup.new(p_self_id, p_config)
+	_recover = BotRecover.new(p_config)
 	set_skill(BotSkill.from_config(p_config) if d < 0.0 else BotDifficulty.skill(d))
 
 
@@ -91,8 +90,9 @@ func _sample(view: Dictionary) -> InputFrame:
 	_tick = int(view.get("tick", 0))
 	var defense := _defense.decide(me, foe, safe, _closing(me, foe), _tick)
 	var getup := _getup.decide(me, foe, _tick, arena)
-	if not bool(me["on_ground"]) and my_pos.y < 0.0 and not ArenaFloor.over_floor(arena, my_pos):
-		return _log.say("recover", InputFrame.make(safe.x, safe.y, int(me["jumps_left"]) > 0))
+	var back := _recover.decide(me, arena, safe, _skill, _tick)
+	if back != null:
+		return _log.say("recover", back)
 	if getup != null:
 		return _log.say("getup", getup)
 	if int(me["state"]) == Fighter.State.HITSTUN and _skill.di_chance > 0.0:
