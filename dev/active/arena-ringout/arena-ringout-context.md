@@ -14,3 +14,7 @@ Last Updated: 2026-10-07
   pinned down (chaotic bot matches); human matches only lose the 0.4 s of doomed fall.
 - FallPose writes CharacterModel.rotation only (HitReaction owns its position/scale; polish-pass tumble
   turns the glb root inside it). The classic decor lake (-0.95) is held at -1 for ~7 frames before the splash.
+- Frozen pond: ArenaShape.Kind.RING added; ArenaData.slippery + src/sim/ground_grip.gd + src/config/ice_config.gd
+  (ice_ground_acceleration 14, ice_slide_friction 0.95). ArenaFloor.safe_point seam rule (_deep_in_union) also
+  changes log_bridge bot play (bot match ends 2437 vs 2747) — deliberate, fixes seam deadlock.
+- Open: analysis/src/brawl_analysis/features.py ARENAS lacks frozen_pond (one-hot dims would change).
