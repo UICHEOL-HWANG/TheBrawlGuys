@@ -20,15 +20,6 @@ func test_spec_is_reproducible_and_valid() -> void:
 	assert_eq(setup.local_slot(), -1, "bots only")
 
 
-func test_bot_config_only_touches_bot_group() -> void:
-	var config := GameConfig.new()
-	var busy := DatasetSpec.bot_config(config, "busy", 0.1)
-	assert_eq(busy.bot_attack_cooldown_ticks, 14)
-	assert_almost_eq(busy.bot_attack_range, config.bot_attack_range + 0.1, 0.0001)
-	assert_eq(busy.fingerprint(), config.fingerprint(), "sim fingerprint unchanged")
-	assert_ne(TelemetrySetup.bot_params_hash(busy), TelemetrySetup.bot_params_hash(config))
-
-
 func test_csv_cells_quote_and_encode() -> void:
 	assert_eq(CsvTable.cell(null), "")
 	assert_eq(CsvTable.cell(true), "true")

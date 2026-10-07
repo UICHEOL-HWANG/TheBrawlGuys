@@ -48,19 +48,32 @@ func setup(target: Node3D) -> void:
 
 
 ## A sim hit on the stage: victim flash and jolt; a melee attacker also lunges (render only).
+## The animators get their cues too: the victim's flinch replays, a thrower tosses.
 static func react(e: Dictionary, views: Array[FighterView], reactions: Array[HitReaction], config: GameConfig) -> void:
 	var target := int(e["target"])
 	var attacker := int(e["attacker"])
 	if target < 0 or target >= views.size():
 		return
+	var tier := ImpactTier.of(float(e["knockback"]), config)
+	_cue_animators(e, views, tier)
 	var melee := e.has("attack_kind") and attacker >= 0 and attacker < views.size()
 	var at: Vector3 = e["pos"]
 	var from := views[attacker].position if melee else at
 	var dir := ImpactTier.hit_direction(views[target].position, at, from, melee)
 	var hold := float(e["hitstop_ticks"]) / SimTime.TICK_RATE
-	reactions[target].struck(dir, ImpactTier.of(float(e["knockback"]), config), hold)
+	reactions[target].struck(dir, tier, hold)
 	if melee and attacker != target:
 		reactions[attacker].strike(dir, hold)
+
+
+static func _cue_animators(e: Dictionary, views: Array[FighterView], tier: int) -> void:
+	var victim := views[int(e["target"])].animator()
+	if victim != null:
+		victim.flinch(tier >= ImpactTier.Tier.MEDIUM)
+	var by := int(e["attacker"])
+	if int(e.get("attack_kind", -1)) == AttackSet.Kind.THROW and by >= 0 and by < views.size() \
+			and views[by].animator() != null:
+		views[by].animator().toss()
 
 
 ## The victim side: flash + jolt along dir (world, flat), sized by the hit tier.

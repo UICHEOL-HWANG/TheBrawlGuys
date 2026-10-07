@@ -18,6 +18,7 @@ const SHEETS := {
 }
 const COLUMNS := 6
 const GETUP := -2  # the getup attack (state GETUP, getup_ticks)
+const TUMBLE := -3  # a tumbling launch, flown for longer in each column
 const GAP := 2.1
 const SETTLE_FRAMES := 3
 
@@ -40,6 +41,7 @@ func _init() -> void:
 			_jobs.append([sheet, kind])
 	_jobs.append(["grab", -1])  # holder + held pair
 	_jobs.append(["getup", GETUP])
+	_jobs.append(["getup", TUMBLE])
 	process_frame.connect(_on_frame)
 
 
@@ -88,6 +90,17 @@ func _samples(character: String, kind: int) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if kind == GETUP:
 		return _getup_samples(base)
+	if kind == TUMBLE:
+		var flips: Array[Dictionary] = []
+		for col: int in COLUMNS:
+			var v := base.duplicate()
+			v["state"] = Fighter.State.HITSTUN
+			v["on_ground"] = false
+			v["tumbling"] = true
+			v["pos"] = Vector3(GAP * col, 0, 0)
+			v["frames"] = col * 2
+			flips.append(v)
+		return flips
 	if kind < 0:
 		for col: int in [1, 2]:
 			var v := base.duplicate()
@@ -141,6 +154,8 @@ func _drive(view: FighterView, v: Dictionary) -> void:
 		view.animate(start if swinging else v, 0.05)
 	for i: int in 2:
 		view.animate(v, 0.0)
+	for i: int in int(v.get("frames", 0)):
+		view.animate(v, 1.0 / 30.0)
 
 
 func _write_sheets() -> void:

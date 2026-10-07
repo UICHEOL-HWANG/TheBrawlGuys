@@ -1,9 +1,11 @@
 extends SceneTree
 ## Finds the contact moment of each KayKit attack clip: the sample where the striking bone is
 ## farthest in front of the hips (+Z, the model's front). Prints clip, bone, contact s, length.
-## Run: godot --headless --path . -s res://scripts/measure_contact.gd
+## Run: godot --headless --path . -s res://scripts/measure_contact.gd [-- --height]
+## (--height ranks by bone height instead: how high a victory pose raises the hand).
 
 const CLIPS := {
+	"Spellcast_Raise": ["handslot.r"], "Jump_Full_Short": ["hips"], "Cheer": ["hand.r"],
 	"Unarmed_Melee_Attack_Punch_A": ["hand.r", "hand.l"], "Unarmed_Melee_Attack_Punch_B": ["hand.r", "hand.l"],
 	"Unarmed_Melee_Attack_Kick": ["foot.r", "foot.l"], "1H_Melee_Attack_Chop": ["handslot.r"],
 	"1H_Melee_Attack_Slice_Diagonal": ["handslot.r"], "1H_Melee_Attack_Slice_Horizontal": ["handslot.r"],
@@ -45,6 +47,8 @@ func _run() -> void:
 				player.advance(0.0)
 				skel.force_update_all_bone_transforms()
 				var p := skel.get_bone_global_pose(b).origin - skel.get_bone_global_pose(hips).origin
+				if OS.get_cmdline_user_args().has("--height"):
+					p.z = p.y  # rank by height instead (victory raises)
 				if p.z > best:
 					best = p.z
 					best_t = t
