@@ -49,6 +49,7 @@ func setup(index: int, character: String, opts: Dictionary) -> void:
 	add_child(_portrait)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _frame(tint))
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER  # a taller portrait overhangs both edges
 	panel.add_child(_bars(index, character, opts, tint))
 	add_child(panel)
 	if _mirrored:
@@ -84,6 +85,7 @@ func _line(index: int, character: String, opts: Dictionary, tint: Variant) -> HB
 		line.add_child(_score)
 	else:
 		_stocks = StockIcons.new()
+		_stocks.mirrored = _mirrored
 		_stocks.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		line.add_child(_stocks)
 		_stocks.setup(index, int(opts.get("max_stocks", 0)), STOCK_PIP)
@@ -171,6 +173,15 @@ func combo_text() -> String:
 
 func gauge_bar() -> CardBar:
 	return _gauge
+
+
+## The stock pips (null in timed matches, which show a score).
+func stock_icons() -> StockIcons:
+	return _stocks
+
+
+func portrait() -> PortraitBadge:
+	return _portrait
 
 
 func _frame(tint: Variant) -> StyleBoxFlat:

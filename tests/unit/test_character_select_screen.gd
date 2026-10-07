@@ -169,3 +169,14 @@ func test_compact_layout_can_switch_after_a_resize() -> void:
 	assert_false(s.view().cards[0].get("_caption").text.contains("\n"), "one-line caption")
 	s.view().set_compact(false)
 	assert_eq(s.view().portraits[0].custom_minimum_size.y, float(DS.CARD_THUMB_HEIGHT))
+
+
+func test_a_bot_slot_fills_its_prompt_line_and_matches_the_human_height() -> void:
+	var s := _screen(MatchSetup.vs_bots(2, 1))
+	await wait_process_frames(2)
+	var human := s.view().slots[0]
+	var bot := s.view().slots[1]
+	assert_true(human.prompt_row().visible, "the human's keys under the header")
+	assert_eq(bot.note_text(), CharacterSelectView.BOT_NOTE, "the bot's line says when it picks")
+	assert_eq(bot.get_combined_minimum_size().y, human.get_combined_minimum_size().y,
+			"no empty band under the bot's header")

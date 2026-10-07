@@ -285,7 +285,7 @@
 
 **v2 (2026-10-01, combat-depth D — 사용자 지시, 겟앰프드 HUD 레이아웃 참고 [`references/ref-getamped-hud.png`](./references/ref-getamped-hud.png), 배치만 참고하고 그림·에셋은 우리 것)**:
 - `HudStrip`: 화면 **아래** 가장자리 스트립. 왼쪽 묶음 P1·P3, 오른쪽 묶음 P2·P4(팀전은 팀 1 왼쪽 / 팀 2 오른쪽), 묶음마다 카드 한 줄씩 세로로. 오른쪽 카드는 좌우 반전(초상이 바깥쪽). 1:1은 양쪽에 카드 하나씩
-- 얇은 스트립: 720p에서 화면 높이의 약 18% 이하(2줄 카드 + 가장자리 `s3`). 카드 = 한 줄("P1 바바리안 · 스톡/점수 · 42%", `caption`) + 굵은 대미지 바(`s3`) + 얇은 게이지 바(`s1`), 초상(`s7`)이 카드 바깥 가장자리에 겹침
+- 얇은 스트립: 720p에서 화면 높이의 약 18% 이하(2줄 카드 + 가장자리 `s3`). 카드 = 한 줄("P1 바바리안 · 스톡/점수 · 42%", `caption`) + 굵은 대미지 바(`s3`) + 얇은 게이지 바(`s1`), 초상이 카드 바깥 가장자리에 겹침 — 배율 1(데스크톱·태블릿) `s8`로 카드 위아래로 조금 삐져나오고(카드는 세로 가운데), 폰 배율(DS-LAY-04 > 1)에서는 스트립을 얇게 두려고 `s7` (2026-10-07)
 - 팀전: 묶음 바깥쪽에 세로 탭 "팀/1" · "팀/2"(`caption`, 팀 색 — 높이를 더하지 않음), 카드 테두리·배지가 팀 색
 - 시간제: 두 묶음 사이 가운데에 `MatchTimer`(시계 아이콘 + 남은 시간, DS-CMP-20)
 - 카드는 `PlayerCard`(DS-CMP-22). 스트립이 화면 폭보다 넓으면 바를 짧게(compact)
@@ -321,7 +321,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 
 **첫 로그인 온보딩** (2026-10-02, 근거 PRD-UI-02): 로그인하자마자 튜토리얼로 넘어가던 흐름을 대체. 세 화면 모두 `OnboardingLayout` — 경기장 선택과 같은 틀(제목 `display_l` 위, 가운데 `Panel`, 뒤로 좌하단·키 안내 우하단, 뒤로 없는 환영 화면도 같은 높이의 빈 칸을 둬 키 안내 위치가 화면마다 같다). 패널 안은 한 열(폭 = 로그인 카드 폭 − `s6`×2 = 496, 버튼·입력칸이 꽉 차 모든 줄의 좌우 끝이 맞음), 묶음 사이 `s5`, 묶음 안(버튼 + 그 아래 설명, 입력칸 + 도움말) `s3`, 패널 안쪽 여백 `s6`. 문구는 이 폭에 한두 줄로 떨어지게 쓴다(한 글자만 다음 줄로 넘어가지 않게). **환영** "환영해요!" — 본문(`body`) "치고, 던지고, 장외로 날려 보내는 / 난투 게임이에요." + 설명(`caption` `ui_text_soft`) "시작하기 전에 세 가지만 정해요." + "시작하기"(primary). **닉네임** "뭐라고 부를까요?" — `TextField`(가운데 정렬, 계정 이름·이 기기의 이전 닉네임으로 미리 채움) + 도움말 "2~12자 · 경기 화면에 보여요"(틀리면 `danger` 글자 + 입력칸 오류 링, 다시 치면 원래대로) + "다음". 규칙 `Nickname`(앞뒤 공백 제거·연속 공백 하나로·2~12자·제어 문자 불가), 저장은 기기 `[profile] nickname` + Supabase `profiles.display_name`(로그아웃하면 기기 쪽은 지워 다음 계정이 물려받지 않음). **캐릭터**는 기존 캐릭터 선택 화면 그대로. **시작 방식** "어떻게 시작할까요?" — "튜토리얼부터"(primary, 처음 포커스) + "조작을 하나씩 배워요 · 약 3분", "바로 봇전"(secondary) + "고른 캐릭터로 봇과 한 판", 맨 아래 "튜토리얼은 타이틀에서 다시 볼 수 있어요". 닉네임은 타이틀 로고 아래 "브롤왕님, 반가워요"(흰 `caption`, 로고와 `s2`, 한 줄) + 옆 `s2`에 밑줄 링크 "변경"(닉네임이 없으면 링크 "닉네임 정하기"만) — 누르면 같은 닉네임 화면이 현재 이름으로 열리고 다음 = 저장 후 타이틀, 뒤로 = 변경 없음(`NicknameEdit`)와 경기 HUD 내 카드 "브롤왕 · 바바리안"(혼자 하는 경기만 — 로컬 2인은 P1/P2 그대로, 길면 말줄임, 목숨·%는 밀리지 않음)에 보인다. 증거 `dev/active/onboarding/evidence/onboarding-*.png`(1920×1080, `-phone` = UI 배율 1.6)
 
-**온보딩 튜토리얼** (Phase 5 T11, 근거 PRD-UI-02): 고전 경기장에서 Barbarian(필살기가 있는 캐릭터) 대 가만히 서 있는 연습 상대(가드 미션에서만 다가와 약공격). 미션 8개 — 이동 → 점프 → 약공격 → 강공격(모아치기) → 가드 → 잡기·던지기 → 아이템(가운데 떨어지는 방망이 줍기·쓰기) → 필살기(게이지를 채워 줌). 미션마다 위쪽 `TutorialCard`(DS-CMP-19)가 한 줄 안내를, 아래 `KeyHintBar`가 지금 누를 키캡을 target 링으로 보여 준다. 성공하면 카드가 "좋아요!"로 바뀌며 통 튀고(`motion_squish`) `ui_confirm` 소리, 1.2초 뒤 다음 미션. 스톡이 줄지 않고 아이템 상자가 떨어지지 않는다. 안내 문구는 손에 든 장치를 따른다: 터치 컨트롤이 보이면 화면 버튼·스틱 이름(키 바는 숨음), 패드를 쓰면 패드 버튼(Xbox A/X/Y/B/RB, PS × □ △ ○ R1), 아니면 P1 키(InputMap에서 읽음). 건너뛰기 버튼·Esc·패드 Start → 확인창(그동안 일시정지) → 타이틀. 완료 카드 "튜토리얼 완료!" + "타이틀로". 증거 `phase-5/evidence/tutorial-*.png`(1920×1080) · `tutorial-*-phone.png`(1624×750, UI 배율 1.6, 터치)
+**온보딩 튜토리얼** (Phase 5 T11, 근거 PRD-UI-02): 고전 경기장에서 Barbarian(필살기가 있는 캐릭터) 대 가만히 서 있는 연습 상대(가드 미션에서만 다가와 약공격). 미션 8개 — 이동 → 점프 → 약공격 → 강공격(모아치기) → 가드 → 잡기·던지기 → 아이템(가운데 떨어지는 방망이 줍기·쓰기) → 필살기(게이지를 채워 줌). 미션마다 위쪽 `TutorialCard`(DS-CMP-19)가 한 줄 안내를, 아래 `KeyHintBar`가 지금 누를 키캡을 target 링으로 보여 준다. 성공하면 카드가 "좋아요!"로 바뀌며 통 튀고(`motion_squish`) `ui_confirm` 소리, 1.2초 뒤 다음 미션. 스톡이 줄지 않고(카드에는 스톡 점 대신 "∞") 아이템 상자가 떨어지지 않는다. 안내 문구는 손에 든 장치를 따른다: 터치 컨트롤이 보이면 화면 버튼·스틱 이름(키 바는 숨음), 패드를 쓰면 패드 버튼(Xbox A/X/Y/B/RB, PS × □ △ ○ R1), 아니면 P1 키(InputMap에서 읽음). 건너뛰기 버튼·Esc·패드 Start → 확인창(그동안 일시정지) → 타이틀. 완료 카드 "튜토리얼 완료!" + "타이틀로". 증거 `phase-5/evidence/tutorial-*.png`(1920×1080) · `tutorial-*-phone.png`(1624×750, UI 배율 1.6, 터치)
 
 **메뉴 배경 — 궤도 디오라마** (`MenuBackdrop`, Phase 4.0, 근거 PRD-AUTH-01 · PRD-UI-02)
 
@@ -359,7 +359,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | ID | 컴포넌트 | 목적 | 상태 | 주요 토큰 | Phase | 근거 |
 |---|---|---|---|---|---|---|
 | DS-CMP-01 | `DamageCounter` | 플레이어 대미지 % 표시 | 기본 · 피격(흔들림+스쿼시) · KO(흐림) · 리스폰 | `display_xl`, 대미지 램프, `motion_squish` | 1 | PRD-UI-01, PRD-RULE-01 |
-| DS-CMP-02 | `StockIcons` | 남은 스톡 | 채움 · 소모(톡 터지는 애니) | 플레이어 색+모양 | 1 | PRD-UI-01, PRD-RULE-02 |
+| DS-CMP-02 | `StockIcons` | 남은 스톡 | 채움 · 소모(톡 터지는 애니) · 무제한(마커 하나 + "∞" `caption` Jua, 오른쪽 카드는 "∞"가 바깥쪽 — 튜토리얼 연습장) | 플레이어 색+모양 | 1 | PRD-UI-01, PRD-RULE-02 |
 | DS-CMP-03 | `TouchStick` | 이동 입력 | 숨김 · 활성(중심·노브) · 데드존 | `ui_surface` 50%, `shadow_soft` | 1 | PRD-CTL-03 |
 | DS-CMP-04 | `TouchButton` | 액션 입력 | idle · pressed · highlight · disabled · charging | 아이콘, `petal_yellow`, `motion_fast` | 1 (v1), 2 (v2) | PRD-CTL-03, PRD-CTL-04 |
 | DS-CMP-05 | `ChargeGauge` | 강공격 차지량 (월드 공간) | 차지 중 · 최대(반짝) | `petal_yellow` → `fire`, `glow` | 2 | PRD-CMB-02 |
@@ -367,7 +367,7 @@ v1 (Phase 1~5): 정보는 상단·조작은 하단, `DamageCounter`를 상단에
 | DS-CMP-07 | `Panel` (`UiPanel`) | 메뉴·설정 컨테이너 | 기본 | `ui_surface`, `radius_l`, `shadow_soft` | 4.0 | PRD-UI-02 |
 | DS-CMP-08 | `SelectCard` | 경기장·캐릭터 선택 | idle · focus · selected · locked | `title`, 디오라마 썸네일(경기장) / 캐릭터 초상(`CharacterPortrait`: 자기 모델이 작은 잔디 무대에서 idle, 포커스·선택된 카드만 매 프레임 그림), 플레이어 색 링(선택), 커서 배지(`CardMarks`: 그 카드에 커서가 있는 플레이어의 마커+번호, 썸네일 오른쪽 위에 겹쳐 높이 0) | 4, 5 | PRD-UI-02 |
 | DS-CMP-09 | `ResultBanner` | 승패·재시작 | 승리 · 패배 · 무승부 | `display_l`, `motion_squish`, 꽃잎 파티클 | 1 | PRD-UI-01 |
-| DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음(`ui_surface_dim`) · 선택 중 · 준비(`stroke_focus` 플레이어 색 링) · 연결 끊김(dim + 마커 흐림, Phase 6 자리) | 한 줄 머리: `PlayerMarker`(색+모양) · `P1`(`title`) · 봇 태그 · 캐릭터(`body`) · 상태(`caption`), 아래 `PromptRow`(DS-TOK-06). `radius_l`, `shadow_soft`, 최소 폭 400 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
+| DS-CMP-10 | `PlayerSlot` | 참가자 표시 | 비어있음(`ui_surface_dim`) · 선택 중 · 준비(`stroke_focus` 플레이어 색 링) · 연결 끊김(dim + 마커 흐림, Phase 6 자리) | 한 줄 머리: `PlayerMarker`(색+모양) · `P1`(`title`) · 봇 태그 · 캐릭터(`body`) · 상태(`caption`), 아래 `PromptRow`(DS-TOK-06). 봇 칸은 옆 사람 칸에 프롬프트가 있으면 그 자리에 안내 한 줄("시작할 때 캐릭터를 골라요", `caption` `ui_text_soft`, 프롬프트 줄 높이)을 둬 칸 높이가 같다. `radius_l`, `shadow_soft`, 최소 폭 400 | 5, 6 | PRD-LOCAL-01, PRD-NET-03 |
 | DS-CMP-11 | `RoomCodeInput` | 방 코드 입력 (온라인 메뉴) | idle · focus(다음 칸 링) · error(모든 칸 `danger` 링) · disabled(확인 중) | `CodeInput`(DS-CMP-18)을 잇는다: 칸 6개 `code_box`, 글자 `title`. 소문자는 대문자로, `RoomCode.ALPHABET`(A-Z·2-9, I/O/0/1 제외) 밖의 글자는 버림, 붙여넣기, 모바일은 일반 키보드 | 6 | PRD-NET-03 |
 | DS-CMP-12 | `DebugPanel` | GameConfig 튜닝 | — (개발용, DS 예외: 기본 Godot 스타일 허용) | — | 0 | PRD-CFG-01 |
 | DS-CMP-13 | `Toast` / `ConnectionIndicator` (`ConnectionBadge`) | 알림, 핑 | 정보 · 경고 · 오류 / 숨김(봇·빈 칸·방장 자신) · 연결 중(`petal_yellow`) · 연결됨 + "N ms"(≤120 `grass_mid` · <250 `petal_yellow` · 그 이상 `danger`) · 연결 실패(`danger`) | `caption` `ui_text_soft` 글자 앞 `s3` 원점. 대기실 `PlayerSlot` 바로 아래 | 6 | PRD-NET-02 |

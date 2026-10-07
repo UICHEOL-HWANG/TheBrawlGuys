@@ -126,7 +126,22 @@ func apply_safe_area(viewport: Viewport) -> void:
 	add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)
 	add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + EDGE if _edge_top else 0)
 	add_theme_constant_override("margin_bottom", 0 if _edge_top else int(vp.end.y - safe.end.y) + EDGE)
+	set_ui_scale((viewport as Window).content_scale_factor if viewport is Window else 1.0)
 	_fit()
+
+
+## Portrait size for a 2D canvas scale (DS-LAY-04): s8 on an unscaled canvas (desktop, tablets),
+## where the head stands out past the card like the GetAmped reference; s7 on an enlarged phone
+## canvas, where every px of strip height costs fight view.
+static func portrait_diameter(ui_scale: float) -> int:
+	return DS.S8 if ui_scale < 1.0 or is_equal_approx(ui_scale, 1.0) else DS.S7
+
+
+func set_ui_scale(ui_scale: float) -> void:
+	var d := portrait_diameter(ui_scale)
+	for c: PlayerCard in cards:
+		if c != null and c.portrait() != null:
+			c.portrait().set_diameter(d)
 
 
 ## Compact bars when the full-size row is wider than the space inside the margins.
