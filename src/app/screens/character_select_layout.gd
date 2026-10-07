@@ -13,7 +13,9 @@ const COMPACT_BELOW := 900.0
 const COMPACT_THUMB_HEIGHT := DS.S8 + DS.S6
 const FOOTER_RESERVE := DS.BUTTON_HEIGHT + DS.S6 * 2
 const ROW_GAP := DS.S5
-const COMPACT_ROW_GAP := DS.S3
+## Phones keep the full gap too: a focused / selected card grows ×1.04 / ×1.07 (about s2 above
+## and below at compact height) and must not touch the title or the slot row.
+const COMPACT_ROW_GAP := DS.S5
 
 
 ## Adds the column and the footer to root; returns {fit: FitCenter, footer: MarginContainer,

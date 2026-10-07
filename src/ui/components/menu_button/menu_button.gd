@@ -120,8 +120,10 @@ func _margins(sb: StyleBoxFlat, lift: int, depth: int) -> StyleBoxFlat:
 	sb.expand_margin_top = lift
 	sb.content_margin_left = DS.S5
 	sb.content_margin_right = DS.S5
-	sb.content_margin_top = Sticker.EDGE + DS.S2 - lift
-	sb.content_margin_bottom = Sticker.EDGE + DS.S2 + depth
+	# Only the outline and key edge: the label never forces a key taller than a compact
+	# (s7) row on short phone screens; BUTTON_HEIGHT sets the usual height.
+	sb.content_margin_top = Sticker.EDGE - lift
+	sb.content_margin_bottom = Sticker.EDGE + depth
 	sb.set_corner_radius_all(DS.RADIUS_M)
 	return sb
 
