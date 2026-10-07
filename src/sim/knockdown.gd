@@ -20,13 +20,14 @@ static func land(f: Fighter, input: InputFrame, config: GameConfig) -> void:
 	f.set_state(Fighter.State.KNOCKDOWN)
 
 
-## Motion's step for a lying fighter. state_ticks counts the ticks it has lain so far.
-static func step(f: Fighter, input: InputFrame, config: GameConfig) -> void:
+## Motion's step for a lying fighter. state_ticks counts the ticks it has lain so far; friction is
+## the floor's slide friction (GroundGrip.friction).
+static func step(f: Fighter, input: InputFrame, config: GameConfig, friction: float) -> void:
 	if not f.on_ground:
 		f.set_state(Fighter.State.AIR)  # the floor went away (a breaking plank, a mushroom)
 		return
-	f.vel.x *= config.hitstun_ground_friction
-	f.vel.z *= config.hitstun_ground_friction
+	f.vel.x *= friction
+	f.vel.z *= friction
 	if f.state_ticks >= config.knockdown_ticks:
 		Getup.start(f, Getup.Kind.STAND, Vector3.ZERO, config)
 		return

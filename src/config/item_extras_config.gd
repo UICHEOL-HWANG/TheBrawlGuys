@@ -1,8 +1,8 @@
 class_name ItemExtrasConfig
-extends Resource
-## The second item set (PRD-ITEM-05..07): squeaky hammer, feather glove, banana peel. The base of
-## the GameConfig chain (DdaConfig extends this), so every value is a GameConfig value with a
-## debug panel slider. "ItemExtras" is a sim group: it enters the fingerprint.
+extends IceConfig
+## The second item set (PRD-ITEM-05..07): squeaky hammer, feather glove, banana peel. DdaConfig
+## extends this, so every value is a GameConfig value with a debug panel slider. "ItemExtras" is a
+## sim group: it enters the fingerprint.
 
 @export_group("ItemExtras")
 ## Box drops draw from all six kinds instead of the classic three. Off by default so classic

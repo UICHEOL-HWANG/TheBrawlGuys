@@ -8,7 +8,7 @@ const PLAYERS := 4
 const RESTART_DELAY_S := 2.0
 ## Each restart moves to the next arena (Phase 4): the menus show every stage over time.
 const ARENA_CYCLE: Array[String] = [ArenaCatalog.DEFAULT_ID, "lakeside_camp", "mushroom_forest",
-		"log_bridge", "foggy_forest"]
+		"log_bridge", "foggy_forest", "frozen_pond"]
 
 var world: World
 var prev_state: Dictionary = {}

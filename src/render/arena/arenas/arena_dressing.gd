@@ -57,6 +57,11 @@ func inner_flowers() -> bool:
 	return _arena.floors[0].kind == ArenaShape.Kind.CIRCLE
 
 
+## Flower dots on the ground outside the arena (not on snow).
+func outer_flowers() -> bool:
+	return true
+
+
 func occluders() -> Array[Dictionary]:
 	return _occluders
 

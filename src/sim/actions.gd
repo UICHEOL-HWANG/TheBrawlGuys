@@ -81,10 +81,10 @@ static func step_charge(f: Fighter, input: InputFrame, config: GameConfig) -> vo
 
 
 ## Guard holds while guard is pressed and the fighter stands on the ground (context E4). A
-## guard push (guard_knockback_mul > 0) slides out with the ground friction.
-static func step_guard(f: Fighter, input: InputFrame, config: GameConfig) -> void:
-	f.vel.x *= config.hitstun_ground_friction
-	f.vel.z *= config.hitstun_ground_friction
+## guard push (guard_knockback_mul > 0) slides out with the ground friction (GroundGrip.friction).
+static func step_guard(f: Fighter, input: InputFrame, config: GameConfig, friction: float) -> void:
+	f.vel.x *= friction
+	f.vel.z *= friction
 	if not input.guard or not f.on_ground:
 		f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
 

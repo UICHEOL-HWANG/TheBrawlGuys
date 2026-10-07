@@ -242,7 +242,7 @@ extends StyleConfig
 const SIM_GROUPS: Array[String] = [
 	"Movement", "Fighter", "Arena", "Rules", "Knockback", "LightAttack", "Combo", "HeavyAttack", "Grab", "Items",
 	"Arena Gimmicks", "StyleBoxer", "StyleWeapon", "StyleRanged", "Special", "SpecialSlam", "SpecialRush",
-	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "DI", "Knockdown", "Tech", "Modes", "ItemExtras",
+	"SpecialSpin", "SpecialFireball", "Dodge", "GuardMeter", "DI", "Knockdown", "Tech", "Modes", "ItemExtras", "Ice",
 ]
 
 @export_group("Audio")
@@ -260,10 +260,10 @@ const NON_SIM_GROUPS: Array[String] = [
 ]
 ## Script files whose groups make up GameConfig (it extends StyleConfig extends SpecialConfig
 ## extends DefenseConfig extends KnockdownConfig extends ModeConfig extends NetConfig extends DdaConfig
-## extends ItemExtrasConfig).
+## extends ItemExtrasConfig extends IceConfig).
 const CONFIG_SCRIPTS: Array[String] = [
 	"game_config.gd", "style_config.gd", "special_config.gd", "defense_config.gd", "knockdown_config.gd",
-	"mode_config.gd", "net_config.gd", "dda_config.gd", "item_extras_config.gd",
+	"mode_config.gd", "net_config.gd", "dda_config.gd", "item_extras_config.gd", "ice_config.gd",
 ]
 
 

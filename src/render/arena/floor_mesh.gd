@@ -3,7 +3,8 @@ extends RefCounted
 ## Builds one walkable arena floor from an ArenaShape view (ArenaShape.to_view) in theme colors
 ## (design.md DS-VIS-04). Circles are a grass disc over a thick flared dirt rim with a bright lip
 ## so the ring-out edge reads from the high camera; boxes are a deck of cross boards over a beam
-## (log bridge). The node's origin is the shape center; its top sits at center.y.
+## (log bridge). Rings, and boxes on ice themes, are IceFloorMesh ice. The node's origin is the
+## shape center; its top sits at center.y.
 
 const TOP_THICKNESS := 0.2
 const RIM_HEIGHT := 0.8
@@ -21,6 +22,9 @@ const BEAM_INSET := 0.8
 
 
 static func build(shape: Dictionary, theme: ArenaTheme) -> Node3D:
+	var kind := int(shape["kind"])
+	if kind == ArenaShape.Kind.RING or (theme.ice_floor and kind == ArenaShape.Kind.BOX):
+		return IceFloorMesh.build(shape, theme)
 	var root := Node3D.new()
 	root.position = shape["center"]
 	root.rotation.y = float(shape["yaw"])

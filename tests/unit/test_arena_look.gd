@@ -18,6 +18,7 @@ func test_each_stage_has_its_own_theme() -> void:
 	assert_eq(ArenaTheme.for_id("mushroom_forest").sun_color, DS.SUN_GOLD, "golden late afternoon")
 	assert_eq(ArenaTheme.for_id("foggy_forest").sun_color, DS.SUN_COOL, "cold morning")
 	assert_gt(ArenaTheme.for_id("foggy_forest").fog_density, 0.0, "a light mist even between fogs")
+	assert_eq(ArenaTheme.for_id("frozen_pond").floor_top, DS.ICE, "snow-white ice")
 	assert_eq(ArenaTheme.for_id("nope").floor_top, DS.GRASS, "unknown ids fall back to classic")
 
 

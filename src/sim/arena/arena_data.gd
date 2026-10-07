@@ -25,6 +25,9 @@ var spawn_radius: float = 0.0
 var item_area: ArenaShape = null
 var gimmicks: Array[Gimmick] = []
 var follow_config: bool = false
+## Ice (frozen pond): walking eases toward the stick and slides last longer (GroundGrip). Fixed
+## per arena, so it is copied but not snapshotted.
+var slippery: bool = false
 ## Farthest floor reach from the origin, kept up to date by add_floor and sync.
 var _floor_bound: float = 0.0
 
@@ -84,6 +87,7 @@ func copy() -> ArenaData:
 	for g: Gimmick in gimmicks:
 		a.gimmicks.append(g.copy())
 	a.follow_config = follow_config
+	a.slippery = slippery
 	a._floor_bound = _floor_bound
 	return a
 

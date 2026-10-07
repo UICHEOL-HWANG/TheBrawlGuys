@@ -24,6 +24,8 @@ var glow_scale: float = 1.0
 ## Always-on distance fog (0 = none); the fog gimmick adds to it while active.
 var fog_color: Color = DS.FOG_MIST
 var fog_density: float = 0.0
+## Floors are ice (frozen pond): FloorMesh draws ice slabs and IcePatchView draws breakable patches.
+var ice_floor: bool = false
 
 
 ## The theme for an ArenaData.theme_id (unknown ids fall back to classic).
@@ -38,6 +40,8 @@ static func for_id(theme_id: String) -> ArenaTheme:
 			t = MushroomForestTheme.make()
 		"foggy_forest":
 			t = FoggyForestTheme.make()
+		"frozen_pond":
+			t = FrozenPondTheme.make()
 		_:
 			t = ArenaTheme.new()
 	t.id = theme_id

@@ -27,15 +27,25 @@ func arena_for(view: Dictionary) -> ArenaData:
 
 
 ## Moves along dir, or slides along its larger then smaller axis, whichever first keeps floor
-## within bot_ground_lookahead ahead; stands still when none does.
+## within lookahead() ahead; stands still when none does.
 func walk(dir: Vector2, my_pos: Vector3, arena: ArenaData) -> InputFrame:
+	var reach := lookahead(arena)
 	var ax := Vector2(signf(dir.x), 0.0)
 	var az := Vector2(0.0, signf(dir.y))
 	var options: Array[Vector2] = [dir, ax, az]
 	if absf(dir.y) > absf(dir.x):
 		options = [dir, az, ax]
 	for d: Vector2 in options:
-		var ahead := my_pos + Vector3(d.x, 0.0, d.y) * _config.bot_ground_lookahead
+		var ahead := my_pos + Vector3(d.x, 0.0, d.y) * reach
 		if d != Vector2.ZERO and ArenaFloor.over_floor(arena, ahead):
 			return InputFrame.make(d.x, d.y)
 	return InputFrame.neutral()
+
+
+## How far ahead the floor must go on: bot_ground_lookahead, plus a full skid from run speed to a
+## stop on slippery ice (GroundGrip), so bots do not slide into holes they saw too late.
+func lookahead(arena: ArenaData) -> float:
+	if not arena.slippery:
+		return _config.bot_ground_lookahead
+	var skid := _config.move_speed * _config.move_speed / (2.0 * _config.ice_ground_acceleration)
+	return _config.bot_ground_lookahead + skid

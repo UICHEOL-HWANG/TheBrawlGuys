@@ -5,8 +5,8 @@ extends RefCounted
 ## ArenaData every call, so every World owns its arena state.
 
 const DEFAULT_ID := "classic"
-## The four Phase 4 stages, in selection-screen order.
-const STAGE_IDS: Array[String] = ["lakeside_camp", "log_bridge", "mushroom_forest", "foggy_forest"]
+## The selectable stages in selection-screen order: the four Phase 4 stages, then the frozen pond.
+const STAGE_IDS: Array[String] = ["lakeside_camp", "log_bridge", "mushroom_forest", "foggy_forest", "frozen_pond"]
 
 
 ## The Phase 1-3 circle (radius = GameConfig.arena_radius, follows the debug slider).
@@ -38,6 +38,8 @@ static func build(id: String, config: GameConfig) -> ArenaData:
 			a = MushroomForestArena.build()
 		"foggy_forest":
 			a = FoggyForestArena.build()
+		"frozen_pond":
+			a = FrozenPondArena.build()
 		_:
 			push_error("ArenaCatalog.build: unknown arena '%s'" % id)
 			return null

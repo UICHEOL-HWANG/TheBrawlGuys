@@ -3,7 +3,8 @@ extends GutTest
 ## against the next character in CharacterData.IDS on the classic arena with a fixed input script
 ## (_inputs_at: a function of the tick and positions only); slot 0 starts with a full gauge so its
 ## special fires early. CHARACTER_HASHES must change only with deliberate sim changes (say why in
-## the commit message). Values are tied to Godot 4.7.2 (engine floats).
+## the commit message). Values are tied to Godot 4.7.2 (engine floats). Re-recorded for the frozen
+## pond's Ice config group: the config fingerprint moved, the classic behavior did not (BEHAVIOR_HASH).
 
 const SEED := 9
 const TICKS := 1200
@@ -13,10 +14,10 @@ const PRIMED_GAUGE := 60.0
 const CLOSE := 1.2
 const XC_HOLD := 20
 const CHARACTER_HASHES := {
-	"barbarian": 2716970792,
-	"rogue": 2149438314,
-	"knight": 3507545121,
-	"mage": 672781242,
+	"barbarian": 1346101365,
+	"rogue": 3963697561,
+	"knight": 2958110712,
+	"mage": 3094215062,
 }
 
 

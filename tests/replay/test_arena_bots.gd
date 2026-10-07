@@ -10,7 +10,7 @@ const MAX_TICKS := 60 * 60 * 6
 ## The event each stage's gimmick must produce during a bot match.
 const GIMMICK_EVENTS := {
 	"lakeside_camp": "gimmick_damage", "log_bridge": "platform_break",
-	"mushroom_forest": "bounce", "foggy_forest": "fog_start",
+	"mushroom_forest": "bounce", "foggy_forest": "fog_start", "frozen_pond": "platform_break",
 }
 
 

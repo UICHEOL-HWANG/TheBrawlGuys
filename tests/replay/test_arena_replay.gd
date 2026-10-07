@@ -4,7 +4,9 @@ extends GutTest
 ## waypoint every WAYPOINT_TICKS, standing still once there) while P1 walks at P0 pressing
 ## light, jump, guard and grab on fixed tick patterns. Inputs depend only on t and positions, so
 ## a run is fully reproducible. ARENA_HASHES must change only with deliberate sim changes (say
-## why in the commit message). Values are tied to Godot 4.7.2 (engine floats).
+## why in the commit message). Values are tied to Godot 4.7.2 (engine floats). The frozen pond's
+## Ice config group re-recorded the four Phase 4 values through the config fingerprint only: with
+## config_fp stripped, their per-tick snapshots are bit-identical to before.
 
 const SEED := 5
 const TICKS := 2400
@@ -12,21 +14,23 @@ const HALF := 1200
 const WAYPOINT_TICKS := 240
 const ARRIVED := 0.3
 const ARENA_HASHES := {
-	"lakeside_camp": 2951331059,
-	"log_bridge": 2008553882,
-	"mushroom_forest": 2330807377,
-	"foggy_forest": 1456028184,
+	"lakeside_camp": 1671949093,
+	"log_bridge": 715661931,
+	"mushroom_forest": 3823209953,
+	"foggy_forest": 2068026426,
+	"frozen_pond": 167019613,
 }
 const TOURS := {
 	"lakeside_camp": [Vector3(-4.0, 0, -3.5), Vector3(0, 0, 0), Vector3(8.5, 0, 0)],
 	"log_bridge": [Vector3(-9.0, 0, -1.5), Vector3(-3.0, 0, 0), Vector3(3.0, 0, 1.5)],
 	"mushroom_forest": [Vector3(5.16, 0, 5.16), Vector3(0, 0, 0), Vector3(-7.05, 0, 1.89)],
 	"foggy_forest": [Vector3(0, 0, 0), Vector3(-3.0, 0, 3.0), Vector3(3.0, 0, -3.0)],
+	"frozen_pond": [Vector3(3.75, 0, 0), Vector3(0, 0, 0), Vector3(-3.75, 0, 3.75)],
 }
 ## The gimmick event each tour must produce, or the hash guards nothing on that stage.
 const GIMMICK_EVENTS := {
 	"lakeside_camp": "gimmick_damage", "log_bridge": "platform_break",
-	"mushroom_forest": "bounce", "foggy_forest": "fog_start",
+	"mushroom_forest": "bounce", "foggy_forest": "fog_start", "frozen_pond": "platform_break",
 }
 
 
