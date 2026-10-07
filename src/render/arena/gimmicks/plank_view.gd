@@ -3,7 +3,8 @@ extends GimmickView
 ## Log bridge side plank (platform; design.md DS-VIS-04 "부서질 발판 = 균열이 단계적으로 커짐"):
 ## draws its own floor deck. Hits taken on it show a first crack; once the break warning starts
 ## the cracks grow through MAX_STAGE and the deck trembles harder; at the break it drops into the
-## water and is gone; when the sim restores it, it bobs back up into place.
+## water and is gone; when the sim restores it, it bobs back up into place. IcePatchView reuses
+## all of it with an ice surface.
 
 const MAX_STAGE := 3
 ## Crack streaks per stage: [x along the plank, z across, yaw].
@@ -58,15 +59,35 @@ func _build(view: Dictionary) -> void:
 	rotation.y = float(area.get("yaw", 0.0))
 	_deck = Node3D.new()
 	add_child(_deck)
-	FloorMesh.deck(_deck, (area["half"] as Vector2) * 2.0, _theme)
-	var mat := ToonMaterials.toon(DS.CANOPY_DEEP)
+	var size := (area["half"] as Vector2) * 2.0
+	_build_surface(_deck, size)
+	var mat := ToonMaterials.toon(_crack_color())
 	var crack_mesh := BoxMesh.new()
 	crack_mesh.size = CRACK_SIZE
-	for c: Vector3 in CRACKS:
-		var mi := _mesh(crack_mesh, mat, Vector3(c.x, CRACK_LIFT, c.y), _deck)
+	for c: Vector3 in _crack_layout(size):
+		var mi := _mesh(crack_mesh, mat, Vector3(c.x, _surface_lift() + CRACK_LIFT, c.y), _deck)
 		mi.rotation.y = c.z
 		mi.visible = false
 		_cracks.append(mi)
+
+
+## The walkable surface drawn into the deck node (size = x, z). Subclasses swap the look.
+func _build_surface(deck: Node3D, size: Vector2) -> void:
+	FloorMesh.deck(deck, size, _theme)
+
+
+## Height of the drawn top above the sim floor top (cracks sit on it).
+func _surface_lift() -> float:
+	return 0.0
+
+
+func _crack_color() -> Color:
+	return DS.CANOPY_DEEP
+
+
+## Crack streaks as [x, z, yaw] on the surface; every MAX_STAGE-th share shows per stage.
+func _crack_layout(_size: Vector2) -> Array[Vector3]:
+	return CRACKS
 
 
 func _follow(view: Dictionary, _delta: float) -> void:

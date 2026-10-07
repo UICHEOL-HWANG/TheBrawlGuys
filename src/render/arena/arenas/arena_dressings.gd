@@ -24,4 +24,6 @@ static func dressing_script(arena_id: String) -> GDScript:
 			return MushroomForestView
 		"foggy_forest":
 			return FoggyForestView
+		"frozen_pond":
+			return FrozenPondView
 	return ClassicArenaView

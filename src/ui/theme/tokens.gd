@@ -35,6 +35,9 @@ const SUN_COOL := Color("#E6F2F7")
 const FOG_MIST := Color("#DCEBEF")
 ## Fog veil sheets over the arena while the fog is in (fog_mist 55%).
 const FOG_VEIL := Color("#DCEBEF8C")
+## Frozen pond: snow-white ice over pale-blue ice walls (thin breakable patches are ice_deep too).
+const ICE := Color("#F3F9FC")
+const ICE_DEEP := Color("#8FC3E0")
 
 # --- Hazard marking (DS-VIS-04) ---
 ## Campfire burn radius glowing on the ground (fire 40%).
@@ -97,10 +100,8 @@ const P1 := Color("#3E7BF0")
 const P2 := Color("#F25C5C")
 const P3 := Color("#FFC93C")
 const P4 := Color("#B46CF0")
-
 ## DamageCounter color stops at 0 / 50 / 100 / 150+ percent.
 const DAMAGE_RAMP := [UI_SURFACE, PETAL_YELLOW, FIRE, DANGER]
-
 const PALETTE := {
 	"grass_sun": GRASS_SUN, "grass": GRASS, "grass_mid": GRASS_MID, "grass_shade": GRASS_SHADE,
 	"canopy": CANOPY, "canopy_deep": CANOPY_DEEP, "water": WATER, "water_deep": WATER_DEEP,

@@ -7,6 +7,8 @@ const NO_GROUND := -INF
 ## A body may land only if it was at most this far below a floor top on the previous tick, so
 ## anything falling under a floor never snaps back up (Motion.LAND_TOLERANCE, same value).
 const LAND_TOLERANCE := 0.05
+## Directions sampled around a point to tell a floor seam from a real edge (_deep_in_union).
+const UNION_SAMPLES := 8
 
 
 ## Top of the highest active floor under pos that a body coming from prev_y may land on, or
@@ -60,7 +62,10 @@ static func edge_distance(arena: ArenaData, pos: Vector3) -> float:
 
 
 ## Nearest point on safe ground: at least extent * (1 - ratio) inside an active floor. Returns
-## pos itself when it already is safe. ratio = GameConfig.bot_edge_ratio for bots.
+## pos itself when it already is safe. ratio = GameConfig.bot_edge_ratio for bots. A seam where
+## floors meet (frozen pond slabs, bridge planks) is not an edge: near two or more floors, pos is
+## safe when the ground all around it, that inset away, is still floor (_deep_in_union). A
+## single-floor arena never takes that path, so its answers are exactly the per-floor rule.
 static func safe_point(arena: ArenaData, pos: Vector3, ratio: float) -> Vector3:
 	var best := pos
 	var best_dist := INF
@@ -73,7 +78,28 @@ static func safe_point(arena: ArenaData, pos: Vector3, ratio: float) -> Vector3:
 		if d < best_dist:
 			best_dist = d
 			best = p
-	return pos if best_dist <= 0.0 else best
+	return pos if best_dist <= 0.0 or _deep_in_union(arena, pos, ratio) else best
+
+
+
+## True when pos is within the safety inset of two or more active floors and every point that
+## inset away around it is over a floor (the largest inset of those floors, to stay cautious).
+static func _deep_in_union(arena: ArenaData, pos: Vector3, ratio: float) -> bool:
+	var near := 0
+	var inset := 0.0
+	for i: int in arena.floors.size():
+		var s := arena.floors[i]
+		var need := s.extent() * (1.0 - ratio)
+		if arena.floor_active[i] and s.edge_distance(pos) > -need:
+			near += 1
+			inset = maxf(inset, need)
+	if near < 2 or not over_floor(arena, pos):
+		return false
+	for k: int in UNION_SAMPLES:
+		var dir := Vector2.from_angle(TAU * k / UNION_SAMPLES)
+		if not over_floor(arena, pos + Vector3(dir.x, 0.0, dir.y) * inset):
+			return false
+	return true
 
 
 ## Unit (x, z) direction toward the nearest real edge of the ground under pos (for throws): the

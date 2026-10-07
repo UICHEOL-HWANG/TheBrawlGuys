@@ -7,7 +7,8 @@ extends GutTest
 const SEED := 7
 const TICKS := 1200
 const HALF := 600
-const GOLDEN_HASH := 99359195
+## Re-recorded for the frozen pond's Ice config group (fingerprint only; BEHAVIOR_HASH unchanged).
+const GOLDEN_HASH := 3945662543
 ## Sim behavior without the config fingerprint (context F1). Changes only with deliberate sim
 ## changes, each explained in its commit message (Phase 4: snapshot v5 arena/burn fields, then
 ## the carried-over combat fixes; Phase 5: snapshot v6 adds fighter character/gauge and the

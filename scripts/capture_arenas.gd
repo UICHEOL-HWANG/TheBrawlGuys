@@ -1,7 +1,8 @@
 extends SceneTree
 ## Phase 4 T6 evidence: every arena under the match camera at a hazard moment — the classic meadow
 ## mid-fight, a fighter burning at the lakeside campfire, a broken and a cracking plank on the log
-## bridge, a bounce off a mushroom, and the fog rolled in with silhouettes above it.
+## bridge, a bounce off a mushroom, the fog rolled in with silhouettes above it, and an open and a
+## cracking ice patch on the frozen pond.
 ##
 ## Usage (windowed, NOT headless; keep the window on top on macOS):
 ##   godot --path . --resolution 1280x720 --always-on-top -s res://scripts/capture_arenas.gd -- \
@@ -47,6 +48,7 @@ func _plan(c: GameConfig) -> Array[Dictionary]:
 		{"id": "log_bridge", "skip": SimTime.to_ticks(plank_crack) - 60, "frames": 60},
 		{"id": "mushroom_forest", "skip": 240, "frames": 58, "pin": {"fighter": 1, "at": pad, "from": 48, "to": 49}},
 		{"id": "foggy_forest", "skip": SimTime.to_ticks(c.fog_first_time) - 10, "frames": 100},
+		{"id": "frozen_pond", "skip": SimTime.to_ticks(plank_crack) - 60, "frames": 60},
 	]
 
 

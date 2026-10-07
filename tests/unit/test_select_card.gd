@@ -93,6 +93,7 @@ func test_every_stage_gets_a_card_with_its_gimmicks() -> void:
 	assert_eq(icons["log_bridge"], ["water", "crack"] as Array[String])
 	assert_eq(icons["mushroom_forest"], ["bounce"] as Array[String])
 	assert_eq(icons["foggy_forest"], ["fog"] as Array[String])
+	assert_eq(icons["frozen_pond"], ["water", "crack"] as Array[String])
 
 
 func test_keyboard_browses_and_confirms() -> void:

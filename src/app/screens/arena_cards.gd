@@ -9,6 +9,7 @@ const NAMES := {
 	"log_bridge": ["통나무 다리", "점점 부서지는 발판"],
 	"mushroom_forest": ["버섯 숲", "밟으면 튀어 오르는 버섯"],
 	"foggy_forest": ["안개 낀 숲", "주기적으로 안개가 껴요"],
+	"frozen_pond": ["얼음 연못", "미끄러운 얼음 · 깨지는 얼음판"],
 }
 ## Gimmick kind -> GimmickIcon kind.
 const ICONS := {"burn_zone": "fire", "platform": "crack", "bounce_pad": "bounce", "fog": "fog"}

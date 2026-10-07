@@ -29,10 +29,11 @@ func test_gimmick_kinds_get_their_views() -> void:
 	assert_true(_view("log_bridge").gimmick_view(0) is PlankView)
 	assert_true(_view("mushroom_forest").gimmick_view(0) is MushroomPadView)
 	assert_true(_view("foggy_forest").gimmick_view(0) is FogView)
+	assert_true(_view("frozen_pond").gimmick_view(0) is IcePatchView, "ice patches, not planks")
 
 
 func test_ring_out_zones_are_drawn_as_water() -> void:
-	for id: String in ["lakeside_camp", "log_bridge"]:
+	for id: String in ["lakeside_camp", "log_bridge", "frozen_pond"]:
 		var found := false
 		for c: Node in _view(id).get_children():
 			if c is WaterView:
@@ -50,9 +51,17 @@ func test_campfire_marks_its_burn_radius() -> void:
 
 
 func test_planks_crack_fall_and_come_back_with_the_sim() -> void:
+	await _crack_cycle("log_bridge")
+
+
+func test_ice_patches_crack_sink_and_refreeze_with_the_sim() -> void:
+	await _crack_cycle("frozen_pond")
+
+
+func _crack_cycle(id: String) -> void:
 	var c := GameConfig.new()
-	var v := _view("log_bridge")
-	var w := World.new(c, 1, 2, ArenaCatalog.build("log_bridge", c))
+	var v := _view(id)
+	var w := World.new(c, 1, 2, ArenaCatalog.build(id, c))
 	var first := -1
 	for g: Gimmick in w.arena.gimmicks:
 		if (g as BreakablePlatform).order == 0:

@@ -114,7 +114,7 @@ func _add_props(rng: RandomNumberGenerator) -> void:
 func _add_flowers(rng: RandomNumberGenerator) -> void:
 	for i: int in FLOWER_COUNT:
 		var inside := i % 2 == 0
-		if inside and not _dressing.inner_flowers():
+		if not (_dressing.inner_flowers() if inside else _dressing.outer_flowers()):
 			continue
 		var patch := FlowerPatch.new()
 		add_child(patch)

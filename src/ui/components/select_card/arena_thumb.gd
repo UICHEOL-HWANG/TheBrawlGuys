@@ -10,6 +10,7 @@ const RIM_DROP := 5.0
 const TREE_COUNT := 10
 const TREE_RADIUS := 0.09
 const MARKER_RADIUS := 0.07
+const RING_POINTS := 64
 
 var _data: Dictionary = {}
 
@@ -61,6 +62,11 @@ func _shape(s: Dictionary, color: Color, offset: Vector2) -> void:
 	var at := to_px(s["center"]) + offset
 	if int(s["kind"]) == ArenaShape.Kind.CIRCLE:
 		draw_circle(at, float(s["radius"]) * _scale(), color)
+		return
+	if int(s["kind"]) == ArenaShape.Kind.RING:
+		var outer := float(s["radius"])
+		var inner := float(s.get("inner", 0.0))
+		draw_arc(at, (outer + inner) * 0.5 * _scale(), 0.0, TAU, RING_POINTS, color, (outer - inner) * _scale(), true)
 		return
 	var half: Vector2 = (s["half"] as Vector2) * _scale()
 	var yaw := float(s["yaw"])

@@ -102,7 +102,7 @@ func test_default_spawn_matches_the_ring_formula() -> void:
 
 func test_catalog_builds_every_arena_with_spawns_on_ground() -> void:
 	var c := GameConfig.new()
-	assert_eq(ArenaCatalog.stage_ids().size(), 4)
+	assert_eq(ArenaCatalog.stage_ids().size(), 5, "four Phase 4 stages and the frozen pond")
 	for id: String in ArenaCatalog.ids():
 		var a := ArenaCatalog.build(id, c)
 		assert_not_null(a, id)
@@ -179,3 +179,14 @@ func test_restore_rejects_another_arena() -> void:
 	var other := World.new(c, 1)
 	assert_false(other.restore(w.snapshot()))
 	assert_push_error("arena mismatch")
+
+
+func test_safe_point_keeps_single_floor_edges_exact() -> void:
+	var a := ArenaData.new()
+	a.add_floor(ArenaShape.circle(Vector3.ZERO, 10.0))
+	var near_edge := Vector3(9.5, 0, 0)
+	assert_almost_eq(ArenaFloor.safe_point(a, near_edge, 0.8).x, 8.0, 0.0001, "one floor: per-floor rule")
+	var b := ArenaData.new()
+	b.add_floor(ArenaShape.box(Vector3(-2, 0, 0), Vector2(4, 4)))
+	b.add_floor(ArenaShape.box(Vector3(2, 0, 0), Vector2(4, 4)))
+	assert_eq(ArenaFloor.safe_point(b, Vector3(0, 0, 0.5), 0.8), Vector3(0, 0, 0.5), "a seam between floors is not an edge")

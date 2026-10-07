@@ -104,7 +104,7 @@
 | `mode_selected` | 모드 확정 | `mode: enum(bot\|local_2p\|online)` | — | A | 4.0 |
 | `rule_selected` | 경기 방식 화면에서 확정 (뒤로 왔다가 다시 고르면 다시 보냄) | `rule: enum(stock\|team\|timed)` | `browse_count: int` (확정 전 옮겨 본 횟수), `focused: list<str>` (포커스를 받은 방식, 처음 받은 순서로 중복 없이 — 기본값이 첫째, 고려한 후보 vs 선택. 스키마 8) | A | 5 (스키마 7) |
 | `character_selected` | 캐릭터 선택 화면에서 모든 사람이 확정한 순간, 슬롯마다 1번 (봇 포함 — 봇 캐릭터는 이때 경기 시드로 뽑힘). 경기장 화면에서 뒤로 와 같은 조합으로 다시 확정하면 다시 보내지 않는다(조합이 바뀌면 새로 보냄) | `slot: int`, `character: enum(barbarian\|rogue\|knight\|mage)`, `style: enum(boxer\|weapon\|ranged)`, `is_bot: bool`, `input_device: str` (사람 = 확정 때 쓴 장치 `keyboard`\|`gamepad`\|`touch`, 마우스 클릭은 `keyboard`, 봇 = `bot`) | `browse_count: int` (사람만, 확정 전 넘겨본 카드 수) | A | 5 (스키마 5) |
-| `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest)` | `browse_count: int` | A | 4 |
+| `arena_selected` | 경기장 확정 | `arena: enum(lakeside_camp\|log_bridge\|mushroom_forest\|foggy_forest\|frozen_pond)` | `browse_count: int` | A | 4 |
 | `select_cancelled` | 선택 화면에서 뒤로 | `screen: enum(mode\|rule\|character\|arena)` | `dwell_ms: int` | A | 4.0 |
 
 #### 3.3.1 온보딩 튜토리얼 퍼널 (`PRD-UI-02`, Phase 5 T11)

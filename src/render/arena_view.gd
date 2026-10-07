@@ -118,7 +118,7 @@ func _rebuild() -> void:
 func _build_gimmicks() -> Array[int]:
 	var owned: Array[int] = []
 	for g: Dictionary in _arena.gimmick_views():
-		var gv := GimmickViews.create(String(g["kind"]))
+		var gv := GimmickViews.create(String(g["kind"]), _theme)
 		if gv == null:
 			continue
 		add_child(gv)

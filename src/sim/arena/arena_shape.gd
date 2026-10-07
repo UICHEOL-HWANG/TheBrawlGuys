@@ -1,14 +1,16 @@
 class_name ArenaShape
 extends RefCounted
-## One flat arena shape (PRD §6.1): a circle or a Y-rotated box in the XZ plane at height center.y.
-## Floors use center.y as the walkable top, ring-out zones as the water line, gimmicks as their area.
-## Pure value object: queries never mutate it.
+## One flat arena shape (PRD §6.1): a circle, a ring (annulus, the frozen pond's outer ice) or a
+## Y-rotated box in the XZ plane at height center.y. Floors use center.y as the walkable top,
+## ring-out zones as the water line, gimmicks as their area. Pure value object: queries never mutate it.
 
-enum Kind { CIRCLE, BOX }
+enum Kind { CIRCLE, BOX, RING }
 
 var kind: int = Kind.CIRCLE
 var center: Vector3 = Vector3.ZERO
 var radius: float = 0.0
+## Ring hole radius (the band runs from inner to radius).
+var inner: float = 0.0
 ## Box half extents along its local x and z.
 var half: Vector2 = Vector2.ZERO
 var yaw: float = 0.0
@@ -22,6 +24,14 @@ static func circle(p_center: Vector3, p_radius: float, p_tag: String = "") -> Ar
 	s.center = p_center
 	s.radius = p_radius
 	s.tag = p_tag
+	return s
+
+
+## A flat ring: the band between p_inner and p_radius around p_center (no floor in the hole).
+static func ring(p_center: Vector3, p_radius: float, p_inner: float, p_tag: String = "") -> ArenaShape:
+	var s := circle(p_center, p_radius, p_tag)
+	s.kind = Kind.RING
+	s.inner = p_inner
 	return s
 
 
@@ -46,6 +56,9 @@ func local_xz(p: Vector3) -> Vector2:
 func contains_xz(p: Vector3) -> bool:
 	if kind == Kind.CIRCLE:
 		return Vector2(p.x - center.x, p.z - center.z).length() <= radius
+	if kind == Kind.RING:
+		var d := Vector2(p.x - center.x, p.z - center.z).length()
+		return d >= inner and d <= radius
 	var l := local_xz(p)
 	return absf(l.x) <= half.x and absf(l.y) <= half.y
 
@@ -55,14 +68,18 @@ func edge_distance(p: Vector3) -> float:
 	var l := local_xz(p)
 	if kind == Kind.CIRCLE:
 		return radius - l.length()
+	if kind == Kind.RING:
+		return minf(radius - l.length(), l.length() - inner)
 	var gap := Vector2(absf(l.x) - half.x, absf(l.y) - half.y)
 	if gap.x <= 0.0 and gap.y <= 0.0:
 		return -maxf(gap.x, gap.y)
 	return -Vector2(maxf(gap.x, 0.0), maxf(gap.y, 0.0)).length()
 
 
-## Smallest half size: the circle radius or the box's shorter half extent.
+## Smallest half size: the circle radius, half the ring band or the box's shorter half extent.
 func extent() -> float:
+	if kind == Kind.RING:
+		return (radius - inner) * 0.5
 	return radius if kind == Kind.CIRCLE else minf(half.x, half.y)
 
 
@@ -73,6 +90,8 @@ func core_point(p: Vector3, inset: float) -> Vector3:
 	var clamped: Vector2
 	if kind == Kind.CIRCLE:
 		clamped = l.limit_length(maxf(radius - inset, 0.0))
+	elif kind == Kind.RING:
+		clamped = _ring_core(l, inset)
 	else:
 		var lim := Vector2(maxf(half.x - inset, 0.0), maxf(half.y - inset, 0.0))
 		clamped = Vector2(clampf(l.x, -lim.x, lim.x), clampf(l.y, -lim.y, lim.y))
@@ -85,8 +104,10 @@ func core_point(p: Vector3, inset: float) -> Vector3:
 func outward(p: Vector3) -> Vector2:
 	var l := local_xz(p)
 	var out: Vector2
-	if kind == Kind.CIRCLE:
+	if kind == Kind.CIRCLE or kind == Kind.RING:
 		out = l.normalized() if l.length() > 0.0001 else Vector2(1, 0)
+		if kind == Kind.RING and l.length() - inner < radius - l.length():
+			out = -out  # the hole is nearer
 	elif half.x - absf(l.x) < half.y - absf(l.y):
 		out = Vector2(signf(l.x) if l.x != 0.0 else 1.0, 0.0)
 	else:
@@ -103,12 +124,15 @@ func sample_point(u1: float, u2: float, ratio: float, y: float) -> Vector3:
 		var angle := u1 * TAU
 		var r := sqrt(u2) * radius * ratio
 		return Vector3(center.x + cos(angle) * r, y, center.z + sin(angle) * r)
+	if kind == Kind.RING:
+		var at := (inner + radius) * 0.5 + (u2 * 2.0 - 1.0) * extent() * ratio
+		return Vector3(center.x + cos(u1 * TAU) * at, y, center.z + sin(u1 * TAU) * at)
 	return _to_world(Vector2((u1 * 2.0 - 1.0) * half.x * ratio, (u2 * 2.0 - 1.0) * half.y * ratio), y)
 
 
 ## Farthest horizontal distance of the shape from the world origin.
 func bound_radius() -> float:
-	var reach := radius if kind == Kind.CIRCLE else half.length()
+	var reach := half.length() if kind == Kind.BOX else radius
 	return Vector2(center.x, center.z).length() + reach
 
 
@@ -117,6 +141,7 @@ func copy() -> ArenaShape:
 	s.kind = kind
 	s.center = center
 	s.radius = radius
+	s.inner = inner
 	s.half = half
 	s.yaw = yaw
 	s.tag = tag
@@ -124,7 +149,18 @@ func copy() -> ArenaShape:
 
 
 func to_view() -> Dictionary:
-	return {"kind": kind, "center": center, "radius": radius, "half": half, "yaw": yaw, "tag": tag}
+	return {"kind": kind, "center": center, "radius": radius, "inner": inner, "half": half, "yaw": yaw, "tag": tag}
+
+
+## Ring core: the radial distance clamped inside the band by inset (its middle when too thin).
+func _ring_core(l: Vector2, inset: float) -> Vector2:
+	var lo := inner + inset
+	var hi := radius - inset
+	var d := l.length()
+	var want := (inner + radius) * 0.5 if lo > hi else clampf(d, lo, hi)
+	if want == d:
+		return l
+	return (l / d if d > 0.0001 else Vector2(1, 0)) * want
 
 
 func _to_world(l: Vector2, y: float) -> Vector3:
