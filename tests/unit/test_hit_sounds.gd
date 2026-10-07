@@ -61,8 +61,8 @@ func test_every_hit_sound_is_baked() -> void:
 	assert_eq(SfxRecipes.stream_path("jump"), "res://assets/sfx/jump.wav")
 
 
-## The web build only plays an AudioStreamWAV as a Web Audio sample; an .ogg streams through the
-## engine mixer (unreliable on a single-threaded web build on phones). No sound effect ships as .ogg.
+## The web build turns every sound into a Web Audio sample; an .ogg would first be decoded on the
+## main thread at its first play, a .wav is free. No sound effect ships as .ogg.
 func test_every_sound_effect_is_a_wav_sample() -> void:
 	for name: String in SfxDirector.sound_names():
 		var stream := load(SfxRecipes.stream_path(name))

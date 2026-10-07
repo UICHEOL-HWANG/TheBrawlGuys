@@ -29,8 +29,8 @@ static func path(name: String) -> String:
 	return "res://assets/sfx/%s.wav" % name
 
 
-## What to load. Always a .wav: the web build plays an AudioStreamWAV as a Web Audio sample (low
-## latency, steady on phones), while an .ogg is streamed through the engine mixer (laggy and
-## crackly on a single-threaded web build). The designed hits (scripts/music/hits.py) are .wav too.
+## What to load: always the .wav (baked placeholder or designed hit from scripts/music/hits.py).
+## The web build plays both formats as Web Audio samples, but an .ogg is first decoded to PCM on
+## the main thread at its first play; a .wav costs nothing to turn into a sample.
 static func stream_path(name: String) -> String:
 	return path(name)

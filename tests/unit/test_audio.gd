@@ -2,17 +2,23 @@ extends GutTest
 ## Buses and event -> sound mapping (design.md DS-SFX-01).
 
 
-func test_buses_are_created_once() -> void:
+func test_ensure_sets_the_bus_volumes_from_config() -> void:
 	var c := GameConfig.new()
 	AudioBuses.ensure(c)
+	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(AudioBuses.MUSIC)), c.music_volume_db, 0.001)
+
+
+## The web build silences every sample if a bus is added at runtime (AudioBuses' header), so the
+## three buses must already be there from default_bus_layout.tres and ensure() must not add any.
+func test_buses_come_from_the_layout_and_are_never_added() -> void:
+	assert_true(FileAccess.file_exists(String(ProjectSettings.get_setting("audio/buses/default_bus_layout"))))
 	var count := AudioServer.bus_count
-	AudioBuses.ensure(c)
-	assert_eq(AudioServer.bus_count, count, "idempotent")
 	for bus: String in [AudioBuses.SFX, AudioBuses.MUSIC, AudioBuses.UI]:
 		var idx := AudioServer.get_bus_index(bus)
-		assert_ne(idx, -1, bus)
+		assert_between(idx, 1, 3, "%s is one of the layout's buses" % bus)
 		assert_eq(AudioServer.get_bus_send(idx), &"Master")
-	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(AudioBuses.MUSIC)), c.music_volume_db, 0.001)
+	AudioBuses.ensure(GameConfig.new())
+	assert_eq(AudioServer.bus_count, count, "ensure() only sets volumes")
 
 
 func test_hits_pick_light_or_heavy_and_bend_pitch() -> void:

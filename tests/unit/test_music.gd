@@ -57,6 +57,23 @@ func test_files_are_baked_and_director_switches_layers() -> void:
 	assert_eq(d.intense_target_db(), 0.0)
 
 
+## Two plain players (Web Audio samples on the web build), never an AudioStreamSynchronized,
+## which the single-threaded web build mixes in the engine and stutters.
+func test_battle_plays_base_and_silent_layer_on_two_plain_players() -> void:
+	var d := MusicDirector.new()
+	add_child_autofree(d)
+	d.setup(GameConfig.new())
+	d.play_battle()
+	for p: AudioStreamPlayer in [d.base_player(), d.layer_player()]:
+		assert_false(p.stream is AudioStreamSynchronized)
+		assert_eq(p.bus, AudioBuses.MUSIC)
+		assert_true(p.playing)
+	assert_eq(d.layer_player().volume_db, MusicDirector.SILENT_DB, "the layer waits silently, on the beat")
+	d.play_menu()
+	assert_false(d.layer_player().playing, "the menu loop plays alone")
+	assert_true(d.base_player().playing)
+
+
 func test_the_battle_theme_loads_the_designed_ogg_loops() -> void:
 	for name: String in ["battle_base", "battle_intense"]:
 		assert_eq(MusicDirector.path_for(name), "res://assets/music/%s.ogg" % name, "scripts/music/compose.py output wins")

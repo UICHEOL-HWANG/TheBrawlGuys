@@ -2,8 +2,8 @@
 
 Run: uv run --with numpy --with scipy --with soundfile scripts/music/hits.py [out_dir]
 Writes <out>/<name>.wav (default assets/sfx), replacing the baked placeholders (bake_sfx.gd skips
-HitSounds.NAMES). .wav on purpose: the web build plays it as a Web Audio sample, an .ogg would be
-streamed through the engine mixer. Every sound is original (context F9).
+HitSounds.NAMES). .wav on purpose: the web build turns every sound into a Web Audio sample, and an
+.ogg would first be decoded on the main thread. Every sound is original (context F9).
 """
 import sys
 from pathlib import Path
