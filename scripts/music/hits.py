@@ -1,14 +1,15 @@
 """Weapon hit sounds (design.md DS-SFX-01): what the attacker hits *with* decides the sound.
 
 Run: uv run --with numpy --with scipy --with soundfile scripts/music/hits.py [out_dir]
-Writes <out>/<name>.ogg (default assets/sfx); SfxRecipes.stream_path prefers them over the
-baked .wav placeholders. Every sound is original (context F9).
+Writes <out>/<name>.wav (default assets/sfx), replacing the baked placeholders (bake_sfx.gd skips
+HitSounds.NAMES). .wav on purpose: the web build plays it as a Web Audio sample, an .ogg would be
+streamed through the engine mixer. Every sound is original (context F9).
 """
 import sys
 from pathlib import Path
 
 import numpy as np
-from compose import write_ogg
+import soundfile
 from synth import RNG, SR, bandpass, highpass, lowpass, sine
 
 PEAK = 0.78  # sharp transients overshoot ~15% after Vorbis
@@ -148,8 +149,9 @@ def main(argv: list) -> int:
     out = Path(argv[0]) if argv else Path(__file__).resolve().parents[2] / "assets" / "sfx"
     out.mkdir(parents=True, exist_ok=True)
     for name in SOUNDS:
-        write_ogg(render(name), out / f"{name}.ogg")
-        print(f"hits: {out / name}.ogg")
+        # .wav, not .ogg: the web build plays AudioStreamWAV as a Web Audio sample (see SfxRecipes.stream_path)
+        soundfile.write(out / f"{name}.wav", render(name), SR, subtype="PCM_16")
+        print(f"hits: {out / name}.wav")
     return 0
 
 

@@ -3,7 +3,7 @@ extends RefCounted
 ## Weapon hit sounds (design.md DS-SFX-01): a held or thrown item decides the sound first, then
 ## the attacker's style (boxer and classic punch, the knight's sword rings, the mage's bolts
 ## burst). Light or heavy follows the knockback, and the pitch drops as it grows.
-## scripts/music/hits.py renders NAMES into assets/sfx/<name>.ogg.
+## scripts/music/hits.py renders NAMES into assets/sfx/<name>.wav (bake_sfx.gd leaves them alone).
 
 const LIGHT_VOLUME_DB := -4.0
 const MIN_PITCH := 0.7

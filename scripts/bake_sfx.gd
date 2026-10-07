@@ -11,5 +11,5 @@ func _init() -> void:
 			push_error("bake_sfx: %s failed (%s)" % [name, error_string(err)])
 			quit(1)
 			return
-	print("bake_sfx: wrote %d sounds" % SfxRecipes.RECIPES.size())
+	print("bake_sfx: wrote %d sounds" % baked)
 	quit(0)

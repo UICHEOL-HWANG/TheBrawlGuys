@@ -29,7 +29,8 @@ static func path(name: String) -> String:
 	return "res://assets/sfx/%s.wav" % name
 
 
-## What to load: a designed .ogg (scripts/music/hits.py) wins over the baked .wav placeholder.
+## What to load. Always a .wav: the web build plays an AudioStreamWAV as a Web Audio sample (low
+## latency, steady on phones), while an .ogg is streamed through the engine mixer (laggy and
+## crackly on a single-threaded web build). The designed hits (scripts/music/hits.py) are .wav too.
 static func stream_path(name: String) -> String:
-	var ogg := "res://assets/sfx/%s.ogg" % name
-	return ogg if ResourceLoader.exists(ogg) else path(name)
+	return path(name)

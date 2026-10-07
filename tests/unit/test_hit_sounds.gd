@@ -57,8 +57,17 @@ func test_every_hit_sound_is_baked() -> void:
 	for name: String in HitSounds.NAMES:
 		assert_true(ResourceLoader.exists(SfxRecipes.stream_path(name)),
 				"%s baked (run scripts/music/hits.py)" % name)
-	assert_eq(SfxRecipes.stream_path("hit_sword_light"), "res://assets/sfx/hit_sword_light.ogg")
-	assert_eq(SfxRecipes.stream_path("jump"), "res://assets/sfx/jump.wav", "no .ogg -> the baked placeholder")
+	assert_eq(SfxRecipes.stream_path("hit_sword_light"), "res://assets/sfx/hit_sword_light.wav")
+	assert_eq(SfxRecipes.stream_path("jump"), "res://assets/sfx/jump.wav")
+
+
+## The web build only plays an AudioStreamWAV as a Web Audio sample; an .ogg streams through the
+## engine mixer (unreliable on a single-threaded web build on phones). No sound effect ships as .ogg.
+func test_every_sound_effect_is_a_wav_sample() -> void:
+	for name: String in SfxDirector.sound_names():
+		var stream := load(SfxRecipes.stream_path(name))
+		assert_true(stream is AudioStreamWAV, "%s is an AudioStreamWAV" % name)
+		assert_false(FileAccess.file_exists("res://assets/sfx/%s.ogg" % name), "%s has no .ogg" % name)
 
 
 func test_sound_names_list_each_sound_once() -> void:
