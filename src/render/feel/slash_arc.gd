@@ -20,6 +20,8 @@ var _wide: MeshInstance3D
 var _edge: MeshInstance3D
 var _on: bool = false
 var _fade: float = 0.0
+## Reduce motion: the crescent shows the reach and fades, without whirling.
+var still: bool = false
 
 
 func setup(radius: float, color: Color) -> void:
@@ -70,7 +72,8 @@ func release() -> void:
 func advance(delta: float) -> void:
 	if not visible:
 		return
-	rotate_y(SPIN * delta)
+	if not still:
+		rotate_y(SPIN * delta)
 	if not _on:
 		_fade -= delta / FADE
 		if _fade <= 0.0:

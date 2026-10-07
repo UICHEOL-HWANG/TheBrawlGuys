@@ -4,7 +4,7 @@ extends GutTest
 
 const CLIPS := ["Idle", "Running_A", "Jump_Idle", "Unarmed_Melee_Attack_Punch_A", "Unarmed_Melee_Attack_Punch_B",
 	"Unarmed_Melee_Attack_Kick", "1H_Melee_Attack_Slice_Diagonal", "Dualwield_Melee_Attack_Stab",
-	"Hit_A", "Hit_B", "Blocking", "Death_A", "Cheer", "Throw"]
+	"Hit_A", "Hit_B", "Blocking", "Death_A", "Cheer", "Throw", "2H_Melee_Attack_Spinning"]
 
 
 func _player() -> AnimationPlayer:
@@ -100,6 +100,36 @@ func test_a_throw_out_of_a_hold_plays_the_throw_then_returns_to_the_view() -> vo
 	for i: int in 30:
 		a.apply(_v(Fighter.State.IDLE), 0.016)
 	assert_eq(a.current_anim(), AnimMap.Anim.IDLE, "back to the view after the follow-through")
+
+
+func test_the_throw_event_plays_the_toss_even_if_the_frozen_frame_was_skipped() -> void:
+	var a := _animator()
+	for i: int in 10:
+		a.apply(_v(Fighter.State.HOLDING), 0.016)
+	a.toss()  # the sim's throw hit, seen this frame
+	a.apply(_v(Fighter.State.MOVE), 0.016)  # the render caught up past the hitstop
+	assert_eq(a.current_anim(), AnimMap.Anim.THROW)
+
+
+func test_a_toss_request_is_dropped_if_the_fighter_is_busy() -> void:
+	var a := _animator()
+	a.toss()
+	a.apply(_v(Fighter.State.HITSTUN), 0.016)
+	a.apply(_v(Fighter.State.IDLE), 0.016)
+	assert_eq(a.current_anim(), AnimMap.Anim.IDLE, "a stale toss never plays later")
+
+
+func test_the_getup_attack_spins_on_the_sim_getup_ticks() -> void:
+	var c := GameConfig.new()
+	var a := _animator(c)
+	var v := _v(Fighter.State.GETUP)
+	v["getup"] = "attack"
+	v["getup_ticks"] = 1
+	a.apply(v, 0.016)
+	assert_eq(a.seek_clip(), String(SwingClips.GETUP_SWEEP["clip"]), "a radial hit reads as a spin")
+	v["getup_ticks"] = Getup.attack_of(c).startup_ticks + 1
+	a.apply(v, 0.0)
+	assert_almost_eq(a.play_position(), float(SwingClips.GETUP_SWEEP["contact"]), 0.001, "on the active tick")
 
 
 func test_letting_go_without_a_throw_just_stands() -> void:

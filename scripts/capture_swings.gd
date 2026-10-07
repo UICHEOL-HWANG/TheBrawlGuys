@@ -17,6 +17,7 @@ const SHEETS := {
 	"grab": [K.GRAB],
 }
 const COLUMNS := 6
+const GETUP := -2  # the getup attack (state GETUP, getup_ticks)
 const GAP := 2.1
 const SETTLE_FRAMES := 3
 
@@ -38,6 +39,7 @@ func _init() -> void:
 		for kind: int in SHEETS[sheet]:
 			_jobs.append([sheet, kind])
 	_jobs.append(["grab", -1])  # holder + held pair
+	_jobs.append(["getup", GETUP])
 	process_frame.connect(_on_frame)
 
 
@@ -67,7 +69,7 @@ func _pose(job: Array) -> void:
 	_views.clear()
 	var sheet := String(job[0])
 	var kind := int(job[1])
-	var character := "barbarian" if sheet == "grab" else sheet
+	var character := "barbarian" if sheet == "grab" or sheet == "getup" else sheet
 	var samples := _samples(character, kind)
 	for i: int in samples.size():
 		var view := FighterView.new()
@@ -84,6 +86,8 @@ func _samples(character: String, kind: int) -> Array[Dictionary]:
 	var base: Dictionary = w.state_view()["fighters"][0]
 	base["facing"] = Vector3.RIGHT
 	var out: Array[Dictionary] = []
+	if kind == GETUP:
+		return _getup_samples(base)
 	if kind < 0:
 		for col: int in [1, 2]:
 			var v := base.duplicate()
@@ -106,6 +110,20 @@ func _samples(character: String, kind: int) -> Array[Dictionary]:
 	return out
 
 
+func _getup_samples(base: Dictionary) -> Array[Dictionary]:
+	var a := Getup.attack_of(_config)
+	var out: Array[Dictionary] = []
+	for t: int in [1, a.startup_ticks / 2, a.startup_ticks + 1, a.startup_ticks + a.active_ticks,
+			a.startup_ticks + a.active_ticks + a.recovery_ticks / 2, a.total_ticks()]:
+		var v := base.duplicate()
+		v["state"] = Fighter.State.GETUP
+		v["getup"] = "attack"
+		v["getup_ticks"] = t
+		v["pos"] = Vector3(GAP * out.size(), 0, 0)
+		out.append(v)
+	return out
+
+
 func _frames(style: String, special: String, kind: int) -> AttackData:
 	if kind == K.SPECIAL:
 		return SpecialCatalog.attack(special, _config)
@@ -114,9 +132,10 @@ func _frames(style: String, special: String, kind: int) -> AttackData:
 
 func _drive(view: FighterView, v: Dictionary) -> void:
 	view.apply(v, v, 1.0, 0)
-	var swinging := int(v["state"]) == Fighter.State.ATTACK or int(v["state"]) == Fighter.State.SPECIAL
+	var swinging := int(v["state"]) in [Fighter.State.ATTACK, Fighter.State.SPECIAL, Fighter.State.GETUP]
 	var start := v.duplicate()
 	start["attack_ticks"] = 1
+	start["getup_ticks"] = 1
 	for i: int in 6:
 		view.apply(v, v, 1.0, 0)  # the gear settles into its swing grip over a few frames
 		view.animate(start if swinging else v, 0.05)

@@ -5,13 +5,20 @@ extends Node3D
 ## fireball's blast over its whole hit radius, a power-up aura in the caster's color on
 ## special_start plus each special's own flourish (SpecialFx), and grab grips (GrabFx). Owned by
 ## MatchStage, so the match, the tutorial, the finishing replay and the menu backdrop all show them.
-## Effects are pooled (BurstPool) and scaled by the quality's particle scale.
+## Effects are pooled (BurstPool) and scaled by the quality's particle scale. Reduce motion
+## ([accessibility] reduce_motion, read again at each match start like the cut-in) cuts the
+## flying sparks and the rush afterimages and stops the spin arc whirling; projectiles, rings
+## and grips stay, they carry the game's information.
+
+## Share of the sparks kept with reduce motion on.
+const REDUCED_PARTICLES := 0.3
 
 var _config: GameConfig
 var _projectiles: ProjectileLayer
 var _bursts: BurstPool
 var _specials: SpecialFx
 var _grabs: GrabFx
+var _reduced: bool = false
 
 
 func _init(config: GameConfig) -> void:
@@ -32,9 +39,19 @@ func _init(config: GameConfig) -> void:
 
 ## Follows the quality setting (MatchStage.apply_quality): spark and dust counts.
 func apply_quality() -> void:
-	var particles := Quality.particle_scale(_config)
+	var particles := Quality.particle_scale(_config) * (REDUCED_PARTICLES if _reduced else 1.0)
 	_bursts.set_particle_scale(particles)
 	_specials.set_particle_scale(particles)
+
+
+func set_reduce_motion(on: bool) -> void:
+	_reduced = on
+	_specials.set_reduce_motion(on)
+	apply_quality()
+
+
+func reduced() -> bool:
+	return _reduced
 
 
 ## The views between the previous and current tick (render interpolation), every frame.
@@ -72,8 +89,9 @@ func advance(delta: float) -> void:
 	_grabs.advance(delta)
 
 
-## A new match: no projectiles and no leftover effects.
+## A new match: no projectiles, no leftover effects, and the reduce-motion setting as it is now.
 func clear() -> void:
+	set_reduce_motion(SpecialCutInDirector.reduce_motion_setting(SettingsStore.new()))
 	_projectiles.clear()
 	_bursts.stop_all()
 	_specials.stop_all()

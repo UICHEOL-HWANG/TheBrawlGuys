@@ -11,7 +11,7 @@ const CLIPS := {
 	"2H_Melee_Attack_Stab": ["handslot.r"], "Dualwield_Melee_Attack_Stab": ["handslot.r", "handslot.l"],
 	"Spellcast_Shoot": ["hand.r", "hand.l"], "Spellcast_Long": ["hand.r", "hand.l"], "1H_Ranged_Shoot": ["hand.r"],
 	"Interact": ["hand.r", "hand.l"], "PickUp": ["hand.r", "hand.l"], "Throw": ["hand.r"], "Block_Attack": ["hand.r", "hand.l"],
-	"Unarmed_Pose": ["hand.r", "hand.l"],
+	"Unarmed_Pose": ["hand.r", "hand.l"], "2H_Melee_Attack_Spinning": ["handslot.r"],
 }
 const STEP := 1.0 / 60.0
 

@@ -26,6 +26,8 @@ var _last_kind: int = -1
 ## A state played regardless of the sim view (force()); -1 follows the view.
 var _forced: int = -1
 var _driver: SwingDriver
+## The sim's throw hit was seen (toss()); used up by the next apply().
+var _toss_asked: bool = false
 ## Machine node playing the current seek-driven state ("" while a plain clip plays).
 var _seek_state: String = ""
 
@@ -81,16 +83,23 @@ static func seeks(anim: int) -> bool:
 
 
 ## The sim throws in one tick (HOLDING -> standing, frozen in the throw's hitstop): the toss
-## plays from there until its follow-through ends or the fighter does something else.
+## plays from the throw event (toss()), or from that frozen frame if the event was missed, until
+## its follow-through ends or the fighter does something else.
 func _tossing(anim: int, view: Dictionary) -> bool:
+	var asked := _toss_asked
+	_toss_asked = false
 	if not STANDING.has(anim):
 		return false
-	if _current == AnimMap.Anim.HOLD:
-		return int(view["hitstop_ticks"]) > 0
+	if asked or (_current == AnimMap.Anim.HOLD and int(view["hitstop_ticks"]) > 0):
+		return _current != AnimMap.Anim.THROW or _driver.done()
 	return _current == AnimMap.Anim.THROW and not _driver.done()
 
 
-## Plays anim whatever the sim view says (the victory cheer); -1 follows the view again.
+## This fighter just threw someone (the sim's "hit" with attack_kind THROW): toss on the next frame.
+func toss() -> void:
+	_toss_asked = true
+
+
 func force(anim: int) -> void:
 	_forced = anim
 

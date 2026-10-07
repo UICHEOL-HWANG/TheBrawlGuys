@@ -26,6 +26,8 @@ var _last: Dictionary = {}
 var _arcs: Dictionary = {}
 var _orbs: Dictionary = {}
 var _attacks: Dictionary = {}
+## Reduce motion: no rush afterimages and the spin arc stays still.
+var _reduced: bool = false
 
 
 func setup(config: GameConfig, bursts: BurstPool, particle_scale: float) -> void:
@@ -38,6 +40,12 @@ func setup(config: GameConfig, bursts: BurstPool, particle_scale: float) -> void
 
 func set_particle_scale(particle_scale: float) -> void:
 	_particle_scale = particle_scale
+
+
+func set_reduce_motion(on: bool) -> void:
+	_reduced = on
+	for arc: SlashArc in _arcs.values():
+		arc.still = on
 
 
 static func phase(attack_ticks: int, a: AttackData) -> int:
@@ -75,7 +83,7 @@ func _special(f: Dictionary, id: int, special: String) -> void:
 			if last <= a.startup_ticks and ticks > a.startup_ticks:
 				_slam(at, color)
 		SpecialCatalog.DASH_RUSH:
-			if phase(ticks, a) == Phase.ACTIVE and _rush_step(ticks, a) != _rush_step(maxi(last, a.startup_ticks), a):
+			if not _reduced and phase(ticks, a) == Phase.ACTIVE and _rush_step(ticks, a) != _rush_step(maxi(last, a.startup_ticks), a):
 				_streak.emit(at, f.get("facing", Vector3.FORWARD), color)
 		SpecialCatalog.SPIN_SLASH:
 			_arc(id, color).show_at(at, phase(ticks, a) == Phase.ACTIVE)
@@ -133,6 +141,10 @@ func arc_visible(id: int) -> bool:
 	return _arcs.has(id) and (_arcs[id] as SlashArc).visible
 
 
+func arc(id: int) -> SlashArc:
+	return _arcs.get(id)
+
+
 func orb_visible(id: int) -> bool:
 	return _orbs.has(id) and (_orbs[id] as ProjectileView).visible
 
@@ -156,6 +168,7 @@ func _arc(id: int, color: Color) -> SlashArc:
 		var arc := SlashArc.new()
 		add_child(arc)
 		arc.setup(_config.spin_radius * 0.85, color)
+		arc.still = _reduced
 		_arcs[id] = arc
 	return _arcs[id]
 

@@ -166,3 +166,38 @@ func test_the_match_stage_draws_projectiles_and_clears_them() -> void:
 	assert_eq((layers[0] as ProjectileLayer).view_count(), 1, "the fireball is drawn")
 	stage.clear_items()
 	assert_eq((layers[0] as ProjectileLayer).view_count(), 0, "a new match starts empty")
+
+
+func test_reduce_motion_drops_afterimages_and_flying_sparks() -> void:
+	var fx := _fx()
+	fx.set_reduce_motion(true)
+	var a := SpecialCatalog.attack(SpecialCatalog.DASH_RUSH, GameConfig.new())
+	_play(fx, SpecialCatalog.DASH_RUSH, 1, a.startup_ticks + 12)
+	assert_eq(fx.special_fx().streak_count(), 0, "no ghosts trailing the rush")
+	var full := _fx()
+	full.on_events([_proj_event("projectile_expire", Projectile.Kind.FIREBALL)])
+	fx.on_events([_proj_event("projectile_expire", Projectile.Kind.FIREBALL)])
+	assert_eq(fx.active_bursts().size(), 1, "the blast still shows its reach")
+	assert_lt(fx.active_bursts()[0].spark_count(), full.active_bursts()[0].spark_count(), "fewer sparks fly")
+
+
+func test_reduce_motion_keeps_the_spin_arc_still() -> void:
+	var fx := _fx()
+	fx.set_reduce_motion(true)
+	var a := SpecialCatalog.attack(SpecialCatalog.SPIN_SLASH, GameConfig.new())
+	_play(fx, SpecialCatalog.SPIN_SLASH, 1, a.startup_ticks + 2)
+	assert_true(fx.special_fx().arc_visible(0), "the reach still shows")
+	var arc := fx.special_fx().arc(0)
+	var before := arc.rotation.y
+	for i: int in 10:
+		fx.advance(DT)
+	assert_almost_eq(arc.rotation.y, before, 0.0001, "no whirling")
+
+
+func test_reduce_motion_can_be_turned_back_off() -> void:
+	var fx := _fx()
+	fx.set_reduce_motion(true)
+	fx.set_reduce_motion(false)
+	var a := SpecialCatalog.attack(SpecialCatalog.DASH_RUSH, GameConfig.new())
+	_play(fx, SpecialCatalog.DASH_RUSH, 1, a.startup_ticks + 12)
+	assert_gt(fx.special_fx().streak_count(), 1)

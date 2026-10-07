@@ -23,6 +23,8 @@ const BLAST := {"clip": "Spellcast_Shoot", "start": 0.0, "contact": 0.3, "end": 
 const LUNGE := {"clip": "Dualwield_Melee_Attack_Stab", "start": 0.25, "contact": 0.62, "end": 1.0}
 const SLAM := {"clip": "2H_Melee_Attack_Chop", "start": 0.15, "contact": 0.85, "end": 1.4}
 const FIREBALL := {"clip": "Spellcast_Shoot", "start": 0.0, "contact": 0.25, "end": 0.85}
+## The getup attack hits all around (a radial hit): a full-turn spin, strike mid-turn.
+const GETUP_SWEEP := {"clip": "2H_Melee_Attack_Spinning", "start": 0.0, "contact": 0.3, "end": 0.66}
 ## The toss out of a hold (the sim throws in one tick; the release pose holds through hitstop).
 const THROW := {"clip": "Throw", "start": 0.6, "contact": 0.77, "end": 1.25}
 ## Render ticks of the toss after the release: a short hold on the release, then the follow-through.
@@ -60,6 +62,7 @@ static func all_plans() -> Array[Dictionary]:
 			if not out.has(plan):
 				out.append(plan)
 	out.append(THROW)
+	out.append(GETUP_SWEEP)
 	return out
 
 
