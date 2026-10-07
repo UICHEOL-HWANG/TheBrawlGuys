@@ -29,3 +29,19 @@ func test_instruction_lines_follow_the_device() -> void:
 		for device: String in [TutorialText.DEVICE_KEYBOARD, TutorialText.DEVICE_GAMEPAD, TutorialText.DEVICE_TOUCH]:
 			var line := TutorialText.line(goal, device)
 			assert_false(line.is_empty() or line.contains("{"), "%s/%s is a finished line" % [goal, device])
+
+
+func test_touch_steps_ring_the_buttons_they_ask_for() -> void:
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_MOVE), [], "the stick has no button")
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_JUMP), ["jump"])
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_LIGHT_HIT), ["attack"])
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_CHARGED_HIT), ["attack"], "a long press")
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_GUARD), ["guard"])
+	for goal: String in [TutorialSteps.G_GRAB, TutorialSteps.G_THROW, TutorialSteps.G_PICKUP]:
+		assert_eq(TutorialSteps.touch_buttons(goal), ["grab"], goal)
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_ITEM_USE), ["attack", "grab"])
+	assert_eq(TutorialSteps.touch_buttons(TutorialSteps.G_SPECIAL), ["attack", "guard"],
+			"special = attack long-press + guard")
+	for goal: String in TutorialSteps.KEYS:
+		for name: String in TutorialSteps.touch_buttons(goal):
+			assert_has(TouchLayout.BUTTONS, name, "%s rings a real button" % goal)
