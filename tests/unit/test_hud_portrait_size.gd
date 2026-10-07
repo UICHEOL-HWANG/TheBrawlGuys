@@ -34,3 +34,8 @@ func test_strip_cards_follow_the_ui_scale() -> void:
 	hud.strip().set_ui_scale(1.6)
 	for c: PlayerCard in hud.strip().cards:
 		assert_eq(c.portrait().diameter(), float(DS.S7), "phone")
+
+
+func test_big_desktop_portraits_keep_a_gap_between_rows() -> void:
+	assert_eq(HudStrip.row_gap(DS.S8), DS.S2, "64 px heads stacked 2 px apart touched: s2 between them")
+	assert_eq(HudStrip.row_gap(DS.S7), DS.S1 / 2, "the slim phone strip keeps its tight rhythm")

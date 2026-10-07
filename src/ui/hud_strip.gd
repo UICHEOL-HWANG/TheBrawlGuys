@@ -20,6 +20,7 @@ var _edge_top: bool = false
 var _compact: bool = false
 ## Row width with full-size bars, measured once laid out (0 = not yet).
 var _full_width: float = 0.0
+var _groups: Array[VBoxContainer] = []
 
 
 func _init() -> void:
@@ -36,6 +37,7 @@ func build(player_count: int, max_stocks: int, mode: Dictionary, characters: Arr
 	var teams: Array = mode.get("teams", []) if rule == MatchRules.TEAM else []
 	var by_team := teams.size() == player_count
 	var groups: Array[VBoxContainer] = [_group(), _group()]
+	_groups = groups
 	cards.resize(player_count)
 	for i: int in player_count:
 		var side := int(teams[i]) if by_team else i % 2
@@ -137,8 +139,15 @@ static func portrait_diameter(ui_scale: float) -> int:
 	return DS.S8 if ui_scale < 1.0 or is_equal_approx(ui_scale, 1.0) else DS.S7
 
 
+## Gap between stacked cards: the card is as tall as its portrait, so this is the gap between heads.
+static func row_gap(diameter: int) -> int:
+	return DS.S2 if diameter >= DS.S8 else DS.S1 / 2
+
+
 func set_ui_scale(ui_scale: float) -> void:
 	var d := portrait_diameter(ui_scale)
+	for g: VBoxContainer in _groups:
+		g.add_theme_constant_override("separation", row_gap(d))
 	for c: PlayerCard in cards:
 		if c != null and c.portrait() != null:
 			c.portrait().set_diameter(d)

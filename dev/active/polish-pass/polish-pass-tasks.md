@@ -1,6 +1,8 @@
-- [ ] A 효과음
-- [ ] B 튜토리얼 목숨 / 초상 크기 / 봇 슬롯
-- [ ] C touch_input 분리 + 강조 링
-- [ ] 6 승리 포즈
-- [ ] 7 피격 모션
-- [ ] 병합·테스트·check-all·플레이 확인·배포
+- [x] A 효과음 (29485dd): zap/heavy zap/fireball launch·boom/bolt pop/special charge/grab/release/toss/swing blade·air, SfxLimiter
+- [x] B 튜토리얼 ∞ 목숨, 데스크톱 초상 S8, 봇 칸 안내 줄 (384080b) + 큰 초상 줄 간격 S2
+- [x] C touch_input 5파일 분리 + 터치 튜토리얼 강조 링 (f29edd6)
+- [x] 6 캐릭터별 승리 포즈
+- [x] 7 피격 재생(Hit_A/Hit_B), 공중제비
+- [x] 2 실제 플레이: src/debug/brawl_capture.tscn → evidence/brawl-*.png
+- [x] 덤: test_gen_dataset.gd가 10/1부터 파싱 실패로 통째로 건너뛰던 것 수정
+- 남은 것: Metal 렌더 버퍼 mipmap 에러(기존, 별도 작업 칩), 폰 해상도 캡처(--ui-scale이 데스크톱 창에서 1.0으로 되돌아감)
