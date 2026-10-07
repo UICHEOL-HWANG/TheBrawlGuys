@@ -18,7 +18,7 @@ const ARENA_HASHES := {
 	"log_bridge": 715661931,
 	"mushroom_forest": 3823209953,
 	"foggy_forest": 2068026426,
-	"frozen_pond": 167019613,
+	"frozen_pond": 2063538545,  # next-polish 2: attacks ride the ice slide
 }
 const TOURS := {
 	"lakeside_camp": [Vector3(-4.0, 0, -3.5), Vector3(0, 0, 0), Vector3(8.5, 0, 0)],

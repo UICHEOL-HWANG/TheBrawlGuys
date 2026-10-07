@@ -2,14 +2,15 @@ class_name Actions
 extends RefCounted
 ## Control-state transitions (PRD §4.3): what a fighter that can act starts this tick and how a
 ## running attack advances (light combo, heavy charge, guard, grab attempts and bat swings).
-## Motion owns physics and calls into here.
+## Motion owns physics and calls into here. slide (GroundGrip.attack_slide): on ice an attack or a
+## heavy charge rides the slide, keeping that share of its speed per tick; 0 stops it dead.
 
 
 ## Returns true when the fighter started an action this tick (movement is then skipped).
 ## Priority: grab > dodge (guard press + move input, or in the air) > guard > heavy > light.
-static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool:
+static func try_start(f: Fighter, input: InputFrame, config: GameConfig, slide: float = 0.0) -> bool:
 	if input.grab and f.on_ground:
-		start_attack(f, AttackSet.Kind.GRAB)
+		start_attack(f, AttackSet.Kind.GRAB, slide)
 		return true
 	if Dodge.try_start(f, input, config):
 		return true
@@ -23,22 +24,22 @@ static func try_start(f: Fighter, input: InputFrame, config: GameConfig) -> bool
 		f.state_ticks = 0
 		f.charge_ticks = 0
 		if f.on_ground:
-			stop_horizontal(f)
+			brake(f, slide)
 		return true
 	if input.light:
 		if Item.is_melee(f.item_kind):
-			start_attack(f, Item.MELEE_ATTACKS[f.item_kind])
+			start_attack(f, Item.MELEE_ATTACKS[f.item_kind], slide)
 			f.item_uses -= 1
 			if f.item_uses <= 0:
 				f.item_kind = Fighter.NONE
 				f.item_uses = 0
 		else:
-			start_attack(f, AttackSet.Kind.LIGHT_1)
+			start_attack(f, AttackSet.Kind.LIGHT_1, slide)
 		return true
 	return false
 
 
-static func start_attack(f: Fighter, kind: int) -> void:
+static func start_attack(f: Fighter, kind: int, slide: float = 0.0) -> void:
 	f.set_state(Fighter.State.ATTACK)
 	f.state_ticks = 0
 	f.attack_kind = kind
@@ -47,36 +48,37 @@ static func start_attack(f: Fighter, kind: int) -> void:
 	f.charge_mul = 1.0
 	f.hit_ids.clear()
 	if f.on_ground:
-		stop_horizontal(f)
+		brake(f, slide)
 
 
 ## One tick of a running attack. A light press while at most combo_buffer_ticks remain queues
 ## the next light hit, which starts on the tick this one ends (context E2).
-static func step_attack(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet) -> void:
+static func step_attack(f: Fighter, input: InputFrame, config: GameConfig, attacks: AttackSet,
+		slide: float = 0.0) -> void:
 	var attack := attacks.get_attack(f.attack_kind)
 	f.attack_ticks += 1
 	if f.on_ground:
-		stop_horizontal(f)
+		brake(f, slide)
 	var left := attack.total_ticks() - f.attack_ticks
 	if input.light and AttackSet.is_light_chainable(f.attack_kind) and left <= config.combo_buffer_ticks:
 		f.combo_queued = true
 	if left > 0:
 		return
 	if f.combo_queued:
-		start_attack(f, f.attack_kind + 1)
+		start_attack(f, f.attack_kind + 1, slide)
 		return
 	f.set_state(Fighter.State.IDLE if f.on_ground else Fighter.State.AIR)
 
 
 ## heavy is a held level (context E3): charge while it is true, swing on the tick it goes false.
-static func step_charge(f: Fighter, input: InputFrame, config: GameConfig) -> void:
+static func step_charge(f: Fighter, input: InputFrame, config: GameConfig, slide: float = 0.0) -> void:
 	if f.on_ground:
-		stop_horizontal(f)
+		brake(f, slide)
 	if input.heavy:
 		f.charge_ticks = mini(f.charge_ticks + 1, SimTime.to_ticks(config.heavy_charge_max_time))
 		return
 	var mul := charge_mul(f.charge_ticks, config)
-	start_attack(f, AttackSet.Kind.HEAVY)
+	start_attack(f, AttackSet.Kind.HEAVY, slide)
 	f.charge_mul = mul
 
 
@@ -92,6 +94,15 @@ static func step_guard(f: Fighter, input: InputFrame, config: GameConfig, fricti
 static func charge_mul(charge_ticks: int, config: GameConfig) -> float:
 	var full := maxi(SimTime.to_ticks(config.heavy_charge_max_time), 1)
 	return 1.0 + (config.heavy_charge_max_mul - 1.0) * minf(float(charge_ticks) / full, 1.0)
+
+
+## Keeps slide of the horizontal speed (ice), or stops it exactly (0: no -0.0 in the state hash).
+static func brake(f: Fighter, slide: float) -> void:
+	if slide <= 0.0:
+		stop_horizontal(f)
+		return
+	f.vel.x *= slide
+	f.vel.z *= slide
 
 
 static func stop_horizontal(f: Fighter) -> void:

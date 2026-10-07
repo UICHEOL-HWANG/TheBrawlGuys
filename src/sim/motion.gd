@@ -35,9 +35,9 @@ static func _step_state(f: Fighter, input: InputFrame, config: GameConfig, book:
 		Fighter.State.HITSTUN:
 			_step_hitstun(f, GroundGrip.friction(config, arena))
 		Fighter.State.ATTACK:
-			Actions.step_attack(f, input, config, book.attacks(f.id))
+			Actions.step_attack(f, input, config, book.attacks(f.id), GroundGrip.attack_slide(config, arena))
 		Fighter.State.CHARGE:
-			Actions.step_charge(f, input, config)
+			Actions.step_charge(f, input, config, GroundGrip.attack_slide(config, arena))
 		Fighter.State.GUARD:
 			Actions.step_guard(f, input, config, GroundGrip.friction(config, arena))
 		Fighter.State.SPECIAL:
@@ -51,7 +51,7 @@ static func _step_state(f: Fighter, input: InputFrame, config: GameConfig, book:
 		Fighter.State.HOLDING, Fighter.State.HELD:
 			pass  # Grab.step drives holds; the held fighter's position comes from the holder
 		_:
-			if not Actions.try_start(f, input, config):
+			if not Actions.try_start(f, input, config, GroundGrip.attack_slide(config, arena)):
 				_step_control(f, input, config, book.kit(f.id).style, arena)
 
 

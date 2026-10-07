@@ -17,6 +17,12 @@ static func walk(f: Fighter, target: Vector2, config: GameConfig, arena: ArenaDa
 	f.vel.z = flat.y
 
 
+## Share of its speed an attack or heavy charge keeps per grounded tick (Actions.brake): the ice
+## slide on a slippery arena, 0 (a dead stop, as before ice) elsewhere. A guard always plants.
+static func attack_slide(config: GameConfig, arena: ArenaData) -> float:
+	return config.ice_slide_friction if arena.slippery else 0.0
+
+
 ## Share of horizontal slide speed kept per grounded tick.
 static func friction(config: GameConfig, arena: ArenaData) -> float:
 	return config.ice_slide_friction if arena.slippery else config.hitstun_ground_friction
