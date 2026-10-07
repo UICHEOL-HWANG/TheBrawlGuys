@@ -75,6 +75,44 @@ func test_reduce_motion_toggle_saves() -> void:
 	assert_true(_store.get_bool("accessibility", "reduce_motion", false))
 
 
+func test_bot_dda_toggle_shows_the_device_arm_and_saves_a_choice() -> void:
+	var tracked: Array = []
+	var s := SettingsScreen.new()
+	s.store = _store
+	s.config = GameConfig.new()
+	s.track = func(n: String, p: Dictionary) -> void:
+		assert_eq(EventCatalog.validate(n, p).size(), 0, n)
+		tracked.append([n, p])
+	add_child_autofree(s)
+	var arm_on := BotSquadFactory.variant(s.config, BotSquadFactory.AUTO, BotSquadFactory.HEADLESS_KEY) == BotSquad.ON
+	assert_eq(s.dda_toggle().button_pressed, arm_on, "unset: the device's A/B arm")
+	s.dda_toggle().button_pressed = not arm_on
+	var want := BotSquad.OFF if arm_on else BotSquad.ON
+	assert_eq(_store.get_value("bots", "dda", BotSquadFactory.AUTO), want, "BotSquadFactory reads it at match start")
+	assert_eq(BotSquadFactory.variant(s.config, want, BotSquadFactory.HEADLESS_KEY), want)
+	assert_eq(tracked.back()[1], {"key": DdaSetting.TRACK_KEY, "old": str(arm_on), "new": str(not arm_on)})
+	assert_eq(DdaSetting.is_on(_store, s.config, BotSquadFactory.HEADLESS_KEY), not arm_on, "a reopened screen")
+
+
+func test_bot_dda_toggle_is_off_and_locked_when_dda_is_disabled() -> void:
+	var c := GameConfig.new()
+	c.dda_enabled = 0
+	_store.set_value("bots", "dda", BotSquad.ON)
+	var s := SettingsScreen.new()
+	s.store = _store
+	s.config = c
+	add_child_autofree(s)
+	assert_false(s.dda_toggle().button_pressed)
+	assert_true(s.dda_toggle().disabled)
+
+
+func test_keys_cross_from_the_sliders_to_the_switches() -> void:
+	var s := _screen()
+	var music := s.slider(UserVolume.MUSIC)
+	assert_eq(music.get_node(music.focus_neighbor_bottom), s.motion_toggle(), "↓ from the last slider")
+	assert_eq(s.motion_toggle().get_node(s.motion_toggle().focus_neighbor_top), music, "↑ back")
+
+
 func test_back_leaves_once_even_when_pressed_twice() -> void:
 	var s := _screen()
 	watch_signals(s)

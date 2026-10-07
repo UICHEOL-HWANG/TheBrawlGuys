@@ -6,6 +6,8 @@ extends RefCounted
 ## it. character is a CharacterData id ("" = the classic fighter). rule is the MatchRules mode
 ## (stock / team / timed, combat-depth D) picked on the rule select step; it sets the fighter
 ## count (RULE_PLAYERS, bots fill new slots) and build_rules turns it into the sim's MatchRules.
+## teams: the team per slot picked on the team select step (team rule only; empty = the default
+## P1·P3 vs P2·P4 split, MatchRules.default_teams).
 
 const MODE_BOT := "bot"
 const MODE_LOCAL_2P := "local_2p"
@@ -31,6 +33,7 @@ var mode: String = MODE_BOT
 var arena_id: String = ARENA_DEFAULT
 var seed: int = DEFAULT_SEED
 var rule: String = MatchRules.STOCK
+var teams: Array[int] = []
 var slots: Array[Dictionary] = []
 
 
@@ -68,18 +71,30 @@ static func slot_entry(slot: int, controller: String, input_device: String) -> D
 
 
 ## Picks the rule (unknown ids play stock) and sizes the line-up for it: existing slots keep
-## their controller and device, missing ones become bots, extra ones are dropped.
+## their controller and device, missing ones become bots, extra ones are dropped. The teams go
+## back to the default (the team step follows the rule step).
 func set_rule(p_rule: String) -> void:
 	rule = p_rule if MatchRules.MODES.has(p_rule) else MatchRules.STOCK
+	teams = []
 	var count: int = RULE_PLAYERS[rule]
 	slots.resize(mini(slots.size(), count))
 	for i: int in range(slots.size(), count):
 		slots.append(slot_entry(i, CONTROLLER_BOT, INPUT_BOT))
 
 
-## The sim rules for this setup (World.new), with the config's mode defaults.
+## The sim rules for this setup (World.new), with the config's mode defaults and the chosen teams.
 func build_rules(config: GameConfig) -> MatchRules:
-	return MatchRules.for_mode(rule, player_count(), config)
+	return MatchRules.for_mode(rule, player_count(), config, teams)
+
+
+## The team per slot (team select: P1's teammate); copied, so later edits never reach the caller.
+func set_teams(p_teams: Array[int]) -> void:
+	teams = p_teams.duplicate()
+
+
+## The split the match will play: the chosen teams, else the default one.
+func team_split() -> Array[int]:
+	return teams.duplicate() if not teams.is_empty() else MatchRules.default_teams(player_count())
 
 
 ## A fresh World for this setup: seed, line-up, characters, arena and rules.
@@ -170,29 +185,12 @@ func copy() -> MatchSetup:
 	c.arena_id = arena_id
 	c.seed = seed
 	c.rule = rule
+	c.teams = teams.duplicate()
 	for s: Dictionary in slots:
 		c.slots.append(s.duplicate())
 	return c
 
 
-## Empty when the setup can start a match; otherwise one message per problem.
+## Empty when the setup can start a match; otherwise one message per problem (MatchSetupCheck).
 func validate() -> PackedStringArray:
-	var errors := PackedStringArray()
-	if slots.is_empty():
-		errors.append("no slots")
-	if not MatchRules.MODES.has(rule):
-		errors.append("unknown rule '%s'" % rule)
-	elif rule == MatchRules.TEAM and slots.size() != MatchRules.TEAM_PLAYERS:
-		errors.append("team rule needs %d slots" % MatchRules.TEAM_PLAYERS)
-	if not ArenaCatalog.ids().has(arena_id):
-		errors.append("unknown arena '%s'" % arena_id)
-	for i: int in slots.size():
-		var s := slots[i]
-		if int(s.get("slot", -1)) != i:
-			errors.append("slot %d: slot index must be %d" % [i, i])
-		if not CONTROLLERS.has(String(s.get("controller", ""))):
-			errors.append("slot %d: unknown controller '%s'" % [i, s.get("controller", "")])
-		var character := String(s.get("character", CharacterData.DEFAULT))
-		if character != CharacterData.DEFAULT and not CharacterData.IDS.has(character):
-			errors.append("slot %d: unknown character '%s'" % [i, character])
-	return errors
+	return MatchSetupCheck.errors(self)

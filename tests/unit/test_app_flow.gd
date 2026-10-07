@@ -272,6 +272,11 @@ func test_team_rule_starts_a_four_fighter_team_match() -> void:
 	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
 	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
 	_pick_rule(app, MatchRules.TEAM)
+	assert_eq(app.router().current_id(), App.TEAM, "team rule: then the teams")
+	var teams := app.router().current() as TeamSelectScreen
+	await wait_process_frames(1)
+	teams.confirm()
+	assert_eq(_props("team_selected")[0]["pairing"], TeamOptions.DEFAULT_ID)
 	var chars := app.router().current() as CharacterSelectScreen
 	await wait_process_frames(1)
 	chars.confirm(0, "keyboard")
@@ -284,3 +289,28 @@ func test_team_rule_starts_a_four_fighter_team_match() -> void:
 	assert_eq(world.mode_state.rules.mode, MatchRules.TEAM)
 	assert_eq(world.fighters[0].ally_mask, 1 << 2, "P3 is P1's teammate")
 	assert_eq((app.router().current().get("setup") as MatchSetup).rule, MatchRules.TEAM)
+
+
+func test_chosen_teams_reach_the_sim_and_back_returns_to_them() -> void:
+	var app := _app(false)
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	(app.router().current() as TitleScreen).mode_button(MatchSetup.MODE_BOT).pressed.emit()
+	_pick_rule(app, MatchRules.TEAM)
+	var teams := app.router().current() as TeamSelectScreen
+	await wait_process_frames(1)
+	teams.buttons()[teams.option_ids().find("12")].pressed.emit()
+	assert_eq(app.router().current_id(), App.CHARACTER)
+	(app.router().current() as CharacterSelectScreen).back()
+	assert_eq(app.router().current_id(), App.TEAM, "back from the characters: the teams again")
+	await wait_process_frames(1)
+	assert_eq(teams.option_ids()[teams.focus_index()], "12", "the pick stays focused")
+	teams.confirm()
+	var chars := app.router().current() as CharacterSelectScreen
+	await wait_process_frames(1)
+	chars.confirm(0, "keyboard")
+	await wait_process_frames(1)
+	(app.router().current() as ArenaSelectScreen).cards()[0].press()
+	var world: World = app.router().current().call("get_world")
+	assert_eq(world.mode_state.rules.teams, [0, 0, 1, 1] as Array[int])
+	assert_eq(world.fighters[0].ally_mask, 1 << 1, "P2 is P1's teammate")

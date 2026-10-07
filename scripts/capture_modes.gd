@@ -10,11 +10,13 @@ extends SceneTree
 ##       --out-dir=/abs/dir [--tag=-720] [--rules=stock,team,timed] [--ui-scale=1.6] [--players=4] [--touch=1]
 ## --touch=1: P1 is a local player with the touch controls shown (the strip moves to the top).
 ## Stock keeps --players fighters (4 by default: the 4-player stock FFA strip).
+## --teams=12|13|14: the team rule plays that TeamOptions split (P1's teammate; default 13).
 ## Writes <out-dir>/hud-<rule>-<n><tag>.png.
 
 const MATCH := "res://src/main/main.tscn"
 ## Loaded at runtime (typed app/HUD references would compile the Analytics autoload too early).
 const SETUP_SCRIPT := "res://src/app/match_setup.gd"
+const TEAM_OPTIONS := "res://src/app/screens/team_options.gd"
 const WARMUP_S := 3.0
 const SHOT_EVERY_S := 1.2
 const SHOTS := 3
@@ -73,6 +75,8 @@ func _next_rule() -> void:
 			else setup_script.call("all_bots", count, 7)
 	if _rules[_rule_index] != "stock":
 		setup.call("set_rule", _rules[_rule_index])
+	if _rules[_rule_index] == "team" and _args.has("teams"):
+		setup.call("set_teams", load(TEAM_OPTIONS).call("teams_of", String(_args["teams"])))
 	setup.call("assign_characters", {})  # seed-drawn characters: names, portraits, gauges
 	_main = (load(MATCH) as PackedScene).instantiate()
 	_main.set("setup", setup)

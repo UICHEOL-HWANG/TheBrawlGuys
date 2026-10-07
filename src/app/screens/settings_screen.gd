@@ -1,8 +1,9 @@
 class_name SettingsScreen
 extends Control
 ## Settings (design.md DS-LAY-03, laid out like the online menu): one Panel with a sound and a
-## music volume slider (UserVolume, applied to the buses as you drag) and a reduce-motion switch
-## (the special cut-in keeps the camera still). Every change is saved at once in SettingsStore.
+## music volume slider (UserVolume, applied to the buses as you drag), a reduce-motion switch
+## (the special cut-in keeps the camera still) and a bot-difficulty switch (DdaSetting: bots
+## follow your skill, read at match start). Every change is saved at once in SettingsStore.
 ## Esc / pad B / 뒤로 go back.
 
 signal cancelled
@@ -12,6 +13,8 @@ const SFX_TEXT := "효과음"
 const MUSIC_TEXT := "음악"
 const MOTION_TEXT := "모션 줄이기"
 const MOTION_HINT := "필살기 컷인에서 카메라 고정"
+const DDA_TEXT := "봇 난이도 자동 조절"
+const DDA_HINT := "내 실력에 맞춰 봇이 강해지거나 약해짐"
 const BACK_TEXT := "뒤로"
 const HINT_TEXT := "Esc 뒤로"
 const BACKDROP_FOCUS := Vector2(0.0, 0.42)
@@ -20,10 +23,14 @@ const ROWS := [[UserVolume.SFX, SFX_TEXT], [UserVolume.MUSIC, MUSIC_TEXT]]
 ## Set before the screen enters the tree.
 var store: SettingsStore
 var config: GameConfig
+var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
+## The A/B bucket key (DdaSetting.device_key when empty).
+var device_key: String = ""
 
 var _sliders: Dictionary = {}
 var _values: Dictionary = {}
 var _motion: CheckButton
+var _dda: CheckButton
 var _dragging: bool = false
 var _left: bool = false
 
@@ -71,23 +78,39 @@ func motion_toggle() -> CheckButton:
 	return _motion
 
 
+func dda_toggle() -> CheckButton:
+	return _dda
+
+
 ## Settings keep the backdrop fight low, like the online menu.
 func backdrop_focus() -> Vector2:
 	return BACKDROP_FOCUS
 
 
+## Two columns so the panel stays clear of the title and footer on short screens: the volume
+## sliders, then the switches; ↓ from the last slider and ↑ from the first switch cross over.
 func _panel() -> UiPanel:
 	var panel := UiPanel.new()
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", DS.S5)
-	panel.add_child(list)
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", DS.S7)
+	panel.add_child(columns)
+	var sound := SettingsRows.column()
+	var play := SettingsRows.column()
+	columns.add_child(sound)
+	columns.add_child(play)
 	for r: Array in ROWS:
-		list.add_child(_volume_row(String(r[0]), String(r[1])))
+		sound.add_child(_volume_row(String(r[0]), String(r[1])))
 	_motion = CheckButton.new()
 	_motion.button_pressed = store.get_bool(SpecialCutInDirector.SETTINGS_SECTION,
 			SpecialCutInDirector.SETTINGS_KEY, false)
 	_motion.toggled.connect(_on_motion)
-	list.add_child(SettingsRows.toggle_row(MOTION_TEXT, MOTION_HINT, _motion))
+	play.add_child(SettingsRows.toggle_row(MOTION_TEXT, MOTION_HINT, _motion))
+	_dda = CheckButton.new()
+	_dda.button_pressed = DdaSetting.is_on(store, config, device_key if device_key != "" else DdaSetting.device_key())
+	_dda.disabled = config.dda_enabled == 0
+	_dda.toggled.connect(_on_dda)
+	play.add_child(SettingsRows.toggle_row(DDA_TEXT, DDA_HINT, _dda))
+	SettingsRows.link_down(slider(UserVolume.MUSIC), _motion)
 	return panel
 
 
@@ -130,3 +153,8 @@ func _show_percent(key: String) -> void:
 
 func _on_motion(on: bool) -> void:
 	store.set_value(SpecialCutInDirector.SETTINGS_SECTION, SpecialCutInDirector.SETTINGS_KEY, on)
+
+
+func _on_dda(on: bool) -> void:
+	DdaSetting.save(store, on)
+	track.call("settings_changed", {"key": DdaSetting.TRACK_KEY, "old": str(not on), "new": str(on)})

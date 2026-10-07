@@ -1,7 +1,7 @@
 class_name ReplayVerifier
 extends RefCounted
 ## Offline replay check (platform A7, analytics-strategy §1): rebuilds the World from a MatchExport
-## header (seed, arena, player count) and the players' characters with the given sim config, feeds the recorded inputs tick by
+## header (seed, arena, player count, rule) and the players' characters and teams with the given sim config, feeds the recorded inputs tick by
 ## tick and compares World.state_hash() with the recorded final_state_hash. Matches that fail are
 ## excluded from analysis. Result: {ok, reason, match_id, ticks, expected, actual}.
 
@@ -36,7 +36,7 @@ static func verify(export: Dictionary, config: GameConfig) -> Dictionary:
 	elif int(header["config_fingerprint"]) != config.fingerprint():
 		result["reason"] = REASON_CONFIG
 	else:
-		_replay(header, log, config, result, characters(export))
+		_replay(header, log, config, result, characters(export), teams(export))
 	return result
 
 
@@ -59,6 +59,24 @@ static func characters(export: Dictionary) -> Array[String]:
 	return out
 
 
+## Each slot's team from the match_players rows (team matches: match_players.team, 0004), in
+## slot order; empty (the default split) unless every slot has one.
+static func teams(export: Dictionary) -> Array[int]:
+	var out: Array[int] = []
+	var players: Variant = export.get("players")
+	if not players is Array:
+		return out
+	var by_slot := {}
+	for p: Variant in players:
+		if p is Dictionary and (p as Dictionary).get("slot") != null and (p as Dictionary).get("team") != null:
+			by_slot[int(p["slot"])] = int(p["team"])
+	for slot: int in by_slot.size():
+		if not by_slot.has(slot):
+			return [] as Array[int]
+		out.append(int(by_slot[slot]))
+	return out
+
+
 ## One printable line: "OK ...", "MISMATCH ..." (hash differs) or "ERROR <reason> ...".
 static func line(result: Dictionary) -> String:
 	var tag := "OK" if result["ok"] else ("MISMATCH" if result["reason"] == REASON_HASH else "ERROR")
@@ -67,11 +85,11 @@ static func line(result: Dictionary) -> String:
 
 
 static func _replay(header: Dictionary, log: InputLog, config: GameConfig, result: Dictionary,
-		characters: Array[String]) -> void:
+		characters: Array[String], teams: Array[int]) -> void:
 	var setup := MatchSetup.new()
 	setup.arena_id = String(header["arena"])
 	setup.rule = String(header.get("rule", MatchRules.STOCK))  # matches.rule (0004); absent = stock
-	var rules := MatchRules.for_mode(setup.rule, log.slot_count(), config)
+	var rules := MatchRules.for_mode(setup.rule, log.slot_count(), config, teams)
 	var world := World.new(config, int(header["seed"]), log.slot_count(), setup.build_arena(config), characters,
 			rules)
 	for t: int in log.frame_count():

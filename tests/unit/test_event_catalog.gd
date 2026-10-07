@@ -6,7 +6,7 @@ const PLAN_EVENTS: Array[String] = [
 	"session_started", "session_ended", "load_timed", "result_viewed",
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
-	"screen_viewed", "mode_selected", "rule_selected", "character_selected", "arena_selected", "select_cancelled",
+	"screen_viewed", "mode_selected", "rule_selected", "team_selected", "character_selected", "arena_selected", "select_cancelled",
 	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
 	"nickname_set", "onboarding_choice",
 	"online_lobby_viewed", "room_created", "room_joined", "room_left", "peer_connect_failed",
@@ -139,3 +139,9 @@ func test_a8_events_require_their_context() -> void:
 	assert_eq(EventCatalog.validate("match_abandoned", abandoned).size(), 2, "stock_diff, ms_since_last_ringout")
 	var perf := {"match_id": "m", "fps_p5": 50.0, "fps_p50": 60.0, "spike_count": 0, "frame_count": 10}
 	assert_eq(EventCatalog.validate("perf_sampled", perf).size(), 0)
+
+
+func test_team_select_is_tracked() -> void:
+	assert_gte(EventCatalog.SCHEMA_VERSION, 14)  # 14 = team select (team_selected, screen "team")
+	assert_eq(EventCatalog.validate("team_selected", {"pairing": "12", "teams": [0, 0, 1, 1]}).size(), 0)
+	assert_eq(EventCatalog.validate("team_selected", {"pairing": "12"}).size(), 1, "teams")

@@ -2,7 +2,7 @@ class_name App
 extends Node
 ## App shell and main scene (platform B1, PRD §6.5, design.md DS-LAY-03): the menu backdrop keeps
 ## brawling behind a screen stack — login (skipped when a stored session is restored) → title →
-## select screens (SELECT_STEPS: rule, character, arena) → match, or 온라인 → OnlineFlow (Phase 6
+## select screens (SELECT_STEPS: rule, team (team rule only), character, arena) → match, or 온라인 → OnlineFlow (Phase 6
 ## lobby) — and the app owns the login gate. Each select screen (SelectScreens) fills the
 ## MatchSetup that mode select starts. Entering a match swaps the backdrop out under the curtain;
 ## 메뉴로 on the result banner goes back to the title.
@@ -17,10 +17,11 @@ const MATCH := "match"
 const ARENA := "arena"
 const CHARACTER := "character"
 const RULE := "rule"
+const TEAM := "team"
 const TUTORIAL := "tutorial"
 const RESTORE_GRACE_S := AppRestore.GRACE_S
 ## Select screens between mode select and the match, in order.
-const SELECT_STEPS: Array[String] = [RULE, CHARACTER, ARENA]
+const SELECT_STEPS: Array[String] = [RULE, TEAM, CHARACTER, ARENA]
 
 ## Tests turn transitions off; set before adding the app to the tree.
 var animate: bool = true
@@ -101,7 +102,7 @@ func _show_title() -> void:
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
 	screen.nickname_edit_requested.connect(func() -> void: NicknameEdit.open(_router, profile, track))
-	screen.settings_requested.connect(func() -> void: SettingsFlow.open(_router, _backdrop.config()))
+	screen.settings_requested.connect(func() -> void: SettingsFlow.open(_router, _backdrop.config(), track))
 	_router.push(TITLE, screen) if _router.depth() == 0 else _router.replace(TITLE, screen)
 
 
@@ -144,8 +145,9 @@ func new_setup(mode: String) -> MatchSetup:
 	return SelectScreens.new_setup(mode, new_seed)
 
 
-## Runs the select screens (SELECT_STEPS) in order, each filling setup, then starts the match.
-func _select_step(setup: MatchSetup, step: int) -> void:
+## Runs the select screens that apply (SELECT_STEPS, SelectScreens.next_step), then the match.
+func _select_step(setup: MatchSetup, from_step: int) -> void:
+	var step := SelectScreens.next_step(SELECT_STEPS, setup, from_step)
 	if step >= SELECT_STEPS.size():
 		_start_match(setup)
 		return

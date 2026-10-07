@@ -181,3 +181,4 @@ func test_validate_rejects_team_without_four_slots() -> void:
 	assert_false(s.validate().is_empty())
 	s.rule = "nope"
 	assert_string_contains(s.validate()[0], "rule")
+
