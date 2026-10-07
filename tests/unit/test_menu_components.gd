@@ -78,13 +78,13 @@ func test_menu_button_press_squishes_and_releases() -> void:
 	assert_almost_eq(b.scale.x, 1.0, 0.02)
 
 
-func test_panel_is_a_dim_sticker_card() -> void:
+func test_panel_is_a_flat_dim_card() -> void:
 	var p := PANEL.instantiate() as UiPanel
 	add_child_autofree(p)
 	var box := p.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_eq(box.bg_color, DS.UI_SURFACE_DIM)
 	assert_eq(box.corner_radius_top_left, DS.RADIUS_L)
-	assert_eq(box.border_color, Sticker.OUTLINE)
+	assert_eq(box.border_width_bottom, 0, "no outline: only the keys inside draw lines")
 	assert_eq(box.content_margin_left, float(DS.S4), "tight s4 inner margin")
 
 
@@ -96,3 +96,22 @@ func test_gallery_registers_the_menu_components() -> void:
 	for path: String in ["res://src/ui/components/menu_button/menu_button.tscn",
 			"res://src/ui/components/panel/panel.tscn"]:
 		assert_true(registered.has(path), path)
+
+
+func test_option_panel_says_a_shared_caption_once() -> void:
+	var same: Array[Dictionary] = [{"title": "A", "caption": "나 + 봇"}, {"title": "B", "caption": "나 + 봇"}]
+	var differ: Array[Dictionary] = [{"title": "A", "caption": "x"}, {"title": "B", "caption": "y"}]
+	assert_eq(_captions(same), ["나 + 봇"])
+	assert_eq(_captions(differ), ["x", "y"])
+
+
+func _captions(entries: Array[Dictionary]) -> Array:
+	var buttons: Array[UiMenuButton] = []
+	var panel := OptionPanel.build(entries, 200.0, buttons, func(_i: int) -> void: pass,
+			func(_i: int) -> void: pass)
+	add_child_autofree(panel)
+	var texts := []
+	for l: Node in panel.find_children("*", "Label", true, false):
+		if not l is Button:
+			texts.append((l as Label).text)
+	return texts

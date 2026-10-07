@@ -8,7 +8,7 @@ static func build() -> Theme:
 	theme.default_font = load(DS.FONT_BODY_PATH) as Font
 	theme.default_font_size = DS.SIZE_BODY
 
-	var panel := _sticker(DS.UI_SURFACE_DIM, DS.RADIUS_L, Sticker.DEPTH)
+	var panel := _flat(DS.UI_SURFACE_DIM, DS.RADIUS_L)  # flat card: only the keys inside draw lines
 	theme.set_stylebox("panel", "PanelContainer", panel)
 	theme.set_stylebox("panel", "Panel", panel)
 

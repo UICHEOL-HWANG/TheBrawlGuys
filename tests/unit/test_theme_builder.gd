@@ -3,13 +3,12 @@ extends GutTest
 const THEME_PATH := "res://src/ui/theme/forest_theme.tres"
 
 
-func test_panel_is_a_dim_sticker_with_large_radius() -> void:
+func test_panel_is_a_flat_dim_card_with_large_radius() -> void:
 	var sb := ThemeBuilder.build().get_stylebox("panel", "PanelContainer") as StyleBoxFlat
 	assert_not_null(sb)
 	assert_eq(sb.bg_color, DS.UI_SURFACE_DIM)
 	assert_eq(sb.corner_radius_top_left, DS.RADIUS_L)
-	assert_eq(sb.border_color, Sticker.OUTLINE)
-	assert_eq(sb.border_width_bottom, Sticker.EDGE + Sticker.DEPTH)
+	assert_eq(sb.border_width_bottom, 0)
 
 
 func test_button_states() -> void:
