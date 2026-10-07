@@ -9,7 +9,7 @@ func test_defaults_match_prd_section_4_5() -> void:
 	assert_eq(c.jump_velocity, 9.0)
 	assert_eq(c.gravity, -25.0)
 	assert_eq(c.arena_radius, 10.0)
-	assert_eq(c.kill_y, -8.0)
+	assert_eq(c.kill_y, -2.0, "ring-out at the meadow, not 7 m under it (arena-ringout A1)")
 	assert_eq(c.hitstun_factor, 0.04)
 	assert_eq(c.hitstop_light, 0.06)
 	assert_eq(c.hitstop_heavy, 0.13, "combat-depth C: heavier heavy hits (user approved)")

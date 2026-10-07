@@ -46,6 +46,21 @@ func test_ringout_burst_both_kinds_free_themselves() -> void:
 		assert_false(is_instance_valid(b))
 
 
+func test_a_splash_shows_white_foam_and_a_ripple_on_blue_water() -> void:
+	var b := RingoutBurst.new()
+	add_child_autofree(b)
+	b.play(Vector3.ZERO, true, DS.P2, 1.0)
+	var colors := []
+	var ripple := false
+	for c: Node in b.get_children():
+		var mi := c as MeshInstance3D
+		ripple = ripple or mi.mesh is TorusMesh
+		if mi.material_override is ShaderMaterial:
+			colors.append((mi.material_override as ShaderMaterial).get_shader_parameter("albedo"))
+	assert_true(colors.has(DS.WHITE), "foam reads on the water (blue drops alone vanish on it)")
+	assert_true(ripple, "a ring spreads where the body went in")
+
+
 func test_respawn_beam_frees_itself() -> void:
 	var beam := RespawnBeam.new()
 	add_child(beam)

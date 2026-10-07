@@ -66,7 +66,7 @@ func test_walking_off_the_edge_falls() -> void:
 	var c := GameConfig.new()
 	var w := World.new(c, 1)
 	w.fighters[0].pos = Vector3(-c.arena_radius + 0.2, 0, 0)
-	_run(w, InputFrame.make(-1.0, 0.0), 30)
+	_run(w, InputFrame.make(-1.0, 0.0), 20)  # off the edge and falling, not yet out at kill_y
 	var f := w.fighters[0]
 	assert_lt(f.pos.y, 0.0)
 	assert_false(f.on_ground)

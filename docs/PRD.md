@@ -172,7 +172,7 @@ hitstun   = knockback * config.hitstun_factor   (초)
 | jump_velocity | 9 m/s |
 | gravity | -25 m/s² |
 | arena_radius | 10 m |
-| kill_y | -8 m |
+| kill_y | -2 m (초원 바로 아래, 점프로 복귀 가능한 깊이 1.8 m보다 깊게) |
 | 약공격 대미지 / base_knockback / scaling | 4% / 3 / 0.05 |
 | 강공격 대미지 / base_knockback / scaling | 12% / 6 / 0.12 |
 | 강공격 최대 차지 배율 | 1.6 (1초 차지) |

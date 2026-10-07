@@ -1,10 +1,9 @@
 class_name MatchStage
 extends Node3D
-## The world a match is drawn in (platform B1/B2, Phase 4 T6): the sun and sky in the arena's
-## theme (DS-THM-02), the arena with its gimmick views, the decor around it, one FighterView plus
-## its FighterHazards (burning, fog silhouette) and DefenseFx (dodges, guard meter) per slot, the
-## item layer and the combat effects (projectiles, special and grab FX), drawn from interpolated
-## sim views. Shared by the match scene and the menu backdrop; cameras, HUD, feel and sound stay out.
+## The world a match is drawn in (platform B1/B2, Phase 4 T6): sun and sky in the arena's theme
+## (DS-THM-02), the arena and gimmick views, the decor, per slot a FighterView with its hazards,
+## DefenseFx, HitReaction and FallPose (falls off the arena), the items and the combat effects,
+## from interpolated sim views. Shared by match and menu backdrop; no camera, HUD, feel or sound.
 
 signal arena_changed(arena_id: String)
 
@@ -23,6 +22,7 @@ var _items: ItemLayer
 var _fx: CombatFxLayer
 var _teams: Array = []
 var _victory := VictoryPose.new()
+var _falls: Array[FallPose] = []
 
 
 ## characters[i]: slot i's CharacterData id, which picks its model ("" / missing = slot model).
@@ -47,6 +47,7 @@ func setup(config: GameConfig, decor_seed: int, player_count: int,
 		view.add_child(reaction)
 		reaction.setup(view.model())
 		_reactions.append(reaction)
+		_falls.append(FallPose.new())
 		var hazards := FighterHazards.new()
 		add_child(hazards)
 		hazards.setup(i, config)
@@ -94,6 +95,7 @@ func draw(prev: Dictionary, curr: Dictionary, alpha: float, delta: float) -> voi
 		var before: Dictionary = before_all[i] if i < before_all.size() else {}
 		_views[i].apply(before, now_all[i], alpha, tick)
 		_views[i].animate(now_all[i], delta)
+		_falls[i].follow(_views[i], now_all[i], delta)
 		_defense[i].apply(now_all[i], delta)
 		_hazards[i].apply(now_all[i], _views[i].position, fog)
 	_victory.apply(_views, delta)

@@ -1,7 +1,9 @@
-- [x] worktree + evidence capture (before)
-- [ ] A1 kill_y -2 + tests
-- [ ] A2 fall pose (Anim.FALL) + tests
-- [ ] A3 after capture
-- [ ] B frozen pond (subagent, worktree) -> merge
-- [ ] test.sh + check-all + code review
+- [x] worktree + evidence capture (before: evidence/before-classic-*.png)
+- [x] A1 kill_y -2 + tests (golden hashes re-recorded, bot coverage seed 23 -> 30)
+- [x] A2 fall pose (OffstageFall + FallPose, rotation only) + meadow hold + tests
+- [x] A2b splash foam + ripple (blue drops vanished on water)
+- [x] A3 after capture (evidence/ringout-classic-*.png)
+- [x] test.sh 1562/1562, check-all OK
+- [x] code review (APPROVE) -> fixes -> commit
+- [ ] B frozen pond (subagent, worktree ../frozen-pond, branch feat/frozen-pond) -> merge here
 - [ ] ask user: merge to main / deploy

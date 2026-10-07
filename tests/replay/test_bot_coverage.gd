@@ -8,8 +8,9 @@ extends GutTest
 ## Covers the Phase 1 carry-over "replay never asserts ring-out/KO".
 
 ## Combat-depth C (knockdowns, the bot perfect-guard cap) changed how bot matches play out; seed
-## 21 no longer had anyone drop an item, 23 covers every required event.
-const SEED := 23
+## 21 no longer had anyone drop an item, 23 covered every required event. arena-ringout (kill_y
+## -2) moved the matches again: 23 no longer picks up an item, 30 covers every required event.
+const SEED := 30
 const MAX_TICKS := 60 * 60 * 4
 
 

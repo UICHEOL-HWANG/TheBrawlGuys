@@ -25,7 +25,8 @@ extends StyleConfig
 
 @export_group("Arena")
 @export_range(4.0, 20.0, 0.1) var arena_radius: float = 10.0
-@export_range(-30.0, -2.0, 0.5) var kill_y: float = -8.0
+## Just under the meadow (y = -1) and past the deepest jump recovery (1.8 m), arena-ringout A1.
+@export_range(-30.0, -1.0, 0.5) var kill_y: float = -2.0
 
 @export_group("Rules")
 @export_range(1, 9, 1) var stocks: int = 3

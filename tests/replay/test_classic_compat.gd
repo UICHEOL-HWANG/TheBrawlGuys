@@ -12,6 +12,7 @@ extends GutTest
 ## here, the stock run is bit-identical to combat-depth C.
 ## The second item set (PRD-ITEM-05..07, v11) adds fighter light_ticks: stripped here too, and with
 ## the classic item pool the run is bit-identical to combat-depth D.
+## arena-ringout: kill_y -8 -> -2 (ring-outs at the meadow) re-recorded it (previous 1458846096).
 
 const R := preload("res://tests/replay/test_replay.gd")
 const DEFENSE_FIELDS: Array[String] = [
@@ -22,7 +23,7 @@ const DEFENSE_FIELDS: Array[String] = [
 	"tumble", "di_pending", "tech_clock", "getup_kind", "getup_ticks", "getup_dir",
 	"light_ticks",
 ]
-const PHASE_4_BEHAVIOR_HASH := 1458846096
+const PHASE_4_BEHAVIOR_HASH := 2126843819
 const PHASE_4_SNAPSHOT_VERSION := 5
 
 
