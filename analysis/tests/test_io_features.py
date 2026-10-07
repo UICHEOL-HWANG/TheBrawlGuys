@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from brawl_analysis.features import (
+    ARENAS,
     SIDE_COLS,
     STATE_COLS,
     finished_ids,
@@ -78,3 +79,19 @@ def test_one_hot_fixed_columns():
     out = one_hot(df, "c", ("a", "b", "z"))
     assert list(out.columns) == ["c_a", "c_b", "c_z"]
     assert out["c_z"].sum() == 0
+
+
+def test_arenas_cover_every_stage_and_encode_frozen_pond():
+    # ArenaCatalog.ids(): "classic" + STAGE_IDS (src/sim/arena/arena_catalog.gd).
+    assert ARENAS == ("classic", "lakeside_camp", "log_bridge", "mushroom_forest",
+                      "foggy_forest", "frozen_pond")
+    df = pd.DataFrame({"arena": ["frozen_pond", "classic"]})
+    out = one_hot(df, "arena", ARENAS)
+    assert "arena_frozen_pond" in out.columns
+    assert out["arena_frozen_pond"].tolist() == [1, 0]
+    assert out.sum(axis=1).tolist() == [1, 1]
+
+
+def test_timeline_matrix_has_an_arena_column_per_arena(tiny):
+    x, _, _ = timeline_matrix(timeline_table(tiny))
+    assert [c for c in x.columns if c.startswith("arena_")] == [f"arena_{a}" for a in ARENAS]

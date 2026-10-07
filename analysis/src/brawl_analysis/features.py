@@ -13,7 +13,8 @@ import pandas as pd
 from brawl_analysis.io import Dataset
 
 CHARACTERS = ("barbarian", "rogue", "knight", "mage")
-ARENAS = ("classic", "lakeside_camp", "log_bridge", "mushroom_forest", "foggy_forest")
+ARENAS = ("classic", "lakeside_camp", "log_bridge", "mushroom_forest", "foggy_forest",
+          "frozen_pond")
 RULES = ("stock", "team", "timed")
 # Fighter.State values used as flags (src/sim/fighter.gd).
 STATE_HITSTUN, STATE_KO, STATE_KNOCKDOWN = 4, 5, 12

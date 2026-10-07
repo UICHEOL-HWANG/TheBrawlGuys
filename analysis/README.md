@@ -21,7 +21,7 @@ uv run python -m brawl_analysis report --data data/synthetic --out reports
 `scripts/gen_dataset.gd` plays bot-only matches with the shipped sim config and feeds every tick
 through the game's own telemetry (`TelemetrySetup` → `MatchTelemetry` → `RawRows` / `SlotStats` /
 `MatchFeatures`), so the CSVs have the Supabase table shapes. Per match (seed = `--seed + i`):
-rule (stock 50 % / team 25 % / timed 25 %), arena (5), player count (stock 2–4, timed 2–4,
+rule (stock 50 % / team 25 % / timed 25 %), arena (6, `ArenaCatalog.ids()`), player count (stock 2–4, timed 2–4,
 team 4), a character per slot and a bot preset per slot (`slow` / `normal` / `busy` + swing-range
 jitter, written to `match_players.bot_difficulty` and `bot_params_hash`). Only the bots' own
 GameConfig copies change; the World runs the shipped config. Rows are tagged
