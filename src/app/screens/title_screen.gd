@@ -65,15 +65,10 @@ func _ready() -> void:
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_greeting = LoginLayout.caption(false)
 	_greeting.autowrap_mode = TextServer.AUTOWRAP_OFF  # one line beside its link (a wrapping label in a row has no width)
-	_greeting_gap = _gap(DS.S2)
+	_greeting_gap = TitleLayout.gap(DS.S2)
 	_nickname_link = LoginLayout.link()
 	_nickname_link.pressed.connect(func() -> void: nickname_edit_requested.emit())
-	var greeting_row := HBoxContainer.new()
-	greeting_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	greeting_row.add_theme_constant_override("separation", DS.S2)
-	greeting_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	greeting_row.add_child(_greeting)
-	greeting_row.add_child(_nickname_link)
+	var greeting_row := TitleLayout.greeting_row(_greeting, _nickname_link)
 	_refresh_greeting()
 	if profile != null:
 		profile.changed.connect(_refresh_greeting)
@@ -88,7 +83,7 @@ func _ready() -> void:
 	body.add_child(_panel)
 	var fit := CenterContainer.new()
 	fit.add_child(body)
-	for c: Control in [_gap(DS.S8), logo, _greeting_gap, greeting_row, fit, _gap(DS.S4)]:
+	for c: Control in [TitleLayout.gap(DS.S8), logo, _greeting_gap, greeting_row, fit, TitleLayout.gap(DS.S4)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", DS.S3)
@@ -116,9 +111,7 @@ func _ready() -> void:
 			button.custom_minimum_size.x = DS.BUTTON_MIN_WIDTH / 2
 		else:
 			list.add_child(button)
-	_tutorial = UiMenuButton.new()
-	_tutorial.text = TUTORIAL_TEXT
-	_tutorial.kind = UiMenuButton.Kind.SECONDARY
+	_tutorial = TitleLayout.secondary_button(TUTORIAL_TEXT)
 	_tutorial.pressed.connect(func() -> void: tutorial_requested.emit())
 	list.add_child(_tutorial)
 	_add_logout()
@@ -166,17 +159,8 @@ func backdrop_focus() -> Vector2:
 	return BACKDROP_FOCUS
 
 
-func _gap(height: int) -> Control:
-	var gap := Control.new()
-	gap.custom_minimum_size.y = height
-	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return gap
-
-
 func _mode_button(mode: String, label: String, enabled: bool) -> UiMenuButton:
-	var b := UiMenuButton.new()
-	b.text = label
-	b.kind = UiMenuButton.Kind.SECONDARY
+	var b := TitleLayout.secondary_button(label)
 	b.pressed.connect(func() -> void: mode_chosen.emit(mode))
 	_buttons[mode] = b
 	if not enabled:
@@ -185,37 +169,17 @@ func _mode_button(mode: String, label: String, enabled: bool) -> UiMenuButton:
 
 
 func _add_logout() -> void:
-	_logout = _corner_button(LOGOUT_TEXT, true)
+	_logout = TitleLayout.corner_button(self, LOGOUT_TEXT, true)
 	_logout.pressed.connect(func() -> void: logout_requested.emit())
-	_settings = _corner_button(SETTINGS_TEXT, false)
+	_settings = TitleLayout.corner_button(self, SETTINGS_TEXT, false)
 	_settings.pressed.connect(func() -> void: settings_requested.emit())
-
-
-## A small secondary button tucked into the top-right (or top-left) corner.
-func _corner_button(label: String, right: bool) -> UiMenuButton:
-	var corner := MarginContainer.new()
-	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT if right else Control.PRESET_TOP_LEFT)
-	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN if right else Control.GROW_DIRECTION_END
-	corner.add_theme_constant_override("margin_top", DS.S5)
-	corner.add_theme_constant_override("margin_right" if right else "margin_left", DS.S5)
-	add_child(corner)
-	var b := UiMenuButton.new()
-	b.text = label
-	b.kind = UiMenuButton.Kind.SECONDARY
-	corner.add_child(b)
-	b.custom_minimum_size = Vector2(0, DS.S8)
-	return b
 
 
 func _refresh_quick() -> void:
 	var setup := quick_match.build(1)
 	_showcase.show_character(setup.characters()[0])
 	_showcase.show_progress(bot_progress)
-	var rule: String = {"stock": "스톡", "team": "2대2", "timed": "시간제"}.get(setup.rule, setup.rule)
-	var arena := String(ArenaCards.NAMES.get(setup.arena_id, ["기본 경기장"])[0])
-	var history := bot_progress.recent()
-	var recent_text := "첫 봇전에서 숙련도를 쌓아보세요" if history.is_empty() else "최근 봇전 · " + "  ".join(history)
-	_quick_info.text = "%s · %s\n%s\n%s" % [CharacterCards.title_of(setup.characters()[0]), rule, arena, recent_text]
+	_quick_info.text = TitleLayout.quick_summary(setup, bot_progress)
 
 
 func quick_button() -> UiMenuButton:

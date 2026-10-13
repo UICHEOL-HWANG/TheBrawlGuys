@@ -6,6 +6,7 @@ extends RefCounted
 ## only, so the screen follows UI scaling on phones.
 
 const TITLE_TEXT := "숲속 대회 · 출전 준비"
+const MATCH_TITLE_TEXT := "이번 경기"
 const GRID_COLUMNS := 2
 ## Control buttons are one step shorter than menu buttons; on short screens (a phone in landscape,
 ## logical height under SHORT_HEIGHT) one step shorter again, with tighter gaps, so the whole column
@@ -70,6 +71,20 @@ static func slot_grid(parent: Control, count: int, columns: int = GRID_COLUMNS) 
 		grid.add_child(col)
 		cells.append({"slot": slot, "conn": conn, "exhibit": exhibit})
 	return cells
+
+
+## "이번 경기" over a static ArenaPreview (left out on short screens) and a rule · arena caption:
+## {"preview": ArenaPreview, "info": Label}.
+static func match_preview(box: Container, config: GameConfig) -> Dictionary:
+	box.add_child(MenuShowcase.label(MATCH_TITLE_TEXT, DS.SIZE_TITLE))
+	var preview := ArenaPreview.new()
+	preview.custom_minimum_size.y = DS.S8 * 2
+	box.add_child(preview)
+	preview.setup(config)
+	preview.visible = not is_short(box.get_viewport())
+	var info := caption("")
+	box.add_child(info)
+	return {"preview": preview, "info": info}
 
 
 ## A compact control button (height CONTROL_HEIGHT).

@@ -65,9 +65,6 @@ func _ready() -> void:
 	_build_ui()
 	_finale.setup(_config, _stage, _presentation, _hud)
 	_finale.revealed.connect(func() -> void: _tracking.on_result_shown())
-	LookPreset.apply(_config.look_preset)
-	_config.changed.connect(func() -> void: LookPreset.apply(_config.look_preset))
-	_config.changed.connect(func() -> void: AudioBuses.ensure(_config, SettingsStore.new()))
 	_start_match()
 
 
@@ -173,13 +170,7 @@ func _process(delta: float) -> void:
 	_alpha = _ticker.alpha()
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
-		_tracking.finish(_curr_state)
-		var highlights := ResultHighlights.lines(_tracking.telemetry().player_rows(), setup.local_slots())
-		var reward := bot_progress.record(setup, _curr_state, _tracking.telemetry().match_id(),
-				_tracking.telemetry().player_rows())
-		_hud.banner().set_highlights(highlights + ("\n" + reward if not reward.is_empty() else ""))
-		if not reward.is_empty():
-			_hud.banner().set_progress(bot_progress.summary(setup.characters()[0]))
+		MatchResultReport.apply(_hud.banner(), setup, _curr_state, _tracking, bot_progress)
 		Analytics.set_user_properties(_squad.finish(_curr_state))
 		# The banner speaks for the lone human, or names the winner when two share the screen.
 		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL

@@ -9,7 +9,6 @@ extends Node
 ## First sign-in on a device → OnboardingFlow over the title; 튜토리얼 다시 보기 replays the tutorial.
 
 const BACKDROP_SCENE := preload("res://src/app/menu_backdrop/menu_backdrop.tscn")
-const MATCH_SCENE := preload("res://src/main/main.tscn")
 const UI_LAYER := 10
 const LOGIN := "login"
 const TITLE := "title"
@@ -92,7 +91,7 @@ func _show_login(reason: String, restoring: bool = false) -> void:
 	if _router.depth() == 0:
 		_router.push(LOGIN, screen)
 	else:
-		_router.reset(LOGIN, screen, true, _attach_backdrop)
+		_router.reset(LOGIN, screen, true, _backdrop.attach_to.bind(self))
 	if not restoring:
 		track.call("login_viewed", {"reason": reason})
 
@@ -138,7 +137,7 @@ func _on_mode_chosen(mode: String) -> void:
 	if mode == MatchSetup.MODE_ONLINE:
 		OnlineFlow.open(self, gate, track, func(scene: Node) -> void:
 			scene.connect("menu_requested", _back_to_title)
-			_router.push(MATCH, scene, true, _detach_backdrop), _show_login.bind("online"))
+			_router.push(MATCH, scene, true, _backdrop.detach), _show_login.bind("online"))
 		return
 	var setup := new_setup(mode)
 	if setup != null:
@@ -178,39 +177,22 @@ func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Contr
 
 func _start_match(setup: MatchSetup) -> void:
 	quick_match.remember(setup)
-	var match_scene := MATCH_SCENE.instantiate()
-	match_scene.set("setup", setup)
-	match_scene.set("bot_progress", bot_progress)
-	match_scene.set("menu_available", true)
-	match_scene.set("new_seed", new_seed)
-	match_scene.set("nickname", profile.nickname())
-	match_scene.connect("menu_requested", _back_to_title)
-	_router.push(MATCH, match_scene, true, _detach_backdrop)
+	var match_scene := MatchLauncher.scene(setup, bot_progress, new_seed, profile.nickname(), _back_to_title)
+	_router.push(MATCH, match_scene, true, _backdrop.detach)
 
 
 ## character: the onboarding pick ("" = the tutorial's default).
 func _start_tutorial(source: String, character: String = "") -> void:
 	if _router.is_busy() or _router.current_id() == TUTORIAL:
 		return
-	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title, character), true, _detach_backdrop)
+	_router.push(TUTORIAL, TutorialLauncher.scene(source, tutorial, track, _back_to_title, character), true, _backdrop.detach)
 
 
 func _back_to_title() -> void:
-	_router.pop_to(TITLE, true, _attach_backdrop)
+	_router.pop_to(TITLE, true, _backdrop.attach_to.bind(self))
 
 
 func _on_logout() -> void:
 	gate.sign_out()
 	profile.forget()  # the next account on this device must not inherit the nickname
 	_show_login("logged_out")
-
-
-func _detach_backdrop() -> void:
-	if _backdrop.is_inside_tree():
-		remove_child(_backdrop)
-
-
-func _attach_backdrop() -> void:
-	if not _backdrop.is_inside_tree():
-		add_child(_backdrop)
-		move_child(_backdrop, 0)

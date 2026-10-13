@@ -81,13 +81,13 @@ func refresh(model: LobbyModel, local_id: int) -> void:
 	_bots = model.has_bots()
 	button("character").text = CHARACTER_FORMAT % CharacterCards.title_of(_character)
 	button("ready").text = UNREADY_TEXT if _is_ready else READY_TEXT
-	button("rule").text = RULE_FORMAT % _rule_title(model.rule)
+	button("rule").text = RULE_FORMAT % RuleOptions.title_of(config, model.rule)
 	button("arena").text = ARENA_FORMAT % String((ArenaCards.NAMES.get(model.arena, [model.arena]) as Array)[0])
 	button("bots").text = BOTS_OFF_TEXT if _bots else BOTS_ON_TEXT
 	WaitingRoomLayout.set_enabled(button("start"), model.can_start())
 	_block.text = model.start_block()
 	_preview.show_arena(model.arena)
-	_match_info.text = "%s · %s" % [_rule_title(model.rule), ArenaCards.NAMES.get(model.arena, [model.arena])[0]]
+	_match_info.text = "%s · %s" % [RuleOptions.title_of(config, model.rule), ArenaCards.NAMES.get(model.arena, [model.arena])[0]]
 	_block.visible = is_host and not _block.text.is_empty()  # an empty line would pad the panel
 
 
@@ -133,14 +133,9 @@ static func clipboard_copy(text: String) -> void:
 
 
 func _build_controls(box: Container) -> void:
-	box.add_child(MenuShowcase.label("이번 경기", DS.SIZE_TITLE))
-	_preview = ArenaPreview.new()
-	_preview.custom_minimum_size.y = DS.S8 * 2
-	box.add_child(_preview)
-	_preview.setup(config)
-	_preview.visible = not WaitingRoomLayout.is_short(get_viewport())
-	_match_info = WaitingRoomLayout.caption("")
-	box.add_child(_match_info)
+	var match_box := WaitingRoomLayout.match_preview(box, config)
+	_preview = match_box["preview"]
+	_match_info = match_box["info"]
 	var own := {
 		"character": func() -> void: _cycle_character(),
 		"ready": func() -> void: pick_changed.emit(_character, not _is_ready),
@@ -201,11 +196,4 @@ func _show_slot(cell: Dictionary, s: Dictionary, local_id: int) -> void:
 	else:
 		view.set_state(PlayerSlot.State.READY if bool(s["ready"]) else PlayerSlot.State.CHOOSING)
 	(cell["conn"] as ConnectionBadge).set_conn(String(s["conn"]) if peer > LobbyModel.HOST_ID else "", int(s["rtt"]))
-
-
-func _rule_title(rule: String) -> String:
-	for e: Dictionary in RuleOptions.entries(config):
-		if e["rule"] == rule:
-			return String(e["title"])
-	return rule
 

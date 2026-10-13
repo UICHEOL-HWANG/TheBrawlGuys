@@ -12,6 +12,14 @@ static func entries(config: GameConfig) -> Array[Dictionary]:
 	]
 
 
+## The display title of rule ("스톡", "팀전 2:2", …); an unknown rule shows as is.
+static func title_of(config: GameConfig, rule: String) -> String:
+	for e: Dictionary in entries(config):
+		if e["rule"] == rule:
+			return String(e["title"])
+	return rule
+
+
 ## "2분", "1분 30초", "45초".
 static func duration_text(seconds: float) -> String:
 	var total := roundi(seconds)

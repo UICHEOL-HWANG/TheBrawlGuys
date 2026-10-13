@@ -55,6 +55,18 @@ func _exit_tree() -> void:
 	_menu_music = false
 
 
+## Leaves the tree while a match plays (pausing it); attach_to() brings it back behind the menus.
+func detach() -> void:
+	if is_inside_tree():
+		get_parent().remove_child(self)
+
+
+func attach_to(parent: Node) -> void:
+	if not is_inside_tree():
+		parent.add_child(self)
+		parent.move_child(self, 0)
+
+
 func _process(delta: float) -> void:
 	var events := _match.advance(delta)
 	_stage.set_arena(_match.arena_id())  # no-op until a restart moves to the next arena

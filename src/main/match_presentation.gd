@@ -2,7 +2,7 @@ class_name MatchPresentation
 extends Node
 ## Everything a match scene shows and plays around the drawn world (platform B1 extraction from
 ## main.gd): the framing camera, game feel, the special cut-in, SFX and BGM, the local grab hint
-## and charge gauges.
+## and charge gauges; it also applies the look preset and audio buses, following config changes.
 ## Fed the sim view and this frame's events; never writes to the sim.
 
 var _config: GameConfig
@@ -41,6 +41,9 @@ func setup(config: GameConfig) -> void:
 	_grab_hint.setup(config)
 	_gauges = ChargeGaugeLayer.new()
 	add_child(_gauges)
+	LookPreset.apply(config.look_preset)
+	config.changed.connect(func() -> void: LookPreset.apply(config.look_preset))
+	config.changed.connect(func() -> void: AudioBuses.ensure(config, SettingsStore.new()))
 
 
 ## A new match: calm feel, battle BGM from the top.

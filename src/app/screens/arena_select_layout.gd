@@ -57,6 +57,14 @@ static func back_button(text: String) -> UiMenuButton:
 	return b
 
 
+## Swaps card's thumbnail for a static 3D ArenaPreview of arena_id.
+static func preview_thumb(card: SelectCard, config: GameConfig, arena_id: String) -> void:
+	var preview := ArenaPreview.new()
+	card.set_thumb(preview)
+	preview.setup(config)
+	preview.show_arena(arena_id)
+
+
 static func hint_label(text: String) -> Label:
 	var hint := Label.new()
 	hint.text = text
