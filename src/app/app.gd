@@ -33,6 +33,8 @@ var profile: ProfileStore = null
 var track: Callable = func(event_name: String, props: Dictionary) -> void: Analytics.track(event_name, props)
 ## Seed for each new match (tests pin it); the sim never draws its own.
 var new_seed: Callable = MatchSeed.fresh
+var bot_progress: BotProgress = BotProgress.create_default()
+var quick_match: QuickMatchPrefs = QuickMatchPrefs.create_default()
 
 var _backdrop: MenuBackdrop
 var _router: ScreenRouter
@@ -98,6 +100,9 @@ func _show_login(reason: String, restoring: bool = false) -> void:
 func _show_title() -> void:
 	var screen := TitleScreen.new()
 	screen.profile = profile
+	screen.quick_match = quick_match
+	screen.bot_progress = bot_progress
+	screen.quick_requested.connect(_quick_start)
 	screen.mode_chosen.connect(_on_mode_chosen)
 	screen.logout_requested.connect(_on_logout)
 	screen.tutorial_requested.connect(_start_tutorial.bind(TutorialFlow.SOURCE_REPLAY))
@@ -140,6 +145,15 @@ func _on_mode_chosen(mode: String) -> void:
 		_select_step(setup, 0)
 
 
+func _quick_start() -> void:
+	if _router.is_busy() or _router.current_id() != TITLE:
+		return
+	var setup := quick_match.build(int(new_seed.call()))
+	track.call("mode_selected", {"mode": MatchSetup.MODE_BOT})
+	track.call("quick_match_started", {"character": setup.characters()[0], "arena": setup.arena_id, "rule": setup.rule})
+	_start_match(setup)
+
+
 ## A new local match setup for mode with its own seed, or null (온라인 goes through OnlineFlow).
 func new_setup(mode: String) -> MatchSetup:
 	return SelectScreens.new_setup(mode, new_seed)
@@ -163,8 +177,10 @@ func _select_screen(step_id: String, setup: MatchSetup, next: Callable) -> Contr
 
 
 func _start_match(setup: MatchSetup) -> void:
+	quick_match.remember(setup)
 	var match_scene := MATCH_SCENE.instantiate()
 	match_scene.set("setup", setup)
+	match_scene.set("bot_progress", bot_progress)
 	match_scene.set("menu_available", true)
 	match_scene.set("new_seed", new_seed)
 	match_scene.set("nickname", profile.nickname())

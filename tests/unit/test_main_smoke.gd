@@ -21,7 +21,7 @@ func test_restart_after_a_ko_starts_a_clean_match() -> void:
 	w.fighters[1].pos = Vector3(0, w.config.kill_y - 1, 0)
 	var hud: Hud = main.call("get_hud")
 	await wait_until(hud.result_visible, 5.0)
-	assert_true(hud.result_visible(), "the KO ends the match and shows the result after the replay")
+	assert_true(hud.result_visible(), "the KO ends the match and shows the result immediately")
 	hud.restart_requested.emit()
 	await wait_seconds(DS.MOTION_BASE + 0.1)  # the banner fades out first
 	var fresh: World = main.call("get_world")
@@ -31,7 +31,7 @@ func test_restart_after_a_ko_starts_a_clean_match() -> void:
 	assert_lt(fresh.tick_count, 30, "the new match just started")
 
 
-func test_a_ring_out_finish_replays_slowly_before_the_result() -> void:
+func test_a_ring_out_finish_shows_result_and_numbers_immediately() -> void:
 	var main: Node = (load("res://src/main/main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
 	await wait_seconds(0.2)
@@ -41,20 +41,13 @@ func test_a_ring_out_finish_replays_slowly_before_the_result() -> void:
 	await wait_physics_frames(3)
 	var hud: Hud = main.call("get_hud")
 	assert_true(w.match_over)
-	assert_false(hud.result_visible(), "the finishing replay plays first (GD-CAM-02)")
-	assert_lt(Engine.time_scale, 1.0, "slowed while it plays")
-	var accept := InputEventAction.new()
-	accept.action = "ui_accept"
-	accept.pressed = true
-	Input.parse_input_event(accept)
-	await wait_physics_frames(2)
-	assert_false(hud.result_visible(), "accept skips the replay to the winner's cheer")
-	assert_eq(Engine.time_scale, 1.0, "normal speed again")
-	assert_eq(main.get("_stage").call("cheering"), [0], "P1 cheers")
-	Input.parse_input_event(accept)
-	await wait_physics_frames(2)
-	assert_true(hud.result_visible(), "a second accept skips the cheer to the banner")
-	assert_eq(main.get("_stage").call("cheering"), [0], "still cheering above the banner")
+	assert_true(hud.result_visible(), "no replay or cheer wait before the result")
+	assert_string_contains(hud.banner().highlights(), "링아웃")
+	assert_string_contains(hud.banner().highlights(), "필살기 적중")
+	assert_eq(hud.banner().modulate.a, 1.0, "numbers are fully visible immediately")
+	assert_eq(hud.banner().scale, Vector2.ONE)
+	assert_eq(Engine.time_scale, 1.0)
+	assert_eq(main.get("_stage").call("cheering"), [0], "winner cheers behind the result")
 
 
 func test_telemetry_follows_the_match() -> void:

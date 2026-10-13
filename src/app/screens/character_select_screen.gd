@@ -56,7 +56,7 @@ func _ready() -> void:
 	_compact = CharacterSelectLayout.is_compact(get_viewport())
 	var cards := _view.build_cards(cfg, _compact)
 	_parts = CharacterSelectLayout.build(self, TITLE_TEXT, cards, _view.build_slots(setup), _back, _hint,
-			_compact)
+			_compact, _view.build_showcase(cfg, _compact))
 	for i: int in _view.cards.size():
 		_view.cards[i].hovered.connect(_point.bind(i))
 		_view.cards[i].pressed.connect(_click.bind(i))

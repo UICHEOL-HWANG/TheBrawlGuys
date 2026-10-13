@@ -1,7 +1,7 @@
 class_name ResultBanner
 extends PanelContainer
 ## Match result (design.md DS-CMP-09): "승리!" / "패배…" / "무승부" in Jua display_l with an
-## elastic pop, plus "다시 하기" and, when an app shell can take the player back, "메뉴로"
+## immediate reveal, plus "다시 하기" and, when an app shell can take the player back, "메뉴로"
 ## (both DS-CMP-06 MenuButtons). Hidden until show_result(). With no single local viewer (local
 ## 2-player, PRD-LOCAL-01) the winner is named instead: "P2 승리!". Team and timed matches
 ## (combat-depth D, show_outcome) add a detail line under the title: the winning team and its
@@ -10,13 +10,17 @@ extends PanelContainer
 signal restart_requested
 signal menu_requested
 
-const POP_FROM := 0.8
 const RESTART_TEXT := "다시 하기"
 const MENU_TEXT := "메뉴로"
 ## show_result() local_id when no one human's point of view applies.
 const NO_LOCAL := -1
 
+var _progress_grid: GridContainer
+var _gauge_labels: Array[Label] = []
+var _gauges: Array[ProgressBar] = []
 var _title: Label
+var _highlights: Label
+var _restart_available := true
 var _detail: Label
 var _button: UiMenuButton
 var _menu_button: UiMenuButton
@@ -39,6 +43,36 @@ func _ready() -> void:
 	_detail.add_theme_color_override("font_color", DS.UI_TEXT)
 	_detail.visible = false
 	col.add_child(_detail)
+	_highlights = MenuShowcase.label("")
+	_highlights.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_highlights.visible = false
+	col.add_child(_highlights)
+	_progress_grid = GridContainer.new()
+	_progress_grid.columns = 2
+	_progress_grid.add_theme_constant_override("h_separation", DS.S5)
+	_progress_grid.add_theme_constant_override("v_separation", DS.S3)
+	col.add_child(_progress_grid)
+	_progress_grid.visible = false
+	for i: int in 4:
+		var cell := VBoxContainer.new()
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_progress_grid.add_child(cell)
+		var caption := MenuShowcase.label("")
+		cell.add_child(caption)
+		_gauge_labels.append(caption)
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size.y = DS.S4
+		var background := StyleBoxFlat.new()
+		background.bg_color = DS.UI_TEXT_SOFT
+		background.set_corner_radius_all(DS.S2)
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = DS.PETAL_YELLOW
+		fill.set_corner_radius_all(DS.S2)
+		bar.add_theme_stylebox_override("background", background)
+		bar.add_theme_stylebox_override("fill", fill)
+		cell.add_child(bar)
+		_gauges.append(bar)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", DS.S4)
@@ -62,13 +96,18 @@ func show_outcome(winner_id: int, local_id: int, mode: Dictionary) -> void:
 	_detail.text = String(words["detail"])
 	_detail.visible = not _detail.text.is_empty()
 	if is_inside_tree():
-		UiMotion.pop_in(self, POP_FROM)
-		_button.grab_focus()
+		visible = true
+		scale = Vector2.ONE
+		UiMotion.set_alpha(self, 1.0)
+		(_button if _restart_available else _menu_button).grab_focus()
 	else:
 		visible = true
 
 
 func hide_result() -> void:
+	_highlights.text = ""
+	_highlights.visible = false
+	_progress_grid.visible = false
 	if is_inside_tree() and visible:
 		UiMotion.fade_out(self)
 	else:
@@ -105,3 +144,46 @@ func _make_button(text: String, kind: UiMenuButton.Kind, sig: Signal) -> UiMenuB
 	b.text = text
 	b.pressed.connect(func() -> void: sig.emit())
 	return b
+
+
+func set_highlights(text: String) -> void:
+	_highlights.text = text
+	_highlights.visible = not text.is_empty()
+
+
+func set_restart_available(on: bool) -> void:
+	_restart_available = on
+	_button.visible = on
+
+
+func highlights() -> String:
+	return _highlights.text
+
+
+## Real targets only: XP to the next level and permanent challenge thresholds.
+## Values are assigned immediately, without a count-up animation.
+func set_progress(stats: Dictionary) -> void:
+	if stats.is_empty():
+		_progress_grid.visible = false
+		return
+	_progress_grid.visible = true
+	_set_gauge(0, "숙련도 Lv.%d" % int(stats["level"]), int(stats["within"]), BotProgress.LEVEL_XP, " XP")
+	for i: int in CharacterChallenges.GOALS.size():
+		var goal: Dictionary = CharacterChallenges.GOALS[i]
+		var value := mini(int(stats.get(goal["key"], 0)), int(goal["target"]))
+		_set_gauge(i + 1, String(goal["action"]), value, int(goal["target"]),
+				" · 달성" if value == int(goal["target"]) else "")
+
+
+func _set_gauge(index: int, caption: String, value: int, target: int, suffix: String) -> void:
+	_gauge_labels[index].text = "%s  %d/%d%s" % [caption, value, target, suffix]
+	_gauges[index].max_value = target
+	_gauges[index].value = value
+
+
+func progress_values() -> Array[float]:
+	var values: Array[float] = []
+	if _progress_grid.visible:
+		for bar: ProgressBar in _gauges:
+			values.append(bar.value)
+	return values

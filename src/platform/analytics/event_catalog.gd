@@ -25,7 +25,8 @@ extends RefCounted
 ## onboarding (nickname_set, onboarding_choice; screen_viewed welcome / nickname / onboarding_choice),
 ## 13 = second item set (item enum hammer / glove / banana, match_events slip, hit made_light),
 ## 14 = team select (team_selected; screen_viewed / select_cancelled screen "team").
-const SCHEMA_VERSION := 14
+## 15 = quick_match_started (remembered bot match selection).
+const SCHEMA_VERSION := 15
 
 ## Keys every match_ended.players[] entry must carry from schema 8 (defense and recovery counters,
 ## skill and context signals; the same names as the match_players columns). Values may be null
@@ -74,6 +75,7 @@ const EVENTS: Dictionary = {
 	# Menu funnel
 	"screen_viewed": ["screen"],
 	"mode_selected": ["mode"],
+	"quick_match_started": ["character", "arena", "rule"],
 	"rule_selected": ["rule"],
 	"team_selected": ["pairing", "teams"],
 	"character_selected": ["slot", "character", "style", "is_bot", "input_device"],

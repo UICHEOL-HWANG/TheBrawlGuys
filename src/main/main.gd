@@ -11,6 +11,7 @@ const LOCAL_PLAYER := 0
 const BOT_PLAYER := 1
 
 var setup: MatchSetup = null
+var bot_progress: BotProgress = BotProgress.new()
 ## Shows "메뉴로" on the result banner (only when an app shell can take the player back).
 var menu_available: bool = false
 ## The signed-in player's nickname (App: ProfileStore); shown on their card when they play alone.
@@ -128,6 +129,7 @@ func _start_match() -> void:
 	_squad = BotSquadFactory.for_setup(setup, _config)
 	_hud.setup(setup.player_count(), _config.stocks, _world.state_view()["mode"], setup.characters(), _config)
 	_hud.set_menu_available(menu_available)
+	_hud.banner().set_restart_available(setup.mode != MatchSetup.MODE_ONLINE)
 	_hud.show_name(setup.local_slot(), nickname if setup.local_slots().size() == 1 else "")
 	_result_shown = false
 	_curr_state = _world.state_view()
@@ -172,6 +174,12 @@ func _process(delta: float) -> void:
 	if bool(_curr_state["match_over"]) and not _result_shown:
 		_result_shown = true
 		_tracking.finish(_curr_state)
+		var highlights := ResultHighlights.lines(_tracking.telemetry().player_rows(), setup.local_slots())
+		var reward := bot_progress.record(setup, _curr_state, _tracking.telemetry().match_id(),
+				_tracking.telemetry().player_rows())
+		_hud.banner().set_highlights(highlights + ("\n" + reward if not reward.is_empty() else ""))
+		if not reward.is_empty():
+			_hud.banner().set_progress(bot_progress.summary(setup.characters()[0]))
 		Analytics.set_user_properties(_squad.finish(_curr_state))
 		# The banner speaks for the lone human, or names the winner when two share the screen.
 		var viewer := setup.local_slot() if _locals.slots().size() == 1 else ResultBanner.NO_LOCAL

@@ -35,9 +35,8 @@ func test_banner_and_counter_use_the_tokens() -> void:
 	var banner := (load("res://src/ui/components/result_banner/result_banner.tscn") as PackedScene).instantiate() as ResultBanner
 	add_child_autofree(banner)
 	banner.show_result(0, 0)
-	assert_lt(banner.modulate.a, 1.0, "the banner fades in")
-	await wait_seconds(DS.MOTION_SQUISH + 0.1)
-	assert_almost_eq(banner.modulate.a, 1.0, 0.02)
+	assert_eq(banner.modulate.a, 1.0, "the result shows immediately, no fade-in")
+	assert_eq(banner.scale, Vector2.ONE, "no pop-in scale")
 	banner.hide_result()
 	await wait_seconds(DS.MOTION_BASE + 0.1)
 	assert_false(banner.visible)

@@ -10,24 +10,28 @@ extends RefCounted
 
 ## Logical heights below this use the compact column (812x375 at scale 1.6 is about 673).
 const COMPACT_BELOW := 900.0
-const COMPACT_THUMB_HEIGHT := DS.S8 + DS.S6
+const COMPACT_THUMB_HEIGHT := DS.S8
 const FOOTER_RESERVE := DS.BUTTON_HEIGHT + DS.S6 * 2
 const ROW_GAP := DS.S5
 ## Phones keep the full gap too: a focused / selected card grows ×1.04 / ×1.07 (about s2 above
 ## and below at compact height) and must not touch the title or the slot row.
-const COMPACT_ROW_GAP := DS.S5
+const COMPACT_ROW_GAP := DS.S3
 
 
 ## Adds the column and the footer to root; returns {fit: FitCenter, footer: MarginContainer,
 ## column: VBoxContainer}.
 static func build(root: Control, title: String, cards: Control, slots: Control, back: Control,
-		hint: Control, compact: bool) -> Dictionary:
+		hint: Control, compact: bool, showcase: Control = null) -> Dictionary:
 	var fit := FitCenter.new()
 	root.add_child(fit)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", COMPACT_ROW_GAP if compact else ROW_GAP)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(LoginLayout.title_label(title))
+	var heading := LoginLayout.title_label(title)
+	heading.add_theme_font_size_override("font_size", DS.SIZE_TITLE)
+	column.add_child(heading)
+	if showcase != null:
+		column.add_child(showcase)
 	cards.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(cards)
 	slots.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

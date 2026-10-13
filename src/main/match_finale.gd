@@ -1,6 +1,7 @@
 class_name MatchFinale
 extends Node
-## Reveals the match result (design.md GD-CAM-02): first the finishing replay when the match ended
+## Normal matches reveal the result immediately, with the winners cheering behind it.
+## Optional cinematic mode (immediate=false, GD-CAM-02): first the finishing replay when the match ended
 ## on a ring-out — FinisherReplay ticks drawn on the MatchStage and presented (feel, SFX, the
 ## camera close shot on the knocked-out fighter) with Engine.time_scale slowed to its speed — then
 ## the winners cheer in a close shot (VictoryCeremony), then the banner comes up at the bottom
@@ -47,13 +48,20 @@ func reset() -> void:
 
 
 ## The match just ended (Hud.show_result arguments; final: the ending sim view). True while the
-## replay or the cheer plays first (they present the ending tick); false when the banner is up.
-func reveal(winner: int, viewer: int, final: Dictionary) -> bool:
+## optional cinematic plays first; normal matches show all result content immediately.
+func reveal(winner: int, viewer: int, final: Dictionary, immediate: bool = true) -> bool:
 	_winner = winner
 	_viewer = viewer
 	_final = final
 	_winners = VictoryCeremony.winners(final)
+	_hud.update_from(final)
 	_reduce_motion = SpecialCutInDirector.reduce_motion_setting(SettingsStore.new())
+	if immediate:
+		_end_replay()
+		_cheer()
+		if not _banner_up:
+			_show_banner()
+		return false
 	if not _replay.start(_reduce_motion):
 		return _cheer()
 	Engine.time_scale = _replay.speed()

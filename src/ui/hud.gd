@@ -2,8 +2,8 @@ class_name Hud
 extends CanvasLayer
 ## In-match HUD (design.md DS-LAY-02 v2, combat-depth D): the HudStrip of PlayerCards — P1 + P3
 ## on the left, P2 + P4 on the right, the clock between them in timed matches — along the bottom
-## edge (GetAmped-style layout), the result banner docked at the bottom (the strip steps aside for
-## it, the winners cheer above it) and the local players' key hints
+## edge (GetAmped-style layout), the result banner centered in the safe area (the strip steps aside for
+## it, the winners cheer behind it) and the local players' key hints
 ## (DS-CMP-16) along the top. While touch controls are shown they own the bottom of the screen
 ## (stick bottom-left, buttons bottom-right), so the strip moves to the top edge instead.
 
@@ -46,6 +46,7 @@ func update_from(view: Dictionary, events: Array = []) -> void:
 	if _strip == null:
 		return
 	_follow_touch()
+	_mode = view.get("mode", _mode)
 	_strip.update_from(view, events)
 	if _key_hints != null:
 		_key_hints.update_gauges(view)
@@ -176,21 +177,24 @@ func _build_frame() -> void:
 	add_child(_dock)
 	_banner = RESULT_BANNER_SCENE.instantiate() as ResultBanner
 	_banner.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_banner.size_flags_vertical = Control.SIZE_SHRINK_END
+	_banner.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_dock.add_child(_banner)
 	_dock_to_safe_area()
+	WidthFit.watch(_dock, _banner)
 	_banner.restart_requested.connect(func() -> void: restart_requested.emit())
 	_banner.menu_requested.connect(func() -> void: menu_requested.emit())
 	get_viewport().size_changed.connect(func() -> void:
 		_dock_to_safe_area()
+		WidthFit.watch(_dock, _banner)
 		if _strip != null:
 			_strip.apply_safe_area(get_viewport()))
 
 
-## The banner sits one gap above the bottom of the safe area (home indicator, notches).
+## Equal top/bottom padding centers the result within the safe area.
 func _dock_to_safe_area() -> void:
 	var vp := get_viewport().get_visible_rect()
 	var safe := SafeArea.rect(get_viewport())
+	_dock.add_theme_constant_override("margin_top", int(safe.position.y - vp.position.y) + DS.S5)
 	_dock.add_theme_constant_override("margin_bottom", int(vp.end.y - safe.end.y) + DS.S5)
 	_dock.add_theme_constant_override("margin_left", int(safe.position.x - vp.position.x) + DS.S5)
 	_dock.add_theme_constant_override("margin_right", int(vp.end.x - safe.end.x) + DS.S5)

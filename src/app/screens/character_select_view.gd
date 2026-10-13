@@ -17,6 +17,13 @@ var cards: Array[SelectCard] = []
 var portraits: Array[CharacterPortrait] = []
 var slots: Array[PlayerSlot] = []
 var ids: Array[String] = []
+var showcase: MenuShowcase
+
+
+func build_showcase(config: GameConfig, compact: bool) -> MenuShowcase:
+	showcase = MenuShowcase.new()
+	showcase.build(config, compact)
+	return showcase
 
 
 func build_cards(config: GameConfig, compact: bool) -> HBoxContainer:
@@ -40,10 +47,13 @@ func build_cards(config: GameConfig, compact: bool) -> HBoxContainer:
 
 ## Phones (compact): shorter head-and-chest portraits and one-line captions.
 func set_compact(compact: bool) -> void:
+	if showcase != null:
+		showcase.set_compact(compact)
 	for i: int in cards.size():
 		var e := CharacterCards.entry(ids[i])
 		cards[i].setup(String(e["title"]), CharacterSelectLayout.caption(e, compact), {}, [])
-		portraits[i].custom_minimum_size.y = CharacterSelectLayout.thumb_height(compact)
+		cards[i].set_caption_visible(not compact)
+		portraits[i].custom_minimum_size.y = CharacterSelectLayout.COMPACT_THUMB_HEIGHT
 		portraits[i].set_close_up(compact)
 
 
@@ -63,6 +73,8 @@ func build_slots(setup: MatchSetup) -> HBoxContainer:
 
 ## prompts_for(seat) -> SelectPrompts rows of that human's current device.
 func refresh(model: CharacterSelectModel, prompts_for: Callable) -> void:
+	if showcase != null:
+		showcase.show_character(ids[model.focus(0)])
 	for i: int in cards.size():
 		_refresh_card(i, model)
 	var bots: Array[PlayerSlot] = []
@@ -96,4 +108,4 @@ func _refresh_card(i: int, model: CharacterSelectModel) -> void:
 		cards[i].set_state(SelectCard.State.SELECTED)
 	else:
 		cards[i].set_state(SelectCard.State.FOCUS if not players.is_empty() else SelectCard.State.IDLE)
-	portraits[i].set_live(not players.is_empty())
+	portraits[i].set_live(showcase == null and not players.is_empty())

@@ -125,6 +125,9 @@ func test_offline_login_skip_match_menu_and_logout() -> void:
 	await wait_seconds(0.2)
 	var hud: Hud = match_scene.call("get_hud")
 	assert_true(hud.menu_button().visible)
+	assert_eq(app.bot_progress.summary(CharacterData.KNIGHT)["played"], 1, "completed match updates the shared progress")
+	assert_string_contains(hud.banner().highlights(), "숙련도 +30 XP")
+	assert_string_contains(hud.banner().highlights(), "도전 달성 · 첫 승리")
 	hud.menu_button().pressed.emit()
 	assert_eq(app.router().current_id(), App.TITLE)
 	assert_true(app.backdrop().is_inside_tree(), "the backdrop is back")
@@ -314,3 +317,46 @@ func test_chosen_teams_reach_the_sim_and_back_returns_to_them() -> void:
 	var world: World = app.router().current().call("get_world")
 	assert_eq(world.mode_state.rules.teams, [0, 0, 1, 1] as Array[int])
 	assert_eq(world.fighters[0].ally_mask, 1 << 1, "P2 is P1's teammate")
+
+
+func test_quick_start_skips_selection_and_uses_a_fresh_seed() -> void:
+	var app := _app(false)
+	app.new_seed = func() -> int: return 7281
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	(app.router().current() as TitleScreen).quick_button().pressed.emit()
+	assert_eq(app.router().current_id(), App.MATCH)
+	var setup := app.router().current().get("setup") as MatchSetup
+	assert_eq(setup.seed, 7281)
+	assert_true(setup.validate().is_empty())
+	assert_eq(_props("quick_match_started").size(), 1)
+	assert_eq(_props("quick_match_started")[0]["character"], setup.characters()[0])
+
+
+func test_lobby_character_navigation_wraps_updates_progress_and_starts_that_character() -> void:
+	var app := _app(false)
+	var completed := QuickMatchPrefs.new().build(1)
+	completed.assign_characters({0: CharacterData.MAGE})
+	app.bot_progress.record(completed, {"match_over": true, "winner": 0}, "lobby-demo")
+	await wait_process_frames(2)
+	(app.router().current() as LoginScreen).panel().skip_button().pressed.emit()
+	var title := app.router().current() as TitleScreen
+	await wait_process_frames(1)
+	var exhibit := title.showcase()
+	assert_eq(exhibit.previous_button().custom_minimum_size.x, 0.0, "compact picker must not inherit the full menu width")
+	exhibit.previous_button().grab_focus()
+	exhibit.previous_button().pressed.emit()
+	assert_eq(exhibit.character(), CharacterCards.ORDER.back())
+	assert_string_contains(exhibit.progress_text(), "1전 1승")
+	assert_string_contains(exhibit.challenge_text(), "도전 1/3")
+	assert_true(exhibit.previous_button().has_focus(), "changing the pick keeps navigation focus")
+	exhibit.next_button().pressed.emit()
+	assert_eq(exhibit.character(), CharacterCards.ORDER[0])
+	assert_string_contains(exhibit.progress_text(), "0전")
+	exhibit.next_button().pressed.emit()
+	var chosen := exhibit.character()
+	title.quick_button().pressed.emit()
+	assert_eq(app.router().current_id(), App.MATCH)
+	var setup := app.router().current().get("setup") as MatchSetup
+	assert_eq(setup.characters()[0], chosen)
+	assert_true(setup.validate().is_empty())

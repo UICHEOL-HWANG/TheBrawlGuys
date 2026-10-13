@@ -24,7 +24,7 @@ const RULE_FORMAT := "경기 방식 · %s"
 const ARENA_FORMAT := "경기장 · %s"
 const BOTS_ON_TEXT := "봇 채우기"
 const BOTS_OFF_TEXT := "봇 빼기"
-const START_TEXT := "시작"
+const START_TEXT := "경기 시작"
 const LEAVE_TEXT := "나가기"
 const ME_SUFFIX := " · 나"
 const HOST_SUFFIX := " · 방장"
@@ -45,6 +45,8 @@ var _notice: Label
 var _character: String = CharacterData.IDS[0]
 var _is_ready: bool = false
 var _bots: bool = false
+var _preview: ArenaPreview
+var _match_info: Label
 
 
 func _ready() -> void:
@@ -84,6 +86,8 @@ func refresh(model: LobbyModel, local_id: int) -> void:
 	button("bots").text = BOTS_OFF_TEXT if _bots else BOTS_ON_TEXT
 	WaitingRoomLayout.set_enabled(button("start"), model.can_start())
 	_block.text = model.start_block()
+	_preview.show_arena(model.arena)
+	_match_info.text = "%s · %s" % [_rule_title(model.rule), ArenaCards.NAMES.get(model.arena, [model.arena])[0]]
 	_block.visible = is_host and not _block.text.is_empty()  # an empty line would pad the panel
 
 
@@ -129,6 +133,14 @@ static func clipboard_copy(text: String) -> void:
 
 
 func _build_controls(box: Container) -> void:
+	box.add_child(MenuShowcase.label("이번 경기", DS.SIZE_TITLE))
+	_preview = ArenaPreview.new()
+	_preview.custom_minimum_size.y = DS.S8 * 2
+	box.add_child(_preview)
+	_preview.setup(config)
+	_preview.visible = not WaitingRoomLayout.is_short(get_viewport())
+	_match_info = WaitingRoomLayout.caption("")
+	box.add_child(_match_info)
 	var own := {
 		"character": func() -> void: _cycle_character(),
 		"ready": func() -> void: pick_changed.emit(_character, not _is_ready),
@@ -138,12 +150,13 @@ func _build_controls(box: Container) -> void:
 		"bots": func() -> void: bots_toggled.emit(not _bots), "start": func() -> void: start_requested.emit(),
 	}
 	for id: String in own:
-		_add_button(box, id, UiMenuButton.Kind.SECONDARY, own[id])
+		_add_button(box, id, UiMenuButton.Kind.PRIMARY if id == "ready" and not is_host else UiMenuButton.Kind.SECONDARY, own[id])
 	for id: String in host:
 		var b := _add_button(box, id, UiMenuButton.Kind.PRIMARY if id == "start" else UiMenuButton.Kind.SECONDARY,
 				host[id])
 		b.visible = is_host
 	(_buttons["start"] as UiMenuButton).text = START_TEXT
+	(_buttons["start"] as UiMenuButton).custom_minimum_size.y = DS.S8 + DS.S4
 	_block = WaitingRoomLayout.caption("")
 	_block.visible = is_host
 	box.add_child(_block)
@@ -155,6 +168,7 @@ func _build_controls(box: Container) -> void:
 
 func _add_button(box: Container, id: String, kind: UiMenuButton.Kind, on_press: Callable) -> UiMenuButton:
 	var b := WaitingRoomLayout.button("", kind)
+	b.prominent = id == "start" or (id == "ready" and not is_host)
 	b.pressed.connect(on_press)
 	box.add_child(b)
 	_buttons[id] = b
@@ -168,6 +182,7 @@ func _cycle_character() -> void:
 
 
 func _show_slot(cell: Dictionary, s: Dictionary, local_id: int) -> void:
+	(cell["exhibit"] as LobbyExhibit).show_slot(s, config, int(s["peer"]) == local_id)
 	var view: PlayerSlot = cell["slot"]
 	var peer := int(s["peer"])
 	view.set_bot(peer == LobbyModel.BOT)

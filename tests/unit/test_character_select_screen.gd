@@ -168,7 +168,8 @@ func test_compact_layout_can_switch_after_a_resize() -> void:
 	assert_true(s.view().portraits[0].close_up)
 	assert_false(s.view().cards[0].get("_caption").text.contains("\n"), "one-line caption")
 	s.view().set_compact(false)
-	assert_eq(s.view().portraits[0].custom_minimum_size.y, float(DS.CARD_THUMB_HEIGHT))
+	assert_eq(s.view().portraits[0].custom_minimum_size.y, float(CharacterSelectLayout.COMPACT_THUMB_HEIGHT),
+		"selector thumbnails stay compact beside the full-body showcase")
 
 
 func test_a_bot_slot_fills_its_prompt_line_and_matches_the_human_height() -> void:

@@ -9,6 +9,7 @@ extends Control
 ## "변경" link next to it ("닉네임 정하기" alone without one) that asks for the nickname screen.
 
 signal mode_chosen(mode: String)
+signal quick_requested
 signal logout_requested
 signal tutorial_requested
 signal nickname_edit_requested
@@ -32,6 +33,11 @@ const SET_TEXT := "닉네임 정하기"
 const PANEL_POP_FROM := 0.9
 const BACKDROP_FOCUS := Vector2(0.0, 0.18)
 
+var bot_progress: BotProgress = BotProgress.new()
+var quick_match: QuickMatchPrefs = QuickMatchPrefs.new()
+var _quick: UiMenuButton
+var _quick_info: Label
+var _showcase: MenuShowcase
 var _buttons: Dictionary = {}
 var _logout: UiMenuButton
 var _settings: UiMenuButton
@@ -47,15 +53,14 @@ var profile: ProfileStore = null
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var outer := FitCenter.new()
+	add_child(outer)
 	var col := VBoxContainer.new()
-	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(col)
+	outer.content().add_child(col)
+	WidthFit.watch(outer, col)
 	var logo := LoginLayout.title_label(LOGO_TEXT)
-	logo.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_XL)
-	var fill := Control.new()
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	logo.add_theme_font_size_override("font_size", DS.SIZE_DISPLAY_L)
 	_panel = UiPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_greeting = LoginLayout.caption(false)
@@ -72,26 +77,56 @@ func _ready() -> void:
 	_refresh_greeting()
 	if profile != null:
 		profile.changed.connect(_refresh_greeting)
-	for c: Control in [_gap(DS.S6), logo, _greeting_gap, greeting_row, fill, _panel, _gap(DS.S7)]:
+	var body := HBoxContainer.new()
+	body.alignment = BoxContainer.ALIGNMENT_CENTER
+	body.add_theme_constant_override("separation", DS.S6)
+	_showcase = MenuShowcase.new()
+	body.add_child(_showcase)
+	_showcase.build(load(MenuBackdrop.CONFIG_PATH) as GameConfig, false)
+	_showcase.enable_navigation()
+	_showcase.character_step.connect(_cycle_character)
+	body.add_child(_panel)
+	var fit := CenterContainer.new()
+	fit.add_child(body)
+	for c: Control in [_gap(DS.S8), logo, _greeting_gap, greeting_row, fit, _gap(DS.S4)]:
 		col.add_child(c)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", DS.S3)
 	_panel.add_child(list)
+	_quick_info = MenuShowcase.label("")
+	list.add_child(_quick_info)
+	var quick_row := HBoxContainer.new()
+	quick_row.add_theme_constant_override("separation", DS.S3)
+	list.add_child(quick_row)
+	_quick = UiMenuButton.new()
+	_quick.text = "빠른 시작"
+	_quick.prominent = true
+	_quick.pressed.connect(func() -> void: quick_requested.emit())
+	quick_row.add_child(_quick)
+	_quick.custom_minimum_size.x = DS.BUTTON_MIN_WIDTH / 2
+	_refresh_quick()
 	for m: Array in MODES:
 		var mode := String(m[0])
 		var mobile_2p := mode == MatchSetup.MODE_LOCAL_2P and PlatformEnv.kind() == "mobile"
-		list.add_child(_mode_button(mode, LOCAL_2P_MOBILE_TEXT if mobile_2p else String(m[1]),
-				bool(m[2]) and not mobile_2p))
+		var button := _mode_button(mode, LOCAL_2P_MOBILE_TEXT if mobile_2p else String(m[1]),
+				bool(m[2]) and not mobile_2p)
+		if mode == MatchSetup.MODE_BOT:
+			button.text = "경기 설정"
+			quick_row.add_child(button)
+			button.custom_minimum_size.x = DS.BUTTON_MIN_WIDTH / 2
+		else:
+			list.add_child(button)
 	_tutorial = UiMenuButton.new()
 	_tutorial.text = TUTORIAL_TEXT
 	_tutorial.kind = UiMenuButton.Kind.SECONDARY
 	_tutorial.pressed.connect(func() -> void: tutorial_requested.emit())
 	list.add_child(_tutorial)
 	_add_logout()
-	(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred()
+	_quick.grab_focus.call_deferred()
 	visibility_changed.connect(func() -> void:  # back from 설정 / 닉네임: the router hid us, focus was dropped
 		if visible:
-			(_buttons[MatchSetup.MODE_BOT] as Control).grab_focus.call_deferred())
+			_refresh_quick()
+			_quick.grab_focus.call_deferred())
 	UiMotion.pop_in.call_deferred(_panel, PANEL_POP_FROM)
 
 
@@ -141,7 +176,7 @@ func _gap(height: int) -> Control:
 func _mode_button(mode: String, label: String, enabled: bool) -> UiMenuButton:
 	var b := UiMenuButton.new()
 	b.text = label
-	b.kind = UiMenuButton.Kind.PRIMARY if enabled else UiMenuButton.Kind.SECONDARY
+	b.kind = UiMenuButton.Kind.SECONDARY
 	b.pressed.connect(func() -> void: mode_chosen.emit(mode))
 	_buttons[mode] = b
 	if not enabled:
@@ -170,3 +205,29 @@ func _corner_button(label: String, right: bool) -> UiMenuButton:
 	corner.add_child(b)
 	b.custom_minimum_size = Vector2(0, DS.S8)
 	return b
+
+
+func _refresh_quick() -> void:
+	var setup := quick_match.build(1)
+	_showcase.show_character(setup.characters()[0])
+	_showcase.show_progress(bot_progress)
+	var rule: String = {"stock": "스톡", "team": "2대2", "timed": "시간제"}.get(setup.rule, setup.rule)
+	var arena := String(ArenaCards.NAMES.get(setup.arena_id, ["기본 경기장"])[0])
+	var history := bot_progress.recent()
+	var recent_text := "첫 봇전에서 숙련도를 쌓아보세요" if history.is_empty() else "최근 봇전 · " + "  ".join(history)
+	_quick_info.text = "%s · %s\n%s\n%s" % [CharacterCards.title_of(setup.characters()[0]), rule, arena, recent_text]
+
+
+func quick_button() -> UiMenuButton:
+	return _quick
+
+
+func _cycle_character(direction: int) -> void:
+	var index := CharacterCards.ORDER.find(quick_match.build(1).characters()[0])
+	var next := posmod(index + direction, CharacterCards.ORDER.size())
+	quick_match.choose_character(CharacterCards.ORDER[next])
+	_refresh_quick()
+
+
+func showcase() -> MenuShowcase:
+	return _showcase

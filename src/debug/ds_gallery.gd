@@ -5,6 +5,9 @@ extends Control
 
 ## Registered components: [display name, scene path]. Phase 1 adds DamageCounter, StockIcons, ...
 const COMPONENTS: Array[Array] = [
+	["MenuShowcase · DS-CMP-23", "res://src/ui/menu_showcase.tscn"],
+	["ArenaPreview · DS-CMP-24", "res://src/ui/arena_preview.tscn"],
+	["LobbyExhibit · DS-CMP-25", "res://src/ui/lobby_exhibit.tscn"],
 	["DamageCounter · DS-CMP-01", "res://src/ui/components/damage_counter/damage_counter.tscn"],
 	["StockIcons · DS-CMP-02", "res://src/ui/components/stock_icons/stock_icons.tscn"],
 	["ResultBanner · DS-CMP-09", "res://src/ui/components/result_banner/result_banner.tscn"],

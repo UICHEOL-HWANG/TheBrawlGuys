@@ -13,6 +13,7 @@ enum Kind { PRIMARY, SECONDARY, GHOST }
 const GHOST_EDGE := 2
 
 @export var kind: Kind = Kind.PRIMARY
+@export var prominent := false
 
 var _state: int = State.IDLE
 var _release_tween: Tween
@@ -111,7 +112,7 @@ func _face(s: int) -> Color:
 			return DS.UI_ACCENT
 		State.DISABLED:
 			return DS.UI_SURFACE_DIM
-	return DS.UI_SURFACE
+	return DS.PETAL_YELLOW if prominent and kind == Kind.PRIMARY else DS.UI_SURFACE
 
 
 ## The face moves `lift` px up (negative = down) and the label stays centered on the face (above

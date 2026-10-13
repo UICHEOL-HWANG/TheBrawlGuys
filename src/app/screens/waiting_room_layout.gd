@@ -5,7 +5,7 @@ extends RefCounted
 ## ConnectionBadge DS-CMP-13) and a Panel column of compact controls. Containers and DS tokens
 ## only, so the screen follows UI scaling on phones.
 
-const TITLE_TEXT := "대기실"
+const TITLE_TEXT := "숲속 대회 · 출전 준비"
 const GRID_COLUMNS := 2
 ## Control buttons are one step shorter than menu buttons; on short screens (a phone in landscape,
 ## logical height under SHORT_HEIGHT) one step shorter again, with tighter gaps, so the whole column
@@ -43,7 +43,7 @@ static func header(caption_text: String, copy_text: String) -> Dictionary:
 ## phone such as an iPhone SE stacks the four slots).
 static func columns_for(viewport: Viewport) -> int:
 	var free := viewport.get_visible_rect().size.x - _margin(viewport) * 2 - PANEL_WIDTH - ROW_GAP
-	return GRID_COLUMNS if free >= PlayerSlot.MIN_WIDTH * GRID_COLUMNS + GRID_GAP else 1
+	return GRID_COLUMNS if free >= PlayerSlot.EXHIBIT_MIN_WIDTH * GRID_COLUMNS + GRID_GAP else 1
 
 
 ## count slot cells in `columns` columns: [{"slot": PlayerSlot, "conn": ConnectionBadge}].
@@ -59,13 +59,16 @@ static func slot_grid(parent: Control, count: int, columns: int = GRID_COLUMNS) 
 		var col := VBoxContainer.new()
 		col.add_theme_constant_override("separation", DS.S1)
 		col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var exhibit := LobbyExhibit.new()
+		col.add_child(exhibit)
 		var slot := PlayerSlot.new()
+		slot.exhibit_mode = true
 		slot.setup(i)
 		col.add_child(slot)
 		var conn := ConnectionBadge.new()
 		col.add_child(conn)
 		grid.add_child(col)
-		cells.append({"slot": slot, "conn": conn})
+		cells.append({"slot": slot, "conn": conn, "exhibit": exhibit})
 	return cells
 
 
@@ -100,13 +103,14 @@ static func caption(text: String) -> Label:
 ## names the screen), then the room code header over the slot grid on the left and the control
 ## panel on the right, level with the header. Returns {"slots": Container, "controls": Container}.
 static func body(root: Control, head: Control) -> Dictionary:
+	var fit := FitCenter.new()
+	root.add_child(fit)
 	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var short := is_short(root.get_viewport())  # a phone in landscape: tighter all round
 	for side: String in ["top", "left", "right", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, _margin(root.get_viewport()))
-	root.add_child(margin)
+	fit.content().add_child(margin)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", DS.S4 if short else DS.S5)

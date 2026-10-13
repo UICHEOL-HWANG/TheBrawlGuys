@@ -166,6 +166,10 @@ func _card_row() -> Control:
 		var card := CARD_SCENE.instantiate() as SelectCard
 		row.add_child(card)
 		card.setup(String(e["title"]), String(e["caption"]), e["diorama"], e["icons"])
+		var preview := ArenaPreview.new()
+		card.set_thumb(preview)
+		preview.setup(cfg)
+		preview.show_arena(String(e["id"]))
 		card.pressed.connect(_choose.bind(i))
 		card.focus_entered.connect(_set_focus.bind(i))
 		_cards.append(card)

@@ -15,6 +15,8 @@ const STATUS := {
 }
 const BOT_TEXT := "봇"
 const MIN_WIDTH := 400
+const EXHIBIT_MIN_WIDTH := 260
+var exhibit_mode := false
 const MARKER_SIZE := DS.S6
 
 var _index: int = 0
@@ -62,7 +64,12 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	custom_minimum_size.x = MIN_WIDTH
+	custom_minimum_size.x = EXHIBIT_MIN_WIDTH if exhibit_mode else MIN_WIDTH
+	if exhibit_mode:
+		var col := get_child(0)
+		_character.reparent(col)
+		col.move_child(_character, 1)
+		_character.custom_minimum_size.y = DS.S6
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_apply()
 
@@ -86,6 +93,7 @@ func state() -> int:
 
 func set_character(title: String) -> void:
 	_character.text = title
+	tooltip_text = title
 
 
 func set_bot(on: bool) -> void:

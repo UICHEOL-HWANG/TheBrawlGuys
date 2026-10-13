@@ -6,7 +6,7 @@ const PLAN_EVENTS: Array[String] = [
 	"session_started", "session_ended", "load_timed", "result_viewed",
 	"login_viewed", "login_started", "login_completed", "login_failed", "login_skipped", "session_restored",
 	"logout", "email_code_requested", "email_code_resent", "email_code_verified",
-	"screen_viewed", "mode_selected", "rule_selected", "team_selected", "character_selected", "arena_selected", "select_cancelled",
+	"quick_match_started", "screen_viewed", "mode_selected", "rule_selected", "team_selected", "character_selected", "arena_selected", "select_cancelled",
 	"tutorial_started", "tutorial_step_completed", "tutorial_skipped", "tutorial_completed",
 	"nickname_set", "onboarding_choice",
 	"online_lobby_viewed", "room_created", "room_joined", "room_left", "peer_connect_failed",

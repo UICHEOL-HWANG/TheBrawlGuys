@@ -85,6 +85,10 @@ func setup(title: String, caption: String, diorama: Dictionary, icons: Array[Str
 		_icons.add_child(icon)
 
 
+func set_caption_visible(on: bool) -> void:
+	_caption.visible = on
+
+
 func set_state(s: int) -> void:
 	_state = s
 	_apply()
